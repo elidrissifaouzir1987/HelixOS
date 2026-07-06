@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
+use std::io::{BufRead, Write};
 use std::path::PathBuf;
 use sha2::{Digest, Sha256};
 use crate::{audit::*, driver::{files::FileDriver, DriverHost}, intention::Intention,
@@ -7,22 +8,65 @@ use crate::{audit::*, driver::{files::FileDriver, DriverHost}, intention::Intent
 
 pub struct Outcome { pub rollback_id: String }
 
+/// Une ligne du journal JSONL des plans consommés (append-only, disjoint de `audit.jsonl`).
+#[derive(serde::Serialize, serde::Deserialize)]
+struct ConsumedRecord { plan_hash: String }
+
 pub struct Kernel {
     lease: ScopeLease,
     driver: FileDriver,
     audit: AppendOnlyStore,
-    plans: HashMap<String, Plan>,   // plan_hash -> Plan (état des ops en vol)
+    plans: HashMap<String, Plan>,           // plan_hash -> Plan (état des ops en vol, en mémoire)
+    consumed_path: PathBuf,                 // journal JSONL persistant des plan_hash consommés
+    consumed_hashes: HashSet<String>,       // reflet en mémoire du journal, pour un refus rapide
 }
 
 impl Kernel {
+    /// Démarre un noyau neuf sur `state_dir` : journal des plans consommés vide (créé au
+    /// premier `apply`), aucun plan en vol.
+    pub fn new(state_dir: PathBuf, lease: ScopeLease) -> std::io::Result<Self> {
+        std::fs::create_dir_all(&state_dir)?;
+        Ok(Self {
+            lease,
+            driver: FileDriver::new(state_dir.join(".staging")),
+            audit: AppendOnlyStore::new(state_dir.join("audit.jsonl")),
+            plans: HashMap::new(),
+            consumed_path: state_dir.join("consumed.jsonl"),
+            consumed_hashes: HashSet::new(),
+        })
+    }
+
+    /// Recharge un noyau depuis un `state_dir` existant : relit le journal des plans
+    /// consommés pour qu'un plan déjà appliqué avant redémarrage reste refusé au rejeu.
+    /// Un `state_dir` sans journal préexistant (première utilisation) charge un ensemble vide.
+    pub fn load(state_dir: PathBuf, lease: ScopeLease) -> std::io::Result<Self> {
+        let mut kernel = Self::new(state_dir, lease)?;
+        if let Ok(f) = std::fs::File::open(&kernel.consumed_path) {
+            for line in std::io::BufReader::new(f).lines() {
+                let line = line?;
+                if line.trim().is_empty() { continue; }
+                let rec: ConsumedRecord = serde_json::from_str(&line)?;
+                kernel.consumed_hashes.insert(rec.plan_hash);
+            }
+        }
+        Ok(kernel)
+    }
+
     #[cfg(test)]
     pub fn new_for_test(dir: PathBuf, lease: ScopeLease) -> Self {
-        Self { lease, driver: FileDriver::new(dir.join(".staging")),
-               audit: AppendOnlyStore::new(dir.join("audit.jsonl")), plans: HashMap::new() }
+        Self::new(dir, lease).expect("new_for_test: échec création state_dir")
     }
 
     fn hash_target(&self, path: &std::path::Path) -> String {
         match std::fs::read(path) { Ok(b) => hex(&Sha256::digest(&b)), Err(_) => "<absent>".into() }
+    }
+
+    /// Ajoute `plan_hash` au journal append-only des plans consommés (persistance E2).
+    fn persist_consumed(&mut self, plan_hash: &str) -> std::io::Result<()> {
+        let mut f = std::fs::OpenOptions::new().create(true).append(true).open(&self.consumed_path)?;
+        writeln!(f, "{}", serde_json::to_string(&ConsumedRecord { plan_hash: plan_hash.to_string() })?)?;
+        self.consumed_hashes.insert(plan_hash.to_string());
+        Ok(())
     }
 
     /// request → scope → policy → plan → diff. Refuse hors bail.
@@ -49,7 +93,14 @@ impl Kernel {
     }
 
     /// apply : usage unique + anti-TOCTOU + exécute + audit + verify.
+    /// Le refus de rejeu (usage unique) est vérifié contre le journal PERSISTÉ des plans
+    /// consommés (`consumed_hashes`) avant même de regarder l'état en mémoire, afin qu'un
+    /// noyau rechargé (`load`) refuse un plan déjà consommé par une instance antérieure,
+    /// même s'il n'a jamais vu ce plan lui-même via `plan_intention` (E2).
     pub fn apply(&mut self, plan_hash: &str) -> Result<Outcome, String> {
+        if self.consumed_hashes.contains(plan_hash) {
+            return Err("plan déjà consommé (rejeu refusé, y compris après redémarrage)".into());
+        }
         let mut plan = self.plans.get(plan_hash).cloned().ok_or("plan inconnu")?;
         if plan.consumed { return Err("plan déjà consommé (rejeu refusé)".into()); }
         if plan.is_expired(time::OffsetDateTime::now_utc()) { return Err("plan expiré".into()); }
@@ -60,6 +111,7 @@ impl Kernel {
         let handle = self.driver.stage_and_apply(&plan.target, &plan.proposed_content).map_err(|e| e.to_string())?;
         plan.consumed = true;
         self.plans.insert(plan_hash.to_string(), plan.clone());
+        self.persist_consumed(plan_hash).map_err(|e| e.to_string())?;
         self.audit.append(&AuditRecord {
             operation_id: plan.plan_id.to_string(), caller: plan.task_id.clone(), subagent_id_hint: None,
             tool: "apply_file_patch".into(), target: plan.target.display().to_string(),
