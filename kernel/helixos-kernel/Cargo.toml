@@ -10,3 +10,16 @@ sha2 = "0.10"
 uuid = { version = "1", features = ["v4", "serde"] }
 time = { version = "0.3", features = ["serde", "formatting"] }
 thiserror = "1"
+tokio = { version = "1.52.3", features = ["rt-multi-thread", "net", "macros", "io-util", "sync"] }
+tokio-rustls = "0.26.4"
+rustls = "0.23.41"
+rustls-pemfile = "2.2.0"
+# NOTE (écart documenté vs consigne "cargo add --dev rcgen") : rcgen doit être une dépendance
+# NORMALE, pas seulement dev. Preuve empirique (sonde jetée après vérification) : quand
+# `tests/mtls_it.rs` (crate d'intégration externe) lie `helixos_kernel`, la lib est compilée
+# SANS `cfg(test)` actif — un `pub fn` sous `#[cfg(test)]` dans `src/` n'existe alors pas dans
+# le binaire lié, donc `mtls::spawn_test_server`/`connect_with_client_cert` (exposés par
+# l'interface demandée dans tests/mtls_it.rs) ne peuvent pas être gated par `#[cfg(test)]` — et
+# donc ne peuvent pas dépendre d'un crate qui ne serait que dev-dependency.
+x509-parser = "0.18.1"
+rcgen = "0.14.8"
