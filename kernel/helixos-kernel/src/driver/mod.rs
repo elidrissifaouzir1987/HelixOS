@@ -17,3 +17,6 @@ pub enum DriverError {
     #[error("io: {0}")] Io(#[from] std::io::Error),
     #[error("not found: {0}")] NotFound(String),
 }
+
+pub mod files;
+pub mod search;
