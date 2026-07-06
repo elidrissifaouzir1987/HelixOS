@@ -1,0 +1,468 @@
+<title>HelixOS — Verdict de stress-test</title>
+<style>
+  :root{
+    /* Neutrals — cool paper, blue-black ink (chosen, not defaulted) */
+    --ink:#14181F;
+    --ink-2:#20262F;
+    --slate:#59616E;
+    --slate-2:#7C848F;
+    --line:#DCDED7;
+    --line-2:#E9EAE4;
+    --paper:#F1F2ED;
+    --card:#FCFCFA;
+    /* Identity accent — sober brass / signed-seal (used sparingly) */
+    --brass:#8C6E33;
+    --brass-soft:#B79A5E;
+    /* Severity heat scale — warm, deliberately separate from brass identity */
+    --crit:#AE3225;
+    --crit-bg:#F6E4E0;
+    --major:#BE6A3C;
+    --major-bg:#F6E9DF;
+    --minor:#8A8574;
+    --minor-bg:#EDEDE5;
+    --sound:#3C7A56;
+    --sound-bg:#E3EEE6;
+    --decide:#2F5468;
+    --decide-bg:#E2ECF0;
+
+    --mono:"Cascadia Code","Cascadia Mono",Consolas,ui-monospace,"SFMono-Regular",Menlo,monospace;
+    --sans:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--serif);font-size:17px;line-height:1.62;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+  .wrap{max-width:940px;margin:0 auto;padding:0 24px}
+
+  /* ---- eyebrow / labels / data : mono, carries the console-dossier identity ---- */
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--brass);font-weight:600;
+  }
+  .mono{font-family:var(--mono)}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* ---------------- HEADER BAND ---------------- */
+  header.masthead{
+    background:var(--ink);color:#EDEEEA;
+    border-bottom:3px solid var(--brass);
+  }
+  .masthead .wrap{padding-top:46px;padding-bottom:42px}
+  .mast-eyebrow{color:var(--brass-soft)}
+  .wordmark{
+    font-family:var(--sans);font-weight:700;letter-spacing:-.02em;
+    font-size:clamp(38px,7vw,68px);line-height:1.0;margin:.28em 0 .12em;
+    text-wrap:balance;
+  }
+  .wordmark small{
+    display:block;font-family:var(--mono);font-weight:400;
+    font-size:13px;letter-spacing:.12em;color:var(--slate-2);
+    text-transform:uppercase;margin-top:14px;
+  }
+  .thesis{
+    font-family:var(--serif);font-size:clamp(19px,2.4vw,23px);line-height:1.5;
+    color:#D7D9D3;max-width:64ch;margin:22px 0 0;text-wrap:pretty;
+  }
+  .thesis b{color:#fff;font-weight:600}
+  .mast-meta{
+    display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:26px;
+    font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--slate-2);
+  }
+  .mast-meta span{white-space:nowrap}
+  .mast-meta b{color:var(--brass-soft);font-weight:600}
+
+  /* ---------------- RISK LEDGER ---------------- */
+  .ledger{background:var(--ink-2);color:#E7E8E3;border-bottom:1px solid #000}
+  .ledger .wrap{padding:24px 24px 28px}
+  .ledger-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:1px;background:#0c0f14;border:1px solid #0c0f14;border-radius:7px;overflow:hidden;
+  }
+  .lcell{background:var(--ink-2);padding:16px 18px}
+  .lcell .n{font-family:var(--mono);font-size:34px;font-weight:600;line-height:1;letter-spacing:-.02em}
+  .lcell .k{font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--slate-2);margin-top:9px}
+  .lcell.c-crit .n{color:#E8897E}
+  .lcell.c-major .n{color:#DDA079}
+  .lcell.c-decide .n{color:#8FB6C8}
+  .lcell.c-sound .n{color:#7FBE9B}
+  .lcell.c-run .n{color:#C9B77F}
+
+  /* ---------------- SECTIONS ---------------- */
+  main .wrap{padding-top:8px}
+  section{padding:46px 0 10px;border-bottom:1px solid var(--line)}
+  section:last-of-type{border-bottom:none}
+  .sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:6px}
+  .sec-tag{
+    font-family:var(--mono);font-size:13px;font-weight:600;color:var(--brass);
+    border:1px solid var(--brass);border-radius:5px;padding:2px 9px;letter-spacing:.06em;flex:none;
+  }
+  h2{
+    font-family:var(--sans);font-weight:700;letter-spacing:-.015em;
+    font-size:clamp(24px,3.4vw,32px);line-height:1.12;margin:0;text-wrap:balance;
+  }
+  .sec-lede{color:var(--slate);font-size:16px;max-width:70ch;margin:14px 0 30px}
+  .sec-lede b{color:var(--ink);font-weight:600}
+
+  /* ---------------- FINDING CARDS ---------------- */
+  .stack{display:flex;flex-direction:column;gap:14px}
+  .card{
+    background:var(--card);border:1px solid var(--line);
+    border-radius:8px;padding:20px 22px;
+  }
+  .card-top{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:9px}
+  /* severity read at a glance = a status dot in the meta row, not a side rail */
+  .card-top::before{content:"";width:9px;height:9px;border-radius:50%;flex:none;background:var(--minor)}
+  .card.s-crit .card-top::before{background:var(--crit)}
+  .card.s-major .card-top::before{background:var(--major)}
+  .card.s-minor .card-top::before{background:var(--minor)}
+  .card.s-sound .card-top::before{background:var(--sound)}
+  .card.s-decide .card-top::before{background:var(--decide)}
+  .chip{
+    font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+    padding:3px 8px;border-radius:4px;white-space:nowrap;
+  }
+  .chip.crit{background:var(--crit-bg);color:var(--crit)}
+  .chip.major{background:var(--major-bg);color:var(--major)}
+  .chip.minor{background:var(--minor-bg);color:#6f6a58}
+  .chip.sound{background:var(--sound-bg);color:var(--sound)}
+  .chip.decide{background:var(--decide-bg);color:var(--decide)}
+  .chip.fix{background:#EFEAF0;color:#6a4b74}
+  .src{
+    margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.03em;
+    color:var(--slate-2);white-space:nowrap;
+  }
+  .card h3{
+    font-family:var(--sans);font-weight:650;font-size:19px;line-height:1.28;
+    margin:0 0 7px;letter-spacing:-.008em;color:var(--ink);
+  }
+  .card h3 .code{font-family:var(--mono);font-size:15px;background:var(--line-2);padding:1px 6px;border-radius:4px;color:var(--ink-2);font-weight:600}
+  .card p{margin:0 0 9px;font-size:15.5px;line-height:1.56;color:#2b313a}
+  .card p:last-child{margin-bottom:0}
+  .card .lead-fact{color:var(--slate);font-size:14.5px}
+  .reco{
+    margin-top:13px;padding:13px 15px;background:#F5F0E4;border:1px solid #E6DCC4;
+    border-radius:7px;
+  }
+  .reco .rk{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--brass);font-weight:600;display:block;margin-bottom:5px}
+  .reco p{font-size:15px;color:var(--ink-2);margin:0}
+  code,.k-inline{font-family:var(--mono);font-size:.88em;background:var(--line-2);padding:.5px 5px;border-radius:4px;color:var(--ink-2)}
+
+  /* decision cards a touch heavier */
+  .card.s-decide{background:#FBFCFC;border-color:#D3DEE2}
+  .card.s-decide h3{color:var(--ink)}
+
+  /* ---------------- ROADMAP TABLE ---------------- */
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:9px;background:var(--card)}
+  table{border-collapse:collapse;width:100%;min-width:560px;font-size:15px}
+  thead th{
+    font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--slate);text-align:left;padding:13px 16px;border-bottom:1.5px solid var(--line);font-weight:600;background:#F7F7F3;
+  }
+  tbody td{padding:14px 16px;border-bottom:1px solid var(--line-2);vertical-align:top;color:#2b313a}
+  tbody tr:last-child td{border-bottom:none}
+  td .rn{font-family:var(--mono);font-weight:600;color:var(--brass);font-size:15px}
+  td .tt{font-family:var(--sans);font-weight:650;color:var(--ink);display:block;margin-bottom:3px}
+  td.sev .chip{display:inline-block}
+
+  /* ---------------- SOUND LIST ---------------- */
+  .keep{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+  .keep li{
+    list-style:none;background:var(--sound-bg);border:1px solid #CADFCF;border-radius:8px;
+    padding:14px 16px;font-size:15px;line-height:1.5;color:#284d39;
+  }
+  .keep li b{color:#1f4530;font-weight:650}
+  .keep{padding:0;margin:0}
+
+  /* ---------------- FOOTER ---------------- */
+  footer{background:var(--ink);color:#CBCEC8;border-top:3px solid var(--brass)}
+  footer .wrap{padding:40px 24px 48px}
+  footer h2{color:#fff;font-size:26px;margin-bottom:8px}
+  .next{display:flex;flex-direction:column;gap:11px;margin:22px 0 0;padding:0;counter-reset:n}
+  .next li{list-style:none;display:flex;gap:14px;align-items:flex-start;font-size:16px;color:#D7D9D3;line-height:1.5}
+  .next li::before{
+    counter-increment:n;content:counter(n,decimal-leading-zero);
+    font-family:var(--mono);font-size:12px;color:var(--brass-soft);font-weight:600;
+    border:1px solid var(--brass);border-radius:5px;padding:3px 7px;flex:none;margin-top:2px;
+  }
+  .next b{color:#fff;font-weight:600}
+  .foot-note{margin-top:30px;font-family:var(--mono);font-size:11.5px;color:var(--slate-2);letter-spacing:.03em;line-height:1.7}
+
+  a{color:var(--brass);text-decoration-thickness:1px;text-underline-offset:2px}
+  :focus-visible{outline:2px solid var(--brass);outline-offset:2px;border-radius:3px}
+
+  @media (max-width:560px){
+    body{font-size:16px}
+    .masthead .wrap{padding-top:34px;padding-bottom:32px}
+    .card{padding:17px 18px 17px 22px}
+    .src{margin-left:0;width:100%}
+  }
+</style>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow mast-eyebrow">Revue adverse · panel multi-agents</div>
+    <h1 class="wordmark">HelixOS<small>verdict de stress-test — conception v1.1 / constitution v1.3.0</small></h1>
+    <p class="thesis">Un <b>excellent modèle de sécurité</b> et un modèle d'exploitation encore à écrire. La doctrine « la sécurité est une topologie » tient comme <b>première ligne</b> — mais elle borne le chemin, jamais le rayon de souffle ; et quatre intégrations tierces sont surpromises face à leur réalité 2026.</p>
+    <div class="mast-meta">
+      <span>PANEL <b>7 agents</b> + 2 vérité-terrain</span>
+      <span>SOURCES <b>~40 URLs</b> vérifiées</span>
+      <span>CIBLE V1 <b>workstation Windows</b></span>
+      <span>DATE <b>2026-07-06</b></span>
+    </div>
+  </div>
+</header>
+
+<div class="ledger">
+  <div class="wrap">
+    <div class="ledger-grid">
+      <div class="lcell c-decide"><div class="n num">6</div><div class="k">Décisions ouvertes</div></div>
+      <div class="lcell c-crit"><div class="n num">9</div><div class="k">Défauts confirmés</div></div>
+      <div class="lcell c-run"><div class="n num">5</div><div class="k">Runbooks manquants</div></div>
+      <div class="lcell c-sound"><div class="n num">7</div><div class="k">Piliers sains</div></div>
+      <div class="lcell c-major"><div class="n num">3</div><div class="k">Hypothèses dangereuses</div></div>
+    </div>
+  </div>
+</div>
+
+<main>
+<div class="wrap">
+
+  <!-- ============ B — DECISIONS (lead with what needs action) ============ -->
+  <section id="decisions">
+    <div class="sec-head"><span class="sec-tag">B</span><h2>Décisions ouvertes — recommandation du panel</h2></div>
+    <p class="sec-lede">Ces six forks changent la forme de tout ce qui est en aval. Chacune porte une reco argumentée ; ce sont elles qui appellent ton arbitrage avant d'écrire la moindre ligne.</p>
+    <div class="stack">
+
+      <div class="card s-decide">
+        <div class="card-top"><span class="chip decide">Décision · verrou n°1</span><span class="src">archi B1 · red-team C1</span></div>
+        <h3>La surface d'approbation « souveraine » (SPEC-003) est impossible telle qu'écrite</h3>
+        <p class="lead-fact"><code>hermes-webui</code> exécute l'agent <b>in-process</b> (il lit le SQLite) et <b>n'expose aucune API</b> pour y pousser un deep link. La frontière « pile fiable / non fiable » passe alors au milieu d'un seul processus. Un passkey prouve « l'humain a cliqué », pas « l'humain a vu la vérité ».</p>
+        <div class="reco"><span class="rk">Reco</span><p>Micro-page servie par le noyau sur une <b>origine distincte</b> (certif dédié, <code>frame-ancestors 'none'</code>) ; deep link livré <b>hors-bande par ntfy</b>, résumé + hash émis par le noyau, pas l'agent ; comparaison de hash pour les L2 ; cible = micro-PWA du noyau. <b>Abandonner « zéro fork » comme dogme</b> — c'est un slogan, pas une contrainte tenable.</p></div>
+      </div>
+
+      <div class="card s-decide">
+        <div class="card-top"><span class="chip decide">Décision</span><span class="src">agent langage</span></div>
+        <h3>Langage du noyau — <span class="code">Rust</span> cœur + sidecar <span class="code">C#/.NET</span></h3>
+        <p><b>Go est éliminé</b> : pas de révocation mTLS dans la stdlib, VSS backup-context impossible via WMI — deux invariants constitutionnels à recoder. C# seul gagne l'interop brute mais seulement en JIT, ce qui sacrifie le binaire unique et gonfle la surface d'attaque du composant souverain.</p>
+        <div class="reco"><span class="rk">Reco</span><p>Cœur <b>Rust</b> (<code>rustls</code> révocation CRL native, <code>webauthn-rs</code>, <code>#![forbid(unsafe_code)]</code>, binaire statique) + <b>sidecar C#/.NET JIT</b> pour VSS/COM — « une main, pas une tête » : ni policy ni HITL, verbes typés en localhost. <b>Exige un amendement du Principe VIII</b> (le noyau n'est plus « un seul binaire »). Plan B : monolithe C#/.NET JIT si le split coûte trop cher au solo.</p></div>
+      </div>
+
+      <div class="card s-decide">
+        <div class="card-top"><span class="chip decide">Décision</span><span class="src">Windows-frontier M1 · day-2 §3.1</span></div>
+        <h3>Runtime conteneur — abandonner Docker Desktop</h3>
+        <p>Double motif convergent. <b>Isolation</b> : Docker Desktop réintroduit des ponts hôte massifs (<code>\\.\pipe\docker_engine</code>, bind-mounts Windows automatiques, moteur partagé cross-distro) que le durcissement WSL2 ne peut pas fermer. <b>Disponibilité</b> : il ne démarre pas sans session ouverte — fatal pour une machine qui reboote seule la nuit.</p>
+        <div class="reco"><span class="rk">Reco</span><p><b>dockerd natif dans la distro WSL2 durcie + systemd</b> (ou Podman rootless). Interdire et <b>tester</b> : montage <code>docker.sock</code>, <code>network_mode: host</code>, <code>privileged</code>, <code>pid/ipc: host</code>. Reformuler la promesse du harness : « prouve que les réglages tiennent », jamais « prouve l'inévasibilité ».</p></div>
+      </div>
+
+      <div class="card s-decide">
+        <div class="card-top"><span class="chip decide">Décision</span><span class="src">archi M1 / B3 / M2</span></div>
+        <h3>Rôle et périmètre de Graphify</h3>
+        <p>Outil fondamentalement <b>codebase-first</b>, 3 mois, pré-1.0, branche <code>v8</code>, churn massif. Son watch ne reconstruit pas le markdown ; l'extraction images/docs est un vision-LLM (cloud sauf Ollama).</p>
+        <div class="reco"><span class="rk">Reco</span><p>MVP = indexation <b>code + markdown + transcription</b> (vraiment local, sans GPU) ; images/PDF-vision = extension explicite « Ollama-GPU ou cloud par exception ». Fraîcheur <b>déclenchée par le noyau</b> à chaque mutation validée. Pinner la version, limites cgroup, et <b>sortir <code>obsidian.*</code> du cœur souverain</b> (Obsidian n'est pas un concept OS).</p></div>
+      </div>
+
+      <div class="card s-decide">
+        <div class="card-top"><span class="chip decide">Décision · doctrine</span><span class="src">red-team C2 / C3</span></div>
+        <h3>Combler le trou topologie → rayon de souffle</h3>
+        <p>Un agent compromis (prompt injection, non résolu en 2026) détient <b>déjà</b> le credential légitime du noyau et émet des intentions typées parfaitement valides. Le test #6 « donnée ≠ instruction » est un pass/fail non falsifiable — du théâtre.</p>
+        <div class="reco"><span class="rk">Reco</span><p>Écrire noir sur blanc : <b>l'agent est présumé compromissible</b>, la défense est en aval. Deny-list secrets sur <code>read_file</code> (<code>*.env, .ssh/, .hermes/</code>) → L2 même en lecture ; budgets d'exfiltration (volume + nb fichiers) ; credential du noyau illisible par toute intention ; <b>taint tracking</b> (contenu non fiable lu ce tour → +1 cran HITL) ; test #6 → éval adversariale continue.</p></div>
+      </div>
+
+      <div class="card s-decide">
+        <div class="card-top"><span class="chip decide">Décision · matériel</span><span class="src">day-2 §3</span></div>
+        <h3>Réalité v1 : un poste, pas un serveur</h3>
+        <p>Le cluster <b>WoL est L2 / Tailscale est L3</b> (réveil impossible via le tailnet), <b>expiry de clé Tailscale à J+180</b> (lockout silencieux), reboots Windows Update, et cold-start Docker sans session — tous pointent au même endroit.</p>
+        <div class="reco"><span class="rk">Reco</span><p>Un <b>petit relais Linux toujours allumé</b> (Pi / mini-PC) sur le LAN : porte le magic packet WoL, le point d'entrée Tailscale stable, le healthcheck externe. C'est l'extension « machine dédiée » de la roadmap, <b>avancée en P1 de fait</b>. À défaut : workstation qui ne dort jamais + expiry de clé désactivé (<code>tag:server</code>).</p></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ A — CONFIRMED DEFECTS ============ -->
+  <section id="defauts">
+    <div class="sec-head"><span class="sec-tag">A</span><h2>Défauts confirmés — à corriger dans les docs</h2></div>
+    <p class="sec-lede">Non débattables : chaque point croise une affirmation des docs avec un fait de vérité-terrain qui la <b>contredit</b>. Ce sont exactement les bugs invisibles au mock que tes tests live rattrapent d'habitude — sauf qu'ici il n'y a pas encore de code.</p>
+    <div class="stack">
+
+      <div class="card s-major">
+        <div class="card-top"><span class="chip fix">Corriger</span><span class="chip major">Majeur</span><span class="src">archi B3 · day-2 §5</span></div>
+        <h3>« GPU jamais requis / OCR-captions légers sur CPU » — faux</h3>
+        <p>Graphify n'a <b>aucun OCR/caption local</b> : images, PDF et docs passent par un vision-LLM (cloud sauf Ollama). Le vrai axe est <b>local vs cloud</b>, pas CPU vs GPU. Seuls le code (tree-sitter) et la transcription (faster-whisper int8, confirmé verbatim) sont réellement locaux-sans-GPU.</p>
+        <p class="lead-fact">→ Supprimer « OCR/captions légers sur CPU » des trois documents ; reclasser la couche connaissance en « local (code+transcription) » vs « LLM requis (le reste) ».</p>
+      </div>
+
+      <div class="card s-major">
+        <div class="card-top"><span class="chip fix">Corriger</span><span class="chip major">Majeur</span><span class="src">archi M1</span></div>
+        <h3>« Fraîcheur &lt; 1 min sur le vault » — impossible</h3>
+        <p>Le watch de Graphify ne reconstruit <b>pas</b> le markdown : il pose un flag <code>needs_update</code> + notification (l'extraction LLM est payante). Atteindre &lt;1 min exigerait un orchestrateur externe qui ré-extrait à chaque édition, avec coût LLM par frappe.</p>
+        <p class="lead-fact">→ NFR redéfini : &lt;1 min pour le code ; vault rafraîchi par le noyau à chaque mutation validée (il est déjà le point de passage obligé).</p>
+      </div>
+
+      <div class="card s-major">
+        <div class="card-top"><span class="chip fix">Corriger</span><span class="chip major">Majeur</span><span class="src">archi M2 · red-team M2</span></div>
+        <h3>Secrets <span class="code">.env</span> en clair — viole le Principe I</h3>
+        <p>L'état Hermes est un unique bind-mount <code>~/.hermes</code> contenant les clés <b>en clair</b> (CVE-2026-53870 : 0644 en &lt;0.16.0). Or le Principe I exige « les secrets hors runtime agent ». Le design viole son propre invariant, et c'est une précondition d'exfiltration (voir décision B5).</p>
+        <p class="lead-fact">→ Exiger Hermes ≥ 0.16.0 comme contrainte versionnée ; secrets 0600 / externalisés ; clé du noyau cloisonnée hors <code>.env</code>.</p>
+      </div>
+
+      <div class="card s-minor">
+        <div class="card-top"><span class="chip fix">Corriger</span><span class="chip minor">Mineur</span><span class="src">archi M5 · day-2 §7.5</span></div>
+        <h3>« WhatsApp/Twilio » — triple erreur factuelle</h3>
+        <p>Le WhatsApp d'Hermes = pont <b>Baileys</b> (émulation non officielle, risque de ban du numéro) ; Twilio est la voie du canal <b>SMS</b> ; le skill complet est une issue ouverte. Faire reposer le « secours » là-dessus est fragile.</p>
+        <p class="lead-fact">→ Canal de notification canonique = <b>ntfy</b> ; WhatsApp = commodité optionnelle documentée non fiable.</p>
+      </div>
+
+      <div class="card s-minor">
+        <div class="card-top"><span class="chip fix">Corriger</span><span class="chip minor">Mineur</span><span class="src">archi M4 · red-team C2</span></div>
+        <h3><span class="code">subagent_id</span> déclaratif — zéro valeur de sécurité</h3>
+        <p>Le champ est fourni par l'agent — précisément le composant non fiable — et non authentifié. Un agent compromis y met n'importe quoi. « Préserve la granularité de l'audit » surpromet : un champ contrôlé par l'attaquant n'est pas de la forensique.</p>
+        <p class="lead-fact">→ Requalifier en « hint debug/coûts, sans valeur de sécurité ». Traçabilité fiable = credential mTLS + plan signé.</p>
+      </div>
+
+      <div class="card s-minor">
+        <div class="card-top"><span class="chip fix">Corriger</span><span class="chip minor">Mineur</span><span class="src">archi M2 / m4</span></div>
+        <h3>Portabilité affirmée mais jamais exercée</h3>
+        <p>« Portable dès le 1er jour » est testé sur <b>un seul driver</b>. Un contrat n'est prouvé portable qu'au 2e driver — et deux abstractions fuient déjà l'OS-spécifique : la classe de rollback (dépend du filesystem) et <code>obsidian.*</code> (produit tiers, pas concept OS).</p>
+        <p class="lead-fact">→ Rétrograder en « architecture prête pour la portabilité » ; retirer de la colonne « Robuste » tant qu'un 2e driver ne l'a pas prouvée.</p>
+      </div>
+
+      <div class="card s-minor">
+        <div class="card-top"><span class="chip fix">Corriger</span><span class="chip minor">Mineur</span><span class="src">archi m5 / m6</span></div>
+        <h3>Graphify « en conteneur » = serving MCP seulement</h3>
+        <p>Le Dockerfile officiel conteneurise le <b>serveur MCP uniquement</b> ; pas d'image préconstruite, et l'extraction/watch en conteneur n'est pas le scénario documenté.</p>
+        <p class="lead-fact">→ Deux conteneurs (serving <code>:ro</code> + extracteur custom en écriture) + limites cgroup CPU/RAM pour rendre le test 8 vrai par construction.</p>
+      </div>
+
+      <div class="card s-minor">
+        <div class="card-top"><span class="chip fix">Corriger</span><span class="chip minor">Mineur</span><span class="src">archi m3</span></div>
+        <h3>Matrice test ↔ SPEC désalignée</h3>
+        <p>Le test 5 (note Obsidian) est attribué à SPEC-003, mais la capacité <code>obsidian.*</code> n'est livrée qu'en SPEC-004 → critère de sortie infaisable. Le test 12 (TOCTOU) est compté double (002 + 003).</p>
+        <p class="lead-fact">→ §9 = source unique ; chaque test appartient au lot qui livre sa capacité ; les recouvrements deviennent « re-vérifié », pas « possédé ».</p>
+      </div>
+
+      <div class="card s-minor">
+        <div class="card-top"><span class="chip fix">Corriger</span><span class="chip minor">Mineur</span><span class="src">archi m1</span></div>
+        <h3>Constitution non ratifiée</h3>
+        <p><code>Ratifiée le : [DATE]</code> alors que le texte « gouverne toutes les specs ». Formellement, rien n'est encore gouverné. Le choix Rust/Go est aussi laissé flottant jusqu'à SPEC-002 alors qu'il conditionne SPEC-001.</p>
+        <p class="lead-fact">→ Ratifier avec une vraie date + trancher le langage (décision B2) avant de démarrer.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ E — WINDOWS INTEROP ============ -->
+  <section id="windows">
+    <div class="sec-head"><span class="sec-tag">E</span><h2>Vérité-terrain Windows — ce qui tient, ce qui ment</h2></div>
+    <p class="sec-lede">La cible v1 est une workstation Windows : le noyau natif pilote l'hôte via VSS, la recherche de fichiers et PowerShell, et sert une page WebAuthn sur le tailnet. Quatre de ces promesses ont été passées aux sources primaires Microsoft.</p>
+    <div class="stack">
+
+      <div class="card s-sound">
+        <div class="card-top"><span class="chip sound">Confirmé · bonne nouvelle</span><span class="src">agent WebAuthn</span></div>
+        <h3>WebAuthn / passkey sur le tailnet — solide</h3>
+        <p>Un service Windows natif peut servir la page d'approbation et vérifier WebAuthn correctement. Le crux est résolu : le RP ID = un nom MagicDNS (<code>helix.&lt;tailnet&gt;.ts.net</code>) marche <b>parce que <code>ts.net</code> est sur la Public Suffix List</b>, donc <code>&lt;tailnet&gt;.ts.net</code> est un eTLD+1 propre — isolation par-tailnet gratuite. <code>tailscale cert</code> fournit un certif Let's Encrypt (secure context) ; servir depuis l'origine du noyau (same-origin) évite tout le bazar cross-origin iframe.</p>
+        <p class="lead-fact">Attestation <code>none</code> = correct pour un usage perso. Jamais l'IP <code>100.x</code> (ni RP ID valide, ni certifiable).</p>
+      </div>
+
+      <div class="card s-major">
+        <div class="card-top"><span class="chip major">Fragile</span><span class="src">agent langage · day-2 §7.4</span></div>
+        <h3>VSS pour le rollback <span class="code">auto</span> — la taxonomie est à l'envers</h3>
+        <p>VSS est <b>par-volume</b> (jamais par-fichier), impose un gel writer de plusieurs secondes, se perd sous forte I/O, échoue disque plein, et son chemin de création « facile » (<code>vssadmin</code>/WMI) est server-only ou en cours de suppression — seul le COM <code>IVssBackupComponents</code> est supporté client, absent de win32metadata (FFI Rust douloureux) ; AlphaVSS (C#) est le chemin mûr mais C++/CLI → <b>incompatible AOT</b> (d'où le sidecar JIT).</p>
+        <p class="lead-fact">→ <b>Inverser la taxonomie</b> : <code>compensation</code> (copie-aside + <code>ReplaceFile</code> atomique, déterministe, tout filesystem, sans élévation) devient la classe <b>garantie par défaut</b> ; <code>auto</code> (VSS) l'exception opportuniste derrière un probe (NTFS fixe + writers sains + espace + élévation), un snapshot par lot jamais par fichier.</p>
+      </div>
+
+      <div class="card s-minor">
+        <div class="card-top"><span class="chip minor">Nuancé</span><span class="src">agents Everything / Windows Search</span></div>
+        <h3>Recherche de fichiers — dépendance à requalifier</h3>
+        <p>Everything dépend de l'app + service tiers + index USN. L'alternative native <b>Windows Search</b> (OLE DB <code>Search.CollatorDSO</code>, zéro install) est <b>conditionnellement</b> utilisable depuis un service session-0 : pas whole-disk par défaut, asynchrone (pas live), et la visibilité des résultats sous l'identité LocalSystem doit être prouvée par un spike.</p>
+        <p class="lead-fact">→ Traiter la recherche comme capacité de driver <b>remplaçable</b>, pas dépendance dure ; valider par un spike avant de committer.</p>
+      </div>
+
+      <div class="card s-minor">
+        <div class="card-top"><span class="chip minor">Nuancé</span><span class="src">Windows-frontier B</span></div>
+        <h3>Firewall Hyper-V « un seul port » — vrai pour le routé, pas le loopback</h3>
+        <p>On peut bien passer WSL en <code>DefaultOutboundAction=Block</code> + une règle d'autorisation. Mais le loopback host↔guest est gouverné par un <b>toggle global</b> <code>LoopbackEnabled</code>, pas par port. « Exactement un port, loopback compris » n'est pas configurable finement ; il faut binder l'endpoint sur la gateway WSL (routée), pas sur <code>127.0.0.1</code>.</p>
+        <p class="lead-fact">→ mTLS par cert client <b>par conteneur</b> (l'identité vient du cert, pas du réseau) reste la seule voie viable vu l'override réseau de Docker Desktop.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ C — MISSING RUNBOOKS ============ -->
+  <section id="runbooks">
+    <div class="sec-head"><span class="sec-tag">C</span><h2>Specs & runbooks manquants — le cycle de vie oublié</h2></div>
+    <p class="sec-lede">Le design excelle sur le steady-state sécurisé et se tait sur tous les mauvais jours. Ces cinq livrables ne changent pas l'architecture — ils la rendent <b>vivable un an, seul, depuis un iPhone</b>. Ordre = priorité réelle de mise en prod perso.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:34px">#</th><th>Livrable</th><th style="width:96px">Sévérité</th><th>Le premier domino</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="rn num">1</span></td>
+            <td><span class="tt">BACKUP-RESTORE + 3-2-1</span><span class="mono" style="font-size:12.5px;color:var(--slate)"><code>~/.hermes</code> chiffré · SQLite <code>.backup</code>+<code>integrity_check</code></span></td>
+            <td class="sev"><span class="chip crit">Critique</span></td>
+            <td><code>~/.hermes</code> = secrets + skills + mémoire, <b>non reproductibles</b>, et zéro ligne de backup dans 5 docs. Un SSD mort ou un <code>-wal</code> non copié = tout perdu.</td>
+          </tr>
+          <tr>
+            <td><span class="rn num">2</span></td>
+            <td><span class="tt">SPEC-UPGRADE</span><span class="mono" style="font-size:12.5px;color:var(--slate)">blue/green · pin par digest · smoke test</span></td>
+            <td class="sev"><span class="chip crit">Critique</span></td>
+            <td>Hermes ~1 mineure/sem en 0.x, webui in-process, 9 CVE/4j, 100+ versions Graphify/3 mois. Le design nomme le couplage et tait le rollback.</td>
+          </tr>
+          <tr>
+            <td><span class="rn num">3</span></td>
+            <td><span class="tt">COLDSTART & disponibilité</span><span class="mono" style="font-size:12.5px;color:var(--slate)">dockerd natif · deps boot · expiry Tailscale</span></td>
+            <td class="sev"><span class="chip crit">Critique</span></td>
+            <td>La machine reboote seule (WU) et dort (Modern Standby) ; Docker Desktop ne remonte pas sans login ; la clé Tailscale expire à J+180 = lockout total.</td>
+          </tr>
+          <tr>
+            <td><span class="rn num">4</span></td>
+            <td><span class="tt">SPEC-BUDGET-COÛT</span><span class="mono" style="font-size:12.5px;color:var(--slate)">plafonds en devise · anti-boucle</span></td>
+            <td class="sev"><span class="chip crit">Critique</span></td>
+            <td>Les budgets comptent des <b>actions</b>, pas des <b>dollars</b>. Un orchestrateur Graphify naïf (ré-extraction vision-LLM en boucle) = centaines de $ en une nuit.</td>
+          </tr>
+          <tr>
+            <td><span class="rn num">5</span></td>
+            <td><span class="tt">DÉGRADATION + kill switch</span><span class="mono" style="font-size:12.5px;color:var(--slate)">PAUSE / ABORT / HALT · p95 falsifiable</span></td>
+            <td class="sev"><span class="chip major">Majeur</span></td>
+            <td>« Kill switch &lt;5 s » ne dit pas ce qu'il coupe (il doit tuer les process hôte enfants) ; « rollback auto » ment disque plein ; « p95 sous charge » est du théâtre sans générateur.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ D — WHAT SURVIVES ============ -->
+  <section id="sain">
+    <div class="sec-head"><span class="sec-tag">D</span><h2>Ce qui survit comme sain</h2></div>
+    <p class="sec-lede">Le stress-test n'invalide pas le projet : la colonne vertébrale est bonne. Ces sept piliers tiennent — la plupart moyennant les correctifs ci-dessus, aucun n'est à jeter.</p>
+    <ul class="keep">
+      <li><b>Doctrine « sécurité = topologie »</b> comme première ligne — à condition d'ajouter le bornage du rayon de souffle (B5).</li>
+      <li><b>Plan signé</b> (hash / TTL / usage unique) + <b>HITL gradué L0/L1/L2</b> + audit append-only + idempotence = bonne colonne vertébrale.</li>
+      <li><b>Noyau portier unique</b> à intentions typées — la bonne abstraction, à compléter par le blast-radius.</li>
+      <li><b>Taxonomie de rollback honnête</b> (auto / compensation / irréversible, dégradable jamais surdéclarée) — à étendre au cas « disque plein ».</li>
+      <li><b>CPU-first pour la transcription</b> (faster-whisper int8 confirmé), GPU opportuniste — le seul mode dégradé déjà bien traité.</li>
+      <li><b>Tailscale deny-by-default</b> garde 8642/9119 non exposés — bon ; chiffrer le state file, activer Tailnet Lock.</li>
+      <li><b>Séparation « Tailscale protège l'accès, le noyau protège les actions »</b> — la bonne ligne de partage.</li>
+    </ul>
+  </section>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="eyebrow" style="color:var(--brass-soft)">Prochaines étapes</div>
+    <h2>De la revue au plan</h2>
+    <p style="color:#D7D9D3;max-width:64ch;margin:6px 0 0">Rien à coder tant que les quatre verrous (B1–B4) ne sont pas tranchés. La suite proposée :</p>
+    <ol class="next">
+      <li>Tu arbitres les <b>6 décisions ouvertes</b> — je pars des recos, tu ajustes.</li>
+      <li>J'<b>amende les trois documents</b> (constitution v1.4.0, architecture, roadmap) : correctifs A1–A9 + doctrine blast-radius + périmètre Graphify + langage.</li>
+      <li>J'insère les <b>5 runbooks manquants</b> dans la roadmap et je réordonne (relais Linux en P1 de fait).</li>
+      <li>On enchaîne sur <b>SPEC-001</b> (frontière durcie + harness) via le plan d'implémentation.</li>
+    </ol>
+    <p class="foot-note">Panel : red-team sécurité · architecte sceptique · opérateur day-2 · vérité-terrain Windows/WSL2 (+ sous-agents VSS, Everything, WebAuthn, firewall) · décision langage · 2 cartographies vérité-terrain (Hermes, Graphify). ~40 sources primaires vérifiées, 2026-07-06.</p>
+  </div>
+</footer>
