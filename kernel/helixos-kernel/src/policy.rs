@@ -8,11 +8,18 @@ pub enum RiskLevel { L0, L1, L2 }
 const SECRET_GLOBS: &[&str] = &[".env", ".key", ".pem", ".kdbx"];
 const SECRET_DIRS: &[&str] = &[".ssh", ".hermes"];
 
+/// NTFS est insensible à la casse : `.ENV`, `ID_RSA`, `deploy.KEY`, `.SSH/config` doivent être
+/// traités comme leurs équivalents minuscules, sous peine de faux négatifs sur le deny-list de
+/// secrets. On compare donc systématiquement en minuscules (nom de fichier ET chaque composant
+/// de chemin), sans jamais modifier `SECRET_GLOBS`/`SECRET_DIRS` eux-mêmes (déjà en minuscules).
 pub fn is_secret(path: &Path) -> bool {
-    let name = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
+    let name = path.file_name().and_then(|s| s.to_str()).unwrap_or("").to_ascii_lowercase();
     if name.starts_with("id_") { return true; }
     if SECRET_GLOBS.iter().any(|g| name.ends_with(g)) { return true; }
-    path.components().any(|c| SECRET_DIRS.contains(&c.as_os_str().to_str().unwrap_or("")))
+    path.components().any(|c| {
+        let comp = c.as_os_str().to_str().unwrap_or("").to_ascii_lowercase();
+        SECRET_DIRS.contains(&comp.as_str())
+    })
 }
 
 fn base(intention: &Intention) -> RiskLevel {
@@ -49,5 +56,13 @@ mod tests {
     #[test] fn apply_patch_is_l1() {
         let i = Intention::ApplyFilePatch { plan_id: "p".into() };
         assert_eq!(classify(&i, false), RiskLevel::L1);
+    }
+    #[test] fn is_secret_is_case_insensitive_for_globs_and_prefix() {
+        assert!(is_secret(&PathBuf::from("C:/vault/.ENV")), ".ENV doit être détecté comme secret (NTFS insensible à la casse)");
+        assert!(is_secret(&PathBuf::from("C:/vault/ID_RSA")), "ID_RSA doit être détecté comme secret");
+        assert!(is_secret(&PathBuf::from("C:/vault/deploy.KEY")), "deploy.KEY doit être détecté comme secret");
+    }
+    #[test] fn is_secret_is_case_insensitive_for_dir_components() {
+        assert!(is_secret(&PathBuf::from("C:/Users/elidr/.SSH/config")), "un chemin traversant .SSH/ doit être détecté comme secret");
     }
 }

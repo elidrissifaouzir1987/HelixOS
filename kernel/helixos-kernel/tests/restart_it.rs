@@ -1,3 +1,4 @@
+#![forbid(unsafe_code)]
 use helixos_kernel::intention::Intention;
 use helixos_kernel::pipeline::Kernel;
 use helixos_kernel::scope::ScopeLease;

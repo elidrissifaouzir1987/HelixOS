@@ -65,6 +65,11 @@ impl Kernel {
     fn persist_consumed(&mut self, plan_hash: &str) -> std::io::Result<()> {
         let mut f = std::fs::OpenOptions::new().create(true).append(true).open(&self.consumed_path)?;
         writeln!(f, "{}", serde_json::to_string(&ConsumedRecord { plan_hash: plan_hash.to_string() })?)?;
+        // `sync_all` force la durabilité de la ligne `consumed` sur le disque physique avant de
+        // retourner : sans ça, l'OS peut garder la ligne en cache page tampon et un crash dur
+        // (coupure de courant, kill -9 du process hôte) juste après `apply` pourrait la perdre,
+        // rouvrant la fenêtre de rejeu qu'E2 est censé fermer (« survit au redémarrage »).
+        f.sync_all()?;
         self.consumed_hashes.insert(plan_hash.to_string());
         Ok(())
     }
@@ -111,6 +116,13 @@ impl Kernel {
         let handle = self.driver.stage_and_apply(&plan.target, &plan.proposed_content).map_err(|e| e.to_string())?;
         plan.consumed = true;
         self.plans.insert(plan_hash.to_string(), plan.clone());
+        // Ordre délibéré, fail-safe : `consumed` est persisté AVANT l'écriture de l'audit, pas
+        // l'inverse. Si le process meurt entre les deux lignes suivantes, l'état résultant est
+        // « consommé mais non audité » — un trou dans le journal humain-lisible, visible et
+        // investiguable après coup. L'ordre inverse produirait « audité mais rejouable » : un
+        // plan qui a modifié le fichier cible pourrait être appliqué une seconde fois après
+        // redémarrage (le journal `consumed.jsonl` ne le connaîtrait pas encore), ce qui est un
+        // trou de sécurité, pas juste un trou d'observabilité. Ne pas inverser cet ordre.
         self.persist_consumed(plan_hash).map_err(|e| e.to_string())?;
         self.audit.append(&AuditRecord {
             operation_id: plan.plan_id.to_string(), caller: plan.task_id.clone(), subagent_id_hint: None,

@@ -44,13 +44,31 @@ impl Plan {
     /// Représentation canonique hashée : inclut le contenu approuvé (via son propre hash
     /// sha256, pour rester une chaîne texte propre) afin qu'il fasse partie du plan signé —
     /// toute substitution du contenu proposé après signature change le `plan_hash`.
+    ///
+    /// Injectivité : chaque champ variable est préfixé par sa longueur en octets
+    /// (`"{len}:{valeur}"`) avant concaténation, plutôt que simplement joint par `|`. Un simple
+    /// séparateur `|` non échappé rendrait la représentation non injective — deux plans avec
+    /// des découpages de champs différents mais des octets de milieu identiques (ex.
+    /// `task_id="a|b", intent="c"` vs `task_id="a", intent="b|c"`) produiraient la même chaîne
+    /// canonique et donc le même hash, alors que ce sont des plans sémantiquement différents.
+    /// Le préfixe-longueur élimine toute ambiguïté de frontière, quel que soit le contenu du
+    /// champ (y compris s'il contient lui-même des `|` ou des chiffres suivis de `:`).
     pub fn canonical_bytes(&self) -> Vec<u8> {
         let content_hash = hex(Sha256::digest(&self.proposed_content).as_slice());
-        format!(
-            "{}|{}|{}|{}|{}|{}|{content_hash}|{}",
-            self.plan_id, self.task_id, self.intention_repr, self.target.display(),
-            self.target_hash_at_diff, self.diff, self.created_at,
-        ).into_bytes()
+        let mut out = String::new();
+        for field in [
+            self.plan_id.to_string(),
+            self.task_id.clone(),
+            self.intention_repr.clone(),
+            self.target.display().to_string(),
+            self.target_hash_at_diff.clone(),
+            self.diff.clone(),
+            content_hash,
+            self.created_at.to_string(),
+        ] {
+            out.push_str(&format!("{}:{}", field.len(), field));
+        }
+        out.into_bytes()
     }
     pub fn is_expired(&self, now: OffsetDateTime) -> bool {
         (now - self.created_at).whole_seconds() as u64 > self.ttl_secs
@@ -100,6 +118,26 @@ mod tests {
                  "HASH_A".into(), "diff".into(), b"CONTENT_B".to_vec(),
                  crate::policy::RiskLevel::L1, RollbackClass::Compensation);
         assert_ne!(a.plan_hash, b.plan_hash);
+    }
+    #[test] fn canonical_bytes_is_injective_across_field_boundary_shifts() {
+        // Anti-régression pour le délimiteur `|` non échappé : `task_id="a|b", intent="c"` et
+        // `task_id="a", intent="b|c"` donnaient auparavant les mêmes octets de milieu
+        // (`...a|b|c...`), donc le même `canonical_bytes()`/`plan_hash`, alors que ce sont deux
+        // plans sémantiquement différents. On construit deux plans à la main, identiques en
+        // tout point (même `plan_id`, même `created_at`, mêmes autres champs) SAUF le découpage
+        // task_id/intention_repr, pour isoler strictement cette variable.
+        let mut a = sample_plan("HASH_A");
+        a.task_id = "a|b".into();
+        a.intention_repr = "c".into();
+
+        let mut b = sample_plan("HASH_A");
+        b.plan_id = a.plan_id;           // même plan_id
+        b.created_at = a.created_at;     // même horodatage
+        b.task_id = "a".into();
+        b.intention_repr = "b|c".into(); // même octets "a|b|c" en concaténation naïve
+
+        assert_ne!(a.canonical_bytes(), b.canonical_bytes(),
+            "des découpages de champs différents doivent produire des canonical_bytes différents (préfixe-longueur)");
     }
     fn sample_plan(target_hash: &str) -> Plan {
         new_plan("t1".into(), "int".into(), "C:/vault/n.md".into(),
