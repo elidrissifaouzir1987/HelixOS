@@ -194,4 +194,32 @@ séparation « Tailscale protège l'accès, le noyau protège les actions ».
 
 1. Amender les 3 docs depuis ce record (constitution v1.4.0, architecture v1.2, roadmap v4 + 5
    runbooks). 2. Revue de cohérence. 3. git init + commit. 4. Revue utilisateur. 5. `/plan`
-   SPEC-001 (frontière durcie + harness, runtime natif, relais).
+   **MVP-0** (tranche verticale, cf. §8/D7), PUIS SPEC-001 complète → 002 → …
+
+---
+
+## 8. Renforcements post-revue utilisateur (2026-07-06)
+
+Trois renforcements demandés à la revue, tous appliqués :
+
+- **D7 — Tranche verticale MVP-0 (walking skeleton).** Avant les SPEC pleines, une boucle
+  brutalement réduite (frontière prouvée + noyau Rust minimal + **une** intention
+  fichier-patch sur une note du vault + approbation hors webui + audit append-only +
+  rollback `compensation`), à rendre **agréable au bureau** avant tout élargissement — le
+  risque n°1 du projet est la complexité opérationnelle, pas l'architecture. **Gelé** :
+  VSS/`auto`, sidecar C#, Graphify, vision, cron/autonomie, budgets, kanban, upgrade
+  blue/green, drivers multi-OS, **et le relais / accès mobile** (le relais sert le réveil
+  distant, hors du « la boucle est-elle agréable au bureau »). Plancher opérationnel mince
+  conservé (backup vault+audit, restart propre). Intention au niveau **fichier**
+  (`host.*_file_patch`), pas `app.obsidian.*`. → roadmap section `MVP-0`.
+- **D8 — Allowlist positive de portées (contrôle PRIMAIRE).** Moindre privilège par **bail
+  de portée par-tâche** : une intention n'opère que dans les scopes loués à son
+  déclenchement, hors bail → refus ; bail **jamais global** (pas d'héritage de l'union),
+  non élargissable par le contenu déclencheur. La deny-list de secrets devient une
+  **défense en profondeur** (2ᵉ couche, contre les oublis), pas le contrôle principal.
+  → constitution Principe I · architecture §3.4 · test 20.
+- **D9 — Contrat de carte d'approbation (anti-approbation-mécanique).** La carte répond à 5
+  questions dans l'ordre : **quoi / où / risque + rollback réel / pourquoi + drapeau taint /
+  inhabituel** (ce qui dévie du comportement normal, pas seulement le diff — un diff vu 200
+  fois se tamponne). Livrable de premier ordre, **lisibilité testée**, taux L1/L2 mesuré.
+  → architecture §4 · SPEC-003.

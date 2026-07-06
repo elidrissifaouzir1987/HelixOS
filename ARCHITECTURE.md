@@ -279,9 +279,15 @@ Le portier borne le **chemin** et la **forme**, jamais le **rayon de souffle** u
 fois qu'un agent compromis détient le credential légitime du noyau (prompt injection
 non résolu en 2026). Défenses **en aval**, dans le cœur :
 
+- **Bail de portée (allowlist positive) — contrôle PRIMAIRE** : par défaut une
+  intention n'opère que dans les **scopes loués à la tâche** à son déclenchement
+  (racines déclarées) ; hors bail → **refus**. Bail **par-tâche** (jamais global —
+  pas d'héritage de l'union des portées), non élargissable par le contenu déclencheur.
+  L'allowlist limite le rayon de souffle ; la deny-list ci-dessous rattrape les oublis.
 - **`host.read_file` porte une deny-list de secrets** (`*.env`, `*.key`, `*.pem`,
-  `id_*`, `*.kdbx`, `.ssh/`, `.hermes/`, stores de credentials Windows) → toute
-  lecture concernée **force L2 + passkey, même en lecture seule**.
+  `id_*`, `*.kdbx`, `.ssh/`, `.hermes/`, stores de credentials Windows) → **défense
+  en profondeur** (seconde couche, pas la première) : toute lecture concernée **force
+  L2 + passkey, même en lecture seule et même dans un scope loué**.
 - **Budgets d'exfiltration** : volume cumulé lu + nb de fichiers distincts sur
   fenêtre glissante, **orthogonaux aux quotas par-action**.
 - **Credential du noyau non lisible** par aucune intention (hors volumes montés
@@ -302,8 +308,17 @@ Trois niveaux (anti-fatigue d'approbation) :
 | L1 léger | écriture faible réversible | tap d'approbation |
 | L2 fort | destructif, externe, irréversible, admin, **lecture de secret** | passkey (WebAuthn), plan signé, diff complet, **comparaison de hash (≥ 4 premiers octets)** |
 
-La carte affiche : résumé, diff, portée, classe de rollback, identité de la tâche
-et `subagent_id` (hint déclaratif), hash du plan, expiration, niveau de risque.
+**Contrat de carte d'approbation** (livrable de premier ordre, conçu *contre*
+l'approbation mécanique) — la carte répond à cinq questions, dans cet ordre :
+1. **Quoi** — diff complet + résumé en une ligne. 2. **Où** — cible + scope loué.
+3. **Risque** — niveau + classe de **rollback réel** (honnête, jamais surdéclarée).
+4. **Pourquoi** — la tâche/déclencheur à l'origine, avec un **drapeau explicite si
+l'action a été influencée par du contenu non fiable** (le signal de taint rendu
+visible). 5. **Inhabituel ?** — ce qui **dévie du comportement normal** (« 1re fois
+qu'un cron écrit hors `~/vault` »), pas seulement le diff : un diff déjà vu 200 fois
+se tamponne, une déviation non. La carte porte aussi identité de tâche + `subagent_id`
+(hint déclaratif), hash du plan, expiration. **Lisibilité testée** ; le taux L1/L2 est
+mesuré pour calibrer l'anti-fatigue.
 
 **La surface d'approbation est servie par le noyau sur une origine distincte**
 (micro-PWA — host:port + certif dédiés, `frame-ancestors 'none'`,
@@ -448,6 +463,7 @@ L'axe réel n'est **pas CPU vs GPU** mais **local vs LLM requis** :
 | 17 | **Kill `HALT` (panic)** pendant un `run_approved_script` | **Process hôte enfant terminé < 5 s** | SPEC-BUDGET / kill switch |
 | 18 | **Backup / restore** de `~/.hermes` + SQLite (`.backup` + `integrity_check`) | **Restauration testée pour de vrai** (jamais `cp` sur WAL) | RUNBOOK-BACKUP-RESTORE |
 | 19 | **Lecture d'un fichier de la deny-list secrets** (`*.env`, `*.key`, `.ssh/`, …) | **Force L2 + passkey**, même en lecture seule | SPEC-002 / §3.4 |
+| 20 | **Intention hors du bail de portée** loué à la tâche | **Refus** (allowlist positive = contrôle primaire ; deny-list = 2ᵉ couche) | SPEC-002 / §3.4 |
 
 > Le test 6 était auparavant un pass/fail non falsifiable (« donnée ≠ instruction ») :
 > il devient une **éval adversariale continue** (taux de compromission mesuré sous

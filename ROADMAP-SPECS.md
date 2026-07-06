@@ -37,6 +37,47 @@ flowchart LR
 
 ---
 
+## MVP-0 — Tranche verticale minimale (walking skeleton)
+
+**Avant les six SPEC pleines**, une tranche verticale **brutalement réduite** qui
+traverse frontière → noyau → **une seule intention utile** → approbation → audit →
+rollback, et qui doit devenir **agréable à utiliser au quotidien, au bureau, AVANT**
+tout élargissement. Le principal risque du projet n'est pas architectural, c'est la
+**complexité opérationnelle** : on ne construit pas une infrastructure quasi
+industrielle avant d'avoir une boucle fluide.
+
+**Périmètre IN (le strict nécessaire)** :
+- Frontière runtime→hôte **prouvée** (harness : tests 1, 2 échouent ; runtime natif
+  dockerd/WSL2). **Le relais Linux et l'accès mobile sont HORS MVP-0** — ils servent
+  le réveil à distance, pas « la boucle est-elle agréable au bureau ».
+- **Noyau Rust minimal** : auth mTLS de l'appelant, pipeline d'**une** intention
+  (normalize→plan→diff→policy→HITL→execute→audit→verify), plan signé (hash/TTL),
+  idempotence, **bail de portée** (allowlist) limité au vault.
+- **Une seule intention utile** : rechercher / lire / **proposer+appliquer un patch
+  sur une note du vault**, au niveau **fichier** (`host.read_file` +
+  `host.propose_file_patch` + `host.apply_file_patch`) — **pas** la couche sémantique
+  `app.obsidian.*` (une note = un fichier markdown).
+- **Approbation simple mais déjà hors webui** : micro-page servie par le noyau sur
+  origine distincte, L1 tap / L2 passkey, **carte d'approbation lisible** (contrat
+  §4 de l'architecture). En local/tailnet ; ntfy-away non requis au bureau.
+- **Audit append-only** + **rollback `compensation`** (copie-aside + `ReplaceFile`,
+  **sans VSS, sans sidecar**).
+- **Plancher opérationnel mince** : backup du vault (Git) + de l'audit/état du noyau,
+  et un **redémarrage propre**. On ne gèle pas *tout* l'opérationnel : sans backup ni
+  restart, « agréable à utiliser » veut dire « jusqu'au premier crash ».
+
+**Gelé tant que la tranche n'est pas agréable** : VSS / rollback `auto`, **sidecar
+C#**, **Graphify** (tout — pas de graphe de connaissances ; la recherche MVP-0 reste
+simple/par nom), **vision**, **autonomie cron**, **budgets** (pas d'autonomie = pas
+d'emballement), **kanban**, **upgrade blue/green sophistiqué**, drivers multi-OS,
+**relais / accès mobile**.
+
+**Sortie** : une note du vault se cherche, se lit, se patche par une intention
+approuvée hors webui, auditée, annulable — **et l'utiliser au quotidien est fluide**.
+C'est le feu vert pour dégeler la suite (SPEC-001 complète → 002 → …).
+
+---
+
 ## SPEC-001 — La frontière : runtime natif durci + relais Linux (P1) + harness par OS
 
 **Objectif** : rendre la frontière runtime→hôte réelle et **prouvée**, de façon
@@ -262,8 +303,11 @@ same-origin depuis le noyau, attestation `none`, jamais l'IP `100.x`.
 unique, sans framework, HTTPS tailnet, `frame-ancestors 'none'` / `X-Frame-Options:
 DENY`, Web Push) : résumé, diff, portée, classe de rollback (jamais surdéclarée),
 identité de la tâche et `subagent_id` (déclaratif), hash du plan, expiration, niveau de
-risque ; niveaux L0/L1/L2 (audit seul / tap / WebAuthn-passkey), **avec comparaison de
-hash (≥ 4 premiers octets) exigée pour les L2** ; **deep link hors-bande via ntfy**
+risque — le tout selon le **contrat de carte d'approbation (§4 architecture)** :
+quoi / où / risque + rollback réel / **pourquoi + drapeau taint** / **inhabituel**,
+**conçu et testé contre l'approbation mécanique** ; niveaux L0/L1/L2 (audit seul / tap
+/ WebAuthn-passkey), **avec comparaison de hash (≥ 4 premiers octets) exigée pour les
+L2** ; **deep link hors-bande via ntfy**
 (contenu émis par le noyau) ; notifications de commodité (toast/badge webui via message
 Hermes, **WhatsApp strictement informatif et non fiable via Baileys** — jamais un canal
 d'autorité) ; révocation en cours de tâche ; vue « opérations en vol ».
@@ -291,8 +335,11 @@ d'autorité) ; révocation en cours de tâche ; vue « opérations en vol ».
 > refusée ; plan modifié après affichage refusé ; **webui activement malveillante
 > (pas seulement éteinte) — tentative de cadrer, rejouer ou détourner la surface
 > d'approbation — l'approbation et le refus d'une opération en vol restent
-> intègres et fonctionnels** ; mesure du taux de sollicitations L1/L2 pour calibrer
-> l'anti-fatigue.
+> intègres et fonctionnels** ; **la carte d'approbation suit le contrat §4 (quoi / où /
+> risque + rollback réel / pourquoi + drapeau taint / inhabituel) et est testée pour sa
+> lisibilité — anti-approbation-mécanique : elle fait ressortir ce qui dévie du
+> comportement normal, pas seulement le diff** ; mesure du taux de sollicitations L1/L2
+> pour calibrer l'anti-fatigue.
 
 **Sortie** : tests 6, 11, 14 verts depuis le téléphone, y compris face à une
 webui malveillante (le test 5 Obsidian est rattaché à SPEC-004 — §9 source unique).

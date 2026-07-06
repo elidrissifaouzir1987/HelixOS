@@ -49,9 +49,16 @@ taint tracking).
   runtime agent (conteneurs et environnement) ; ils ne vivent **jamais** en clair
   dans le runtime agent (Hermes **≥ 0.16.0**, permissions 0600). **La clé du noyau
   est cloisonnée hors du `.env` d'Hermes et illisible par toute intention.**
+- **Moindre privilège par bail de portée (allowlist positive) — contrôle PRIMAIRE** :
+  par défaut, une tâche ne peut lire ou écrire QUE dans les **scopes explicitement
+  loués** à son déclenchement (racines déclarées) ; toute intention hors du bail est
+  **refusée**. Le bail est **par-tâche, jamais global** (un agent compromis n'hérite
+  pas de l'union des portées jamais accordées) et le **contenu déclencheur ne peut
+  jamais l'élargir**.
 - `host.read_file` porte une **deny-list** de secrets (`*.env, *.key, *.pem, id_*,
   *.kdbx, .ssh/, .hermes/`, stores de credentials Windows) qui force **L2 + passkey
-  même en lecture**.
+  même en lecture, même dans un scope loué** — c'est une **défense en profondeur**
+  (contre les oublis), pas le contrôle principal : l'allowlist ci-dessus l'est.
 - **Taint tracking** : une action influencée par un contenu non fiable lu dans le tour
   ne peut pas être auto-approuvée (L0) → **+1 cran HITL**.
 
