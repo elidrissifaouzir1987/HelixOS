@@ -101,12 +101,36 @@ mod tests {
         assert!(!lease_at(vault).permits(&escaping));
     }
 
-    /// Best-effort : prouve que `permits` refuse une cible atteinte via un lien-dir ancêtre
-    /// placé DANS le vault et pointant VERS L'EXTÉRIEUR (contournement lexical historique :
-    /// `C:\vault\link\x` restait lexicalement sous `C:\vault` alors que `link` menait ailleurs).
-    /// La création de jonctions/symlinks sous Windows exige un privilège (SeCreateSymbolicLink)
-    /// ou le mode développeur ; si la création échoue par manque de droits (os error 1314),
-    /// on saute proprement au lieu de faire échouer le test dans un environnement CI restreint.
+    /// Crée un répertoire "reparse" (lien symbolique-dir, ou à défaut une jonction NTFS) menant
+    /// de `link` vers `target`. Les deux formes sont des reparse points : `canonicalize` les
+    /// résout et `entry.file_type().is_symlink()` renvoie `true` pour elles, donc les deux
+    /// exercent le même contrôle. Un vrai lien symbolique exige un privilège
+    /// (SeCreateSymbolicLink) ou le mode développeur (échoue en os error 1314 sinon) ; une
+    /// jonction (`mklink /J`) ne demande aucun privilège particulier. On tente donc le
+    /// symlink d'abord, puis on retombe sur la jonction. Retourne `false` si aucune des deux
+    /// formes n'a pu être créée (cas rare, ex. FS non-NTFS).
+    fn make_reparse_dir(link: &Path, target: &Path) -> bool {
+        if std::os::windows::fs::symlink_dir(target, link).is_ok() {
+            return true;
+        }
+        // Repli jonction NTFS : `mklink /J` exige que `link` n'existe pas encore et que
+        // `target` soit un répertoire existant. Pas de privilège requis.
+        let link_str = link.to_string_lossy().replace('/', "\\");
+        let target_str = target.to_string_lossy().replace('/', "\\");
+        match std::process::Command::new("cmd")
+            .args(["/C", "mklink", "/J", &link_str, &target_str])
+            .status()
+        {
+            Ok(status) => status.success(),
+            Err(_) => false,
+        }
+    }
+
+    /// Prouve que `permits` refuse une cible atteinte via un lien-dir ancêtre placé DANS le
+    /// vault et pointant VERS L'EXTÉRIEUR (contournement lexical historique : `C:\vault\link\x`
+    /// restait lexicalement sous `C:\vault` alors que `link` menait ailleurs). Exercé via
+    /// `make_reparse_dir` (symlink si privilège dispo, sinon jonction NTFS sans privilège) :
+    /// le skip ne subsiste que si NI l'une NI l'autre forme n'a pu être créée.
     #[test]
     fn refuses_target_reached_through_outward_symlink_best_effort() {
         let vault = temp_vault();
@@ -114,16 +138,15 @@ mod tests {
         std::fs::create_dir_all(&outside).unwrap();
         std::fs::write(outside.join("x"), b"SECRET").unwrap();
         let link = vault.join("link");
-        match std::os::windows::fs::symlink_dir(&outside, &link) {
-            Ok(()) => {
-                assert!(!lease_at(vault).permits(&link.join("x")),
-                    "un lien-dir dans le vault pointant hors-vault doit faire refuser la cible");
-            }
-            Err(e) if e.raw_os_error() == Some(1314) => {
-                eprintln!("skip refuses_target_reached_through_outward_symlink_best_effort: \
-                           privilège insuffisant pour créer un lien symbolique (os error 1314)");
-            }
-            Err(e) => panic!("échec inattendu de création du lien symbolique : {e}"),
+        if !make_reparse_dir(&link, &outside) {
+            eprintln!("skip refuses_target_reached_through_outward_symlink_best_effort: \
+                       ni symlink ni jonction créables");
+            return;
         }
+        let lease = lease_at(vault);
+        assert!(!lease.permits(&link.join("x")),
+            "un lien-dir dans le vault pointant hors-vault doit faire refuser une feuille existante");
+        assert!(!lease.permits(&link.join("does-not-exist")),
+            "un lien-dir dans le vault pointant hors-vault doit aussi faire refuser une feuille inexistante");
     }
 }
