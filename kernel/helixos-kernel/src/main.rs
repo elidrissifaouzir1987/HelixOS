@@ -5,4 +5,5 @@ mod scope;
 mod policy;
 mod plan;
 mod audit;
+mod pipeline;
 fn main() { println!("helixos-kernel 0.0.1"); }
