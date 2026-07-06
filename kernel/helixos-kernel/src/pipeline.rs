@@ -77,8 +77,14 @@ impl Kernel {
     /// request → scope → policy → plan → diff. Refuse hors bail.
     pub fn plan_intention(&mut self, task_id: &str, _caller: &str,
                           intention: Intention, tainted: bool) -> Result<Plan, String> {
+        // Fix F2 : seul `ProposeFilePatch` est planifiable. `ReadFile` était accepté ici avant ce
+        // correctif — le plan résultant avait `proposed_content` vide (aucune branche de
+        // construction de contenu pour `ReadFile` plus bas), et `apply` aurait donc TRONQUÉ la
+        // cible à 0 octet si un tel plan était appliqué. La classification policy de `ReadFile`
+        // (`policy::classify`, L0/L2 selon secret) reste inchangée — seule son éligibilité au
+        // pipeline plan/apply est retirée ici.
         let target = match &intention {
-            Intention::ProposeFilePatch { path, .. } | Intention::ReadFile { path } => path.clone(),
+            Intention::ProposeFilePatch { path, .. } => path.clone(),
             _ => return Err("MVP-0: seul propose_file_patch est planifiable".into()),
         };
         if !self.lease.permits(&target) { return Err("hors bail de portée (refus)".into()); }  // contrôle primaire
@@ -164,6 +170,15 @@ mod tests {
         let r = k.plan_intention("t1", "hermes",
             Intention::ProposeFilePatch { path: outside, patch: "P".into() }, false);
         assert!(r.is_err());
+    }
+    #[test] fn read_file_is_not_planifiable() {              // fix F2 (anti-régression)
+        // `ReadFile` ne doit jamais atteindre le chemin plan/apply : avant ce fix, un plan issu
+        // d'un `ReadFile` avait `proposed_content` vide (aucune branche de construction de
+        // contenu pour cette variante), donc `apply` aurait tronqué la cible à 0 octet.
+        let (mut k, target) = kernel_with_note(b"OLD");
+        let r = k.plan_intention("t1", "hermes", Intention::ReadFile { path: target }, false);
+        let err = r.expect_err("ReadFile ne doit pas être planifiable");
+        assert!(err.contains("seul propose_file_patch est planifiable"));
     }
     #[test] fn applied_content_matches_proposed_content_not_diff_string() {
         // Garde-fou anti-régression pour la modification-contrôleur : `apply` doit écrire

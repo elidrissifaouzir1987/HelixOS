@@ -27,6 +27,8 @@ pub struct Plan {
     pub consumed: bool,
 }
 
+// MVP-0: refactor builder/struct-arg reporté à C2+
+#[allow(clippy::too_many_arguments)]
 pub fn new_plan(task_id: String, intention_repr: String, target: PathBuf,
                 target_hash_at_diff: String, diff: String, proposed_content: Vec<u8>,
                 risk: RiskLevel, rollback_class: RollbackClass) -> Plan {

@@ -13,13 +13,35 @@ thiserror = "1"
 tokio = { version = "1.52.3", features = ["rt-multi-thread", "net", "macros", "io-util", "sync"] }
 tokio-rustls = "0.26.4"
 rustls = "0.23.41"
-rustls-pemfile = "2.2.0"
-# NOTE (écart documenté vs consigne "cargo add --dev rcgen") : rcgen doit être une dépendance
-# NORMALE, pas seulement dev. Preuve empirique (sonde jetée après vérification) : quand
-# `tests/mtls_it.rs` (crate d'intégration externe) lie `helixos_kernel`, la lib est compilée
-# SANS `cfg(test)` actif — un `pub fn` sous `#[cfg(test)]` dans `src/` n'existe alors pas dans
-# le binaire lié, donc `mtls::spawn_test_server`/`connect_with_client_cert` (exposés par
-# l'interface demandée dans tests/mtls_it.rs) ne peuvent pas être gated par `#[cfg(test)]` — et
-# donc ne peuvent pas dépendre d'un crate qui ne serait que dev-dependency.
 x509-parser = "0.18.1"
-rcgen = "0.14.8"
+# Fix F4 : `rcgen` reste une dépendance déclarée dans `[dependencies]` (pas `[dev-dependencies]`,
+# voir NOTE historique ci-dessous pour le pourquoi) mais devient `optional` : elle n'est compilée
+# dans le binaire de PRODUCTION que si la feature `test-harness` est activée. `cargo build` (sans
+# feature) NE COMPILE PAS `rcgen` — vérifié via `cargo tree` (voir rapport). `cargo test` l'active
+# via le `[dev-dependencies]` ci-dessous (auto-activation de la feature sur les cibles de test).
+rcgen = { version = "0.14.8", optional = true }
+
+[dev-dependencies]
+# Réactive `rcgen`/le harness de test pour les cibles `#[test]`/`tests/*.rs` uniquement — jamais
+# pour `cargo build`/`cargo run` du binaire de production (fix F4).
+helixos-kernel = { path = ".", features = ["test-harness"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+
+[features]
+# Fix F4 : isole `rcgen` + tout le harness de test mTLS (génération de certs, serveur/clients de
+# test, registre de certs) du binaire de production. `build_server_config` et
+# `handle_authenticated_connection` restent NON gatés (future API de prod, ne dépendent pas de
+# `rcgen`). `cargo build`/`cargo run` sans cette feature ne tirent donc plus `rcgen` du tout.
+test-harness = ["dep:rcgen"]
+
+# NOTE (écart documenté vs consigne "cargo add --dev rcgen") : `rcgen` doit être déclaré dans
+# `[dependencies]` (même optionnel), pas seulement `[dev-dependencies]`. Preuve empirique (sonde
+# jetée après vérification) : quand `tests/mtls_it.rs` (crate d'intégration externe) lie
+# `helixos_kernel`, la lib est compilée SANS `cfg(test)` actif — un `pub fn` sous `#[cfg(test)]`
+# dans `src/` n'existe alors pas dans le binaire lié, donc `mtls::spawn_test_server`/
+# `connect_with_client_cert` (exposés par l'interface demandée dans tests/mtls_it.rs) ne peuvent
+# pas être gated par `#[cfg(test)]` — et donc ne peuvent pas dépendre d'un crate qui ne serait que
+# dev-dependency. La feature `test-harness` (fix F4) résout ce problème d'une autre façon : au
+# lieu de gater par `cfg(test)` (qui ne s'active pas pour un crate externe), on gate par
+# `cfg(feature = "test-harness")`, activée explicitement par `[dev-dependencies]` ci-dessus pour
+# TOUTES les cibles de test du crate (unit ET intégration), jamais pour `cargo build` seul.

@@ -19,7 +19,7 @@ pub fn walk_by_name(query: &str, roots: &[PathBuf]) -> Result<Vec<PathBuf>, Driv
                 if ft.is_symlink() { continue; } // n'entre jamais dans un lien, ne le rapporte pas non plus
                 let p = entry.path();
                 if ft.is_dir() { stack.push(p); }
-                else if p.file_name().and_then(|s| s.to_str()).map_or(false, |n| n.contains(query)) { out.push(p); }
+                else if p.file_name().and_then(|s| s.to_str()).is_some_and(|n| n.contains(query)) { out.push(p); }
             }
         }
     }

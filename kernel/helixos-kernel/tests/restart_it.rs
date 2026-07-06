@@ -23,9 +23,28 @@ fn consumed_plan_stays_consumed_across_restart() {   // test 9 (persistance)
     // 2. Kernel B : recharge l'état depuis le même chemin.
     let mut kernel_b = Kernel::load(state_dir.clone(), lease).unwrap();
 
-    // 3. B.apply(meme_hash) -> Err (rejeu refusé après restart).
-    let result = kernel_b.apply(&hash);
-    assert!(result.is_err(), "un noyau rechargé doit refuser de rejouer un plan déjà consommé");
+    // 3. B.apply(meme_hash) -> Err (rejeu refusé après restart), via le chemin ANTI-REJEU
+    //    PERSISTÉ précisément — pas via « plan inconnu ».
+    //
+    // Fix F3 : après `load`, la map `plans` en mémoire de `kernel_b` est vide (elle n'a jamais vu
+    // ce plan via `plan_intention`, seul `consumed_hashes` a été rechargé depuis
+    // `consumed.jsonl`). `apply` échouerait donc de toute façon avec « plan inconnu » MÊME SI la
+    // relecture du journal persisté ne fonctionnait pas du tout — un simple `is_err()` ne prouve
+    // rien sur le mécanisme testé (persistance E2). On asserte donc le message EXACT renvoyé par
+    // le garde `consumed_hashes.contains(plan_hash)` en tête d'`apply` (pipeline.rs ~:106-108),
+    // qui s'exécute AVANT le lookup dans `plans` et est donc bien le chemin persisté, pas
+    // « plan inconnu ».
+    // `Outcome` (variante `Ok`) n'implémente pas `Debug`, donc `expect_err` n'est pas utilisable
+    // directement ici : match explicite plutôt que d'ajouter `Debug` sur un type de production
+    // pour un seul besoin de test.
+    match kernel_b.apply(&hash) {
+        Ok(_) => panic!("un noyau rechargé doit refuser de rejouer un plan déjà consommé"),
+        Err(err) => assert_eq!(
+            err, "plan déjà consommé (rejeu refusé, y compris après redémarrage)",
+            "l'échec doit venir du chemin anti-rejeu PERSISTÉ (consumed_hashes rechargé par `load`), \
+             pas d'un « plan inconnu » accidentel (plans en mémoire vide après restart)"
+        ),
+    }
 }
 
 #[test]
