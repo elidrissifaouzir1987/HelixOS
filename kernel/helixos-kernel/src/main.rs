@@ -3,4 +3,5 @@ mod driver;
 mod intention;
 mod scope;
 mod policy;
+mod plan;
 fn main() { println!("helixos-kernel 0.0.1"); }
