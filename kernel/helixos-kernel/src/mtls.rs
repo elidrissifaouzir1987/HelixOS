@@ -57,14 +57,15 @@
 //!    `invalid peer certificate: BadSignature` — trouvé en écrivant le premier test vert.
 
 use crate::intention::Intention;
-use crate::pipeline::Kernel;
+use crate::pipeline::{Kernel, SharedKernel};
 use rustls::pki_types::{CertificateDer, PrivateKeyDer};
 use rustls::server::WebPkiClientVerifier;
 use rustls::{RootCertStore, ServerConfig};
 use std::io;
 use std::sync::Arc;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
-use tokio::net::TcpStream;
+use tokio::net::{TcpListener, TcpStream};
+use tokio_rustls::TlsAcceptor;
 
 /// Assemble le `ServerConfig` mTLS : `WebPkiClientVerifier` exige un certificat client signé
 /// par une des `ca_roots` (politique anonyme par défaut = `Deny`, donc un appelant sans
@@ -184,6 +185,46 @@ async fn handle_authenticated_connection(
     Ok(())
 }
 
+/// Boucle de service mTLS de PRODUCTION (bootstrap MVP-0) : accepte en continu les connexions
+/// entrantes sur `listener` (déjà lié — l'appelant connaît donc l'adresse effective, même pour
+/// `127.0.0.1:0`), termine le handshake mTLS avec `server_config` (qui porte le
+/// `WebPkiClientVerifier` : un appelant sans certificat client valide est refusé au handshake) et
+/// délègue chaque connexion authentifiée à [`handle_authenticated_connection`] sur le `kernel`
+/// PARTAGÉ. C'est LE point d'assemblage côté appelants : le `SharedKernel` passé ici est le même
+/// `Arc<Mutex<Kernel>>` que celui du serveur d'approbation, donc un plan créé via cette frontière
+/// mTLS est immédiatement approuvable sur la page HTTPS.
+///
+/// Ne dépend d'AUCUN symbole du harness de test (pas de `rcgen`) — `server_config` est assemblé en
+/// amont par [`build_server_config`] à partir de certificats chargés sur disque
+/// (`helixos-provision`). API de production, compilée inconditionnellement.
+///
+/// Cycle de vie : boucle tant que `listener.accept()` réussit. Chaque connexion est traitée dans
+/// sa propre tâche `tokio::spawn` (une connexion lente ou un handshake refusé ne bloque pas les
+/// autres). Un handshake refusé (ex. pas de certificat client — le contrôle primaire
+/// d'authentification) se termine silencieusement dans sa tâche : c'est le comportement CORRECT, pas
+/// une erreur de service à propager. `serve_mtls` ne rend la main (avec l'erreur d'`accept`) que si
+/// le `listener` lui-même devient inutilisable — l'appelant (le bootstrap) traite alors cela comme
+/// un arrêt du service.
+pub async fn serve_mtls(
+    listener: TcpListener,
+    kernel: SharedKernel,
+    server_config: Arc<ServerConfig>,
+) -> io::Result<()> {
+    let acceptor = TlsAcceptor::from(server_config);
+    loop {
+        let (stream, _peer_addr) = listener.accept().await?;
+        let acceptor = acceptor.clone();
+        let kernel = kernel.clone();
+        tokio::spawn(async move {
+            // Un handshake refusé (ex. pas de cert client) termine ici sans bruit : comportement
+            // attendu (contrôle primaire d'authentification), pas une erreur de service.
+            if let Ok(tls) = acceptor.accept(stream).await {
+                let _ = handle_authenticated_connection(tls, kernel).await;
+            }
+        });
+    }
+}
+
 // Fix F4 : le harness de test mTLS (génération de certs via `rcgen`, serveur/clients de test,
 // registre process-global de `TestCerts`) vit sous la feature `test-harness` — jamais compilé
 // dans le binaire de PRODUCTION (`cargo build`/`cargo run` sans cette feature). `rcgen` lui-même
@@ -191,7 +232,7 @@ async fn handle_authenticated_connection(
 // feature est active (vérifié via `cargo tree`, voir le rapport de la fix wave finale).
 #[cfg(feature = "test-harness")]
 mod test_harness {
-    use super::{build_server_config, handle_authenticated_connection, WireResponse};
+    use super::{build_server_config, serve_mtls, WireResponse};
     use crate::intention::Intention;
     use crate::pipeline::Kernel;
     use crate::scope::ScopeLease;
@@ -204,7 +245,7 @@ mod test_harness {
     use std::sync::{Arc, Mutex, OnceLock};
     use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
     use tokio::net::{TcpListener, TcpStream};
-    use tokio_rustls::{TlsAcceptor, TlsConnector};
+    use tokio_rustls::TlsConnector;
 
     /// Octets DER bruts d'une paire cert/clé de test — stockés en `Vec<u8>` (clonable) plutôt
     /// qu'en types `rustls` (`PrivateKeyDer` n'implémente pas `Clone`), pour pouvoir reconstruire
@@ -358,7 +399,6 @@ mod test_harness {
         let certs = generate_test_certs();
         let server_config =
             build_server_config(certs.ca_roots(), certs.server.cert(), certs.server.key());
-        let acceptor = TlsAcceptor::from(server_config);
 
         let lease = ScopeLease { task_id: "mtls-caller".into(), roots: vec![lease_root] };
         let kernel = Kernel::new(state_dir, lease).expect("création du noyau de test mTLS");
@@ -373,19 +413,12 @@ mod test_harness {
         // chaîne — voir la doc de `test_cert_registry` pour le pourquoi.
         register_test_certs(addr, certs.clone());
 
+        // Fix bootstrap : le harness exerce désormais la VRAIE boucle de service de production
+        // (`super::serve_mtls`) — même acceptation, même délégation à `handle_authenticated_connection`
+        // sur le `SharedKernel` — plutôt qu'une réplique locale de la boucle. Toute divergence de la
+        // boucle de prod ferait donc échouer les tests mTLS existants (auto-preuve du chemin réel).
         tokio::spawn(async move {
-            loop {
-                let Ok((stream, _peer_addr)) = listener.accept().await else { break };
-                let acceptor = acceptor.clone();
-                let kernel = kernel.clone();
-                tokio::spawn(async move {
-                    // Un handshake refusé (ex. pas de cert client, test 3) termine ici sans
-                    // bruit : c'est le comportement attendu, pas une erreur serveur à remonter.
-                    if let Ok(tls) = acceptor.accept(stream).await {
-                        let _ = handle_authenticated_connection(tls, kernel).await;
-                    }
-                });
-            }
+            let _ = serve_mtls(listener, kernel, server_config).await;
         });
 
         (addr, certs)
