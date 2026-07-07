@@ -29,6 +29,35 @@ services:
     networks: [kernelnet]
     # PAS de ports publiés vers l'hôte : Hermes n'est joignable que via le tunnel/tailnet + le noyau.
     # PAS de docker.sock, PAS de network_mode host, PAS de pid/ipc host.
+    #
+    # --- Shim MCP `helixos-mcp-shim` (tâche D1a) : GABARIT d'intégration, PAS encore branché live ---
+    # Le shim expose UN outil MCP `helix_patch_note{path, patch}` sur STDIO : Hermes le lance comme
+    # sous-processus MCP (transport stdio) et relaie le lien d'approbation renvoyé à l'utilisateur.
+    # Il traduit l'appel d'outil en une intention mTLS `ProposeFilePatch` vers le noyau (hôte) et
+    # rend `{plan_hash, approval_url}` — il N'APPLIQUE JAMAIS (l'apply passe par la page
+    # d'approbation, hors pile agent).
+    #
+    # Ce bloc reste EN COMMENTAIRE tant que (a) l'image Hermes est épinglée (`PIN_ME` ci-dessus) et
+    # (b) le format exact de déclaration d'un serveur MCP stdio à CETTE image Hermes est vérifié
+    # live (partie non testée du spike D1). Le contrat de config du shim, lui, est figé et testé :
+    # tout est piloté par ces variables d'environnement (voir `helixos-mcp-shim/src/config.rs`).
+    #
+    # environment:
+    #   # `host:port` du serveur mTLS du noyau, atteint via l'unique règle firewall (gateway WSL).
+    #   HELIX_KERNEL_ADDR: "kernel.helix.<tailnet>.ts.net:8443"
+    #   # Origine de la page d'approbation ; `approval_url = <origine>/op/<plan_hash>`.
+    #   HELIX_APPROVAL_ORIGIN: "https://helix.<tailnet>.ts.net"
+    #   # Nom TLS attendu dans le cert serveur du noyau (SNI + vérif de nom) = nom MagicDNS, jamais une IP.
+    #   HELIX_KERNEL_SERVER_NAME: "kernel.helix.<tailnet>.ts.net"
+    #   # Certs mTLS provisionnés HORS BANDE, montés en lecture seule (jamais dans l'image, jamais un secret d'arg).
+    #   HELIX_MTLS_CA: "/run/helix/ca.pem"
+    #   HELIX_MTLS_CLIENT_CERT: "/run/helix/client.pem"
+    #   HELIX_MTLS_CLIENT_KEY: "/run/helix/client.key"
+    # volumes:
+    #   - type: bind
+    #     source: /mnt/helix-mtls          # certs client du shim, projetés RO dans la distro
+    #     target: /run/helix
+    #     read_only: true
 
 volumes:
   hermes_state:
