@@ -462,6 +462,7 @@ dependencies = [
  "http-body-util",
  "rcgen",
  "rustls",
+ "rustls-pemfile",
  "serde",
  "serde_json",
  "sha2",
@@ -486,6 +487,14 @@ dependencies = [
  "tokio",
  "tokio-rustls",
  "uuid",
+]
+
+[[package]]
+name = "helixos-provision"
+version = "0.0.1"
+dependencies = [
+ "rcgen",
+ "x509-parser",
 ]
 
 [[package]]

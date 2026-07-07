@@ -1,0 +1,28 @@
+[package]
+name = "helixos-provision"
+version = "0.0.1"
+edition = "2021"
+
+# Binaire `helixos-provision` : génère la PKI locale de HelixOS (CA + certs serveur mTLS, serveur
+# d'approbation, client appelant) sur disque, pour que le binaire de runtime `helixos-kernel` les
+# CHARGE (jamais ne les génère). `rcgen` est déclaré UNIQUEMENT ici — c'est le seul crate du
+# workspace qui doit en dépendre en dépendance normale ; le runtime en est libre (vérifié via
+# `cargo tree -e normal -i rcgen`).
+[[bin]]
+name = "helixos-provision"
+path = "src/main.rs"
+
+[dependencies]
+# `rcgen` : génération de la CA + feuilles signées, en Rust pur (jamais le binaire `openssl`, qui
+# peut être absent). Même version que celle déjà tirée par le harness de test du noyau, pour un
+# lockfile workspace cohérent.
+rcgen = "0.14.8"
+
+[dev-dependencies]
+# `x509-parser` : UNIQUEMENT pour les tests — parse les certs générés et prouve, de façon
+# déterministe et sans binaire externe, que la chaîne feuille↔CA porte bien SKI (sur la CA) + AKI
+# (sur chaque feuille) et que l'AKI de la feuille == la SKI de la CA (le trou qui faisait rejeter la
+# chaîne par OpenSSL 3.x / Python 3.13). En `[dev-dependencies]` : n'entre JAMAIS dans le binaire
+# `helixos-provision` (ni, a fortiori, `helixos-kernel`). Même version que le noyau (0.18.1) → aucun
+# remous de lockfile (la version est déjà résolue au niveau workspace).
+x509-parser = "0.18.1"
