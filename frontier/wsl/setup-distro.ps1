@@ -55,9 +55,10 @@ wsl.exe --import $DistroName $InstallDir $tar --version 2
 Write-Host "Création de l'utilisateur '$AppUser'..."
 wsl.exe -d $DistroName -u root -- bash -lc "id -u $AppUser >/dev/null 2>&1 || (useradd -m -s /bin/bash $AppUser && usermod -aG sudo $AppUser && passwd -d $AppUser)"
 
-# 4) Installer dockerd natif + systemd (PAS Docker Desktop).
-Write-Host "Installation de dockerd natif..."
-wsl.exe -d $DistroName -u root -- bash -lc "apt-get update -y && apt-get install -y docker.io && usermod -aG docker $AppUser && systemctl enable docker || true"
+# 4) Installer dockerd natif + le plugin compose v2 + systemd (PAS Docker Desktop).
+#    `docker.io` seul n'a PAS `docker compose` v2 -> ajouter docker-compose-v2 (requis pour déployer Hermes, D1).
+Write-Host "Installation de dockerd natif (+ docker-compose-v2)..."
+wsl.exe -d $DistroName -u root -- bash -lc "apt-get update -y && apt-get install -y docker.io docker-compose-v2 && usermod -aG docker $AppUser && systemctl enable docker || true"
 
 # 5) Déployer le wsl.conf durci (ferme automount/interop/appendWindowsPath, user non-root, systemd).
 $conf = (Get-Content -Raw (Join-Path $here 'helixos.wsl.conf')) -replace "`r`n","`n"

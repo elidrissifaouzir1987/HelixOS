@@ -17,19 +17,14 @@ if [ -e /init ] && /init /mnt/c/Windows/System32/cmd.exe /c echo x >/dev/null 2>
 # 1d : socket Docker monté (= root sur l'hôte de la distro).
 if [ -S /var/run/docker.sock ]; then note "LEAK 1d: /var/run/docker.sock monté dans le conteneur"; leak=1; else note "OK 1d: pas de docker.sock"; fi
 
-# --- Test 2 : le conteneur ne doit PAS joindre un port hôte non prévu ---
-# Port RDP (3389) sur la gateway WSL comme sonde d'un service hôte quelconque.
+# --- Test 2 : aucune SORTIE réseau (ni internet, ni port hôte) ---
+# Décisif quel que soit le routage : on tente une cible externe fixe ET la gateway WSL.
+# En durci (réseau `internal`), les deux doivent ÉCHOUER.
+egress=0
+if nc -w2 1.1.1.1 53 </dev/null >/dev/null 2>&1; then egress=1; fi          # internet (DNS/TCP)
 GW=$(ip route show default 2>/dev/null | awk '/default/ {print $3; exit}')
-if [ -n "${GW:-}" ]; then
-  if command -v nc >/dev/null 2>&1; then
-    if nc -z -w3 "$GW" 3389 2>/dev/null; then note "LEAK 2: port hôte 3389 joignable ($GW)"; leak=1; else note "OK 2: port hôte non prévu bloqué ($GW:3389)"; fi
-  else
-    # /dev/tcp (bash) en repli si nc absent.
-    if timeout 3 sh -c ": >/dev/tcp/$GW/3389" 2>/dev/null; then note "LEAK 2: port hôte 3389 joignable ($GW)"; leak=1; else note "OK 2: port hôte non prévu bloqué ($GW:3389)"; fi
-  fi
-else
-  note "?? 2: gateway introuvable (ip route) — vérifier manuellement"
-fi
+if [ -n "${GW:-}" ] && nc -w2 "$GW" 3389 </dev/null >/dev/null 2>&1; then egress=1; fi   # port hôte quelconque
+if [ "$egress" -eq 1 ]; then note "LEAK 2: sortie réseau possible (internet/hôte)"; leak=1; else note "OK 2: aucune sortie réseau"; fi
 
 if [ "$leak" -eq 0 ]; then echo "FRONTIERE-ETANCHE"; else echo "FRONTIERE-PERCEE"; fi
 exit $leak
