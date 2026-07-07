@@ -1,3 +1,3 @@
 [workspace]
-members = ["helixos-kernel"]
+members = ["helixos-kernel", "helixos-mcp-shim"]
 resolver = "2"
