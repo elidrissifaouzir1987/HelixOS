@@ -8,6 +8,14 @@ use crate::{audit::*, driver::{files::FileDriver, DriverHost}, intention::Intent
 
 pub struct Outcome { pub rollback_id: String }
 
+/// C2 : handle partagé du noyau, pour que le serveur d'approbation (`approval::server`) et,
+/// plus tard, le serveur mTLS (`mtls`) opèrent sur la MÊME instance de `Kernel` — pas deux
+/// noyaux indépendants avec des vues divergentes des plans en vol. `tokio::sync::Mutex` (async,
+/// pas `std::sync::Mutex`) : le verrou est tenu à travers des points d'attente `.await` dans les
+/// handlers HTTP (I/O disque via `apply`), ce qu'un mutex synchrone ne permettrait pas de faire
+/// sûrement sans bloquer un thread de l'executor tokio.
+pub type SharedKernel = std::sync::Arc<tokio::sync::Mutex<Kernel>>;
+
 /// Une ligne du journal JSONL des plans consommés (append-only, disjoint de `audit.jsonl`).
 #[derive(serde::Serialize, serde::Deserialize)]
 struct ConsumedRecord { plan_hash: String }
@@ -139,6 +147,26 @@ impl Kernel {
         }).map_err(|e| e.to_string())?;
         Ok(Outcome { rollback_id: handle.id })
     }
+
+    /// C2 : accès en lecture à un plan par son hash, pour la surface d'approbation
+    /// (`GET /op/:hash`). Renvoie un clone — jamais de référence interne — pour que le serveur
+    /// HTTP puisse construire une `Card` sans retenir le verrou du noyau au-delà de cet appel.
+    pub fn get_plan(&self, plan_hash: &str) -> Option<Plan> {
+        self.plans.get(plan_hash).cloned()
+    }
+
+    /// C2 : liste les opérations en vol (`GET /ops`) — plans connus qui sont encore
+    /// exploitables : ni consommés (déjà appliqués), ni expirés (TTL dépassé). Un plan
+    /// consommé ou expiré n'a plus rien à approuver, il ne doit donc pas apparaître ici même
+    /// s'il reste en mémoire.
+    pub fn in_flight(&self) -> Vec<Plan> {
+        let now = time::OffsetDateTime::now_utc();
+        self.plans
+            .values()
+            .filter(|p| !p.consumed && !p.is_expired(now))
+            .cloned()
+            .collect()
+    }
 }
 
 fn hex(b: &[u8]) -> String { b.iter().map(|x| format!("{x:02x}")).collect() }
@@ -193,5 +221,51 @@ mod tests {
         let hash = plan.plan_hash.clone();
         k.apply(&hash).unwrap();
         assert_eq!(std::fs::read(&target).unwrap(), tricky_patch.as_bytes());
+    }
+
+    // --- C2 : accès plan pour la surface d'approbation ---
+
+    #[test] fn get_plan_returns_clone_of_known_plan() {
+        let (mut k, target) = kernel_with_note(b"OLD");
+        let plan = k.plan_intention("t1", "hermes",
+            Intention::ProposeFilePatch { path: target, patch: "NEW".into() }, false).unwrap();
+        let fetched = k.get_plan(&plan.plan_hash).expect("le plan vient d'être planifié, doit être trouvable");
+        assert_eq!(fetched.plan_hash, plan.plan_hash);
+        assert_eq!(fetched.proposed_content, plan.proposed_content);
+    }
+
+    #[test] fn get_plan_returns_none_for_unknown_hash() {
+        let (k, _target) = kernel_with_note(b"OLD");
+        assert!(k.get_plan("does-not-exist").is_none());
+    }
+
+    #[test] fn in_flight_lists_unconsumed_unexpired_plans() {
+        let (mut k, target) = kernel_with_note(b"OLD");
+        let plan = k.plan_intention("t1", "hermes",
+            Intention::ProposeFilePatch { path: target, patch: "NEW".into() }, false).unwrap();
+        let in_flight = k.in_flight();
+        assert_eq!(in_flight.len(), 1);
+        assert_eq!(in_flight[0].plan_hash, plan.plan_hash);
+    }
+
+    #[test] fn in_flight_excludes_consumed_plans() {
+        let (mut k, target) = kernel_with_note(b"OLD");
+        let plan = k.plan_intention("t1", "hermes",
+            Intention::ProposeFilePatch { path: target, patch: "NEW".into() }, false).unwrap();
+        k.apply(&plan.plan_hash).unwrap();
+        assert!(k.in_flight().is_empty(), "un plan consommé ne doit plus apparaître en vol");
+    }
+
+    #[test] fn in_flight_excludes_expired_plans() {
+        let (mut k, target) = kernel_with_note(b"OLD");
+        let plan = k.plan_intention("t1", "hermes",
+            Intention::ProposeFilePatch { path: target, patch: "NEW".into() }, false).unwrap();
+        // Force l'expiration en manipulant directement l'entrée en mémoire (TTL=0 -> expiré dès
+        // que `now` dépasse `created_at`), sans dépendre de l'horloge réelle du test.
+        let mut expired = plan.clone();
+        expired.ttl_secs = 0;
+        k.plans.insert(plan.plan_hash.clone(), expired);
+        std::thread::sleep(std::time::Duration::from_millis(1100));
+        assert!(k.in_flight().is_empty(), "un plan expiré ne doit pas apparaître en vol");
     }
 }
