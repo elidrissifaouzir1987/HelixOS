@@ -1,0 +1,20 @@
+# Compose de PREUVE de frontière : un conteneur busybox avec EXACTEMENT l'isolation du service
+# `hermes` (réseau `internal`, vault RO, cap_drop ALL, no-new-privileges) — prouve la frontière
+# SANS tirer l'image Hermes (~Go). Le service réel (../compose/docker-compose.yml) a la MÊME
+# isolation, vérifiée par la garde statique de run-harness.ps1.
+services:
+  probe:
+    image: busybox:latest
+    command: ["sh", "-c", "sleep 600"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    volumes:
+      - type: bind
+        source: ${VAULT_DIR:-/home/helix/vault-demo}   # vault de démo (Linux-side) monté RO
+        target: /vault
+        read_only: true
+    networks: [kernelnet]
+networks:
+  kernelnet:
+    driver: bridge
+    internal: true                                       # aucune sortie réseau (ni hôte ni internet)

@@ -1,0 +1,39 @@
+# Runtime conteneurs de HelixOS — déployé DANS la distro dédiée `helixos` (dockerd natif),
+# JAMAIS Docker Desktop. Frontière : les conteneurs ne montent que leurs volumes déclarés ;
+# aucun pont vers l'hôte Windows ; réseau interne restreint au seul futur port du noyau.
+#
+# Interdits testés par le harness (leur présence = frontière percée) :
+#   - montage de /var/run/docker.sock   - network_mode: host   - privileged: true
+#   - pid: host / ipc: host             - montage de /dev/shm hôte
+# Ne JAMAIS ajouter l'un de ces éléments ici.
+
+services:
+  hermes:
+    # Épingler par DIGEST (pas un tag mobile). ≥ 0.16.0 (CVE secrets 0644 < 0.16.0).
+    # Remplacer <PIN_ME> par le digest réel une fois l'image tirée : docker pull nousresearch/hermes-agent:0.18.0 && docker inspect --format '{{index .RepoDigests 0}}' nousresearch/hermes-agent:0.18.0
+    image: nousresearch/hermes-agent@sha256:PIN_ME
+    restart: unless-stopped
+    # Aucune capacité ajoutée, pas de privilèges élevés.
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    read_only: false            # /opt/data doit être inscriptible (état Hermes)
+    volumes:
+      # État Hermes (secrets .env, sessions SQLite, skills, mémoire) — volume NOMMÉ, jamais un bind hôte.
+      - hermes_state:/opt/data
+      # Vault projeté en LECTURE SEULE. Toute MUTATION du vault passe par le NOYAU (hôte), pas par ce montage.
+      # /mnt/vault côté distro = le vault exposé RO (voir README : montage contrôlé, pas /mnt/c global).
+      - type: bind
+        source: /mnt/vault
+        target: /vault
+        read_only: true
+    networks: [kernelnet]
+    # PAS de ports publiés vers l'hôte : Hermes n'est joignable que via le tunnel/tailnet + le noyau.
+    # PAS de docker.sock, PAS de network_mode host, PAS de pid/ipc host.
+
+volumes:
+  hermes_state:
+
+networks:
+  kernelnet:
+    driver: bridge
+    internal: true              # pas de sortie réseau arbitraire depuis ce réseau
