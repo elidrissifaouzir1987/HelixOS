@@ -494,6 +494,7 @@ name = "helixos-provision"
 version = "0.0.1"
 dependencies = [
  "rcgen",
+ "x509-parser",
 ]
 
 [[package]]

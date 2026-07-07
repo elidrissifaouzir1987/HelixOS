@@ -17,3 +17,12 @@ path = "src/main.rs"
 # peut être absent). Même version que celle déjà tirée par le harness de test du noyau, pour un
 # lockfile workspace cohérent.
 rcgen = "0.14.8"
+
+[dev-dependencies]
+# `x509-parser` : UNIQUEMENT pour les tests — parse les certs générés et prouve, de façon
+# déterministe et sans binaire externe, que la chaîne feuille↔CA porte bien SKI (sur la CA) + AKI
+# (sur chaque feuille) et que l'AKI de la feuille == la SKI de la CA (le trou qui faisait rejeter la
+# chaîne par OpenSSL 3.x / Python 3.13). En `[dev-dependencies]` : n'entre JAMAIS dans le binaire
+# `helixos-provision` (ni, a fortiori, `helixos-kernel`). Même version que le noyau (0.18.1) → aucun
+# remous de lockfile (la version est déjà résolue au niveau workspace).
+x509-parser = "0.18.1"

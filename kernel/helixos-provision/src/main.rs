@@ -23,7 +23,7 @@
 //! régénération accidentelle invaliderait des certs déjà distribués). En cas de refus, AUCUN
 //! fichier n'est modifié (la collision est détectée avant toute écriture).
 
-use rcgen::{BasicConstraints, CertificateParams, DnType, Issuer, IsCa, KeyPair};
+use rcgen::{BasicConstraints, CertificateParams, DnType, Issuer, IsCa, KeyIdMethod, KeyPair};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
@@ -143,6 +143,14 @@ fn generate_leaf(
     let mut params =
         CertificateParams::new(sans).map_err(|e| format!("SANs invalides pour {cn}: {e}"))?;
     params.distinguished_name.push(DnType::CommonName, cn);
+    // FIX AKI : émettre l'extension Authority Key Identifier sur la feuille. rcgen ne l'écrit QUE si
+    // ce drapeau est vrai (défaut : faux → aucune AKI, d'où le rejet OpenSSL 3.x/Python 3.13
+    // « Missing Authority Key Identifier »). rcgen dérive alors l'AKI depuis la `KeyIdMethod` de
+    // l'émetteur appliquée à la SPKI de la CA — soit exactement la SKI de la CA (même méthode,
+    // même clé) : la chaîne feuille↔CA se lie donc et se vérifie sous OpenSSL strict / navigateur.
+    params.use_authority_key_identifier_extension = true;
+    // Même méthode de dérivation que la CA (SHA-256 tronqué, RFC 7093) → AKI feuille == SKI CA.
+    params.key_identifier_method = KeyIdMethod::Sha256;
     let issuer = Issuer::from_params(ca_params, ca_key);
     let cert = params
         .signed_by(&key, &issuer)
@@ -167,6 +175,10 @@ fn generate_pki(config: &Config) -> Result<Pki, String> {
         CertificateParams::new(vec!["HelixOS Local CA".into()]).map_err(|e| format!("params de CA: {e}"))?;
     ca_params.is_ca = IsCa::Ca(BasicConstraints::Unconstrained);
     ca_params.distinguished_name.push(DnType::CommonName, "HelixOS Local CA");
+    // La CA (is_ca) émet toujours un Subject Key Identifier ; on épingle la méthode de dérivation
+    // (SHA-256 tronqué) explicitement pour que la SKI de la CA et l'AKI des feuilles (même méthode,
+    // même clé émettrice) coïncident quoi qu'il arrive au défaut de rcgen dans le futur.
+    ca_params.key_identifier_method = KeyIdMethod::Sha256;
     let ca_cert =
         ca_params.clone().self_signed(&ca_key).map_err(|e| format!("auto-signature de la CA: {e}"))?;
 
@@ -327,6 +339,80 @@ mod tests {
     #[test]
     fn parse_args_help_returns_none() {
         assert!(parse_args(["--help".to_string()].into_iter()).unwrap().is_none());
+    }
+
+    /// Extrait, d'un cert PEM, le Subject Key Identifier (octets bruts) s'il est présent.
+    fn subject_key_id(cert_pem: &str) -> Option<Vec<u8>> {
+        let (_, pem) = x509_parser::pem::parse_x509_pem(cert_pem.as_bytes()).expect("PEM parsable");
+        let (_, cert) =
+            x509_parser::parse_x509_certificate(&pem.contents).expect("cert DER parsable");
+        // Le résultat est `Vec<u8>` (possédé) ; on le lie avant la fin du bloc pour que l'itérateur
+        // temporaire (qui emprunte `cert`) soit relâché avant `cert` (sinon E0597).
+        let id = cert.iter_extensions().find_map(|ext| match ext.parsed_extension() {
+            x509_parser::extensions::ParsedExtension::SubjectKeyIdentifier(id) => {
+                Some(id.0.to_vec())
+            }
+            _ => None,
+        });
+        id
+    }
+
+    /// Extrait, d'un cert PEM, le keyIdentifier de l'Authority Key Identifier s'il est présent.
+    fn authority_key_id(cert_pem: &str) -> Option<Vec<u8>> {
+        let (_, pem) = x509_parser::pem::parse_x509_pem(cert_pem.as_bytes()).expect("PEM parsable");
+        let (_, cert) =
+            x509_parser::parse_x509_certificate(&pem.contents).expect("cert DER parsable");
+        let id = cert.iter_extensions().find_map(|ext| match ext.parsed_extension() {
+            x509_parser::extensions::ParsedExtension::AuthorityKeyIdentifier(aki) => {
+                aki.key_identifier.as_ref().map(|k| k.0.to_vec())
+            }
+            _ => None,
+        });
+        id
+    }
+
+    /// Vrai si le cert PEM porte BasicConstraints CA:TRUE.
+    fn is_ca(cert_pem: &str) -> bool {
+        let (_, pem) = x509_parser::pem::parse_x509_pem(cert_pem.as_bytes()).expect("PEM parsable");
+        let (_, cert) =
+            x509_parser::parse_x509_certificate(&pem.contents).expect("cert DER parsable");
+        cert.is_ca()
+    }
+
+    /// PREUVE que le trou AKI est fermé (drive live : OpenSSL 3.x / Python 3.13 rejetaient la chaîne
+    /// « Missing Authority Key Identifier »). Ce test ÉCHOUE sans le fix (les feuilles n'avaient
+    /// aucune extension AKI → `authority_key_id` renvoie `None`). Il asserte, via `x509-parser`
+    /// (déterministe, aucune dépendance externe) :
+    ///   - la CA porte un Subject Key Identifier ET BasicConstraints CA:TRUE ;
+    ///   - chaque feuille (mtls-server, approval-server, client) porte un Authority Key Identifier
+    ///     avec un keyIdentifier, N'est PAS une CA, et son AKI == la SKI de la CA — c.-à-d. la
+    ///     liaison exacte qu'OpenSSL exige pour construire/vérifier la chaîne feuille↔CA.
+    #[test]
+    fn leaves_carry_aki_matching_ca_ski_so_chain_verifies_strictly() {
+        let cfg = config_at(temp_out(), false);
+        let pki = generate_pki(&cfg).expect("génération PKI");
+
+        // CA : SKI présent + CA:TRUE.
+        let ca_ski = subject_key_id(&pki.ca_pem)
+            .expect("la CA doit porter un Subject Key Identifier (racine de la liaison)");
+        assert!(!ca_ski.is_empty(), "la SKI de la CA ne doit pas être vide");
+        assert!(is_ca(&pki.ca_pem), "la CA doit porter BasicConstraints CA:TRUE");
+
+        // Chaque feuille : AKI présent, == SKI de la CA, et non-CA.
+        for (label, leaf) in [
+            ("mtls-server", &pki.mtls),
+            ("approval-server", &pki.approval),
+            ("client", &pki.client),
+        ] {
+            let aki = authority_key_id(&leaf.cert_pem).unwrap_or_else(|| {
+                panic!("{label}: feuille SANS Authority Key Identifier — OpenSSL rejette la chaîne")
+            });
+            assert_eq!(
+                aki, ca_ski,
+                "{label}: l'AKI de la feuille doit référencer la SKI de la CA (liaison de chaîne)"
+            );
+            assert!(!is_ca(&leaf.cert_pem), "{label}: une feuille ne doit PAS être une CA");
+        }
     }
 
     #[test]
