@@ -1,0 +1,37 @@
+[package]
+name = "helixos-mcp-shim"
+version = "0.0.1"
+edition = "2021"
+
+# Binaire `helixos-mcp-shim` : pont MCP (stdio) → mTLS noyau. Décision spike (voir
+# d1a-shim-report.md) : serveur JSON-RPC 2.0 fait main sur `serde_json` plutôt que le SDK `rmcp`
+# — MCP-sur-stdio EST du JSON-RPC 2.0 avec un petit jeu de méthodes stable, et un seul outil à
+# exposer ; `rmcp` (server+macros+transport-io) tirerait schemars/rmcp-macros/pastey/async-trait/
+# futures/chrono, surface disproportionnée pour ce shim minimal souverain.
+[[bin]]
+name = "helixos-mcp-shim"
+path = "src/main.rs"
+
+[dependencies]
+# Partage le type `Intention` (et son (dé)sérialisation serde) avec le noyau : source de vérité
+# unique du format de fil. PAS de feature `test-harness` ici — le binaire de production ne tire
+# jamais `rcgen`.
+helixos-kernel = { path = "../helixos-kernel" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Client mTLS vers le noyau + boucle stdio async. Mêmes versions que le noyau pour un lockfile
+# workspace cohérent.
+tokio = { version = "1.52.3", features = ["rt-multi-thread", "net", "macros", "io-util", "io-std"] }
+tokio-rustls = "0.26.4"
+rustls = "0.23.41"
+rustls-pemfile = "2.2.0"
+
+[dev-dependencies]
+# Le noyau de test (VRAI serveur mTLS via `spawn_test_server_returning_certs`, VRAI
+# `handle_authenticated_connection`, génération de certs) n'est tiré que pour `cargo test` du shim,
+# via la feature `test-harness` du noyau — jamais pour `cargo build`. Fix D1a : l'e2e n'utilise PLUS
+# `rcgen` directement (les certs de test viennent du harness du noyau, qui tire `rcgen` de manière
+# transitive sous `test-harness`) — la réplique du fil qui en avait besoin a été supprimée.
+helixos-kernel = { path = "../helixos-kernel", features = ["test-harness"] }
+tokio = { version = "1.52.3", features = ["rt-multi-thread", "net", "macros", "io-util", "io-std", "process", "time"] }
+uuid = { version = "1", features = ["v4"] }

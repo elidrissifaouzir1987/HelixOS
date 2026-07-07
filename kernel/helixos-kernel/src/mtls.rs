@@ -109,12 +109,31 @@ fn extract_common_name(cert_der: &CertificateDer<'_>) -> Result<String, String> 
 }
 
 /// Une ligne de réponse JSON envoyée sur le flux authentifié après traitement de l'intention.
+///
+/// ## Format de fil PLAT (fix revue D1a) — `#[serde(untagged)]`, PAS externally-tagged
+///
+/// **Contrat de fil** : chaque variante sérialise DIRECTEMENT ses champs, sans enveloppe de tag :
+/// `PlanHash{plan_hash}` → `{"plan_hash":"…"}` et `Error{error}` → `{"error":"…"}`. Les deux
+/// variantes ont des jeux de champs DISJOINTS (`plan_hash` xor `error`), donc `untagged`
+/// désérialise sans AUCUNE ambiguïté (essaie `PlanHash`, sinon `Error`).
+///
+/// **Pourquoi c'est critique (défaut mock-invisible corrigé ici) :** l'enum externally-tagged par
+/// défaut (le `#[serde(rename_all = "snake_case")]` d'avant) sérialisait le NOM DE VARIANTE comme
+/// clé externe → `{"plan_hash":{"plan_hash":"…"}}` (NIÉ, double niveau). Le shim (`kernel_client`),
+/// lui, parse par forme un fil PLAT (`value["plan_hash"].as_str()`), donc contre le VRAI noyau
+/// chaque patch réussi remontait comme une erreur de protocole → outil inutilisable. `untagged`
+/// aligne le fil sur ce que le shim lit ET ce que le noyau relit (round-trip prouvé par le test
+/// `wire_response_roundtrips_flat` ci-dessous). Voir `.superpowers/sdd/d1a-fix-report.md`.
+///
+/// Public sous `test-harness` (via le `pub use` en fin de module) pour que le test unitaire du shim
+/// régénère son entrée codée en dur depuis un VRAI `to_string(&WireResponse::…)` (jamais un octet
+/// réinventé).
 // MVP-0 (fix F4) : même raison que sur `extract_common_name` ci-dessus — orpheline pour `cargo
 // build` seul (sans `test-harness`), mais fait partie du protocole de PRODUCTION.
 #[cfg_attr(not(feature = "test-harness"), allow(dead_code))]
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-#[serde(rename_all = "snake_case")]
-enum WireResponse {
+#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
+#[serde(untagged)]
+pub enum WireResponse {
     PlanHash { plan_hash: String },
     Error { error: String },
 }
@@ -191,10 +210,16 @@ mod test_harness {
     /// qu'en types `rustls` (`PrivateKeyDer` n'implémente pas `Clone`), pour pouvoir reconstruire
     /// un `CertificateDer`/`PrivateKeyDer` frais à chaque connexion cliente à partir d'une CA
     /// partagée.
+    ///
+    /// Les formes PEM (`cert_pem`/`key_pem`) sont AUSSI capturées à la génération (fix D1a) : un
+    /// crate externe (le shim) les écrit sur disque pour exercer le VRAI chemin `ClientTls::load`
+    /// (chargement PEM), sans avoir à ré-encoder du DER en PEM lui-même.
     #[derive(Clone)]
     pub struct LeafDer {
         pub cert_der: Vec<u8>,
         pub key_pkcs8_der: Vec<u8>,
+        pub cert_pem: String,
+        pub key_pem: String,
     }
 
     impl LeafDer {
@@ -214,6 +239,9 @@ mod test_harness {
     #[derive(Clone)]
     pub struct TestCerts {
         pub ca_der: Vec<u8>,
+        /// PEM de la CA (racine de confiance) — écrit sur disque par les tests externes (shim) qui
+        /// exercent `ClientTls::load`.
+        pub ca_pem: String,
         pub server: LeafDer,
         pub client: LeafDer,
     }
@@ -236,7 +264,12 @@ mod test_harness {
         let cert = params
             .signed_by(&key, &issuer)
             .expect("signature du certificat de test par la CA de test");
-        LeafDer { cert_der: cert.der().to_vec(), key_pkcs8_der: key.serialize_der() }
+        LeafDer {
+            cert_der: cert.der().to_vec(),
+            key_pkcs8_der: key.serialize_der(),
+            cert_pem: cert.pem(),
+            key_pem: key.serialize_pem(),
+        }
     }
 
     /// Génère (en Rust pur, via `rcgen` — jamais le binaire `openssl`, qui peut être absent) une
@@ -262,7 +295,7 @@ mod test_harness {
         );
         let client = generate_leaf("test-client", vec!["test-client".into()], &ca_params, &ca_key);
 
-        TestCerts { ca_der: ca_cert.der().to_vec(), server, client }
+        TestCerts { ca_der: ca_cert.der().to_vec(), ca_pem: ca_cert.pem(), server, client }
     }
 
     /// Registre process-global : associe l'adresse d'un serveur mTLS de test à la `TestCerts`
@@ -298,7 +331,30 @@ mod test_harness {
     /// persistant du noyau (plans consommés, audit). La boucle d'acceptation tourne en tâche de
     /// fond tant que le test vit (processus de test court-circuité en fin de run ; pas de handle
     /// d'arrêt exposé, le périmètre B8-minimal ne couvre pas le cycle de vie du service).
+    ///
+    /// Réservé aux tests INTERNES du noyau (`tests/mtls_it.rs`), qui retrouvent les certs via le
+    /// registre process-interne. Un crate EXTERNE (le shim) doit récupérer le cert client pour se
+    /// connecter avec sa propre pile TLS : il utilise [`spawn_test_server_returning_certs`], qui
+    /// exécute le MÊME `handle_authenticated_connection` réel et RENVOIE la `TestCerts`.
     pub async fn spawn_test_server(lease_root: PathBuf, state_dir: PathBuf) -> SocketAddr {
+        let (addr, _certs) = spawn_test_server_returning_certs(lease_root, state_dir).await;
+        addr
+    }
+
+    /// Variante de [`spawn_test_server`] pour les tests d'un AUTRE crate (le shim) : monte le VRAI
+    /// serveur mTLS du noyau — même `build_server_config`, même boucle d'acceptation, même
+    /// `handle_authenticated_connection` (le VRAI handler de production, PAS une réplique) — et
+    /// RENVOIE la `TestCerts` (CA + cert/clé serveur + cert/clé client) pour que l'appelant externe
+    /// construise un client mTLS présentant le cert client que ce serveur accepte.
+    ///
+    /// C'est le pivot du fix D1a (suppression de la réplique) : l'e2e du shim exerce désormais le
+    /// vrai chemin noyau — s'il écrit une forme de fil incohérente avec ce que le shim parse, l'e2e
+    /// ÉCHOUE (auto-preuve du contrat de fil). Les certs sont AUSSI enregistrés dans le registre
+    /// interne pour que les helpers `connect_*` restent utilisables sur le même serveur.
+    pub async fn spawn_test_server_returning_certs(
+        lease_root: PathBuf,
+        state_dir: PathBuf,
+    ) -> (SocketAddr, TestCerts) {
         let certs = generate_test_certs();
         let server_config =
             build_server_config(certs.ca_roots(), certs.server.cert(), certs.server.key());
@@ -315,7 +371,7 @@ mod test_harness {
         // Enregistre la CA/serveur/client de CE serveur pour que les clients de test
         // (`connect_with_client_cert`/`connect_without_client_cert`) fassent confiance à la même
         // chaîne — voir la doc de `test_cert_registry` pour le pourquoi.
-        register_test_certs(addr, certs);
+        register_test_certs(addr, certs.clone());
 
         tokio::spawn(async move {
             loop {
@@ -332,7 +388,7 @@ mod test_harness {
             }
         });
 
-        addr
+        (addr, certs)
     }
 
     /// Client de test qui présente un certificat client valide (signé par la même CA que le
@@ -479,8 +535,14 @@ mod test_harness {
 #[cfg(feature = "test-harness")]
 pub use test_harness::{
     connect_with_client_cert, connect_with_foreign_client_cert, connect_without_client_cert,
-    generate_test_certs, spawn_test_server, LeafDer, TestCerts,
+    generate_test_certs, spawn_test_server, spawn_test_server_returning_certs, LeafDer, TestCerts,
 };
+
+// `WireResponse` est déclaré `pub` (ci-dessus) : c'est le type de fil de PRODUCTION, donc
+// `helixos_kernel::mtls::WireResponse` est visible du crate shim, qui l'importe dans son test
+// unitaire pour régénérer son entrée codée en dur depuis un VRAI
+// `serde_json::to_string(&WireResponse::PlanHash{..})` — jamais un octet réinventé. (Pas de
+// ré-export supplémentaire nécessaire : un `pub enum` au niveau module est déjà atteignable.)
 
 #[cfg(test)]
 mod tests {
@@ -501,5 +563,34 @@ mod tests {
     fn build_server_config_succeeds_with_generated_test_certs() {
         let certs = generate_test_certs();
         let _config = build_server_config(certs.ca_roots(), certs.server.cert(), certs.server.key());
+    }
+
+    /// Fix D1a : le fil DOIT être PLAT et round-tripper à l'identique (ce que le noyau ÉCRIT, il le
+    /// RELIT sans perte) — c'est l'invariant que l'ancien `#[serde(rename_all)]` externally-tagged
+    /// violait côté shim (il émettait `{"plan_hash":{"plan_hash":…}}`). Ici on prouve les deux :
+    /// (1) la forme sérialisée est PLATE (`{"plan_hash":"…"}` / `{"error":"…"}`, un seul niveau) ;
+    /// (2) `from_str` after `to_string` redonne la même valeur, sans ambiguïté entre variantes.
+    #[test]
+    fn wire_response_roundtrips_flat() {
+        let ok = WireResponse::PlanHash { plan_hash: "deadbeef".into() };
+        let ok_json = serde_json::to_string(&ok).unwrap();
+        assert_eq!(ok_json, r#"{"plan_hash":"deadbeef"}"#, "le fil de succès doit être PLAT");
+        assert_eq!(serde_json::from_str::<WireResponse>(&ok_json).unwrap(), ok, "round-trip succès");
+
+        let err = WireResponse::Error { error: "hors bail de portée".into() };
+        let err_json = serde_json::to_string(&err).unwrap();
+        assert_eq!(err_json, r#"{"error":"hors bail de portée"}"#, "le fil d'erreur doit être PLAT");
+        assert_eq!(serde_json::from_str::<WireResponse>(&err_json).unwrap(), err, "round-trip erreur");
+
+        // Désambiguïsation `untagged` : une forme `plan_hash` ne se lit JAMAIS comme `Error` et
+        // réciproquement (jeux de champs disjoints).
+        assert!(matches!(
+            serde_json::from_str::<WireResponse>(r#"{"plan_hash":"h"}"#).unwrap(),
+            WireResponse::PlanHash { .. }
+        ));
+        assert!(matches!(
+            serde_json::from_str::<WireResponse>(r#"{"error":"e"}"#).unwrap(),
+            WireResponse::Error { .. }
+        ));
     }
 }
