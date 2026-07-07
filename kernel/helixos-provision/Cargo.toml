@@ -1,0 +1,19 @@
+[package]
+name = "helixos-provision"
+version = "0.0.1"
+edition = "2021"
+
+# Binaire `helixos-provision` : génère la PKI locale de HelixOS (CA + certs serveur mTLS, serveur
+# d'approbation, client appelant) sur disque, pour que le binaire de runtime `helixos-kernel` les
+# CHARGE (jamais ne les génère). `rcgen` est déclaré UNIQUEMENT ici — c'est le seul crate du
+# workspace qui doit en dépendre en dépendance normale ; le runtime en est libre (vérifié via
+# `cargo tree -e normal -i rcgen`).
+[[bin]]
+name = "helixos-provision"
+path = "src/main.rs"
+
+[dependencies]
+# `rcgen` : génération de la CA + feuilles signées, en Rust pur (jamais le binaire `openssl`, qui
+# peut être absent). Même version que celle déjà tirée par le harness de test du noyau, pour un
+# lockfile workspace cohérent.
+rcgen = "0.14.8"

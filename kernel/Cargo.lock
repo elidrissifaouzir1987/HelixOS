@@ -489,6 +489,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "helixos-provision"
+version = "0.0.1"
+dependencies = [
+ "rcgen",
+]
+
+[[package]]
 name = "http"
 version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
