@@ -27,9 +27,11 @@ rustls = "0.23.41"
 rustls-pemfile = "2.2.0"
 
 [dev-dependencies]
-# Le noyau de test (serveur mTLS réel, génération de certs) n'est tiré que pour `cargo test` du
-# shim, via la feature `test-harness` du noyau — jamais pour `cargo build`.
+# Le noyau de test (VRAI serveur mTLS via `spawn_test_server_returning_certs`, VRAI
+# `handle_authenticated_connection`, génération de certs) n'est tiré que pour `cargo test` du shim,
+# via la feature `test-harness` du noyau — jamais pour `cargo build`. Fix D1a : l'e2e n'utilise PLUS
+# `rcgen` directement (les certs de test viennent du harness du noyau, qui tire `rcgen` de manière
+# transitive sous `test-harness`) — la réplique du fil qui en avait besoin a été supprimée.
 helixos-kernel = { path = "../helixos-kernel", features = ["test-harness"] }
 tokio = { version = "1.52.3", features = ["rt-multi-thread", "net", "macros", "io-util", "io-std", "process", "time"] }
-rcgen = "0.14.8"
 uuid = { version = "1", features = ["v4"] }

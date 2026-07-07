@@ -221,15 +221,33 @@ fn parse_plan_hash(response_line: &str) -> Result<String, KernelError> {
 mod tests {
     use super::*;
 
+    /// Fix de revue D1a : l'entrée n'est PLUS codée en dur (`{"plan_hash":"abc123"}`), ce qui
+    /// ré-encoderait aveuglément une forme de fil — potentiellement la MAUVAISE (c'est exactement le
+    /// bug corrigé). On la régénère depuis un VRAI `serde_json::to_string` du `WireResponse` du
+    /// noyau (type importé sous la feature `test-harness`), donc ce test suit automatiquement le
+    /// format réel du noyau : si le noyau change sa forme de fil, l'octet testé ici change avec.
     #[test]
     fn parse_plan_hash_reads_success_shape() {
-        let hash = parse_plan_hash(r#"{"plan_hash":"abc123"}"#).unwrap();
+        let wire = serde_json::to_string(&helixos_kernel::mtls::WireResponse::PlanHash {
+            plan_hash: "abc123".into(),
+        })
+        .unwrap();
+        // Ceinture + bretelles : le fil du noyau DOIT être PLAT (`untagged`), sinon le shim ne peut
+        // pas le parser par forme. On fige l'attente pour attraper une régression du format.
+        assert_eq!(wire, r#"{"plan_hash":"abc123"}"#, "le fil de succès du noyau doit être PLAT");
+        let hash = parse_plan_hash(&wire).unwrap();
         assert_eq!(hash, "abc123");
     }
 
     #[test]
     fn parse_plan_hash_maps_error_shape_to_kernel_refused() {
-        let err = parse_plan_hash(r#"{"error":"hors bail de portée (refus)"}"#).unwrap_err();
+        // Idem : l'entrée d'erreur vient d'un vrai `WireResponse::Error` du noyau, pas d'un littéral.
+        let wire = serde_json::to_string(&helixos_kernel::mtls::WireResponse::Error {
+            error: "hors bail de portée (refus)".into(),
+        })
+        .unwrap();
+        assert_eq!(wire, r#"{"error":"hors bail de portée (refus)"}"#, "le fil d'erreur du noyau doit être PLAT");
+        let err = parse_plan_hash(&wire).unwrap_err();
         match err {
             KernelError::KernelRefused(m) => assert!(m.contains("hors bail")),
             other => panic!("attendu KernelRefused, obtenu {other:?}"),

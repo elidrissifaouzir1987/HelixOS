@@ -479,7 +479,6 @@ name = "helixos-mcp-shim"
 version = "0.0.1"
 dependencies = [
  "helixos-kernel",
- "rcgen",
  "rustls",
  "rustls-pemfile",
  "serde",

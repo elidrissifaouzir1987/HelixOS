@@ -11,8 +11,9 @@
 
 use serde_json::{json, Value};
 
-/// Version du protocole MCP annoncée au `initialize`. Le client (Hermes) négocie ; on renvoie
-/// une version stable et largement supportée.
+/// Version du protocole MCP annoncée au `initialize` par DÉFAUT, quand le client n'en propose pas.
+/// La négociation réelle échote la `protocolVersion` demandée par le client si elle est fournie
+/// (voir `handle_request`/`initialize`) — cette constante n'est que le repli stable.
 pub const PROTOCOL_VERSION: &str = "2024-11-05";
 
 /// Nom de l'unique outil exposé au conteneur Hermes.
@@ -125,10 +126,22 @@ pub fn handle_request(req: &Value, executor: &dyn ToolExecutor) -> Option<Value>
             if is_notification {
                 return None;
             }
+            // Négociation de version MCP : on ÉCHOTE la `protocolVersion` demandée par le client si
+            // elle est présente et non vide (le protocole n'a qu'un petit socle stable
+            // `initialize`/`tools/list`/`tools/call`/notifications que ce shim implémente de façon
+            // compatible sur les révisions connues) ; à défaut on annonce notre version stable par
+            // défaut. Échouer sur une version cliente inconnue serait plus fragile qu'utile pour ce
+            // shim minimal — l'écho maximise l'interopérabilité tout en restant explicite.
+            let negotiated = req
+                .get("params")
+                .and_then(|p| p.get("protocolVersion"))
+                .and_then(Value::as_str)
+                .filter(|v| !v.is_empty())
+                .unwrap_or(PROTOCOL_VERSION);
             Some(ok_response(
                 id_for_response,
                 json!({
-                    "protocolVersion": PROTOCOL_VERSION,
+                    "protocolVersion": negotiated,
                     "capabilities": { "tools": {} },
                     "serverInfo": { "name": "helixos-mcp-shim", "version": env!("CARGO_PKG_VERSION") }
                 }),
@@ -212,16 +225,27 @@ fn handle_tools_call(id: Value, req: &Value, executor: &dyn ToolExecutor) -> Val
 
     match executor.patch_note(path, patch) {
         ToolOutcome::Ok { plan_hash, approval_url } => {
+            // Bloc 1 : phrase lisible par l'humain (pour un affichage direct côté client/agent).
             let human = format!(
                 "Patch planifié (NON appliqué). Ouvrez la page d'approbation pour valider :\n\
-                 plan_hash: {plan_hash}\napproval_url: {approval_url}"
+                 plan_hash {plan_hash}\napproval_url {approval_url}"
             );
-            // Contenu MCP standard : un bloc texte lisible + un bloc structuré (structuredContent)
-            // pour les clients qui savant le consommer par machine.
+            // Bloc 2 : résultat MACHINE-LISIBLE et STABLE. Beaucoup de clients MCP ne lisent que
+            // `content` (jamais `structuredContent`) ; on émet donc un second bloc texte au format
+            // strict `clé: valeur`, une paire par ligne, SANS espace de tête — parsable par un
+            // simple `line.strip_prefix("plan_hash:")`. Contrat figé (documenté ici, verrouillé par
+            // l'e2e `tools_call_over_stdio_returns_plan_hash_and_approval_url`) :
+            //   plan_hash: <64 hex>
+            //   approval_url: <origine>/op/<plan_hash>
+            let machine = format!("plan_hash: {plan_hash}\napproval_url: {approval_url}");
+            // `structuredContent` reste fourni en plus (clients qui savent le consommer).
             ok_response(
                 id,
                 json!({
-                    "content": [ { "type": "text", "text": human } ],
+                    "content": [
+                        { "type": "text", "text": human },
+                        { "type": "text", "text": machine }
+                    ],
                     "structuredContent": { "plan_hash": plan_hash, "approval_url": approval_url },
                     "isError": false
                 }),
@@ -270,9 +294,21 @@ mod tests {
         let resp = handle_request(&req, &StubExecutor).expect("initialize doit répondre");
         assert_eq!(resp["jsonrpc"], "2.0");
         assert_eq!(resp["id"], 1);
+        // Pas de protocolVersion cliente → repli sur la constante par défaut.
         assert_eq!(resp["result"]["protocolVersion"], PROTOCOL_VERSION);
         assert!(resp["result"]["capabilities"]["tools"].is_object());
         assert_eq!(resp["result"]["serverInfo"]["name"], "helixos-mcp-shim");
+    }
+
+    #[test]
+    fn initialize_echoes_client_requested_protocol_version() {
+        // Le client propose une version : on la lui renvoie (négociation par écho).
+        let req = json!({
+            "jsonrpc": "2.0", "id": 1, "method": "initialize",
+            "params": { "protocolVersion": "2025-06-18" }
+        });
+        let resp = handle_request(&req, &StubExecutor).expect("initialize doit répondre");
+        assert_eq!(resp["result"]["protocolVersion"], "2025-06-18");
     }
 
     #[test]
@@ -303,6 +339,20 @@ mod tests {
         let text = resp["result"]["content"][0]["text"].as_str().unwrap();
         assert!(text.contains("plan_hash"));
         assert!(text.contains("approval_url"));
+
+        // Second bloc `content` MACHINE-LISIBLE : lignes strictes `clé: valeur` sans espace de tête,
+        // parsables par un client qui ne lit que `content`. Contrat figé.
+        let machine = resp["result"]["content"][1]["text"].as_str().unwrap();
+        let hash_line = machine
+            .lines()
+            .find_map(|l| l.strip_prefix("plan_hash:").map(str::trim))
+            .expect("ligne plan_hash: présente et sans espace de tête");
+        let url_line = machine
+            .lines()
+            .find_map(|l| l.strip_prefix("approval_url:").map(str::trim))
+            .expect("ligne approval_url: présente et sans espace de tête");
+        assert_eq!(hash_line, "a".repeat(64));
+        assert_eq!(url_line, "https://approval.example/op/".to_string() + &"a".repeat(64));
     }
 
     #[test]

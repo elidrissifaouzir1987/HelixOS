@@ -1,55 +1,38 @@
 #![forbid(unsafe_code)]
-//! Tests d'intégration bout-en-bout du shim ↔ noyau : le VRAI client mTLS du shim se connecte à un
-//! serveur qui exécute le VRAI `Kernel` du noyau via son format de fil exact, traite un
+//! Tests d'intégration bout-en-bout du shim ↔ noyau **contre le VRAI handler du noyau** (fix de
+//! revue D1a — plus de réplique du fil). Le VRAI client mTLS du shim se connecte à un serveur qui
+//! exécute le VRAI `Kernel` ET le VRAI `handle_authenticated_connection`
+//! (`helixos_kernel::mtls::spawn_test_server_returning_certs`, feature `test-harness`), traite un
 //! `helix_patch_note`, et rend `{plan_hash, approval_url}` — SANS appliquer (le shim planifie,
 //! l'humain applique via la page d'approbation).
+//!
+//! **Auto-preuve du contrat de fil :** comme le serveur écrit maintenant le fil réel du noyau
+//! (`WireResponse`, forme PLATE après le fix `#[serde(untagged)]`), si le noyau et le shim
+//! divergaient sur le format, ces tests ÉCHOUERAIENT. C'est précisément ce que la réplique (qui
+//! écrivait une forme alignée sur le parseur buggé) masquait.
 
 mod common;
 
-use common::{generate_pki, spawn_kernel_like_server, temp_dir, TestPki};
-use helixos_mcp_shim::config::ShimConfig;
+use common::{spawn_real_kernel_server, temp_dir, write_client_pems_and_config};
+use helixos_kernel::mtls::generate_test_certs;
 use helixos_mcp_shim::kernel_client::{ClientTls, KernelError};
 use helixos_mcp_shim::mcp::{ToolExecutor, ToolOutcome};
 use helixos_mcp_shim::{serve_stdio, MtlsToolExecutor};
 use std::path::PathBuf;
 
-/// Écrit les trois PEM (CA, cert client, clé client) de la PKI de test sur disque et renvoie une
-/// `ShimConfig` pointant dessus — exerce le vrai chemin `ClientTls::load` (fichiers PEM).
-fn write_client_pems_and_config(
-    pki: &TestPki,
-    dir: &std::path::Path,
-    kernel_addr: std::net::SocketAddr,
-) -> ShimConfig {
-    let ca_path = dir.join("ca.pem");
-    let cert_path = dir.join("client.pem");
-    let key_path = dir.join("client.key");
-    std::fs::write(&ca_path, &pki.ca_pem).unwrap();
-    std::fs::write(&cert_path, &pki.client.cert_pem).unwrap();
-    std::fs::write(&key_path, &pki.client.key_pem).unwrap();
-
-    ShimConfig {
-        kernel_addr: kernel_addr.to_string(),
-        approval_origin: "https://helix.test.ts.net".into(),
-        ca_path,
-        client_cert_path: cert_path,
-        client_key_path: key_path,
-        server_name: "localhost".into(),
-    }
-}
-
-/// Cœur bout-en-bout : le client mTLS du shim envoie `ProposeFilePatch` au noyau et obtient un
-/// plan_hash 64-hex ; le fichier cible N'EST PAS modifié (planification seule).
+/// Cœur bout-en-bout : le client mTLS du shim envoie `ProposeFilePatch` au VRAI noyau et obtient un
+/// plan_hash 64-hex ; le fichier cible N'EST PAS modifié (planification seule). Prouve aussi que le
+/// fil réel du noyau est parsable par le shim (aurait échoué avec l'ancien fil NESTED).
 #[tokio::test]
 async fn shim_client_gets_plan_hash_and_does_not_apply() {
-    let pki = generate_pki();
     let vault = temp_dir("helix-shim-vault");
     let state = temp_dir("helix-shim-state");
     let note = vault.join("note.md");
     std::fs::write(&note, b"AVANT").unwrap();
 
-    let addr = spawn_kernel_like_server(&pki, vault.clone(), state).await;
+    let (addr, certs) = spawn_real_kernel_server(vault.clone(), state).await;
     let workdir = temp_dir("helix-shim-certs");
-    let config = write_client_pems_and_config(&pki, &workdir, addr);
+    let config = write_client_pems_and_config(&certs, &workdir, addr);
     let tls = ClientTls::load(&config.ca_path, &config.client_cert_path, &config.client_key_path)
         .expect("chargement des PEM client");
 
@@ -76,19 +59,19 @@ async fn shim_client_gets_plan_hash_and_does_not_apply() {
 }
 
 /// Chemin MCP complet : un `tools/call helix_patch_note` sur `serve_stdio`, avec le vrai
-/// `MtlsToolExecutor` (client mTLS réel), produit un résultat MCP `{plan_hash, approval_url}` et
-/// laisse le fichier intact.
+/// `MtlsToolExecutor` (client mTLS réel) contre le VRAI noyau, produit un résultat MCP
+/// `{plan_hash, approval_url}` — dans `structuredContent` ET dans un bloc `content` machine-lisible —
+/// et laisse le fichier intact.
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn tools_call_over_stdio_returns_plan_hash_and_approval_url() {
-    let pki = generate_pki();
     let vault = temp_dir("helix-shim-vault2");
     let state = temp_dir("helix-shim-state2");
     let note = vault.join("doc.md");
     std::fs::write(&note, b"ORIGINAL").unwrap();
 
-    let addr = spawn_kernel_like_server(&pki, vault.clone(), state).await;
+    let (addr, certs) = spawn_real_kernel_server(vault.clone(), state).await;
     let workdir = temp_dir("helix-shim-certs2");
-    let config = write_client_pems_and_config(&pki, &workdir, addr);
+    let config = write_client_pems_and_config(&certs, &workdir, addr);
     let tls = ClientTls::load(&config.ca_path, &config.client_cert_path, &config.client_key_path)
         .expect("chargement des PEM client");
 
@@ -118,26 +101,45 @@ async fn tools_call_over_stdio_returns_plan_hash_and_approval_url() {
     let approval_url = resp["result"]["structuredContent"]["approval_url"].as_str().unwrap();
     assert_eq!(approval_url, format!("{approval_origin}/op/{plan_hash}"));
 
+    // Le résultat doit AUSSI être machine-lisible depuis `content` (beaucoup de clients MCP ne
+    // lisent que `content`, pas `structuredContent`) : un second bloc texte STABLE porte les lignes
+    // `plan_hash: …` / `approval_url: …`. On le parse ici comme un vrai client minimal le ferait.
+    let blocks = resp["result"]["content"].as_array().expect("content est un tableau");
+    let machine = blocks
+        .iter()
+        .filter_map(|b| b["text"].as_str())
+        .find(|t| t.lines().any(|l| l.starts_with("plan_hash:")))
+        .expect("un bloc content doit porter des lignes clé:valeur stables");
+    let parsed_hash = machine
+        .lines()
+        .find_map(|l| l.strip_prefix("plan_hash:").map(str::trim))
+        .expect("ligne plan_hash: présente");
+    let parsed_url = machine
+        .lines()
+        .find_map(|l| l.strip_prefix("approval_url:").map(str::trim))
+        .expect("ligne approval_url: présente");
+    assert_eq!(parsed_hash, plan_hash, "le plan_hash de content doit égaler celui de structuredContent");
+    assert_eq!(parsed_url, approval_url, "l'approval_url de content doit égaler celui de structuredContent");
+
     // Toujours pas d'application.
     assert_eq!(std::fs::read(&note).unwrap(), b"ORIGINAL");
 }
 
 /// Un cert client signé par une CA ÉTRANGÈRE (inconnue du noyau) est refusé : le noyau exige un
 /// cert dont l'émetteur est dans ses racines. On construit un `ClientTls` avec la bonne CA
-/// (racines) mais une feuille cliente d'une autre PKI → le handshake mTLS échoue.
+/// (racines du serveur) mais une feuille cliente d'une autre PKI → le handshake mTLS échoue.
 #[tokio::test]
 async fn foreign_ca_client_cert_is_rejected() {
     use rustls::pki_types::{CertificateDer, PrivateKeyDer, PrivatePkcs8KeyDer};
 
-    let pki = generate_pki();
     let vault = temp_dir("helix-shim-vault3");
     let state = temp_dir("helix-shim-state3");
     std::fs::write(vault.join("n.md"), b"X").unwrap();
-    let addr = spawn_kernel_like_server(&pki, vault.clone(), state).await;
+    let (addr, certs) = spawn_real_kernel_server(vault.clone(), state).await;
 
     // Une PKI totalement indépendante : sa feuille cliente n'est PAS signée par la CA du noyau.
-    let foreign = generate_pki();
-    let ca_roots = common::ca_roots(&pki); // le client fait bien confiance au serveur…
+    let foreign = generate_test_certs();
+    let ca_roots = certs.ca_roots(); // le client fait bien confiance au serveur…
     let foreign_certs = vec![CertificateDer::from(foreign.client.cert_der.clone())];
     let foreign_key =
         PrivateKeyDer::Pkcs8(PrivatePkcs8KeyDer::from(foreign.client.key_pkcs8_der.clone()));
@@ -159,17 +161,17 @@ async fn foreign_ca_client_cert_is_rejected() {
     }
 }
 
-/// Une intention hors bail de portée → le noyau répond `{"error":…}` → le client la remonte en
-/// `KernelRefused` → la couche MCP la présente en erreur d'OUTIL (`isError: true`), pas un panic.
+/// Une intention hors bail de portée → le VRAI noyau répond `{"error":…}` (forme PLATE) → le client
+/// la remonte en `KernelRefused` → la couche MCP la présente en erreur d'OUTIL (`isError: true`),
+/// pas un panic.
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn out_of_lease_path_surfaces_as_tool_error() {
-    let pki = generate_pki();
     let vault = temp_dir("helix-shim-vault4");
     let state = temp_dir("helix-shim-state4");
     std::fs::write(vault.join("n.md"), b"X").unwrap();
-    let addr = spawn_kernel_like_server(&pki, vault.clone(), state).await;
+    let (addr, certs) = spawn_real_kernel_server(vault.clone(), state).await;
     let workdir = temp_dir("helix-shim-certs4");
-    let config = write_client_pems_and_config(&pki, &workdir, addr);
+    let config = write_client_pems_and_config(&certs, &workdir, addr);
     let tls = ClientTls::load(&config.ca_path, &config.client_cert_path, &config.client_key_path)
         .unwrap();
 
