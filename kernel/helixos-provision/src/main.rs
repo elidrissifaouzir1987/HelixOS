@@ -23,7 +23,10 @@
 //! régénération accidentelle invaliderait des certs déjà distribués). En cas de refus, AUCUN
 //! fichier n'est modifié (la collision est détectée avant toute écriture).
 
-use rcgen::{BasicConstraints, CertificateParams, DnType, Issuer, IsCa, KeyIdMethod, KeyPair};
+use rcgen::{
+    BasicConstraints, CertificateParams, DnType, ExtendedKeyUsagePurpose, Issuer, IsCa,
+    KeyIdMethod, KeyPair, KeyUsagePurpose,
+};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
@@ -129,13 +132,27 @@ struct LeafPem {
     key_pem: String,
 }
 
+/// Rôle d'une feuille — détermine son ExtendedKeyUsage (et si `keyEncipherment` est pertinent).
+/// OpenSSL 3.x strict n'exige pas d'EKU sur une feuille, mais un navigateur / une politique TLS
+/// stricte veut serverAuth sur un cert serveur et clientAuth sur un cert présenté en client ; on
+/// les pose explicitement pour que les certs soient pleinement utilisables (browser-trustable).
+#[derive(Clone, Copy)]
+enum LeafRole {
+    /// Cert présenté par un serveur TLS → EKU serverAuth (+ keyEncipherment, utile aux suites RSA).
+    Server,
+    /// Cert présenté par un client mTLS → EKU clientAuth.
+    Client,
+}
+
 /// Génère une feuille (serveur ou client) signée par la CA fournie. `sans` deviennent les Subject
 /// Alternative Names (rcgen classe automatiquement une valeur ressemblant à une IP, ex.
 /// `127.0.0.1`, en SAN IP, et le reste en SAN DNS). `cn` renseigne le Common Name du sujet
-/// (identité de l'appelant pour un cert client ; libellé du serveur sinon).
+/// (identité de l'appelant pour un cert client ; libellé du serveur sinon). `role` fixe le
+/// KeyUsage/EKU (serverAuth pour un serveur, clientAuth pour un client).
 fn generate_leaf(
     cn: &str,
     sans: Vec<String>,
+    role: LeafRole,
     ca_params: &CertificateParams,
     ca_key: &KeyPair,
 ) -> Result<LeafPem, String> {
@@ -143,6 +160,22 @@ fn generate_leaf(
     let mut params =
         CertificateParams::new(sans).map_err(|e| format!("SANs invalides pour {cn}: {e}"))?;
     params.distinguished_name.push(DnType::CommonName, cn);
+    // FIX KeyUsage/EKU feuille : une feuille TLS doit porter KeyUsage.digitalSignature (elle signe
+    // l'échange de clés du handshake) et l'EKU adapté à son rôle. Sans EKU, un client TLS strict /
+    // navigateur peut refuser d'utiliser le cert pour l'authentification serveur ou client.
+    match role {
+        LeafRole::Server => {
+            // digitalSignature (ECDSA/ECDHE) + keyEncipherment (suites RSA classiques) ; serverAuth.
+            params.key_usages =
+                vec![KeyUsagePurpose::DigitalSignature, KeyUsagePurpose::KeyEncipherment];
+            params.extended_key_usages = vec![ExtendedKeyUsagePurpose::ServerAuth];
+        }
+        LeafRole::Client => {
+            // Un cert client n'a pas besoin de keyEncipherment ; digitalSignature suffit ; clientAuth.
+            params.key_usages = vec![KeyUsagePurpose::DigitalSignature];
+            params.extended_key_usages = vec![ExtendedKeyUsagePurpose::ClientAuth];
+        }
+    }
     // FIX AKI : émettre l'extension Authority Key Identifier sur la feuille. rcgen ne l'écrit QUE si
     // ce drapeau est vrai (défaut : faux → aucune AKI, d'où le rejet OpenSSL 3.x/Python 3.13
     // « Missing Authority Key Identifier »). rcgen dérive alors l'AKI depuis la `KeyIdMethod` de
@@ -175,6 +208,12 @@ fn generate_pki(config: &Config) -> Result<Pki, String> {
         CertificateParams::new(vec!["HelixOS Local CA".into()]).map_err(|e| format!("params de CA: {e}"))?;
     ca_params.is_ca = IsCa::Ca(BasicConstraints::Unconstrained);
     ca_params.distinguished_name.push(DnType::CommonName, "HelixOS Local CA");
+    // FIX KeyUsage CA : émettre l'extension KeyUsage sur la CA avec keyCertSign (+ cRLSign). C'est
+    // l'extension qui manquait APRÈS le fix AKI : OpenSSL 3.x `-x509_strict` (et donc navigateur /
+    // curl-openssl / Python) rejetait la chaîne avec « CA cert does not include key usage extension »
+    // car un cert qui signe des feuilles DOIT porter keyCertSign (RFC 5280 §4.2.1.3). cRLSign est
+    // ajouté pour que la CA puisse aussi signer une CRL (cohérent avec un rôle de CA complet).
+    ca_params.key_usages = vec![KeyUsagePurpose::KeyCertSign, KeyUsagePurpose::CrlSign];
     // La CA (is_ca) émet toujours un Subject Key Identifier ; on épingle la méthode de dérivation
     // (SHA-256 tronqué) explicitement pour que la SKI de la CA et l'AKI des feuilles (même méthode,
     // même clé émettrice) coïncident quoi qu'il arrive au défaut de rcgen dans le futur.
@@ -182,10 +221,12 @@ fn generate_pki(config: &Config) -> Result<Pki, String> {
     let ca_cert =
         ca_params.clone().self_signed(&ca_key).map_err(|e| format!("auto-signature de la CA: {e}"))?;
 
-    // Serveur mTLS : présenté aux appelants ; SAN `localhost` + boucle locale IPv4.
+    // Serveur mTLS : présenté aux appelants ; SAN `localhost` + boucle locale IPv4. Rôle serveur
+    // (le noyau présente ce cert côté serveur ; l'identité cliente est le cert `client` distinct).
     let mtls = generate_leaf(
         "helixos-kernel-mtls",
         vec!["localhost".into(), "127.0.0.1".into()],
+        LeafRole::Server,
         &ca_params,
         &ca_key,
     )?;
@@ -194,12 +235,20 @@ fn generate_pki(config: &Config) -> Result<Pki, String> {
     let approval = generate_leaf(
         "helixos-kernel-approval",
         vec![config.approval_name.clone()],
+        LeafRole::Server,
         &ca_params,
         &ca_key,
     )?;
 
     // Client : CN = identité de l'appelant, dérivée côté serveur depuis ce cert (jamais du réseau).
-    let client = generate_leaf(&config.client_cn, vec![config.client_cn.clone()], &ca_params, &ca_key)?;
+    // Rôle client (présenté par le shim MCP au `WebPkiClientVerifier` du noyau) → EKU clientAuth.
+    let client = generate_leaf(
+        &config.client_cn,
+        vec![config.client_cn.clone()],
+        LeafRole::Client,
+        &ca_params,
+        &ca_key,
+    )?;
 
     Ok(Pki { ca_pem: ca_cert.pem(), mtls, approval, client })
 }
@@ -379,6 +428,35 @@ mod tests {
         cert.is_ca()
     }
 
+    /// Extrait l'extension KeyUsage (les drapeaux bruts) d'un cert PEM si elle est présente.
+    /// OpenSSL 3.x `-x509_strict` EXIGE cette extension sur un cert de CA (« CA cert does not
+    /// include key usage extension ») : son absence est précisément ce qui bloquait le drive live.
+    fn key_usage(cert_pem: &str) -> Option<x509_parser::extensions::KeyUsage> {
+        let (_, pem) = x509_parser::pem::parse_x509_pem(cert_pem.as_bytes()).expect("PEM parsable");
+        let (_, cert) =
+            x509_parser::parse_x509_certificate(&pem.contents).expect("cert DER parsable");
+        let ku = cert.iter_extensions().find_map(|ext| match ext.parsed_extension() {
+            x509_parser::extensions::ParsedExtension::KeyUsage(ku) => Some(*ku),
+            _ => None,
+        });
+        ku
+    }
+
+    /// Extrait, d'un cert PEM, les deux drapeaux ExtendedKeyUsage qui nous intéressent
+    /// `(server_auth, client_auth)` si l'extension EKU est présente.
+    fn extended_key_usage(cert_pem: &str) -> Option<(bool, bool)> {
+        let (_, pem) = x509_parser::pem::parse_x509_pem(cert_pem.as_bytes()).expect("PEM parsable");
+        let (_, cert) =
+            x509_parser::parse_x509_certificate(&pem.contents).expect("cert DER parsable");
+        let eku = cert.iter_extensions().find_map(|ext| match ext.parsed_extension() {
+            x509_parser::extensions::ParsedExtension::ExtendedKeyUsage(eku) => {
+                Some((eku.server_auth, eku.client_auth))
+            }
+            _ => None,
+        });
+        eku
+    }
+
     /// PREUVE que le trou AKI est fermé (drive live : OpenSSL 3.x / Python 3.13 rejetaient la chaîne
     /// « Missing Authority Key Identifier »). Ce test ÉCHOUE sans le fix (les feuilles n'avaient
     /// aucune extension AKI → `authority_key_id` renvoie `None`). Il asserte, via `x509-parser`
@@ -412,6 +490,107 @@ mod tests {
                 "{label}: l'AKI de la feuille doit référencer la SKI de la CA (liaison de chaîne)"
             );
             assert!(!is_ca(&leaf.cert_pem), "{label}: une feuille ne doit PAS être une CA");
+        }
+    }
+
+    /// PREUVE que le trou KeyUsage/EKU est fermé (drive live : OpenSSL 3.x `-x509_strict` rejetait
+    /// la chaîne « CA cert does not include key usage extension » APRÈS le fix AKI). Ce test ÉCHOUE
+    /// sans le fix KeyUsage/EKU (la CA n'a AUCUNE extension KeyUsage → `key_usage(&ca)` renvoie
+    /// `None` → premier `expect` en panique). Il asserte, via `x509-parser` (déterministe, aucun
+    /// binaire externe) — en plus des SKI/AKI déjà couverts :
+    ///   - la CA porte KeyUsage avec keyCertSign (+ cRLSign) — l'extension qu'OpenSSL strict exige
+    ///     sur tout cert signeur ;
+    ///   - chaque feuille porte KeyUsage(digitalSignature) ;
+    ///   - les serveurs (mtls, approval) portent EKU serverAuth ; le client porte EKU clientAuth.
+    #[test]
+    fn certs_carry_keyusage_and_eku_for_strict_openssl() {
+        let cfg = config_at(temp_out(), false);
+        let pki = generate_pki(&cfg).expect("génération PKI");
+
+        // CA : KeyUsage présent, avec keyCertSign (signe des certs) ET cRLSign (signe des CRL).
+        let ca_ku = key_usage(&pki.ca_pem).expect(
+            "la CA DOIT porter une extension KeyUsage (sinon OpenSSL 3.x strict: « CA cert does \
+             not include key usage extension »)",
+        );
+        assert!(
+            ca_ku.key_cert_sign(),
+            "la CA doit porter KeyUsage.keyCertSign (elle signe les feuilles)"
+        );
+        assert!(ca_ku.crl_sign(), "la CA doit porter KeyUsage.cRLSign");
+
+        // Serveurs : KeyUsage.digitalSignature + EKU.serverAuth.
+        for (label, leaf) in [("mtls-server", &pki.mtls), ("approval-server", &pki.approval)] {
+            let ku = key_usage(&leaf.cert_pem)
+                .unwrap_or_else(|| panic!("{label}: feuille SANS extension KeyUsage"));
+            assert!(
+                ku.digital_signature(),
+                "{label}: un cert serveur doit porter KeyUsage.digitalSignature"
+            );
+            let (server_auth, _client_auth) = extended_key_usage(&leaf.cert_pem)
+                .unwrap_or_else(|| panic!("{label}: feuille SANS ExtendedKeyUsage"));
+            assert!(server_auth, "{label}: un cert serveur doit porter EKU serverAuth");
+        }
+
+        // Client : KeyUsage.digitalSignature + EKU.clientAuth.
+        let client_ku = key_usage(&pki.client.cert_pem)
+            .expect("le cert client doit porter une extension KeyUsage");
+        assert!(
+            client_ku.digital_signature(),
+            "le cert client doit porter KeyUsage.digitalSignature"
+        );
+        let (_server_auth, client_auth) = extended_key_usage(&pki.client.cert_pem)
+            .expect("le cert client doit porter ExtendedKeyUsage");
+        assert!(client_auth, "le cert client doit porter EKU clientAuth");
+    }
+
+    /// PREUVE la plus fidèle à OpenSSL 3.x : écrit la CA + les feuilles sur disque et invoque le VRAI
+    /// binaire `openssl verify -x509_strict -CAfile ca.pem <feuille>.pem`, qui applique exactement la
+    /// politique stricte qui a rejeté la chaîne lors du drive live (AKI manquant, puis KeyUsage
+    /// manquant sur la CA). Exige exit 0 pour la feuille serveur d'approbation ET le cert client.
+    /// SKIP propre (via `eprintln!`) si `openssl` est absent de l'environnement — le test
+    /// `certs_carry_keyusage_and_eku_for_strict_openssl` (toujours actif) reste alors la preuve.
+    /// Ce test ÉCHOUE sans le fix KeyUsage : `openssl verify -x509_strict` sortait alors non-zéro
+    /// avec « CA cert does not include key usage extension ».
+    #[test]
+    fn openssl_strict_verify_accepts_chain() {
+        // Résout `openssl` : soit un chemin explicite via $OPENSSL, soit `openssl` sur le PATH.
+        let openssl = std::env::var("OPENSSL").unwrap_or_else(|_| "openssl".to_string());
+        // Sonde de disponibilité : `openssl version`. Toute erreur de lancement => SKIP.
+        match std::process::Command::new(&openssl).arg("version").output() {
+            Ok(out) if out.status.success() => {}
+            _ => {
+                eprintln!(
+                    "SKIP openssl_strict_verify_accepts_chain: binaire `openssl` indisponible \
+                     (défini $OPENSSL pour le pointer). La preuve x509-parser reste active."
+                );
+                return;
+            }
+        }
+
+        let out = temp_out();
+        let cfg = config_at(out.clone(), false);
+        let pki = generate_pki(&cfg).expect("génération PKI");
+        write_pki(&cfg, &pki).expect("écriture PKI");
+        let paths = OutputPaths::under(&out);
+
+        for (label, leaf_path) in
+            [("approval-server", &paths.approval_cert), ("client", &paths.client_cert)]
+        {
+            let output = std::process::Command::new(&openssl)
+                .arg("verify")
+                .arg("-x509_strict")
+                .arg("-CAfile")
+                .arg(&paths.ca_pem)
+                .arg(leaf_path)
+                .output()
+                .expect("lancement de `openssl verify`");
+            assert!(
+                output.status.success(),
+                "openssl verify -x509_strict a REJETÉ {label} (la chaîne n'est pas conforme \
+                 OpenSSL 3.x strict):\nstdout: {}\nstderr: {}",
+                String::from_utf8_lossy(&output.stdout),
+                String::from_utf8_lossy(&output.stderr),
+            );
         }
     }
 
