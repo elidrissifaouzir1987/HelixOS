@@ -10,9 +10,13 @@ sha2 = "0.10"
 uuid = { version = "1", features = ["v4", "serde"] }
 time = { version = "0.3", features = ["serde", "formatting"] }
 thiserror = "1"
-tokio = { version = "1.52.3", features = ["rt-multi-thread", "net", "macros", "io-util", "sync"] }
+tokio = { version = "1.52.3", features = ["rt-multi-thread", "net", "macros", "io-util", "sync", "signal"] }
 tokio-rustls = "0.26.4"
 rustls = "0.23.41"
+# Chargement des certificats/clés de la PKI (produits par `helixos-provision`) depuis le disque,
+# au format PEM, pour le binaire de runtime `helixos-kernel`. Ne tire jamais `rcgen` (vérifié via
+# `cargo tree`). Même version que celle utilisée par le shim, pour un lockfile workspace cohérent.
+rustls-pemfile = "2.2.0"
 x509-parser = "0.18.1"
 # Fix F4 : `rcgen` reste une dépendance déclarée dans `[dependencies]` (pas `[dev-dependencies]`,
 # voir NOTE historique ci-dessous pour le pourquoi) mais devient `optional` : elle n'est compilée
