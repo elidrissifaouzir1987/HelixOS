@@ -20,11 +20,15 @@ x509-parser = "0.18.1"
 # feature) NE COMPILE PAS `rcgen` — vérifié via `cargo tree` (voir rapport). `cargo test` l'active
 # via le `[dev-dependencies]` ci-dessous (auto-activation de la feature sur les cibles de test).
 rcgen = { version = "0.14.8", optional = true }
+axum = "0.8.9"
+axum-server = { version = "0.8.0", features = ["tls-rustls"] }
 
 [dev-dependencies]
 # Réactive `rcgen`/le harness de test pour les cibles `#[test]`/`tests/*.rs` uniquement — jamais
 # pour `cargo build`/`cargo run` du binaire de production (fix F4).
 helixos-kernel = { path = ".", features = ["test-harness"] }
+http-body-util = "0.1.3"
+tower = { version = "0.5.3", features = ["util"] }
 uuid = { version = "1", features = ["v4", "serde"] }
 
 [features]
