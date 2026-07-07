@@ -42,12 +42,27 @@ async fn body_string(response: axum::response::Response) -> String {
     String::from_utf8(bytes.to_vec()).unwrap()
 }
 
+/// Vérifie la CSP durcie (revue C2 : `default-src 'none'` rend tout script inerte par
+/// construction, en plus de `frame-ancestors 'none'` déjà prouvé) et `X-Frame-Options: DENY`,
+/// posés par le middleware `add_security_headers` sur TOUTE réponse de ce router — y compris les
+/// réponses de refus (403/409/405), pas seulement 200/404 (durcissement de couverture, revue C2) :
+/// le middleware étant appliqué une seule fois via `.layer(...)` sur le router entier, il n'existe
+/// aucun chemin de réponse qui y échappe, mais on le prouve explicitement sur chaque code observé
+/// plutôt que de le supposer.
 fn assert_anti_embedding_headers(response: &axum::response::Response) {
     let headers = response.headers();
-    assert_eq!(
-        headers.get("content-security-policy"),
-        Some(&HeaderValue::from_static("frame-ancestors 'none'")),
-        "CSP frame-ancestors 'none' doit être présent sur toute réponse de la surface d'approbation"
+    let csp = headers
+        .get("content-security-policy")
+        .expect("CSP doit être présente sur toute réponse de la surface d'approbation")
+        .to_str()
+        .unwrap();
+    assert!(
+        csp.contains("default-src 'none'"),
+        "CSP doit contenir default-src 'none' (script inerte par construction): {csp}"
+    );
+    assert!(
+        csp.contains("frame-ancestors 'none'"),
+        "CSP doit contenir frame-ancestors 'none': {csp}"
     );
     assert_eq!(
         headers.get("x-frame-options"),
@@ -208,6 +223,7 @@ async fn approve_l2_plan_is_forbidden_and_file_unchanged() {
     let response = router.oneshot(request).await.unwrap();
 
     assert_eq!(response.status(), StatusCode::FORBIDDEN, "un plan L2 doit être refusé (403), pas appliqué silencieusement");
+    assert_anti_embedding_headers(&response);
     let body = body_string(response).await;
     assert!(
         body.to_lowercase().contains("passkey") || body.to_lowercase().contains("l2"),
@@ -256,6 +272,31 @@ async fn approve_already_consumed_plan_is_conflict() {
         StatusCode::CONFLICT,
         "un plan déjà consommé doit renvoyer 409, pas être ré-appliqué silencieusement"
     );
+    assert_anti_embedding_headers(&response);
+}
+
+#[tokio::test]
+async fn disallowed_method_on_known_route_is_405_with_security_headers() {
+    // Durcissement de couverture (revue C2) : preuve que le middleware d'en-têtes de sécurité
+    // couvre TOUTES les réponses, y compris un refus de méthode (405) sur un path par ailleurs
+    // connu du router — pas seulement les réponses "métier" (200/403/404/409). `/op/{hash}` n'a
+    // qu'un handler `get` ; un `POST` dessus doit être rejeté par le routeur lui-même (405), avant
+    // même d'atteindre un handler applicatif — et porter quand même la CSP + X-Frame-Options.
+    let (shared, _target) = kernel_with_note(b"OLD");
+    let router = build_router(shared);
+    let request = Request::builder()
+        .method("POST")
+        .uri("/op/does-not-exist")
+        .body(Body::empty())
+        .unwrap();
+    let response = router.oneshot(request).await.unwrap();
+
+    assert_eq!(
+        response.status(),
+        StatusCode::METHOD_NOT_ALLOWED,
+        "un POST sur /op/{{hash}} (route GET uniquement) doit être 405"
+    );
+    assert_anti_embedding_headers(&response);
 }
 
 #[tokio::test]

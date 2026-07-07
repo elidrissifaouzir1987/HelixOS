@@ -25,7 +25,7 @@ impl Card {
     /// texte est un contenu potentiellement contrôlé par ce qui a été lu/proposé dans le plan
     /// (ex. `quoi` = diff = contenu du fichier proposé, `inhabituel` = signal dérivé d'un
     /// contenu lu) — jamais une constante du noyau — donc chaque valeur passe par
-    /// [`escape_html`] avant interpolation, pour qu'un caractère `&<>"` dans le contenu du plan
+    /// [`escape_html`] avant interpolation, pour qu'un caractère `&<>"'` dans le contenu du plan
     /// ne puisse jamais être interprété comme balise/attribut par le navigateur qui affiche
     /// cette carte (XSS). Rendu volontairement minimal : pas de CSS/JS externe, pas de
     /// framework — cohérent avec l'exigence d'une page servie hors webui sur une origine isolée.
@@ -57,15 +57,21 @@ impl Card {
     }
 }
 
-/// Échappe les 4 caractères significatifs pour l'injection HTML (`&<>"`), dans l'ordre qui évite
-/// une double-substitution : `&` doit être échappé EN PREMIER, sinon les `&amp;`/`&lt;`/...
-/// produits pour les autres caractères seraient eux-mêmes ré-échappés (`&` -> `&amp;amp;`).
+/// Échappe les 5 caractères significatifs pour l'injection HTML/attribut (`& < > " '`), dans
+/// l'ordre qui évite une double-substitution : `&` doit être échappé EN PREMIER, sinon les
+/// `&amp;`/`&lt;`/... produits pour les autres caractères seraient eux-mêmes ré-échappés
+/// (`&` -> `&amp;amp;`). L'apostrophe `'` -> `&#x27;` (forme numérique canonique, pas `&apos;`
+/// qui n'est pas une entité HTML4/HTML5 nommée universellement reconnue) complète la liste :
+/// sans elle, un contexte attribut délimité par des apostrophes (ex. `onclick='...'`) resterait
+/// injectable malgré l'échappement de `& < > "` — durcissement anti-régression (revue C2) sur la
+/// surface où l'humain approuve.
 fn escape_html(input: &str) -> String {
     input
         .replace('&', "&amp;")
         .replace('<', "&lt;")
         .replace('>', "&gt;")
         .replace('"', "&quot;")
+        .replace('\'', "&#x27;")
 }
 
 #[cfg(test)]
@@ -135,5 +141,33 @@ mod tests {
         let html = card.render_html();
         assert!(!html.contains("<img"), "un tag brut dans INHABITUEL ne doit jamais apparaître");
         assert!(html.contains("&lt;img"));
+    }
+
+    #[test] fn html_render_escapes_apostrophe_from_plan_content() {
+        // Durcissement (revue C2) : l'échappement doit couvrir les 5 caractères significatifs
+        // HTML/attribut, y compris l'apostrophe `'` — un vecteur XSS classique dans un contexte
+        // attribut délimité par des apostrophes (ex. `onclick='...'`) que les 4 caractères
+        // `& < > "` seuls ne neutralisent pas. On injecte les 5 caractères dangereux ensemble
+        // (`< > & " '`) dans un champ contrôlé par l'appelant (`inhabituel`) et vérifie que la
+        // séquence dangereuse d'origine n'atteint jamais le HTML telle quelle, et que sa forme
+        // échappée (dont l'apostrophe -> `&#x27;`) y est bien présente. NOTE : on n'asserte pas
+        // "aucune apostrophe dans tout le document" — le chrome HTML statique du template
+        // (constante du noyau, ex. `<h1>Carte d'approbation</h1>`) en contient légitimement une ;
+        // seule l'absence de fuite du CONTENU CONTRÔLÉ PAR L'APPELANT importe ici.
+        let plan = crate::plan::new_plan("t1".into(), "int".into(), "C:/vault/n.md".into(),
+            "th".into(), "diff".into(), b"proposed".to_vec(),
+            crate::policy::RiskLevel::L1, crate::plan::RollbackClass::Compensation);
+        let dangerous = "<script>alert('xss')</script> & \"quoted\" 'single'";
+        let card = Card::from_plan(&plan, Some(dangerous.into()), false);
+        let html = card.render_html();
+        assert!(!html.contains(dangerous), "la séquence dangereuse brute ne doit jamais atteindre le HTML rendu");
+        assert!(html.contains("&#x27;"), "l'apostrophe doit être échappée en entité HTML &#x27;");
+        assert!(!html.contains("<script>"));
+        assert!(html.contains("&lt;script&gt;"));
+        assert!(html.contains("&amp;"));
+        assert!(html.contains("&quot;"));
+        // La forme pleinement échappée de l'input dangereux doit apparaître intégralement.
+        let expected_escaped = "&lt;script&gt;alert(&#x27;xss&#x27;)&lt;/script&gt; &amp; &quot;quoted&quot; &#x27;single&#x27;";
+        assert!(html.contains(expected_escaped), "forme échappée attendue absente du HTML: {html}");
     }
 }

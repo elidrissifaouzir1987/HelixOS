@@ -6,9 +6,12 @@
 //! vol ; `POST /op/{hash}/approve` déclenche `Kernel::apply` pour un plan **L1** (tap) mais
 //! refuse tout plan **L2** sans jamais l'appliquer (passkey requise, WebAuthn = C3, hors
 //! périmètre ici) ; `GET /ops` liste les opérations en vol pour un tableau de bord minimal.
-//! Chaque réponse porte `Content-Security-Policy: frame-ancestors 'none'` et
-//! `X-Frame-Options: DENY` — cette page ne doit jamais pouvoir être embarquée dans un iframe
-//! d'une autre origine (surface d'approbation hors webui, Global Constraints).
+//! Chaque réponse porte une CSP durcie (`default-src 'none'` — tout script inerte par
+//! construction, cf. `add_security_headers` — plus `style-src 'unsafe-inline'`, `form-action
+//! 'self'`, `base-uri 'none'`, `frame-ancestors 'none'`) et `X-Frame-Options: DENY` — cette page
+//! ne doit jamais pouvoir être embarquée dans un iframe d'une autre origine (surface
+//! d'approbation hors webui, Global Constraints) ni exécuter de script injecté (durcissement
+//! defense-in-depth, revue C2).
 //!
 //! ## Écarts vérifiés vs l'énoncé du plan (spike axum/axum-server)
 //!
@@ -49,13 +52,31 @@ pub fn build_router(shared: SharedKernel) -> Router {
         .layer(axum::middleware::map_response(add_security_headers))
 }
 
-/// Pose `Content-Security-Policy: frame-ancestors 'none'` et `X-Frame-Options: DENY` sur chaque
-/// réponse sortante de ce router (Global Constraints : approbation hors webui, jamais embarquable
-/// dans un iframe d'une autre origine).
+/// Pose une CSP durcie et `X-Frame-Options: DENY` sur chaque réponse sortante de ce router
+/// (Global Constraints : approbation hors webui, jamais embarquable dans un iframe d'une autre
+/// origine ; durcissement defense-in-depth, revue C2).
+///
+/// `default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none';
+/// frame-ancestors 'none'` :
+/// - `default-src 'none'` est le verrou principal : en l'absence d'une directive `script-src`
+///   explicite, TOUTE source (script, objet, image, connect, ...) retombe sur `default-src` —
+///   donc tout script est inerte par construction, même un `<script>` XSS qui aurait échappé à
+///   [`crate::approval::card::escape_html`] (défense en profondeur : la 2e ligne ne dépend pas de
+///   la 1re). La carte ne charge ni script ni image externe, ce verrou ne casse donc rien.
+/// - `style-src 'unsafe-inline'` autorise le seul `<style>` inline utilisé par cette page (pas de
+///   feuille de style externe) sans quoi `default-src 'none'` bloquerait aussi le style.
+/// - `form-action 'self'` autorise le seul POST légitime de cette page (`/op/{hash}/approve`,
+///   même origine) sans rouvrir `default-src` à autre chose.
+/// - `base-uri 'none'` empêche l'injection d'un `<base href>` qui détournerait toute URL relative
+///   de la page (même si un tel tag ne devrait de toute façon jamais apparaître, cf. `escape_html`).
+/// - `frame-ancestors 'none'` (inchangé) : jamais embarquable dans un iframe d'une autre origine.
 async fn add_security_headers(mut response: Response) -> Response {
     response.headers_mut().insert(
         "content-security-policy",
-        HeaderValue::from_static("frame-ancestors 'none'"),
+        HeaderValue::from_static(
+            "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; \
+             base-uri 'none'; frame-ancestors 'none'",
+        ),
     );
     response
         .headers_mut()
@@ -131,6 +152,18 @@ async fn approve_operation(
 }
 
 /// `GET /ops` : liste JSON des opérations en vol (`Kernel::in_flight`) — hash, cible, risque.
+///
+/// DETTE DOCUMENTÉE (revue C2, durcissement) : cette route n'exige aucune authentification et
+/// divulgue, pour chaque opération en vol, le `plan_hash` ET le **chemin cible complet** (`target`
+/// = chemin absolu dans le vault) ainsi que son niveau de risque — une information sensible
+/// (structure du système de fichiers, existence/nom de fichiers) exposée sans contrôle d'accès au
+/// niveau applicatif. C'est acceptable en MVP-0 UNIQUEMENT parce que la barrière de sécurité réelle
+/// est le réseau (cette page n'est jamais exposée hors du tailnet mTLS) — pas une propriété de ce
+/// handler, donc hors périmètre de la revue C2 elle-même. **NE PAS OUBLIER** en phase réseau
+/// (D1 : shim MCP / C3 : passkey WebAuthn) : `/ops` DOIT être placée derrière une authentification
+/// (mTLS client cert ou équivalent), pas seulement derrière l'obscurité du tailnet — sans quoi tout
+/// accès réseau au port (interne, mal configuré, ou après une future exposition) divulgue
+/// silencieusement la cartographie complète du vault en vol.
 async fn list_in_flight(State(shared): State<SharedKernel>) -> Response {
     let kernel = shared.lock().await;
     let ops: Vec<OpSummary> = kernel
