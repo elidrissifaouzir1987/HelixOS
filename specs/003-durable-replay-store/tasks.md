@@ -175,7 +175,7 @@ portable evidence without overstating remote or M4 status.
 - [x] T051 Verify exact direct/native dependency tree, bundled SQLite version/source ID, licenses, vulnerability result and build provenance; record the commands/results without secrets in `specs/003-durable-replay-store/evidence/supply-chain-local.md`
 - [x] T052 Run the locked whole-workspace fmt/clippy/test suite plus an inverse-dependency/removal-isolation drill excluding `helix-replay-sqlite`, and document that fallback to the in-memory claimant is test-only in `specs/003-durable-replay-store/evidence/validation-local.md`
 - [x] T053 Refresh Graphify with `graphify update .`, save concise redacted `useful` records for the bounded replay-only decision, random attempt-ID correction and verified outcomes, refresh reflections, and confirm the records in `graphify-out/memory/` and `graphify-out/reflections/LESSONS.md`
-- [ ] T054 Capture one successful unchanged Linux x64/macOS arm64/Windows x64 `PLAN-003` workflow for the same immutable commit and record run URLs, runner/rustc hosts, corpus/schema/artifact SHA-256, attestations and preserved locations in `conformance/catalog.yaml`
+- [x] T054 Capture one successful unchanged Linux x64/macOS arm64/Windows x64 `PLAN-003` workflow for the same immutable commit and record run URLs, runner/rustc hosts, corpus/schema/artifact SHA-256, attestations and preserved locations in `conformance/catalog.yaml`
 - [ ] T055 Run the controlled release probe on the actual Mac mini M4, archive its hardware/filesystem/profile/raw samples in `specs/003-durable-replay-store/evidence/`, and keep the separate `F_FULLFSYNC`/power-cut spike explicitly pending unless it is genuinely executed
 
 ---
@@ -215,6 +215,16 @@ the first remediation rerun without closing the unchanged three-host evidence ga
 
 ---
 
+## Phase 11: Immutable Evidence and Workspace EOL Closure
+
+**Purpose**: Catalogue the successful three-host evidence and remove the final
+Windows-only false fixture drift without changing any contract bytes.
+
+- [x] T067 Catalogue the successful immutable `d3d763bf44443d93b8ccbf1d3cc3ac22b82dd0e3` PLAN-003 run, independently verify all three uploaded ZIP digests, preserve runner/runtime/artifact/attestation metadata, and retain the hosted-macOS versus physical-Mac/power-loss boundary in `conformance/catalog.yaml` and `specs/003-durable-replay-store/evidence/ci-immutable-d3d763bf44443d93b8ccbf1d3cc3ac22b82dd0e3.md`
+- [x] T068 Pin the intentionally trailing-LF PLAN-001 negative wire fixture to LF checkout bytes, make attribute changes trigger the portable workflow, reproduce the Windows `core.autocrlf=true` checkout, and prove the exact generator drift command remains clean in `.gitattributes` and `.github/workflows/contracts.yml`
+
+---
+
 ## Acceptance Traceability
 
 | Requirement / criterion | Primary tasks |
@@ -226,14 +236,14 @@ the first remediation rerun without closing the unchanged three-host evidence ga
 | FR-013-FR-017 | T008-T010, T013-T014, T031, T036, T039, T056-T057, T061, T064 |
 | FR-018-FR-022 | T035-T042, T046, T054-T055, T057, T059 |
 | FR-023-FR-026 | T006-T007, T009, T015, T045, T051-T053 |
-| FR-027-FR-029 | T024-T025, T031-T034, T043-T046, T049, T054, T058-T066 |
+| FR-027-FR-029 | T024-T025, T031-T034, T043-T046, T049, T054, T058-T068 |
 | FR-030-FR-031 | T015, T021-T022, T045, T050-T053, T060 |
 | SC-001 | T016-T022, T043-T046, T058 |
-| SC-002 | T024-T025, T027-T028, T048, T054, T056, T059, T061, T063-T066 |
+| SC-002 | T024-T025, T027-T028, T048, T054, T056, T059, T061, T063-T068 |
 | SC-003 | T029-T034, T048, T054, T059, T061, T064 |
 | SC-004 | T023, T026, T028, T048, T055 |
 | SC-005 | T035-T042, T046, T048, T054, T057, T059 |
-| SC-006 | T043-T046, T049-T050, T054, T058, T060-T066 |
+| SC-006 | T043-T046, T049-T050, T054, T058, T060-T068 |
 | SC-007 | T047-T048, T055 |
 | SC-008 | T006-T007, T015, T045, T052, T054, T060 |
 | SC-009 | T005, T009-T010, T035-T042, T049-T052, T054, T056-T057, T060 |
@@ -327,7 +337,7 @@ T038: negative corruption/package tests
 
 ## Task Summary
 
-- Total tasks: 66
+- Total tasks: 68
 - Setup: 5
 - Foundational: 9
 - US1: 8
@@ -338,9 +348,10 @@ T038: negative corruption/package tests
 - Convergence hardening: 5
 - First immutable CI remediation: 3
 - First remediation rerun: 3
+- Immutable evidence and workspace EOL closure: 2
 - Suggested MVP scope: T001-T022
-- Suggested locally actionable scope before external evidence: T001-T053 and T056-T066
-- External unchanged CI: T054
+- Suggested locally actionable scope before external evidence: T001-T053 and T056-T068
+- External unchanged CI: T054 (complete at `d3d763bf44443d93b8ccbf1d3cc3ac22b82dd0e3`)
 - Physical Mac mini M4 evidence: T055
 - Every task row follows the required checkbox, sequential ID, optional `[P]`, story
   label and exact path format.

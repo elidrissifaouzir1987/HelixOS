@@ -99,3 +99,24 @@ all pass locally. The release contention gate also passed 4 scenarios x 100 roun
 threads plus 20 process rounds x 8 contenders with exactly one durable winner in 73.87
 seconds, and the release process-kill matrix passed 6/6. Cross-host confirmation still
 requires a new immutable CI commit.
+
+## Second remediation rerun inspected
+
+**Source commit**: `d3d763bf44443d93b8ccbf1d3cc3ac22b82dd0e3`
+
+- Durable replay claim store passed unchanged on Linux x64, macOS arm64 and Windows x64:
+  `https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29118903798`.
+  Its artifacts and attestations are catalogued separately, completing T054.
+- Current plan eligibility passed unchanged on all three hosts:
+  `https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29118903780`.
+- Portable signed contracts passed on Linux and macOS, but Windows failed only after all
+  workspace tests, when the PLAN-001 generator rewrote the intentional trailing-LF
+  negative wire fixture:
+  `https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29118903784`.
+
+The committed fixture and Rust generator both contain exactly one final LF byte. With no
+path attribute, Windows checkout converted that byte to CRLF, and the byte-exact
+generator restored LF, producing false drift. A targeted `text eol=lf` attribute now
+pins that fixture's checkout bytes without changing its wire, generator or validation
+semantics. A forced checkout under the Windows `core.autocrlf=true` configuration
+produced 2,103 bytes ending in LF, and the exact generator drift command stayed clean.

@@ -3,6 +3,7 @@ name: Portable signed contracts
 on:
   pull_request:
     paths:
+      - ".gitattributes"
       - ".github/workflows/contracts.yml"
       - "contracts/**"
       - "conformance/**"
@@ -15,6 +16,7 @@ on:
     branches:
       - master
     paths:
+      - ".gitattributes"
       - ".github/workflows/contracts.yml"
       - "contracts/**"
       - "conformance/**"

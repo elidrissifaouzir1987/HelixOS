@@ -1,3 +1,6 @@
+# Preserve the intentional LF byte in this non-canonical PLAN-001 wire fixture on Windows.
+/contracts/fixtures/plan-envelope-v1/negative/noncanonical-trailing-newline.json text eol=lf
+
 # Content-addressed PLAN-003 inputs and evidence must remain byte-stable on every host.
 /kernel/Cargo.lock text eol=lf
 /contracts/fixtures/durable-replay-store-v1/*.json text eol=lf

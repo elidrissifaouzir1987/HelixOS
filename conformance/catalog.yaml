@@ -252,69 +252,73 @@ entries:
         backup_restore_digest_sha256: d19104ea2bf23e993118b9caa9ae1151505ed0f08c8b16a0eda90c6eac956d61
         supply_chain_artifact: specs/003-durable-replay-store/evidence/supply-chain-local.md
       immutable:
-        status: pending
-        commit: pending
-        ci_run: pending
+        status: passing-immutable
+        commit: d3d763bf44443d93b8ccbf1d3cc3ac22b82dd0e3
+        ci_run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29118903798
         last_failed_commit: 6e3940d40b5661ece7b4ed53ce9e7c8f598e4ff2
         last_failed_ci_run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29117243288
-        last_failed_portability_run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29117243631
+        last_failed_portability_commit: d3d763bf44443d93b8ccbf1d3cc3ac22b82dd0e3
+        last_failed_portability_run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29118903784
         failure_diagnosis_artifact: specs/003-durable-replay-store/evidence/ci-remediation-local.md
-        failure_diagnosis_digest_sha256: d8b1ef241e67fb4d73940e7180017ae6da855d1c3a88baf650b889ba719570bd
-        cases_digest_sha256: pending
-        expected_outcomes_digest_sha256: pending
-        store_schema_digest_sha256: pending
-        backup_manifest_schema_digest_sha256: pending
-        artifact: pending
-        uploaded_artifact_digest_sha256: pending
+        failure_diagnosis_digest_sha256: e6143a6fa22560b621496ce48cab7c5147f98eb669a5b90a5f34912d4634c057
+        validation_artifact: specs/003-durable-replay-store/evidence/ci-immutable-d3d763bf44443d93b8ccbf1d3cc3ac22b82dd0e3.md
+        validation_digest_sha256: 320c3f3b186d1452f5d576d7b1b25fde408a55b579a7b90aff8ef8f37bb99112
+        cases_digest_sha256: 7db71958d28d135d1880daaaf57788b4476950a7835a4c85d633e8d921a3a5ff
+        expected_outcomes_digest_sha256: 687c562f05fe7e449f3df2b09505057a26420407e7df9c91b109a1d3950f25ac
+        store_schema_digest_sha256: 7749bd426803f589c6a4dd0643d0b19d76aa38bc0645bc74db205f24e687d53d
+        backup_manifest_schema_digest_sha256: ecd2a0ddfbd0fc3e64f9a9bd2ea7659adef04bfd551c7c49bf3fceb51f3255b6
+        artifact: per-platform-below
+        uploaded_artifact_digest_sha256: per-platform-below
         artifact_retention_days: 90
-        attestation_status: pending
-        attestation_url: pending
-        preservation_location: pending
+        artifact_expires_at: "2026-10-08T19:42:24Z"
+        attestation_status: published-all-platforms
+        attestation_url: per-platform-below
+        preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29118903798
         linux_x86_64:
-          status: pending
-          run: pending
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29118903798/job/86449052588
           runner_label: ubuntu-24.04
-          runner_image_os: pending
-          runner_image_version: pending
-          runner_os_description: pending
-          runner_arch: pending
-          rustc_host: pending
-          sqlite_source_id: pending
-          sqlite_runtime_profile: pending
-          artifact: pending
-          uploaded_artifact_digest_sha256: pending
-          attestation_url: pending
-          preservation_location: pending
+          runner_image_os: ubuntu24
+          runner_image_version: 20260705.232.1
+          runner_os_description: Ubuntu 24.04.4 LTS
+          runner_arch: X64
+          rustc_host: x86_64-unknown-linux-gnu
+          sqlite_source_id: "2026-06-03 19:12:13 d6e03d8c777cfa2d35e3b60d8ec3e0187f3e9f99d8e2ee9cac695fd6fcdf1a24"
+          sqlite_runtime_profile: "journal_mode:WAL,synchronous:FULL,wal_autocheckpoint_pages:0,foreign_keys:ON,trusted_schema:OFF,cell_size_check:ON"
+          artifact: plan-003-linux-x86_64-d3d763bf44443d93b8ccbf1d3cc3ac22b82dd0e3
+          uploaded_artifact_digest_sha256: e764e6470f5a6c7a292fc366a10c25aafffc51178c147da5fdbb24b4697dc6e1
+          attestation_url: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34810403
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29118903798/artifacts/8237784700
         macos_arm64:
-          status: pending
-          run: pending
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29118903798/job/86449052647
           runner_label: macos-26
-          runner_image_os: pending
-          runner_image_version: pending
-          runner_os_description: pending
-          runner_arch: pending
-          rustc_host: pending
-          sqlite_source_id: pending
-          sqlite_runtime_profile: pending
-          artifact: pending
-          uploaded_artifact_digest_sha256: pending
-          attestation_url: pending
-          preservation_location: pending
+          runner_image_os: macos26
+          runner_image_version: 20260630.0213.1
+          runner_os_description: macOS 26.4.0
+          runner_arch: ARM64
+          rustc_host: aarch64-apple-darwin
+          sqlite_source_id: "2026-06-03 19:12:13 d6e03d8c777cfa2d35e3b60d8ec3e0187f3e9f99d8e2ee9cac695fd6fcdf1a24"
+          sqlite_runtime_profile: "journal_mode:WAL,synchronous:FULL,wal_autocheckpoint_pages:0,foreign_keys:ON,trusted_schema:OFF,cell_size_check:ON"
+          artifact: plan-003-macos-arm64-d3d763bf44443d93b8ccbf1d3cc3ac22b82dd0e3
+          uploaded_artifact_digest_sha256: 45bbc565b257b878c62a85c561522a88fcea67f2bd36ac3331204de89ab0e694
+          attestation_url: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34810674
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29118903798/artifacts/8237830169
         windows_x64:
-          status: pending
-          run: pending
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29118903798/job/86449052629
           runner_label: windows-2022
-          runner_image_os: pending
-          runner_image_version: pending
-          runner_os_description: pending
-          runner_arch: pending
-          rustc_host: pending
-          sqlite_source_id: pending
-          sqlite_runtime_profile: pending
-          artifact: pending
-          uploaded_artifact_digest_sha256: pending
-          attestation_url: pending
-          preservation_location: pending
+          runner_image_os: win22
+          runner_image_version: 20260706.237.1
+          runner_os_description: Microsoft Windows 10.0.20348
+          runner_arch: X64
+          rustc_host: x86_64-pc-windows-msvc
+          sqlite_source_id: "2026-06-03 19:12:13 d6e03d8c777cfa2d35e3b60d8ec3e0187f3e9f99d8e2ee9cac695fd6fcdf1a24"
+          sqlite_runtime_profile: "journal_mode:WAL,synchronous:FULL,wal_autocheckpoint_pages:0,foreign_keys:ON,trusted_schema:OFF,cell_size_check:ON"
+          artifact: plan-003-windows-x64-d3d763bf44443d93b8ccbf1d3cc3ac22b82dd0e3
+          uploaded_artifact_digest_sha256: 94a45b9c63fce6e28c247909d2a5048e584cf7ab134817e10b62b02c9c16e11d
+          attestation_url: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34810893
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29118903798/artifacts/8237862796
       mac_mini_m4:
         benchmark: pending
         fullfsync_spike: pending
