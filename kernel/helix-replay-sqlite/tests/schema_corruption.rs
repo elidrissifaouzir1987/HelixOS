@@ -91,6 +91,10 @@ fn empty_root_initializes_one_exact_v1_store_and_reopens_cleanly() {
 #[test]
 fn concurrent_empty_root_initializers_converge_on_one_complete_schema() {
     const INITIALIZERS: usize = 8;
+    // This is an initialization-convergence correctness fixture, not SC-004 latency
+    // evidence. Give hosted providers five seconds while the production setup gate
+    // retains its independent cap of 1,000 one-millisecond attempts.
+    const INITIALIZATION_CORRECTNESS_BUSY_WAIT_MS: u64 = 5_000;
     let root = SyntheticTempRoot::new("concurrent-init");
     let path = Arc::new(root.path().to_path_buf());
     let barrier = Arc::new(Barrier::new(INITIALIZERS));
@@ -102,8 +106,13 @@ fn concurrent_empty_root_initializers_converge_on_one_complete_schema() {
         handles.push(thread::spawn(move || {
             let trusted = TrustedLocalStoreRootV1::try_from_provisioned((*path).clone())
                 .unwrap_or_else(|_| panic!("concurrent provisioned root was rejected"));
-            let config = ReplayStoreConfigV1::try_new(trusted, 250, 16, 1)
-                .unwrap_or_else(|_| panic!("concurrent configuration was rejected"));
+            let config = ReplayStoreConfigV1::try_new(
+                trusted,
+                INITIALIZATION_CORRECTNESS_BUSY_WAIT_MS,
+                16,
+                1,
+            )
+            .unwrap_or_else(|_| panic!("concurrent configuration was rejected"));
             barrier.wait();
             SqliteReplayClaimantV1::open_or_create(
                 config,
@@ -122,7 +131,8 @@ fn concurrent_empty_root_initializers_converge_on_one_complete_schema() {
         let opened = handle
             .join()
             .unwrap_or_else(|_| panic!("concurrent initializer panicked"));
-        let verified = opened.unwrap_or_else(|_| panic!("concurrent initializer failed"));
+        let verified = opened
+            .unwrap_or_else(|error| panic!("concurrent initializer failed: {}", error.code()));
         verified.unwrap_or_else(|_| panic!("concurrent initialized store was unhealthy"));
     }
 

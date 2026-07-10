@@ -106,3 +106,52 @@ fn creator_does_not_overwrite_unknown_reserved_role() {
         .unwrap_or_else(|_| panic!("unknown role readback failed"));
     assert_eq!(actual, unknown);
 }
+
+#[test]
+fn preparation_accepts_root_role_created_after_an_absent_sample() {
+    let (_guard, root) = TestRootGuard::new("intent-lock-interposition");
+    let lock_path = root.path().join(ROOT_LOCK_FILENAME);
+    let intent_path = root.path().join(LIVE_INITIALIZATION_INTENT_FILENAME);
+    OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&intent_path)
+        .and_then(|file| file.sync_all())
+        .unwrap_or_else(|_| panic!("live intent fixture creation failed"));
+
+    // This is the stale negative sample used by the former `lock || intent`
+    // expression. A cooperating initializer publishes the lock immediately
+    // afterwards, so the intent-only check is now false and the final lock
+    // recheck must converge instead of reporting LOCATION_NOT_DEDICATED.
+    assert!(!lock_path.exists());
+    OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create_new(true)
+        .open(&lock_path)
+        .unwrap_or_else(|_| panic!("interposed root role creation failed"));
+
+    verify_live_intent_or_published_root_role(&root, &lock_path)
+        .unwrap_or_else(|_| panic!("interposed root role was not accepted"));
+}
+
+#[test]
+fn preparation_suppresses_intent_inspection_error_only_after_role_publication() {
+    let (_guard, root) = TestRootGuard::new("intent-error-lock-recheck");
+    let lock_path = root.path().join(ROOT_LOCK_FILENAME);
+    let original = InternalStoreError::StoreUnavailable;
+
+    let without_role = resolve_live_intent_or_published_root_role(Err(original), &lock_path)
+        .err()
+        .unwrap_or_else(|| panic!("intent error was suppressed without a root role"));
+    assert_eq!(without_role, original);
+
+    OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create_new(true)
+        .open(&lock_path)
+        .unwrap_or_else(|_| panic!("published root role fixture creation failed"));
+    resolve_live_intent_or_published_root_role(Err(original), &lock_path)
+        .unwrap_or_else(|_| panic!("published root role did not resolve the intent race"));
+}

@@ -204,6 +204,17 @@ without rewriting the implementation history or claiming T054 before a green rer
 
 ---
 
+## Phase 10: First Remediation Rerun (append-only findings)
+
+**Purpose**: Preserve the additional interleavings and hosted-runner limit exposed by
+the first remediation rerun without closing the unchanged three-host evidence gate.
+
+- [x] T064 Eliminate both pre-lock intent/role TOCTOU variants by inspecting intent state before a final monotonic role-path sample, preserving the original error when no role exists, and adding deterministic false/error regressions in `kernel/helix-replay-sqlite/src/root_safety.rs` and `kernel/helix-replay-sqlite/src/root_safety/tests.rs`
+- [x] T065 Give the concurrent-schema correctness fixture a hosted-runner budget distinct from SC-004 and preserve the payload-free public error code in future failures without changing production limits in `kernel/helix-replay-sqlite/tests/schema_corruption.rs`
+- [x] T066 Inspect every job of the immutable `6e3940d40b5661ece7b4ed53ce9e7c8f598e4ff2` rerun, record its partial macOS/Linux successes and exact remaining failures, rerun the bounded local gates, and retain T054 as pending in `specs/003-durable-replay-store/evidence/ci-remediation-local.md` and `conformance/catalog.yaml`
+
+---
+
 ## Acceptance Traceability
 
 | Requirement / criterion | Primary tasks |
@@ -212,17 +223,17 @@ without rewriting the implementation history or claiming T054 before a green rer
 | FR-002-FR-006 | T008-T010, T016, T018-T021, T029-T034 |
 | FR-007-FR-010 | T012, T016, T019-T020, T029-T034 |
 | FR-011-FR-012 | T011-T012, T023, T026, T028-T029 |
-| FR-013-FR-017 | T008-T010, T013-T014, T031, T036, T039, T056-T057, T061 |
+| FR-013-FR-017 | T008-T010, T013-T014, T031, T036, T039, T056-T057, T061, T064 |
 | FR-018-FR-022 | T035-T042, T046, T054-T055, T057, T059 |
 | FR-023-FR-026 | T006-T007, T009, T015, T045, T051-T053 |
-| FR-027-FR-029 | T024-T025, T031-T034, T043-T046, T049, T054, T058-T063 |
+| FR-027-FR-029 | T024-T025, T031-T034, T043-T046, T049, T054, T058-T066 |
 | FR-030-FR-031 | T015, T021-T022, T045, T050-T053, T060 |
 | SC-001 | T016-T022, T043-T046, T058 |
-| SC-002 | T024-T025, T027-T028, T048, T054, T056, T059, T061, T063 |
-| SC-003 | T029-T034, T048, T054, T059, T061 |
+| SC-002 | T024-T025, T027-T028, T048, T054, T056, T059, T061, T063-T066 |
+| SC-003 | T029-T034, T048, T054, T059, T061, T064 |
 | SC-004 | T023, T026, T028, T048, T055 |
 | SC-005 | T035-T042, T046, T048, T054, T057, T059 |
-| SC-006 | T043-T046, T049-T050, T054, T058, T060-T063 |
+| SC-006 | T043-T046, T049-T050, T054, T058, T060-T066 |
 | SC-007 | T047-T048, T055 |
 | SC-008 | T006-T007, T015, T045, T052, T054, T060 |
 | SC-009 | T005, T009-T010, T035-T042, T049-T052, T054, T056-T057, T060 |
@@ -316,7 +327,7 @@ T038: negative corruption/package tests
 
 ## Task Summary
 
-- Total tasks: 63
+- Total tasks: 66
 - Setup: 5
 - Foundational: 9
 - US1: 8
@@ -326,8 +337,9 @@ T038: negative corruption/package tests
 - Polish/evidence: 9
 - Convergence hardening: 5
 - First immutable CI remediation: 3
+- First remediation rerun: 3
 - Suggested MVP scope: T001-T022
-- Suggested locally actionable scope before external evidence: T001-T053 and T056-T063
+- Suggested locally actionable scope before external evidence: T001-T053 and T056-T066
 - External unchanged CI: T054
 - Physical Mac mini M4 evidence: T055
 - Every task row follows the required checkbox, sequential ID, optional `[P]`, story

@@ -387,12 +387,7 @@ fn prepare_live_initialization_intent(
     let intent_path = root.path().join(LIVE_INITIALIZATION_INTENT_FILENAME);
     if !intent_path.exists() {
         if ensure_empty(root.path()).is_err() {
-            if root_lock_path.exists() {
-                return Ok(());
-            }
-            if !intent_path.exists() {
-                return Err(InternalStoreError::LocationNotDedicated);
-            }
+            return verify_live_intent_or_published_root_role(root, root_lock_path);
         }
         match OpenOptions::new()
             .write(true)
@@ -406,10 +401,33 @@ fn prepare_live_initialization_intent(
             Err(_) => return Err(InternalStoreError::StoreUnavailable),
         }
     }
-    if root_lock_path.exists() || root_contains_only_regular_live_intent(root.path())? {
-        Ok(())
-    } else {
-        Err(InternalStoreError::LocationNotDedicated)
+
+    verify_live_intent_or_published_root_role(root, root_lock_path)
+}
+
+/// Accepts the exact live intent, or a root role that appeared while the
+/// intent was being inspected. The root-role path is monotonic for cooperating
+/// processes, so it must be sampled after the fallible intent inspection.
+fn verify_live_intent_or_published_root_role(
+    root: &TrustedLocalStoreRootV1,
+    root_lock_path: &Path,
+) -> Result<(), InternalStoreError> {
+    resolve_live_intent_or_published_root_role(
+        root_contains_only_regular_live_intent(root.path()),
+        root_lock_path,
+    )
+}
+
+fn resolve_live_intent_or_published_root_role(
+    intent_state: Result<bool, InternalStoreError>,
+    root_lock_path: &Path,
+) -> Result<(), InternalStoreError> {
+    match intent_state {
+        Ok(true) => Ok(()),
+        Ok(false) if root_lock_path.exists() => Ok(()),
+        Ok(false) => Err(InternalStoreError::LocationNotDedicated),
+        Err(_) if root_lock_path.exists() => Ok(()),
+        Err(error) => Err(error),
     }
 }
 
