@@ -6,4 +6,4 @@
 /contracts/fixtures/durable-replay-store-v1/*.json text eol=lf
 /specs/003-durable-replay-store/contracts/*.json text eol=lf
 /specs/003-durable-replay-store/contracts/*.sql text eol=lf
-/specs/003-durable-replay-store/evidence/* text eol=lf
+/specs/003-durable-replay-store/evidence/* text eol=lf whitespace=-blank-at-eof

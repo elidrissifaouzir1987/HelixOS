@@ -1,0 +1,2 @@
+    Finished `release` profile [optimized] target(s) in 0.03s
+     Running tests/contention.rs (target/release/deps/contention-b0311e72fcb5f804)

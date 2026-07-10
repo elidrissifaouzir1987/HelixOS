@@ -1,0 +1,2 @@
+    Finished `release` profile [optimized] target(s) in 0.03s
+     Running tests/process_crash.rs (target/release/deps/process_crash-ff05a7ac7038d56b)

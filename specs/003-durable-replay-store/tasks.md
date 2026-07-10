@@ -176,7 +176,7 @@ portable evidence without overstating remote or M4 status.
 - [x] T052 Run the locked whole-workspace fmt/clippy/test suite plus an inverse-dependency/removal-isolation drill excluding `helix-replay-sqlite`, and document that fallback to the in-memory claimant is test-only in `specs/003-durable-replay-store/evidence/validation-local.md`
 - [x] T053 Refresh Graphify with `graphify update .`, save concise redacted `useful` records for the bounded replay-only decision, random attempt-ID correction and verified outcomes, refresh reflections, and confirm the records in `graphify-out/memory/` and `graphify-out/reflections/LESSONS.md`
 - [x] T054 Capture one successful unchanged Linux x64/macOS arm64/Windows x64 `PLAN-003` workflow for the same immutable commit and record run URLs, runner/rustc hosts, corpus/schema/artifact SHA-256, attestations and preserved locations in `conformance/catalog.yaml`
-- [ ] T055 Run the controlled release probe on the actual Mac mini M4, archive its hardware/filesystem/profile/raw samples in `specs/003-durable-replay-store/evidence/`, and keep the separate `F_FULLFSYNC`/power-cut spike explicitly pending unless it is genuinely executed
+- [x] T055 Run the controlled release probe on the actual Mac mini M4, archive its hardware/filesystem/profile/raw samples in `specs/003-durable-replay-store/evidence/`, and keep the separate `F_FULLFSYNC`/power-cut spike explicitly pending unless it is genuinely executed
 
 ---
 
@@ -260,8 +260,9 @@ Windows-only false fixture drift without changing any contract bytes.
 - US3 reuses the US2 child-process protocol after T027; its private classification tests
   T029 can start as soon as US1 exists.
 - US4 maintenance can be developed in parallel with US2/US3 once US1 is stable.
-- Phase 7 local convergence depends on selected user stories. T054 requires remote CI;
-  T055 requires the user's physical M4 and neither can be checked from Windows evidence.
+- Phase 7 local convergence depends on selected user stories. T054 required remote CI;
+  T055 required the user's physical M4, and both now retain commit-pinned evidence for
+  their completed scopes. Windows evidence alone could not close either task.
 
 ### Parallel opportunities
 
@@ -352,6 +353,7 @@ T038: negative corruption/package tests
 - Suggested MVP scope: T001-T022
 - Suggested locally actionable scope before external evidence: T001-T053 and T056-T068
 - External unchanged CI: T054 (complete at `d3d763bf44443d93b8ccbf1d3cc3ac22b82dd0e3`)
-- Physical Mac mini M4 evidence: T055
+- Physical Mac mini M4 evidence: T055 (complete at
+  `3355639837f9523b563d2084c0b78f60be5f6c60`)
 - Every task row follows the required checkbox, sequential ID, optional `[P]`, story
   label and exact path format.

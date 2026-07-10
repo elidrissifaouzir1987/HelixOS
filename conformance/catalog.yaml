@@ -320,6 +320,38 @@ entries:
           attestation_url: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34810893
           preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29118903798/artifacts/8237862796
       mac_mini_m4:
-        benchmark: pending
+        status: passing-controlled-process-commit
+        commit: 3355639837f9523b563d2084c0b78f60be5f6c60
+        validation_artifact: specs/003-durable-replay-store/evidence/benchmark-mac-mini-m4-3355639837f9523b563d2084c0b78f60be5f6c60.md
+        validation_digest_sha256: fb6a00215058aef510f40b71d0eda8a00a735af2447e0d2d71f3b7f82e84ff0c
+        benchmark_artifact: specs/003-durable-replay-store/evidence/benchmark-mac-mini-m4-3355639837f9523b563d2084c0b78f60be5f6c60.json
+        benchmark_digest_sha256: d31fa6d648b788466eef9fafbdc030242096cf2a519e66afb8c9d539a737b402
+        hardware: Mac mini M4 10-core CPU 16GB internal SSD
+        model_identifier: Mac16,10
+        os_version: macOS 26.0
+        os_build: 25A354
+        architecture: aarch64
+        filesystem_assurance: validated-local-APFS-internal-SSD-lock-create-hardlink-sync-primitives
+        rustc_release: 1.96.1
+        rustc_host: aarch64-apple-darwin
+        build_profile: release
+        sqlite_source_id: "2026-06-03 19:12:13 d6e03d8c777cfa2d35e3b60d8ec3e0187f3e9f99d8e2ee9cac695fd6fcdf1a24"
+        sqlite_runtime_profile: "journal_mode:WAL,synchronous:FULL,wal_autocheckpoint_pages:0"
+        warmup_claims: 500
+        measured_claims: 10000
+        p50_ns: 449792
+        p95_ns: 528500
+        p99_ns: 583250
+        max_ns: 4169542
+        meets_p95_limit: true
+        meets_p99_limit: true
+        deadline_artifact: specs/003-durable-replay-store/evidence/deadline-mac-mini-m4-3355639837f9523b563d2084c0b78f60be5f6c60.stdout.txt
+        deadline_digest_sha256: 786e637c97a08c9ab38bb6d6df90452cca39a683f013dc3049ad64043639ad29
+        contention_artifact: specs/003-durable-replay-store/evidence/contention-mac-mini-m4-3355639837f9523b563d2084c0b78f60be5f6c60.stdout.txt
+        contention_digest_sha256: 4fd39974b0444ecd8e8322004d64a8efe85a1354ccdf7a500c7bd8ddbbc5cfe7
+        process_kill_artifact: specs/003-durable-replay-store/evidence/process-kill-mac-mini-m4-3355639837f9523b563d2084c0b78f60be5f6c60.stdout.txt
+        process_kill_digest_sha256: 5129a2ff0c69b8d64a324e4df89588062acd1ccd532eff19d2e20f204d37813b
+        backup_restore_artifact: specs/003-durable-replay-store/evidence/backup-restore-mac-mini-m4-3355639837f9523b563d2084c0b78f60be5f6c60.stdout.txt
+        backup_restore_digest_sha256: 099e4a44448d097abcf428b7cd39aa83f551b881cbb5421e2a48cd7853c8ba7f
         fullfsync_spike: pending
         power_loss_evidence: pending

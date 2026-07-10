@@ -204,8 +204,12 @@ struct Pki {
 fn generate_pki(config: &Config) -> Result<Pki, String> {
     // CA locale auto-signée : racine de confiance commune aux deux serveurs et au client.
     let ca_key = KeyPair::generate().map_err(|e| format!("génération de la clé de la CA: {e}"))?;
+    // L'identité d'une CA appartient au Distinguished Name, pas à un SAN DNS. Passer le libellé à
+    // `CertificateParams::new` produisait `DNS:HelixOS Local CA` ; les espaces en font un nom DNS
+    // invalide et les vérificateurs X.509 stricts (dont LibreSSL sur macOS) rejetaient alors une
+    // chaîne autrement valide.
     let mut ca_params =
-        CertificateParams::new(vec!["HelixOS Local CA".into()]).map_err(|e| format!("params de CA: {e}"))?;
+        CertificateParams::new(Vec::<String>::new()).map_err(|e| format!("params de CA: {e}"))?;
     ca_params.is_ca = IsCa::Ca(BasicConstraints::Unconstrained);
     ca_params.distinguished_name.push(DnType::CommonName, "HelixOS Local CA");
     // FIX KeyUsage CA : émettre l'extension KeyUsage sur la CA avec keyCertSign (+ cRLSign). C'est
@@ -428,6 +432,20 @@ mod tests {
         cert.is_ca()
     }
 
+    /// Vrai si le cert PEM porte une extension Subject Alternative Name.
+    fn has_subject_alt_name(cert_pem: &str) -> bool {
+        let (_, pem) = x509_parser::pem::parse_x509_pem(cert_pem.as_bytes()).expect("PEM parsable");
+        let (_, cert) =
+            x509_parser::parse_x509_certificate(&pem.contents).expect("cert DER parsable");
+        let has_san = cert.iter_extensions().any(|ext| {
+            matches!(
+                ext.parsed_extension(),
+                x509_parser::extensions::ParsedExtension::SubjectAlternativeName(_)
+            )
+        });
+        has_san
+    }
+
     /// Extrait l'extension KeyUsage (les drapeaux bruts) d'un cert PEM si elle est présente.
     /// OpenSSL 3.x `-x509_strict` EXIGE cette extension sur un cert de CA (« CA cert does not
     /// include key usage extension ») : son absence est précisément ce qui bloquait le drive live.
@@ -455,6 +473,54 @@ mod tests {
             _ => None,
         });
         eku
+    }
+
+    #[test]
+    fn ca_display_name_is_not_encoded_as_a_dns_subject_alternative_name() {
+        let cfg = config_at(temp_out(), false);
+        let pki = generate_pki(&cfg).expect("génération PKI");
+
+        assert!(
+            !has_subject_alt_name(&pki.ca_pem),
+            "la CA ne doit pas porter un nom d'affichage comme DNS Subject Alternative Name"
+        );
+    }
+
+    fn is_openssl_3_banner(banner: &str) -> bool {
+        let mut fields = banner.split_whitespace();
+        let Some(version) = fields
+            .next()
+            .filter(|name| *name == "OpenSSL")
+            .and_then(|_| fields.next())
+        else {
+            return false;
+        };
+        let mut components = version.split('.');
+        components.next() == Some("3")
+            && components
+                .next()
+                .is_some_and(|minor| {
+                    !minor.is_empty() && minor.chars().all(|c| c.is_ascii_digit())
+                })
+    }
+
+    #[test]
+    fn openssl_3_banner_detection_rejects_other_or_malformed_verifiers() {
+        assert!(is_openssl_3_banner("OpenSSL 3.6.2 7 Apr 2026"));
+        for banner in [
+            "LibreSSL 3.3.6",
+            "OpenSSL 1.1.1w 11 Sep 2023",
+            "OpenSSL 4.0.0-dev",
+            "OpenSSL",
+            "OpenSSL 3",
+            "",
+            "not-a-version",
+        ] {
+            assert!(
+                !is_openssl_3_banner(banner),
+                "bannière non OpenSSL 3 acceptée: {banner}"
+            );
+        }
     }
 
     /// PREUVE que le trou AKI est fermé (drive live : OpenSSL 3.x / Python 3.13 rejetaient la chaîne
@@ -546,25 +612,64 @@ mod tests {
     /// PREUVE la plus fidèle à OpenSSL 3.x : écrit la CA + les feuilles sur disque et invoque le VRAI
     /// binaire `openssl verify -x509_strict -CAfile ca.pem <feuille>.pem`, qui applique exactement la
     /// politique stricte qui a rejeté la chaîne lors du drive live (AKI manquant, puis KeyUsage
-    /// manquant sur la CA). Exige exit 0 pour la feuille serveur d'approbation ET le cert client.
-    /// SKIP propre (via `eprintln!`) si `openssl` est absent de l'environnement — le test
+    /// manquant sur la CA). Exige exit 0 pour les deux feuilles serveur ET le cert client.
+    /// SKIP propre (via `eprintln!`) si `openssl` est absent de l'environnement ou si le PATH ne
+    /// fournit pas OpenSSL 3.x — le test
     /// `certs_carry_keyusage_and_eku_for_strict_openssl` (toujours actif) reste alors la preuve.
     /// Ce test ÉCHOUE sans le fix KeyUsage : `openssl verify -x509_strict` sortait alors non-zéro
     /// avec « CA cert does not include key usage extension ».
     #[test]
     fn openssl_strict_verify_accepts_chain() {
-        // Résout `openssl` : soit un chemin explicite via $OPENSSL, soit `openssl` sur le PATH.
-        let openssl = std::env::var("OPENSSL").unwrap_or_else(|_| "openssl".to_string());
-        // Sonde de disponibilité : `openssl version`. Toute erreur de lancement => SKIP.
-        match std::process::Command::new(&openssl).arg("version").output() {
-            Ok(out) if out.status.success() => {}
-            _ => {
+        // Un $OPENSSL explicite est une exigence : toute erreur ou version inattendue échoue. Sans
+        // override, l'absence d'OpenSSL 3 (notamment LibreSSL dans macOS) produit un skip explicite.
+        let explicit_openssl = std::env::var_os("OPENSSL");
+        let openssl = explicit_openssl
+            .clone()
+            .unwrap_or_else(|| std::ffi::OsString::from("openssl"));
+        let version_output = match std::process::Command::new(&openssl).arg("version").output() {
+            Ok(output) if output.status.success() => output,
+            Ok(output) => {
+                let message = format!(
+                    "le vérificateur X.509 a quitté avec {}: stdout={} stderr={}",
+                    output.status,
+                    String::from_utf8_lossy(&output.stdout),
+                    String::from_utf8_lossy(&output.stderr)
+                );
+                if explicit_openssl.is_some() {
+                    panic!("$OPENSSL explicite invalide: {message}");
+                }
+                eprintln!("SKIP openssl_strict_verify_accepts_chain: {message}");
+                return;
+            }
+            Err(error) => {
+                if explicit_openssl.is_some() {
+                    panic!("$OPENSSL explicite ne peut pas être lancé: {error}");
+                }
                 eprintln!(
                     "SKIP openssl_strict_verify_accepts_chain: binaire `openssl` indisponible \
                      (défini $OPENSSL pour le pointer). La preuve x509-parser reste active."
                 );
                 return;
             }
+        };
+        let version_banner = format!(
+            "{}{}",
+            String::from_utf8_lossy(&version_output.stdout),
+            String::from_utf8_lossy(&version_output.stderr)
+        );
+        if !is_openssl_3_banner(version_banner.trim()) {
+            if explicit_openssl.is_some() {
+                panic!(
+                    "$OPENSSL explicite n'est pas un binaire OpenSSL 3.x: {}",
+                    version_banner.trim()
+                );
+            }
+            eprintln!(
+                "SKIP openssl_strict_verify_accepts_chain: le PATH fournit `{}` au lieu \
+                 d'OpenSSL 3.x. La preuve x509-parser reste active.",
+                version_banner.trim()
+            );
+            return;
         }
 
         let out = temp_out();
@@ -573,9 +678,11 @@ mod tests {
         write_pki(&cfg, &pki).expect("écriture PKI");
         let paths = OutputPaths::under(&out);
 
-        for (label, leaf_path) in
-            [("approval-server", &paths.approval_cert), ("client", &paths.client_cert)]
-        {
+        for (label, leaf_path) in [
+            ("mtls-server", &paths.mtls_cert),
+            ("approval-server", &paths.approval_cert),
+            ("client", &paths.client_cert),
+        ] {
             let output = std::process::Command::new(&openssl)
                 .arg("verify")
                 .arg("-x509_strict")

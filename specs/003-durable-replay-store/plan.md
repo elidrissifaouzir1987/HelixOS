@@ -64,8 +64,9 @@ benchmark/soak. Fault hooks compile only with the non-default `test-fault-inject
 feature.
 
 **Target Platform**: macOS arm64 is primary (user target: Mac mini M4); Linux x64 and
-Windows x64 are required unchanged conformance drivers. Local evidence is currently
-Windows x64. Hosted macOS arm64 process tests do not replace target M4 power-loss and
+Windows x64 are required unchanged conformance drivers. Controlled local evidence now
+covers Windows x64 and physical Mac mini M4 process commits. Hosted macOS arm64 process
+tests and the controlled M4 latency probe do not replace target M4 power-loss and
 `F_FULLFSYNC` evidence.
 
 **Project Type**: One storage-adapter library, versioned fixture corpus, conformance

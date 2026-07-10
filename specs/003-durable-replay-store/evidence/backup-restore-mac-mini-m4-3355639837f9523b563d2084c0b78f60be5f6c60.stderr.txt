@@ -1,0 +1,2 @@
+    Finished `release` profile [optimized] target(s) in 0.03s
+     Running tests/backup_restore.rs (target/release/deps/backup_restore-7c30774888bfac26)

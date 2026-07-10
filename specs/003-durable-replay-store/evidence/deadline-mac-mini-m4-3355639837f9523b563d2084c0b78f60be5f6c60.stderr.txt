@@ -1,0 +1,2 @@
+    Finished `release` profile [optimized] target(s) in 0.03s
+     Running tests/deadline.rs (target/release/deps/deadline-db4936b5c695ff2e)
