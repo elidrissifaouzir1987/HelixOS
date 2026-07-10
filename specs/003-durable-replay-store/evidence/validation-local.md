@@ -60,7 +60,10 @@ fallback from a failed durable store.
 | 68-case corpus | `7db71958d28d135d1880daaaf57788b4476950a7835a4c85d633e8d921a3a5ff` |
 | expected outcomes | `687c562f05fe7e449f3df2b09505057a26420407e7df9c91b109a1d3950f25ac` |
 
-Still pending: the clean controlled local-SSD benchmark with immutable raw samples; one
+At the time of this pre-commit record, the clean controlled local-SSD benchmark was
+still pending. It was later completed against commit
+`c7f736656b572a88c8b805a34c5efa872834c56d`; see
+`benchmark-local-c7f736656b572a88c8b805a34c5efa872834c56d.md`. Still pending: one
 immutable commit across Linux x64, macOS arm64 and Windows x64 with attestations and
 preserved artifacts; controlled Mac mini M4 benchmark evidence; and the separately
 scoped `F_FULLFSYNC`/power-cut investigation.

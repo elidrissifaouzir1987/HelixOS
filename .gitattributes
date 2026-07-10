@@ -1,0 +1,6 @@
+# Content-addressed PLAN-003 inputs and evidence must remain byte-stable on every host.
+/kernel/Cargo.lock text eol=lf
+/contracts/fixtures/durable-replay-store-v1/*.json text eol=lf
+/specs/003-durable-replay-store/contracts/*.json text eol=lf
+/specs/003-durable-replay-store/contracts/*.sql text eol=lf
+/specs/003-durable-replay-store/evidence/* text eol=lf

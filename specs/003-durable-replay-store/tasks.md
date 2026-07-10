@@ -169,7 +169,7 @@ still requires external paused activation and epoch rotation.
 portable evidence without overstating remote or M4 status.
 
 - [x] T047 [P] Implement the create-new-root release probe with raw samples, p50/p95/p99/max and exact redacted environment/profile metadata in `kernel/helix-replay-sqlite/examples/durable_replay_benchmark.rs`
-- [ ] T048 Run 500 warmups plus 10,000 sequential FULL/WAL claims, the ignored release contention/process-kill workloads and the full release backup/restore suite on the controlled local host, preserve raw immutable local artifacts in `specs/003-durable-replay-store/evidence/`, and report SC-004/SC-007 against the actual hardware only
+- [x] T048 Run 500 warmups plus 10,000 sequential FULL/WAL claims, the ignored release contention/process-kill workloads and the full release backup/restore suite on the controlled local host, preserve raw immutable local artifacts in `specs/003-durable-replay-store/evidence/`, and report SC-004/SC-007 against the actual hardware only
 - [x] T049 [P] Add locked fmt/clippy/test, unchanged corpus, fault-feature, artifact digest and three-host Windows/Linux/macOS-arm64 jobs in `.github/workflows/durable-replay-store.yml`
 - [x] T050 Register `PLAN-003`, schema/corpus/toolchain/platforms, evidence requirements and pending immutable fields without weakening PLAN-001/002 in `conformance/catalog.yaml`
 - [x] T051 Verify exact direct/native dependency tree, bundled SQLite version/source ID, licenses, vulnerability result and build provenance; record the commands/results without secrets in `specs/003-durable-replay-store/evidence/supply-chain-local.md`

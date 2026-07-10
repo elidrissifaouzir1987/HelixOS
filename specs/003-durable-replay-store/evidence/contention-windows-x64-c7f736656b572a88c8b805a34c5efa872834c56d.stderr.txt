@@ -1,0 +1,2 @@
+    Finished `release` profile [optimized] target(s) in 0.10s
+     Running tests\contention.rs (target\release\deps\contention-a6deb485bfba2875.exe)

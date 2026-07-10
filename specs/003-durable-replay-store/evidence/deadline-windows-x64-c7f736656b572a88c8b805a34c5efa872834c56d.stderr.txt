@@ -1,0 +1,2 @@
+    Finished `release` profile [optimized] target(s) in 0.08s
+     Running tests\deadline.rs (target\release\deps\deadline-3e9ef1102b7b5d80.exe)

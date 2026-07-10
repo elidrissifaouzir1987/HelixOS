@@ -233,16 +233,23 @@ entries:
     claim_status: pending-evidence
     evidence:
       local:
-        status: passing-uncommitted
+        status: passing-immutable-local
         platform: windows-x64
-        commit: "uncommitted-worktree; base=6b31af88af28f4356517846acb9f3bb77a48fcf6"
-        validation_artifact: specs/003-durable-replay-store/evidence/validation-local.md
-        validation_digest_sha256: 96c6263f4605e8b7e5bcc9b6ea0c7de2f46759a94904add7303a22bda18ee362
-        benchmark_artifact: pending
-        benchmark_digest_sha256: pending
-        contention_artifact: specs/003-durable-replay-store/evidence/contention-local.md
-        process_kill_artifact: specs/003-durable-replay-store/evidence/process-kill-local.md
-        backup_restore_artifact: specs/003-durable-replay-store/evidence/validation-local.md
+        commit: c7f736656b572a88c8b805a34c5efa872834c56d
+        validation_artifact: specs/003-durable-replay-store/evidence/benchmark-local-c7f736656b572a88c8b805a34c5efa872834c56d.md
+        validation_digest_sha256: 9ca0451c7ac123db14176eda711038deed64c9cebb1e45556ef078def24e291d
+        precommit_validation_artifact: specs/003-durable-replay-store/evidence/validation-local.md
+        precommit_validation_digest_sha256: 1c5a73106cf506067e6e2da09f102c665cfab8cb465d341b883361269012c8ae
+        benchmark_artifact: specs/003-durable-replay-store/evidence/benchmark-windows-x64-c7f736656b572a88c8b805a34c5efa872834c56d.json
+        benchmark_digest_sha256: 8109fda01dda6c2993fad327b01d2b66b0f868c889145d500cfa792939fb6527
+        deadline_artifact: specs/003-durable-replay-store/evidence/deadline-windows-x64-c7f736656b572a88c8b805a34c5efa872834c56d.stdout.txt
+        deadline_digest_sha256: cfd9267e88ae7d8306a5aa23739db3e415fb27433e110bef0ba698c66550d172
+        contention_artifact: specs/003-durable-replay-store/evidence/contention-windows-x64-c7f736656b572a88c8b805a34c5efa872834c56d.stdout.txt
+        contention_digest_sha256: 45ed69b83214fea99677e1392cf663fd7f75adc85878ac4031831dc115408eb8
+        process_kill_artifact: specs/003-durable-replay-store/evidence/process-kill-windows-x64-c7f736656b572a88c8b805a34c5efa872834c56d.stdout.txt
+        process_kill_digest_sha256: 48d1fae86a50b13b5efec4142185b37311a7c42b6e2e59b54631d18e3f0b0818
+        backup_restore_artifact: specs/003-durable-replay-store/evidence/backup-restore-windows-x64-c7f736656b572a88c8b805a34c5efa872834c56d.stdout.txt
+        backup_restore_digest_sha256: d19104ea2bf23e993118b9caa9ae1151505ed0f08c8b16a0eda90c6eac956d61
         supply_chain_artifact: specs/003-durable-replay-store/evidence/supply-chain-local.md
       immutable:
         status: pending

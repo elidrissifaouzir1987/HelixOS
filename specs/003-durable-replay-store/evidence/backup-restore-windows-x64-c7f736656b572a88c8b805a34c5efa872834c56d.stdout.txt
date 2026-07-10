@@ -1,0 +1,20 @@
+
+running 16 tests
+test backup_and_restore_reject_same_root_and_nonempty_destinations ... ok
+test concurrent_backup_and_restore_destinations_have_one_reservation_winner ... ok
+test deadline_between_database_and_manifest_publish_leaves_no_restorable_package ... ok
+test multiple_claim_backup_restores_exact_replay_history_after_reopen ... ok
+test one_page_batches_observe_multiple_online_backup_steps ... ok
+test online_backup_with_concurrent_claim_restores_one_coherent_generation ... ok
+test public_backup_verifier_checks_complete_package_and_rejects_incomplete_staging ... ok
+test public_backup_verifier_rejects_extra_members_and_digest_mutation ... ok
+test restore_deadline_after_staging_begins_never_activates_partial_destination ... ok
+test restore_rejects_missing_invalid_and_digest_mismatched_manifests ... ok
+test restore_return_error_leaves_pending_nonclaimable_destination ... ok
+test restore_return_error_worker ... ignored, private return-error child entry point
+test stale_staging_and_late_final_collisions_are_never_reused_or_overwritten ... ok
+test successful_package_publishes_role_database_and_valid_manifest ... ok
+test verified_restore_evidence_requires_paused_activation_and_epoch_rotation ... ok
+test zero_claim_backup_restores_to_a_clean_empty_root_and_reopens ... ok
+
+test result: ok. 15 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 1.00s

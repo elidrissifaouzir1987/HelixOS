@@ -1,0 +1,10 @@
+
+running 6 tests
+test backup_publication_boundaries_reject_incomplete_and_restore_published ... ok
+test checkpoint_boundaries_fresh_reopen_without_losing_claims ... ok
+test every_frozen_claim_boundary_reopens_all_or_none ... ok
+test fault_worker_process ... ok
+test initialization_boundaries_fresh_reopen_to_valid_empty_store ... ok
+test restore_boundaries_remain_pending_inactive_and_no_clobber ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
