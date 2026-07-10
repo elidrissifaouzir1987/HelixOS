@@ -51,10 +51,11 @@ fn production_foundation_has_no_native_or_ambient_api() {
 }
 
 #[test]
-fn no_workspace_package_depends_back_on_the_leaf_contract() {
+fn only_the_reviewed_replay_adapter_depends_on_the_eligibility_contract() {
     let workspace = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .parent()
         .expect("eligibility crate is directly below the kernel workspace");
+    let mut reviewed_consumers = 0_u8;
 
     for entry in std::fs::read_dir(workspace).expect("kernel workspace is readable") {
         let entry = entry.expect("workspace directory entry is readable");
@@ -68,12 +69,17 @@ fn no_workspace_package_depends_back_on_the_leaf_contract() {
             continue;
         }
         let contents = std::fs::read_to_string(&manifest).expect("package manifest is UTF-8");
-        assert!(
-            !contents.contains("helix-plan-eligibility"),
-            "reverse workspace dependency found in {}",
-            manifest.display()
-        );
+        if contents.contains("helix-plan-eligibility") {
+            assert_eq!(
+                entry.file_name(),
+                "helix-replay-sqlite",
+                "unreviewed workspace dependency found in {}",
+                manifest.display()
+            );
+            reviewed_consumers += 1;
+        }
     }
+    assert_eq!(reviewed_consumers, 1);
 }
 
 #[test]

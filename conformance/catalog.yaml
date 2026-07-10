@@ -144,3 +144,166 @@ entries:
           digest_sha256: pending
           attestation: pending
           preservation_location: pending
+  - acceptance_id: PLAN-003
+    title: Durable atomic replay claim store
+    feature: specs/003-durable-replay-store
+    spec: specs/003-durable-replay-store/spec.md
+    research: specs/003-durable-replay-store/research.md
+    in_process_contract: specs/003-durable-replay-store/contracts/durable-replay-store-v1.md
+    store_schema: specs/003-durable-replay-store/contracts/replay-store-schema-v1.sql
+    backup_manifest_schema: specs/003-durable-replay-store/contracts/backup-manifest-v1.schema.json
+    data_model: specs/003-durable-replay-store/data-model.md
+    corpus:
+      root: contracts/fixtures/durable-replay-store-v1
+      manifest: contracts/fixtures/durable-replay-store-v1/cases.json
+      expected_outcomes: contracts/fixtures/durable-replay-store-v1/expected-outcomes.json
+      instructions: contracts/fixtures/durable-replay-store-v1/README.md
+      summary_schema: helixos.durable-replay-store-summary/1
+    ci_workflow: .github/workflows/durable-replay-store.yml
+    ci_evidence_policy:
+      artifact_subject: actions-upload-artifact-output-digest
+      artifact_digest: actions-upload-artifact-artifact-digest-output
+      retention_days: 90
+      attestation_action: actions/attest@a1948c3f048ba23858d222213b7c278aabede763
+      attestation_events:
+        - push
+        - workflow_dispatch
+      pull_request_evidence: validation-only-no-attestation
+      catalog_update_required_before_claim: true
+    toolchain:
+      manifest: kernel/rust-toolchain.toml
+      rust: 1.96.1
+      profile: minimal
+      components:
+        - rustfmt
+        - clippy
+      cargo_lock: kernel/Cargo.lock
+      rusqlite: 0.40.1
+      libsqlite3_sys: 0.38.1
+      bundled_sqlite: 3.53.2
+      bundled_sqlite_source_id: "2026-06-03 19:12:13 d6e03d8c777cfa2d35e3b60d8ec3e0187f3e9f99d8e2ee9cac695fd6fcdf1a24"
+      sqlite_link_profile: rusqlite-0.40.1/libsqlite3-sys-0.38.1/bundled-static
+      required_runtime_profile:
+        journal_mode: WAL
+        synchronous: FULL
+        wal_autocheckpoint_pages: 0
+        foreign_keys: "ON"
+        trusted_schema: "OFF"
+        cell_size_check: "ON"
+    required_platforms:
+      - id: linux-x86_64
+        runner: ubuntu-24.04
+        rust_host: x86_64-unknown-linux-gnu
+        automation: required
+      - id: macos-arm64
+        runner: macos-26
+        rust_host: aarch64-apple-darwin
+        automation: required
+      - id: windows-x64
+        runner: windows-2022
+        rust_host: x86_64-pc-windows-msvc
+        automation: required
+      - id: mac-mini-m4
+        runner: physical-target
+        rust_host: aarch64-apple-darwin
+        automation: pending-device
+    evidence_requirements:
+      - id: atomic-two-index-claim
+        requirement: A fresh binding atomically persists the composite nonce key, operation key, random attempt claim ID, exact binding digest and strictly increasing safe generation; exact repeat and either-key conflict remain closed denials after process reopen.
+      - id: verified-storage-profile
+        requirement: The reviewed application/schema identity and invariants open only with WAL, synchronous FULL, controlled checkpointing and caller-attested local-filesystem placement; foreign, newer, altered, corrupt or weaker stores fail closed.
+      - id: contention
+        requirement: At least 100 rounds with 64 synchronized threads and 20 rounds with 8 synchronized processes produce exactly one fresh durable winner per contested key and consistent rows/generation after reopen.
+      - id: deadlines
+        requirement: Controlled held-writer tests return by the boot-monotonic deadline plus declared scheduler tolerance, create no detached mutation and never return a positive claim after the deadline; no hard-cancellation claim is made for an in-flight VFS sync.
+      - id: crash-and-ambiguity
+        requirement: Every declared initialization, claim, checkpoint, backup and restore mutation/publication/profile boundary is process-killed or fault-injected; reopen is all-or-none, restored roots remain pending/nonclaimable, and a possible commit is never reported unavailable or retried without exact fresh-view proof. Evidence is labeled process-kill, not power-loss.
+      - id: online-backup-clean-restore
+        requirement: A live SQLite online backup publishes its verified manifest last, clean restore uses the SQLite API into an empty root, every included claim retains conflict behavior, and evidence requires paused activation plus new instance/fencing epochs while admitting later claims may be absent.
+      - id: portable-corpus
+        requirement: The same case IDs, expected outcomes, reviewed schema and manifest run unchanged on required Windows x64, Linux x64 and macOS arm64 hosts without target-OS-conditioned replay semantics.
+      - id: redaction-and-removal
+        requirement: Public errors, debug, metrics, fixtures and evidence expose no native path, nonce, operation/task/workload ID, binding/plan digest or provider diagnostic; no online prune or production fallback to the in-memory claimant exists.
+      - id: benchmark
+        requirement: Controlled local-SSD evidence records 500 warmups and at least 10000 acknowledged FULL/WAL commits with raw samples, p50/p95/p99/max, exact hardware/OS/architecture/filesystem assurance, toolchain, SQLite source/profile and corpus/schema digests; p95 is at most 25 ms and p99 at most 100 ms.
+      - id: supply-chain
+        requirement: Exact Rust/native dependency, bundled SQLite source/version, license, vulnerability, provenance, schema rollback-refusal and restore-drill evidence is retained for the immutable commit.
+      - id: immutable-ci
+        requirement: One unchanged Linux x64, macOS arm64 and Windows x64 matrix for the same commit publishes each exact runner image OS/version, OS/architecture and rustc host, bundled SQLite source ID/runtime profile, corpus/schema digests, upload-artifact digest, retained artifact and attestation URL before PLAN-003, portability or production readiness is claimed; the attestation binds the upload-artifact digest rather than an individual evidence file, a pull-request-only run is validation rather than immutable evidence, and hosted Mac evidence is not labeled Mac mini M4 power-loss proof.
+    claim_status: pending-evidence
+    evidence:
+      local:
+        status: passing-uncommitted
+        platform: windows-x64
+        commit: "uncommitted-worktree; base=6b31af88af28f4356517846acb9f3bb77a48fcf6"
+        validation_artifact: specs/003-durable-replay-store/evidence/validation-local.md
+        validation_digest_sha256: 96c6263f4605e8b7e5bcc9b6ea0c7de2f46759a94904add7303a22bda18ee362
+        benchmark_artifact: pending
+        benchmark_digest_sha256: pending
+        contention_artifact: specs/003-durable-replay-store/evidence/contention-local.md
+        process_kill_artifact: specs/003-durable-replay-store/evidence/process-kill-local.md
+        backup_restore_artifact: specs/003-durable-replay-store/evidence/validation-local.md
+        supply_chain_artifact: specs/003-durable-replay-store/evidence/supply-chain-local.md
+      immutable:
+        status: pending
+        commit: pending
+        ci_run: pending
+        cases_digest_sha256: pending
+        expected_outcomes_digest_sha256: pending
+        store_schema_digest_sha256: pending
+        backup_manifest_schema_digest_sha256: pending
+        artifact: pending
+        uploaded_artifact_digest_sha256: pending
+        artifact_retention_days: 90
+        attestation_status: pending
+        attestation_url: pending
+        preservation_location: pending
+        linux_x86_64:
+          status: pending
+          run: pending
+          runner_label: ubuntu-24.04
+          runner_image_os: pending
+          runner_image_version: pending
+          runner_os_description: pending
+          runner_arch: pending
+          rustc_host: pending
+          sqlite_source_id: pending
+          sqlite_runtime_profile: pending
+          artifact: pending
+          uploaded_artifact_digest_sha256: pending
+          attestation_url: pending
+          preservation_location: pending
+        macos_arm64:
+          status: pending
+          run: pending
+          runner_label: macos-26
+          runner_image_os: pending
+          runner_image_version: pending
+          runner_os_description: pending
+          runner_arch: pending
+          rustc_host: pending
+          sqlite_source_id: pending
+          sqlite_runtime_profile: pending
+          artifact: pending
+          uploaded_artifact_digest_sha256: pending
+          attestation_url: pending
+          preservation_location: pending
+        windows_x64:
+          status: pending
+          run: pending
+          runner_label: windows-2022
+          runner_image_os: pending
+          runner_image_version: pending
+          runner_os_description: pending
+          runner_arch: pending
+          rustc_host: pending
+          sqlite_source_id: pending
+          sqlite_runtime_profile: pending
+          artifact: pending
+          uploaded_artifact_digest_sha256: pending
+          attestation_url: pending
+          preservation_location: pending
+      mac_mini_m4:
+        benchmark: pending
+        fullfsync_spike: pending
+        power_loss_evidence: pending

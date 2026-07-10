@@ -1,3 +1,1 @@
-{
-  "feature_directory": "specs/002-plan-eligibility"
-}
+{"feature_directory":"specs/003-durable-replay-store"}

@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:helixos:schema:replay-store-backup:1",
+  "title": "HelixOS Durable Replay Store Backup Manifest v1",
+  "description": "Closed non-secret consistency evidence for one quiescent SQLite replay-store backup. This manifest is not signed authority and cannot prove absence of claims committed after its generation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "application_id",
+    "store_schema_version",
+    "claimant_generation",
+    "claim_count",
+    "database_sha256",
+    "sqlite_version",
+    "sqlite_source_id",
+    "integrity_check",
+    "requires_paused_activation",
+    "requires_instance_epoch_rotation",
+    "requires_fencing_epoch_rotation",
+    "may_omit_claims_after_generation"
+  ],
+  "properties": {
+    "schema": {
+      "const": "helixos.replay-store-backup/1"
+    },
+    "application_id": {
+      "const": 1212962898
+    },
+    "store_schema_version": {
+      "const": 1
+    },
+    "claimant_generation": {
+      "$ref": "#/$defs/safeU64"
+    },
+    "claim_count": {
+      "$ref": "#/$defs/safeU64"
+    },
+    "database_sha256": {
+      "$ref": "#/$defs/sha256Digest"
+    },
+    "sqlite_version": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 32,
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "sqlite_source_id": {
+      "type": "string",
+      "minLength": 40,
+      "maxLength": 160,
+      "pattern": "^[ -~]+$"
+    },
+    "integrity_check": {
+      "const": "ok"
+    },
+    "requires_paused_activation": {
+      "const": true
+    },
+    "requires_instance_epoch_rotation": {
+      "const": true
+    },
+    "requires_fencing_epoch_rotation": {
+      "const": true
+    },
+    "may_omit_claims_after_generation": {
+      "const": true
+    }
+  },
+  "$defs": {
+    "safeU64": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sha256Digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

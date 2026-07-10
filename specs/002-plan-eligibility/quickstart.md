@@ -9,9 +9,10 @@ trusted current-state evidence and performs the final claim through the
 
 It is not proof of human approval or WebAuthn verification, durable recovery
 preparation, budget reservation, `PREPARING`, an `ExecutionGrant`, adapter inbox
-admission, or authority to perform a host effect. No adapter may accept it. Production
-replay durability and compare-before-prepare belong to a later durable-coordinator
-feature.
+admission, or authority to perform a host effect. No host-effect adapter may accept it.
+A reviewed non-authority replay provider may implement `ReplayClaimantV1`; production
+replay durability is supplied by feature 003, while compare-before-prepare remains a
+later coordinator boundary.
 
 ## Prerequisites
 
@@ -109,6 +110,22 @@ test implementation. It is **not** evidence that a production claim survives pro
 death, reboot, restore, disk failure, or an ambiguous storage outcome. Those properties
 remain mandatory work for the durable coordinator.
 
+### Production claimant deadline meaning
+
+`claim_deadline_monotonic_ms` is an exclusive absolute value in the same trusted
+suspend-aware boot clock used to build the eligibility context. A production claimant
+must reject before mutation when the deadline is reached, bound controlled lock waiting
+by the remaining time, recheck after acquiring the writer and immediately before/after
+commit or readback, return no positive result at or after the deadline, and leave no
+detached retry after return.
+
+This synchronous interface does not promise hard cancellation of a filesystem flush
+already executing in the kernel. A late possibly committed attempt is `Ambiguous`, even
+when the durable row is retained; only a definite pre-write failure or confirmed
+rollback is `Unavailable`. Feature 003's controlled held-writer fixture measures the
+deadline plus its declared scheduler tolerance. A kernel/device stall is reported as a
+late storage operation and is not presented as proof of bounded hard cancellation.
+
 ## Deterministic 100,000-context soak
 
 ```sh
@@ -165,12 +182,14 @@ continues to pass without selecting it:
 cargo tree --locked --manifest-path kernel/Cargo.toml \
   --workspace --invert helix-plan-eligibility --edges normal
 cargo test --locked --manifest-path kernel/Cargo.toml \
-  --workspace --exclude helix-plan-eligibility --all-targets --all-features
+  --workspace --exclude helix-plan-eligibility --exclude helix-replay-sqlite \
+  --all-targets --all-features
 ```
 
-Expected result: the inverse tree contains the eligibility package itself and no
-dependent workspace crate; feature-001 golden/signature tests and the legacy MVP-0
-tests remain green while the new member is excluded. Together with the source gate that
+Expected result in the current workspace: the inverse tree contains the eligibility
+package plus exactly the reviewed `helix-replay-sqlite` provider and no host-effect
+adapter. To remove feature 002, remove/exclude feature 003 first; feature-001
+golden/signature tests and the legacy MVP-0 tests remain green. Together with the source gate that
 forbids reverse dependencies, this is the non-destructive removal drill. It does not
 delete or rewrite the user's working tree.
 

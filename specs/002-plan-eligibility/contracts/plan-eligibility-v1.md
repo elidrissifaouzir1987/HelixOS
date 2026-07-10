@@ -13,7 +13,9 @@ AuthenticPlanEnvelopeV1 + EligibilityContextV1 + ReplayClaimantV1
 
 Authenticity proves canonical provenance only. Eligibility is a point-in-time necessary
 condition only. Neither type is approval, durable preparation authority, an
-`ExecutionGrant`, or an adapter input. No adapter may depend on this crate.
+`ExecutionGrant`, or an effect-adapter input. No host-effect adapter may accept its
+markers. A reviewed non-authority `ReplayClaimantV1` provider may depend on this crate
+only to implement the closed claim contract and consume replay bindings/outcomes.
 
 ## Public surface
 
@@ -246,7 +248,8 @@ stable plan-v1 issuer namespace. It binds:
 - `plan_id`, `operation_id`, `task_id`, `workload_id`, and `task_lease_digest`;
 - current signer-trust generation;
 - instance and fencing epochs;
-- the caller-owned monotonic completion deadline for the claim call.
+- the caller-owned exclusive absolute deadline for the claim call, expressed in the
+  same trusted suspend-aware boot-monotonic clock domain used by eligibility.
 
 The binding exposes redacted narrow accessors required by an external claimant,
 including the nonce uniqueness key, operation ID and `binding_digest()`. The digest is:
@@ -290,13 +293,25 @@ A conforming production claimant MUST:
   enough durable state for later reconciliation;
 - never panic and never expose storage/provider error text through the outcome.
 
-The claimant implementation is caller-owned and MUST have bounded completion no later
-than the binding's monotonic claim deadline. A timeout after a possibly committed write
-maps to `Ambiguous`; a definite pre-write outage maps to `Unavailable`. The synchronous
-trait itself cannot pre-empt a broken implementation, so production integration remains
-blocked until the sovereign coordinator enforces that deadline and integrates the claim
-with durable operation/reconciliation state. The local 1 ms benchmark measures only the
-deterministic in-memory model and is not a production-store latency claim.
+The claimant implementation is caller-owned. The deadline is an exclusive absolute
+scalar, not a duration. A conforming production implementation MUST use the same trusted
+suspend-aware boot clock, perform no mutation when `now >= deadline`, limit intentional
+lock or queue waiting to the remaining budget, and recheck after acquiring mutation
+authority, immediately before commit, and immediately after commit or definitive
+readback. It MUST return no positive outcome at or after the deadline and MUST leave no
+detached worker or retry that can mutate replay state after the call returns.
+
+The synchronous trait does not claim portable hard cancellation of a VFS flush already
+executing inside the operating system. A storage call may therefore return late. If a
+write may have committed and a timely definitive result cannot be proved, including a
+late successful or uncertain commit, the outcome is `Ambiguous`; only a definite
+pre-mutation failure or confirmed rollback maps to `Unavailable`. Controlled held-lock
+tests are bounded by the deadline plus declared scheduler tolerance; arbitrary kernel or
+device stalls are recorded as late storage failures rather than misreported as a hard
+cancellation guarantee. The trait itself still cannot pre-empt a broken implementation,
+so production integration requires a reviewed durable claimant and later reconciliation
+state. The local 1 ms benchmark measures only the deterministic in-memory model and is
+not a production-store latency claim.
 
 `Unavailable` and `Ambiguous` fail closed. The evaluator MUST NOT retry the trait call.
 An ambiguous outcome is treated as possibly committed and requires reconciliation or a

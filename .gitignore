@@ -3,6 +3,12 @@ kernel/target/
 
 # Rust and platform build products
 **/target/
+*.rs.bk
+*.rlib
+*.prof*
+*.log
+.idea/
+.vscode/
 .DS_Store
 Thumbs.db
 *.tmp

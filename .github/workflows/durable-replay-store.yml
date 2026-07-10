@@ -1,0 +1,446 @@
+name: Durable replay claim store
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/durable-replay-store.yml"
+      - "conformance/catalog.yaml"
+      - "contracts/fixtures/durable-replay-store-v1/**"
+      - "kernel/Cargo.lock"
+      - "kernel/Cargo.toml"
+      - "kernel/rust-toolchain.toml"
+      - "kernel/helix-contracts/**"
+      - "kernel/helix-plan-eligibility/**"
+      - "kernel/helix-replay-sqlite/**"
+      - "specs/003-durable-replay-store/**"
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/durable-replay-store.yml"
+      - "conformance/catalog.yaml"
+      - "contracts/fixtures/durable-replay-store-v1/**"
+      - "kernel/Cargo.lock"
+      - "kernel/Cargo.toml"
+      - "kernel/rust-toolchain.toml"
+      - "kernel/helix-contracts/**"
+      - "kernel/helix-plan-eligibility/**"
+      - "kernel/helix-replay-sqlite/**"
+      - "specs/003-durable-replay-store/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+
+concurrency:
+  group: durable-replay-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: "1"
+
+jobs:
+  conformance:
+    name: PLAN-003 / ${{ matrix.platform }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux-x86_64
+            runner: ubuntu-24.04
+            expected_host: x86_64-unknown-linux-gnu
+          - platform: macos-arm64
+            runner: macos-26
+            expected_host: aarch64-apple-darwin
+          - platform: windows-x64
+            runner: windows-2022
+            expected_host: x86_64-pc-windows-msvc
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install pinned Rust 1.96.1
+        shell: pwsh
+        run: |
+          rustup toolchain install 1.96.1 --profile minimal --component rustfmt,clippy --no-self-update
+          rustup default 1.96.1
+          rustc --version --verbose
+          cargo --version --verbose
+
+      - name: Assert runner architecture
+        shell: pwsh
+        run: |
+          $hostLine = (rustc --version --verbose | Select-String '^host:').Line
+          if (-not $hostLine) {
+            throw 'rustc did not report a host triple'
+          }
+          $actualHost = $hostLine.Substring(5).Trim()
+          $expectedHost = '${{ matrix.expected_host }}'
+          if ($actualHost -ne $expectedHost) {
+            throw "runner host mismatch: expected $expectedHost, got $actualHost"
+          }
+
+      - name: Check formatting
+        working-directory: kernel
+        run: >-
+          cargo fmt
+          --package helix-contracts
+          --package helix-plan-eligibility
+          --package helix-replay-sqlite
+          -- --check
+
+      - name: Lint default production surface
+        working-directory: kernel
+        run: >-
+          cargo clippy --locked
+          --package helix-replay-sqlite
+          --all-targets
+          -- -D warnings
+
+      - name: Lint test fault surface
+        working-directory: kernel
+        run: >-
+          cargo clippy --locked
+          --package helix-replay-sqlite
+          --all-targets
+          --features test-fault-injection
+          -- -D warnings
+
+      - name: Test prerequisite contract regressions
+        working-directory: kernel
+        run: >-
+          cargo test --locked
+          --package helix-contracts
+          --package helix-plan-eligibility
+          --all-targets
+
+      - name: Test durable replay default surface
+        working-directory: kernel
+        run: cargo test --locked --package helix-replay-sqlite --all-targets
+
+      - name: Test all 68 corpus and private fault scenarios
+        working-directory: kernel
+        run: >-
+          cargo test --locked
+          --package helix-replay-sqlite
+          --all-targets
+          --all-features
+          -- --test-threads=1
+
+      - name: Prove release contention
+        working-directory: kernel
+        run: >-
+          cargo test --locked --release
+          --package helix-replay-sqlite
+          --test contention --
+          --ignored --nocapture --test-threads=1
+
+      - name: Prove process-kill recovery
+        working-directory: kernel
+        run: >-
+          cargo test --locked --release
+          --package helix-replay-sqlite
+          --features test-fault-injection
+          --test process_crash --
+          --ignored --nocapture --test-threads=1
+
+      - name: Capture exact runner image and bundled SQLite runtime
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:ImageOS)) {
+            throw 'GitHub-hosted runner did not expose ImageOS'
+          }
+          if ([string]::IsNullOrWhiteSpace($env:ImageVersion)) {
+            throw 'GitHub-hosted runner did not expose ImageVersion'
+          }
+
+          $probe = 'kernel/helix-replay-sqlite/examples/ci_sqlite_profile.rs'
+          if (Test-Path -LiteralPath $probe) {
+            throw 'temporary SQLite profile probe path already exists'
+          }
+          $probeSource = @'
+          use rusqlite::{Connection, OpenFlags};
+          use serde::Serialize;
+          use std::error::Error;
+          use std::time::{SystemTime, UNIX_EPOCH};
+
+          #[derive(Serialize)]
+          struct Profile {
+              sqlite_version: String,
+              sqlite_source_id: String,
+              sqlite_ffi_source_id: String,
+              journal_mode: String,
+              synchronous: i64,
+              wal_autocheckpoint: i64,
+              foreign_keys: i64,
+              trusted_schema: i64,
+              cell_size_check: i64,
+          }
+
+          fn pragma_i64(connection: &Connection, name: &str) -> rusqlite::Result<i64> {
+              connection.pragma_query_value(None, name, |row| row.get(0))
+          }
+
+          fn main() -> Result<(), Box<dyn Error>> {
+              let unique = SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos();
+              let root = std::env::temp_dir().join(format!(
+                  "helix-plan-003-sqlite-profile-{}-{unique}",
+                  std::process::id()
+              ));
+              std::fs::create_dir(&root)?;
+              let database = root.join("profile.sqlite3");
+              let connection = Connection::open_with_flags(
+                  &database,
+                  OpenFlags::SQLITE_OPEN_READ_WRITE
+                      | OpenFlags::SQLITE_OPEN_CREATE
+                      | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+              )?;
+              let journal_mode: String = connection.query_row(
+                  "PRAGMA journal_mode = WAL",
+                  [],
+                  |row| row.get(0),
+              )?;
+              connection.pragma_update(None, "synchronous", "FULL")?;
+              connection.pragma_update(None, "wal_autocheckpoint", 0_i64)?;
+              connection.pragma_update(None, "foreign_keys", "ON")?;
+              connection.pragma_update(None, "trusted_schema", "OFF")?;
+              connection.pragma_update(None, "cell_size_check", "ON")?;
+              let sqlite_source_id: String = connection.query_row(
+                  "SELECT sqlite_source_id()",
+                  [],
+                  |row| row.get(0),
+              )?;
+              let profile = Profile {
+                  sqlite_version: rusqlite::version().to_owned(),
+                  sqlite_source_id,
+                  sqlite_ffi_source_id: rusqlite::ffi::SQLITE_SOURCE_ID.to_str()?.to_owned(),
+                  journal_mode,
+                  synchronous: pragma_i64(&connection, "synchronous")?,
+                  wal_autocheckpoint: pragma_i64(&connection, "wal_autocheckpoint")?,
+                  foreign_keys: pragma_i64(&connection, "foreign_keys")?,
+                  trusted_schema: pragma_i64(&connection, "trusted_schema")?,
+                  cell_size_check: pragma_i64(&connection, "cell_size_check")?,
+              };
+              drop(connection);
+              std::fs::remove_dir_all(root)?;
+              println!("{}", serde_json::to_string(&profile)?);
+              Ok(())
+          }
+          '@
+          Set-Content -LiteralPath $probe -Value $probeSource -Encoding utf8 -NoNewline
+          try {
+            $profileJson = ((cargo run --locked --quiet `
+              --manifest-path kernel/Cargo.toml `
+              --package helix-replay-sqlite `
+              --example ci_sqlite_profile | Out-String).Trim())
+            if ($LASTEXITCODE -ne 0) {
+              throw 'bundled SQLite runtime probe failed'
+            }
+          }
+          finally {
+            Remove-Item -LiteralPath $probe -Force
+          }
+
+          try {
+            $profile = $profileJson | ConvertFrom-Json -ErrorAction Stop
+          }
+          catch {
+            throw 'bundled SQLite runtime probe did not emit one JSON object'
+          }
+          $expectedSourceId = '2026-06-03 19:12:13 d6e03d8c777cfa2d35e3b60d8ec3e0187f3e9f99d8e2ee9cac695fd6fcdf1a24'
+          if ($profile.sqlite_version -ne '3.53.2' `
+              -or $profile.sqlite_source_id -ne $expectedSourceId `
+              -or $profile.sqlite_ffi_source_id -ne $expectedSourceId `
+              -or $profile.journal_mode -ine 'wal' `
+              -or $profile.synchronous -ne 2 `
+              -or $profile.wal_autocheckpoint -ne 0 `
+              -or $profile.foreign_keys -ne 1 `
+              -or $profile.trusted_schema -ne 0 `
+              -or $profile.cell_size_check -ne 1) {
+            throw 'bundled SQLite source or required runtime profile drifted'
+          }
+
+          $runtimeMetadata = [ordered]@{
+            schema = 'helixos.durable-replay-store-runtime-metadata/1'
+            runner_label = '${{ matrix.runner }}'
+            runner_image_os = $env:ImageOS
+            runner_image_version = $env:ImageVersion
+            runner_os = '${{ runner.os }}'
+            runner_arch = '${{ runner.arch }}'
+            os_description = [System.Runtime.InteropServices.RuntimeInformation]::OSDescription
+            sqlite_link_profile = 'rusqlite-0.40.1/libsqlite3-sys-0.38.1/bundled-static'
+            sqlite_version = $profile.sqlite_version
+            sqlite_source_id = $profile.sqlite_source_id
+            journal_mode = $profile.journal_mode.ToUpperInvariant()
+            synchronous = 'FULL'
+            synchronous_numeric = $profile.synchronous
+            wal_autocheckpoint_pages = $profile.wal_autocheckpoint
+            foreign_keys = 'ON'
+            trusted_schema = 'OFF'
+            cell_size_check = 'ON'
+          }
+          New-Item -ItemType Directory -Path 'plan-003-evidence' | Out-Null
+          $runtimeMetadata | ConvertTo-Json -Compress | Set-Content `
+            -LiteralPath 'plan-003-evidence/runtime-metadata.json' `
+            -Encoding utf8 -NoNewline
+
+          cargo tree --locked --manifest-path kernel/Cargo.toml `
+            --package helix-replay-sqlite --edges features | Set-Content `
+            -LiteralPath 'plan-003-evidence/cargo-tree.txt' -Encoding utf8
+          if ($LASTEXITCODE -ne 0) {
+            throw 'cargo tree failed'
+          }
+          rustc --version --verbose | Set-Content `
+            -LiteralPath 'plan-003-evidence/rustc-version.txt' -Encoding utf8
+          if ($LASTEXITCODE -ne 0) {
+            throw 'rustc version capture failed'
+          }
+
+      - name: Assert corpus and reviewed schema have not drifted
+        shell: pwsh
+        run: |
+          $drift = git status --porcelain -- `
+            contracts/fixtures/durable-replay-store-v1 `
+            specs/003-durable-replay-store/contracts
+          if ($drift) {
+            $drift | Write-Output
+            throw 'durable replay corpus or reviewed schema changed during validation'
+          }
+
+      - name: Build immutable evidence descriptor
+        shell: pwsh
+        run: |
+          $cases = 'contracts/fixtures/durable-replay-store-v1/cases.json'
+          $outcomes = 'contracts/fixtures/durable-replay-store-v1/expected-outcomes.json'
+          $schema = 'specs/003-durable-replay-store/contracts/replay-store-schema-v1.sql'
+          $manifestSchema = 'specs/003-durable-replay-store/contracts/backup-manifest-v1.schema.json'
+          $casesHash = (Get-FileHash -LiteralPath $cases -Algorithm SHA256).Hash.ToLowerInvariant()
+          $outcomesHash = (Get-FileHash -LiteralPath $outcomes -Algorithm SHA256).Hash.ToLowerInvariant()
+          $schemaHash = (Get-FileHash -LiteralPath $schema -Algorithm SHA256).Hash.ToLowerInvariant()
+          $manifestHash = (Get-FileHash -LiteralPath $manifestSchema -Algorithm SHA256).Hash.ToLowerInvariant()
+          $runtimePath = 'plan-003-evidence/runtime-metadata.json'
+          $treePath = 'plan-003-evidence/cargo-tree.txt'
+          $rustPath = 'plan-003-evidence/rustc-version.txt'
+          $runtime = Get-Content -Raw -LiteralPath $runtimePath | ConvertFrom-Json
+          $runtimeHash = (Get-FileHash -LiteralPath $runtimePath -Algorithm SHA256).Hash.ToLowerInvariant()
+          $treeHash = (Get-FileHash -LiteralPath $treePath -Algorithm SHA256).Hash.ToLowerInvariant()
+          $rustHash = (Get-FileHash -LiteralPath $rustPath -Algorithm SHA256).Hash.ToLowerInvariant()
+          $artifactName = 'plan-003-${{ matrix.platform }}-${{ github.sha }}'
+          $body = @(
+            'schema=helixos.durable-replay-ci-evidence/1'
+            'acceptance_id=PLAN-003'
+            'evidence_kind=process-kill-not-power-loss'
+            'evidence_status=validated-not-yet-catalogued'
+            'platform=${{ matrix.platform }}'
+            'runner_label=${{ matrix.runner }}'
+            "runner_image_os=$($runtime.runner_image_os)"
+            "runner_image_version=$($runtime.runner_image_version)"
+            "runner_os=$($runtime.runner_os)"
+            "runner_arch=$($runtime.runner_arch)"
+            "runner_os_description=$($runtime.os_description)"
+            'rust_host=${{ matrix.expected_host }}'
+            'commit=${{ github.sha }}'
+            'workflow_ref=${{ github.workflow_ref }}'
+            'event_name=${{ github.event_name }}'
+            'run_id=${{ github.run_id }}'
+            'run_attempt=${{ github.run_attempt }}'
+            'run_url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+            "artifact_name=$artifactName"
+            'uploaded_artifact_sha256=published-after-upload'
+            'artifact_attestation=push-or-workflow-dispatch-only'
+            "cases_sha256=$casesHash"
+            'expected_outcomes_schema=helixos.durable-replay-store-summary/1'
+            "expected_outcomes_sha256=$outcomesHash"
+            "store_schema_sha256=$schemaHash"
+            "backup_manifest_schema_sha256=$manifestHash"
+            "runtime_metadata_sha256=$runtimeHash"
+            "cargo_tree_sha256=$treeHash"
+            "rustc_version_sha256=$rustHash"
+            "sqlite_link_profile=$($runtime.sqlite_link_profile)"
+            "sqlite_version=$($runtime.sqlite_version)"
+            "sqlite_source_id=$($runtime.sqlite_source_id)"
+            "sqlite_runtime_profile=journal_mode:$($runtime.journal_mode),synchronous:$($runtime.synchronous),wal_autocheckpoint_pages:$($runtime.wal_autocheckpoint_pages),foreign_keys:$($runtime.foreign_keys),trusted_schema:$($runtime.trusted_schema),cell_size_check:$($runtime.cell_size_check)"
+          ) -join "`n"
+          Set-Content -LiteralPath 'plan-003-evidence/summary.txt' -Value $body -Encoding utf8 -NoNewline
+
+      - name: Upload evidence descriptor
+        id: upload-evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: plan-003-${{ matrix.platform }}-${{ github.sha }}
+          path: plan-003-evidence
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Attest uploaded evidence artifact provenance
+        id: attest-evidence
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
+        with:
+          subject-name: plan-003-${{ matrix.platform }}-${{ github.sha }}
+          subject-digest: sha256:${{ steps.upload-evidence.outputs.artifact-digest }}
+
+      - name: Validate and publish evidence artifact digest
+        if: always() && steps.upload-evidence.outcome == 'success'
+        shell: pwsh
+        env:
+          EVIDENCE_ARTIFACT_ID: ${{ steps.upload-evidence.outputs.artifact-id }}
+          EVIDENCE_ARTIFACT_URL: ${{ steps.upload-evidence.outputs.artifact-url }}
+          EVIDENCE_ARTIFACT_DIGEST: ${{ steps.upload-evidence.outputs.artifact-digest }}
+          EVIDENCE_ATTESTATION_ID: ${{ steps.attest-evidence.outputs.attestation-id }}
+          EVIDENCE_ATTESTATION_URL: ${{ steps.attest-evidence.outputs.attestation-url }}
+          EVIDENCE_ATTESTATION_OUTCOME: ${{ steps.attest-evidence.outcome }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:EVIDENCE_ARTIFACT_ID)) {
+            throw 'upload-artifact did not return an artifact ID'
+          }
+          if ([string]::IsNullOrWhiteSpace($env:EVIDENCE_ARTIFACT_URL)) {
+            throw 'upload-artifact did not return an artifact URL'
+          }
+          if ($env:EVIDENCE_ARTIFACT_DIGEST -notmatch '^[0-9a-fA-F]{64}$') {
+            throw 'upload-artifact did not return a SHA-256 artifact digest'
+          }
+
+          $artifactDigest = $env:EVIDENCE_ARTIFACT_DIGEST.ToLowerInvariant()
+          if ('${{ github.event_name }}' -eq 'pull_request') {
+            $attestationStatus = 'not-produced-pr-validation-only'
+            $attestationId = 'not-applicable'
+            $attestationUrl = 'not-applicable'
+          }
+          else {
+            if ($env:EVIDENCE_ATTESTATION_OUTCOME -ne 'success' `
+                -or [string]::IsNullOrWhiteSpace($env:EVIDENCE_ATTESTATION_ID) `
+                -or [string]::IsNullOrWhiteSpace($env:EVIDENCE_ATTESTATION_URL)) {
+              throw 'immutable evidence run did not publish its required attestation'
+            }
+            $attestationStatus = 'published'
+            $attestationId = $env:EVIDENCE_ATTESTATION_ID
+            $attestationUrl = $env:EVIDENCE_ATTESTATION_URL
+          }
+          $summary = @(
+            'PLAN-003 process-kill validation artifact'
+            'evidence_status=uncatalogued'
+            'platform=${{ matrix.platform }}'
+            'runner_label=${{ matrix.runner }}'
+            'rust_host=${{ matrix.expected_host }}'
+            'commit=${{ github.sha }}'
+            'event_name=${{ github.event_name }}'
+            'run_id=${{ github.run_id }}'
+            "artifact_id=$($env:EVIDENCE_ARTIFACT_ID)"
+            "artifact_url=$($env:EVIDENCE_ARTIFACT_URL)"
+            "uploaded_artifact_sha256=$artifactDigest"
+            "attestation_status=$attestationStatus"
+            "attestation_id=$attestationId"
+            "attestation_url=$attestationUrl"
+            'catalog_claim_status=pending-until-conformance-catalog-is-updated'
+          ) -join "`n"
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value $summary -Encoding utf8

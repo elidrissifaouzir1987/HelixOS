@@ -119,6 +119,11 @@ impl<'plan> ReplayBindingV1<'plan> {
     pub const fn fencing_epoch(&self) -> u64 {
         self.fencing_epoch.get()
     }
+    /// Exclusive absolute deadline in the caller's trusted suspend-aware boot clock.
+    ///
+    /// This scalar is not a duration and must be interpreted in the same clock domain
+    /// that produced the eligibility context. See [`ReplayClaimantV1`] for the bounded
+    /// wait, commit and late-result requirements.
     pub const fn claim_deadline_monotonic_ms(&self) -> u64 {
         self.claim_deadline_monotonic_ms.get()
     }
@@ -229,9 +234,19 @@ impl fmt::Debug for ReplayClaimOutcomeV1 {
 /// Caller-owned atomic replay claimant.
 ///
 /// A production implementation must durably and atomically maintain both uniqueness
-/// indexes, permanently retain successful claims, finish within the binding deadline,
-/// and preserve ambiguous outcomes for sovereign recovery. The in-repository claimant
-/// is test-only and does not establish those production properties.
+/// indexes and permanently retain successful claims. It must interpret the binding's
+/// exclusive deadline in the same trusted suspend-aware boot-clock domain used by the
+/// caller, perform no mutation when that deadline is already reached, bound intentional
+/// lock/wait time by the remaining budget, and recheck after acquiring mutation authority
+/// and immediately before and after commit or definitive readback. It must return no
+/// positive outcome at or after the deadline and leave no detached retry after return.
+///
+/// The synchronous trait does not promise portable hard cancellation of an operating-
+/// system storage flush already in progress. If a mutation may have committed and the
+/// call completes late or cannot obtain a timely definitive readback, the outcome is
+/// [`ReplayClaimOutcomeV1::Ambiguous`], not `Unavailable`; only a definite pre-mutation
+/// failure or confirmed rollback is unavailable. The in-repository claimant is test-only
+/// and does not establish those production durability or timing properties.
 pub trait ReplayClaimantV1: Send + Sync {
     fn claim_once(&self, binding: &ReplayBindingV1<'_>) -> ReplayClaimOutcomeV1;
 }

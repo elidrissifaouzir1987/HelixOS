@@ -320,10 +320,20 @@ plan-v1 issuer namespace and binds:
 - `plan_id` and `operation_id`;
 - `task_id`, `workload_id`, and `task_lease_digest`;
 - current signer trust generation;
-- `instance_epoch`, `fencing_epoch`, and the caller-owned maximum monotonic completion
-  deadline for the claim call.
+- `instance_epoch`, `fencing_epoch`, and the caller-owned exclusive absolute deadline
+  for the claim call in the same trusted suspend-aware boot-monotonic clock domain.
 
 It has private fields, narrow accessors, no serialization and a redacted `Debug`.
+
+The deadline bounds implementable claimant behavior rather than promising cancellation
+of arbitrary synchronous kernel I/O. A production claimant performs no mutation when the
+deadline is already reached, bounds intentional lock waiting by the remaining budget,
+rechecks after writer acquisition and immediately before/after commit or readback,
+returns no positive outcome at or after the deadline, and leaves no detached mutation
+after return. A definitely pre-mutation failure or confirmed rollback is `Unavailable`;
+a possibly committed write that is late or cannot be proved by timely readback is
+`Ambiguous`. The five `ReplayClaimOutcomeV1` variants and all v1 field types remain
+unchanged.
 
 ### `ReplayClaimOutcomeV1`
 
@@ -438,7 +448,9 @@ Authority invariants:
 
 - authentic is not current, eligible is not approved-for-effect, and neither is an
   `ExecutionGrant`;
-- no adapter may depend on `helix-plan-eligibility` or accept its types;
+- no host-effect adapter may depend on `helix-plan-eligibility` or accept its markers;
+  the reviewed non-authority `helix-replay-sqlite` leaf may depend on it only to
+  implement `ReplayClaimantV1` and consume replay binding/outcome types;
 - no plan claim, including an ahead epoch, mutates a trusted provider;
 - no public positive boolean or storable read-only candidate exists;
 - current facts are provider-owned, not reconstructed from the plan or agent input.
@@ -450,8 +462,9 @@ milliseconds, or boot-scoped monotonic milliseconds. The same
 `contracts/fixtures/plan-eligibility-v1/` corpus and stable outcome summary run unchanged
 on Windows, Linux and macOS arm64.
 
-Feature 002 adds no wire version or persisted eligible state. Removal consists of
-removing the leaf workspace member and deleting its source, fixtures, CI and spec
-artefacts, then removing the non-wire claims projection and verification fingerprint if
-they have no remaining consumer. Feature-001 canonical bytes, `plan_id`, signatures,
-fixtures and legacy runtime behavior remain unchanged.
+Feature 002 adds no wire version or persisted eligible state. Removal first removes any
+reviewed `ReplayClaimantV1` provider such as feature 003, then removes the leaf workspace
+member and its source, fixtures, CI and spec artefacts, plus the non-wire claims
+projection and verification fingerprint if they have no remaining consumer.
+Feature-001 canonical bytes, `plan_id`, signatures, fixtures and legacy runtime behavior
+remain unchanged.
