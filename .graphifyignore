@@ -1,0 +1,10 @@
+/.git/
+/graphify-out/
+/kernel/target/
+/.codex/
+/.agents/
+/.impeccable/
+/.superpowers/
+/.specify/integrations/
+/.specify/scripts/
+/.specify/templates/

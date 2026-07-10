@@ -1,215 +1,362 @@
-# Constitution — Agentic OS personnel
+# Constitution — HelixOS
 
-**Version** : 1.4.0
-**Ratifiée le** : 2026-07-06
-**Dernier amendement** : 2026-07-06 — v1.4.0 : surface d'approbation servie par le
-noyau sur origine distincte + notification hors-bande (ntfy), doctrine « agent
-présumé compromissible / défense en aval », noyau = cœur portable (Rust) +
-driver-sidecar hors-processus (retrait de « un seul binaire »), taxonomie de
-rollback inversée (compensation garantie par défaut), reclassement local-vs-cloud
-de l'extraction.
+**Version** : 2.0.0
+**Date d'adoption documentaire** : 2026-07-10
+**Statut** : norme de conception applicable aux nouvelles specs ; conformité de
+release non acquise tant que les gates ne sont pas prouvées
+**Changement majeur** : architecture Mac-first, frontière VM sans partage hôte,
+leases par tâche, egress/secrets médiés, workflow durable, récupération honnête et
+portabilité par conformance.
 
-Cette constitution gouverne toutes les specs, plans et implémentations. `/plan` et
-`/tasks` incluent une section « Constitution check ». Conflit spec/constitution →
-la constitution gagne, ou amendement versionné.
+Cette constitution gouverne l'architecture, les specs, le code, les runbooks et les
+releases. Un conflit est résolu en faveur de la constitution ou par un amendement
+versionné. Chaque plan et chaque release contiennent un **Constitution Check**
+automatisable.
 
-**Doctrine générale** : la sécurité est une topologie, pas une discipline de l'agent.
-L'agent n'a aucune capacité hôte sauf celles que le noyau lui loue — une par une,
-avec preuve, durée, portée et trace. La topologie borne le **chemin** (rien d'autre
-que le noyau ne touche l'hôte) et la **forme** (intentions typées), jamais le **rayon
-de souffle** une fois l'agent détenteur du credential légitime : **l'agent est présumé
-compromissible** (prompt injection non résolu), et la défense du rayon de souffle est
-**en aval** (HITL sur les conséquences, deny-list de secrets, budgets d'exfiltration,
-taint tracking).
+HelixOS est un plan de contrôle de capacités, pas un noyau matériel. Sa doctrine est :
+
+> L'agent est présumé totalement compromis. La sécurité vient de frontières,
+> contrats et décisions déterministes situés en aval du modèle, jamais de sa
+> docilité, de son prompt ou de sa capacité à détecter une injection.
 
 ---
 
-## Principe I — Le noyau de capacités est souverain (NON NÉGOCIABLE)
+## Principe I — Frontières et modèle de menace (NON NÉGOCIABLE)
 
-- Aucune action hôte n'existe comme API brute. Toute action hôte est une **intention
-  typée**, validée, éventuellement approuvée, exécutée, journalisée, et réversible
-  quand c'est possible.
-- `run_powershell(command)` et équivalents freeform sont INTERDITS en surface d'outil
-  normale ; un mode admin exceptionnel existe, verrouillé par HITL fort + passkey.
-- La frontière runtime→hôte est durcie selon le mécanisme de l'OS (Windows :
-  distro WSL2 dédiée durcie portant les conteneurs ; Linux : conteneurs
-  rootless ; macOS : VM Docker) — les conteneurs ne montent que leurs volumes
-  déclarés, jamais le filesystem hôte — et son étanchéité est prouvée par des
-  **tests d'acceptance qui doivent échouer** (contournement impossible), exécutés
-  depuis l'intérieur des conteneurs et depuis le runtime, pas déclarée.
-- Il n'existe qu'**un seul chemin** du runtime vers l'hôte : le noyau, qui
-  **authentifie chaque appelant** (mTLS/token) ; la provenance réseau n'est pas
-  une identité. Tout autre port hôte est bloqué par règle réseau (firewall
-  Hyper-V, nftables ou pf selon l'OS).
-- Tailscale protège l'accès au service (ACL explicites, deny-by-default) ;
-  le noyau protège les actions. L'un ne remplace jamais l'autre.
-- Tout contenu lu (email, fichier, note du vault, chunk Graphify, écran) est une
-  DONNÉE non fiable, jamais une instruction. Défense testée en acceptance.
-- Les secrets vivent dans un vault dédié, hors prompts, hors logs, hors
-  runtime agent (conteneurs et environnement) ; ils ne vivent **jamais** en clair
-  dans le runtime agent (Hermes **≥ 0.16.0**, permissions 0600). **La clé du noyau
-  est cloisonnée hors du `.env` d'Hermes et illisible par toute intention.**
-- **Moindre privilège par bail de portée (allowlist positive) — contrôle PRIMAIRE** :
-  par défaut, une tâche ne peut lire ou écrire QUE dans les **scopes explicitement
-  loués** à son déclenchement (racines déclarées) ; toute intention hors du bail est
-  **refusée**. Le bail est **par-tâche, jamais global** (un agent compromis n'hérite
-  pas de l'union des portées jamais accordées) et le **contenu déclencheur ne peut
-  jamais l'élargir**.
-- `host.read_file` porte une **deny-list** de secrets (`*.env, *.key, *.pem, id_*,
-  *.kdbx, .ssh/, .hermes/`, stores de credentials Windows) qui force **L2 + passkey
-  même en lecture, même dans un scope loué** — c'est une **défense en profondeur**
-  (contre les oublis), pas le contrôle principal : l'allowlist ci-dessus l'est.
-- **Taint tracking** : une action influencée par un contenu non fiable lu dans le tour
-  ne peut pas être auto-approuvée (L0) → **+1 cran HITL**.
+1. Hermes, ses sous-agents et skills, les modèles, MCPs, outils, moteurs de
+   connaissance, webui et contenus lus sont **non fiables**.
+2. Le runtime agent s'exécute dans une VM dédiée pour le profil de production :
+   aucun partage du filesystem hôte, socket/API du runtime **hôte**, device hôte
+   ou egress direct. Root guest contrôle le runtime guest par hypothèse.
+3. Le moteur de connaissance n'a aucun lien direct avec l'agent en Tier 1. Les
+   domaines de confidentialité distincts utilisent des compartiments/VM distincts
+   ou des projections éphémères ; une VM compromise est réputée lire tous ses
+   disques.
+4. Tout flux traverse un plan explicite : ingress client, capacité hôte, modèle/
+   egress, projection de connaissance ou maintenance. Un réseau privé n'est pas une
+   identité et un port unique n'est pas un modèle de sécurité.
+   En Tier 1, l'absence de NIC généraliste ou le filtre hôte/hyperviseur est le
+   contrôle egress primaire ; un firewall guest n'est qu'une seconde couche.
+5. Une compromission totale de la VM agent est un scénario d'acceptance. Elle ne
+   donne aucun **nouvel** accès hôte, effet ou egress hors bail, policy et approval
+   valides, ni secret brut. Tout octet déjà matérialisé dans cette zone est en
+   revanche réputé divulgué jusqu'à destruction du compartiment.
+6. Le compromis administrateur/root de l'hôte, du firmware ou de la chaîne de build
+   souveraine est hors du périmètre de prévention. Les preuves hors hôte doivent
+   rendre certaines altérations détectables.
+7. Le profil de confiance, les menaces exclues et les hypothèses sont versionnés.
+   Toute nouvelle intégration modifie le threat model avant d'être activée.
 
-## Principe II — Approbation signée, HITL gradué
+## Principe II — Autorité minimale, typée et liée à la tâche
 
-- Trois niveaux, proportionnés au risque, pour éviter la fatigue d'approbation :
-  L0 lecture sûre (audit seul) ; L1 écriture faible réversible (approbation légère
-  PWA) ; L2 destructif/externe/irréversible/admin (PWA + passkey).
-- L'humain **signe le plan, pas le texte affiché** : plan canonique, hashé,
-  à usage unique, TTL court. Le noyau refuse tout hash divergent, tout rejeu,
-  tout plan expiré.
-- **Anti-TOCTOU** : le plan porte le hash de la cible au moment du diff ; cible
-  modifiée → refus, re-diff, re-approbation.
-- La carte d'approbation affiche : résumé, diff, portée, classe de rollback,
-  identité de la tâche et du sous-agent, hash du plan, expiration, niveau de risque.
-- La surface d'approbation (rendu canonique du plan, diff, vérification passkey)
-  est **servie par le noyau lui-même** sur une **origine distincte** (host:port +
-  certif dédiés, `frame-ancestors 'none'`), jamais dans une vue contrôlable par la
-  webui. Le deep link est livré **hors-bande par ntfy** (self-hosté dans le tailnet) ;
-  son **contenu (résumé + hash du plan) est émis par le noyau, pas par l'agent**. Le
-  passkey prouve « l'humain a cliqué », pas « l'humain a vu la vérité » → **comparaison
-  de hash de plan exigée pour les L2**. La webui **sort du chemin d'autorité** (commodité
-  jetable). Cette surface reste opérante si l'agent est éteint ou compromis.
-- WhatsApp/SMS est un canal de **notification** ; il n'approuve jamais seul une
-  action L2 — il redirige vers la PWA. Le vocal n'approuve jamais L1/L2.
-- L'humain peut révoquer en cours de tâche ; l'agent s'arrête proprement (checkpoint).
+1. Il n'existe aucune API hôte brute. Toute action agentique est une **intention
+   typée** connue, validée et bornée.
+2. Une identité de workload authentifie un compartiment réellement isolé ; root
+   VM peut voler toute clé guest et impersonner ses conteneurs jusqu'à rotation.
+   Elle n'accorde aucune portée.
+   Un `TaskLease` signé par le cœur accorde à une tâche des intentions,
+   racines, budgets, compteurs et une durée précis.
+3. Le cœur, à partir d'un `HumanRequestGrant` one-shot signé par un ingress
+   humain authentifié ou d'un déclencheur enregistré, est le seul émetteur de bail.
+   Un message déclaré par Hermes n'est pas une preuve humaine. L'agent ne peut ni
+   s'autoriser, ni élargir, ni renouveler silencieusement.
+4. Une délégation ne peut que réduire portée, budget, durée et catalogue. Un
+   sous-agent n'hérite jamais de l'union des privilèges du parent ou de tâches
+   précédentes.
+5. Toute version ou intention inconnue est **refusée**, pas envoyée à
+   l'approbation. Une approbation humaine ne rend pas un contrat incompris sûr.
+6. Les ressources sont des identifiants opaques `root_id + composants relatifs`,
+   jamais des chemins bruts choisis par l'agent. Résolution par handle, validation
+   de file ID/volume ID et défense contre traversal, symlink, hardlink, reparse,
+   ADS, casse et Unicode sont obligatoires.
+7. Les binaires/policies du cœur, credentials, audit, backups, UI d'approbation,
+   configuration du superviseur et stores souverains sont des cibles
+   non autorisables.
+8. Un shell break-glass est un outil humain local, séparé, désactivé par défaut. Il
+   n'est jamais accessible à un credential agent. Un script automatisable est un
+   package immuable signé avec paramètres, environnement, réseau, limites et
+   vérification déclarés.
+9. Roots, policies, packages, triggers, provider allowlists et trust stores ne sont
+   modifiés que par `helixctl admin` ou une UI souveraine : principal humain
+   fort, révision signée, audit et rollback.
 
-## Principe III — Client léger, serveur souverain
+## Principe III — Autorisation humaine souveraine
 
-- Toute l'intelligence et tout l'état vivent sur la workstation ; les clients (PWA,
-  vocal) affichent et transmettent. Une coupure client/tunnel n'interrompt ni ne
-  corrompt une tâche (file persistante + checkpointing).
-- Tous les clients consomment les mêmes contrats versionnés.
-- Contrainte d'exploitation : hermes-webui et hermes-agent se mettent à jour
-  ensemble (couplage de versions assumé).
+1. Trois niveaux existent : L0 déterministe et borné ; L1 effet faible/récupérable
+   avec session authentifiée ; L2 nouvelle destination/provider, effet externe
+   visible, donnée sensible, administrateur, dépense hors enveloppe ou absence de
+   récupération, avec WebAuthn user verification. L'inférence routinière dans une
+   enveloppe pré-autorisée n'est pas L2 par nature.
+2. Certaines opérations sont toujours refusées, même L2 : lecture brute de secret,
+   extension de bail par l'agent, contrat inconnu ou mutation d'une cible souveraine.
+3. Le plan est canonique, haché et signé. Il lie versions, tâche/bail, cible,
+   préconditions, effets, budget, profil de récupération, vérification, expiry,
+   nonce et fencing epoch.
+4. L'assertion WebAuthn est liée au digest complet, à la décision,
+   `operation_id`, au nonce et à l'expiration. Le fingerprint visuel est une
+   aide, jamais le contrôle cryptographique.
+5. La surface d'approbation est servie depuis un **hostname dédié** sans cookie,
+   CORS, frame ou service worker partagé avec la webui. Un port différent sur le
+   même hostname ne suffit pas.
+6. L'UI rend les données canoniques stockées par le cœur ; elle n'affiche pas un
+   diff ou résumé fourni comme vérité par l'agent.
+7. ntfy, email, messagerie et vocal sont des canaux de notification. Un lien est
+   opaque, court et non-bearer ; aucun de ces canaux n'approuve seul une action.
+8. Enrôlement, seconde passkey, perte, révocation et récupération sont testés avant
+   le mode autonome.
+9. La révocation est possible pendant une tâche. Le résultat peut devenir
+   `OUTCOME_UNKNOWN` ; le système ne prétend pas annuler un effet déjà commis.
 
-## Principe IV — Une seule source de vérité, lisible
+## Principe IV — Effets durables, vérification et récupération honnête
 
-- Le vault Obsidian (Windows) est la vérité humaine : durable, éditable,
-  versionnable Git. **Toute mutation durable passe par le noyau.**
-- Graphify est un index dérivé : il indexe, résume, relie, suggère — il ne devient
-  **jamais** source de vérité ni autorité. Reconstructible par commande.
-- La mémoire Hermes se limite à l'utile pour agir (préférences, conventions,
-  procédures, résumés stables) ; pas de duplication massive du vault.
-- Toute réponse fondée sur le retrieval est traçable à sa source.
+1. Le cycle normatif est :
 
-## Principe V — Vérifier, et être honnête sur l'irréversible
+   `receive → validate → plan → authorize → prepare → execute → verify → settle`.
 
-- Boucle : raisonner → agir → VÉRIFIER. Aucune action à effet de bord n'est réussie
-  sans vérification du résultat.
-- Taxonomie de rollback à trois classes : `compensation` (copie-aside +
-  `ReplaceFile` atomique, déterministe, tout filesystem, sans élévation) est la classe
-  **garantie par défaut** ; `auto` (VSS) est l'**exception opportuniste** derrière un
-  probe (NTFS fixe + writers sains + espace + élévation), **un snapshot par lot, jamais
-  par fichier** ; `irreversible` (aucune garantie). Une action irréversible n'est
-  **jamais présentée comme rollbackable** ; elle exige L2. La classe est **observée**
-  par le driver au runtime, **jamais promise** par le contrat.
-- Idempotence : un plan s'exécute au plus une fois ; crash/restart du noyau →
-  pas de double exécution, état récupérable depuis le journal.
-- Quotas par appelant et par fenêtre de temps ; sous-agents sous moindre privilège.
+   Chaque transition significative est persistée avant l'action suivante.
+2. L'état de reprise appartient à une machine d'état durable et une transactional
+   outbox, pas au seul audit ni à la mémoire du process.
+3. Il n'existe pas de garantie `exactly once` universelle entre DB,
+   filesystem, processus et API. Les effets utilisent des idempotency keys quand
+   le provider les garantit ; sinon un crash ambigu devient
+   `OUTCOME_UNKNOWN / RECONCILIATION_REQUIRED` et n'est pas rejoué
+   automatiquement.
+4. Toute action à effet de bord a un prédicat de vérification. Sans résultat
+   vérifiable, elle n'est pas déclarée réussie.
+5. Atomicité, compensation préparée, snapshot vérifié et irréversibilité sont des
+   propriétés observées séparément. Aucun label de rollback n'est promis par le nom
+   de l'OS.
+6. Une compensation n'est annoncée qu'après pré-image durable, hash vérifié,
+   métadonnées supportées et espace réservé. Échec de préparation → refus ou
+   reclassification irréversible + L2.
+7. Un rollback automatique vérifie le post-hash. Une modification humaine
+   concurrente produit un conflit/merge, jamais un écrasement.
+8. Un plan multi-cibles déclare ordre, point de commit, effet partiel et stratégie
+   de compensation ; à défaut il est refusé.
+9. Le superviseur de PAUSE/ABORT/HALT est indépendant du scheduler et du pool du
+   cœur. Chaque exécution porte un fencing epoch ; après HALT le redémarrage est
+   PAUSED.
+   Une primitive process-group macOS est best-effort ; du code potentiellement
+   hostile exige une VM éphémère. Un descendant survivant échoue Tier 1.
+10. Un `ExecutionGrant` est inscrit dans un inbox durable avant consommation
+    et produit un receipt adapter durable. L'état DISPATCHING est persisté avant
+    l'envoi ; replay ou échec de transport ne crée pas un second effet.
 
-## Principe VI — Réactivité budgétée, matériel modeste
+## Principe V — Données, secrets et vie privée
 
-- Le système fonctionne sur toute machine capable de faire tourner des
-  conteneurs. Ce qui est **local sans GPU** = **code + transcription**
-  (faster-whisper int8 CPU) ; les images/PDF/docs/entités **exigent un LLM**
-  (Ollama local **ou** cloud par exception) — ce n'est pas de l'extraction
-  légère sur CPU. **Un GPU accélère la vision locale (Ollama), il n'est jamais
-  requis** pour le socle.
-- PWA : feedback < 200 ms sur toute action utilisateur.
-- Les jobs lourds (indexation, backfill médias) tournent en heures creuses et ne
-  dégradent jamais l'interactif (PWA/chat) — vérifié au **p95/p99 sous charge**,
-  jamais à la moyenne.
-- Si le pipeline vocal temps réel (extension ultérieure) est un jour activé, il
-  réintroduit son budget propre (< 1,5 s) et l'ordonnanceur GPU préemptif.
-- Les budgets d'autonomie doivent inclure un **plafond en devise** (jour/mois, par
-  déclencheur et global), pas seulement un nombre d'actions.
+1. La vérité documentaire est le vault/fichier humain. Toute mutation **issue de
+   l'agent** passe par le cœur ; les modifications humaines ou faites par
+   l'application native restent autoritaires et sont réconciliées.
+2. La DB du cœur est la vérité des opérations, plans, approvals et budgets.
+   Hermes est la mémoire conversationnelle non souveraine ; le knowledge provider
+   est un index dérivé et reconstructible.
+3. Aucun moteur non fiable ne monte le filesystem hôte, même en lecture seule. Le
+   cœur matérialise une projection filtrée, immutable, hachée et accompagnée de
+   manifests/tombstones. Projeter est une **déclassification** : toute donnée sur
+   le disque d'une VM non fiable est réputée divulguée à cette VM.
+4. En Tier 1, Hermes ne parle jamais directement au moteur de connaissance. Le
+   moteur renvoie uniquement des IDs candidats/scores bornés ; le cœur filtre les
+   IDs par bail, relit lui-même les contenus autorisés et construit les extraits.
+   Les domaines de confidentialité sont physiquement séparés.
+5. Les secrets ne résident jamais en clair dans le runtime agent, ses
+   environnements, volumes, prompts ou logs. Des permissions `0600` ne sont
+   pas un store de secrets.
+6. Les secrets sont détenus par Keychain/DPAPI/store Linux. L'agent utilise des
+   verbes tels que signer, authentifier ou injecter dans un package approuvé ; il
+   ne reçoit jamais les octets bruts.
+   Un package credential-capable possède un signer/trust tier dédié, digest,
+   purpose, destination et réseau liés au plan ; aucune sortie agent-readable.
+7. Modèles, web, notifications et connecteurs sortants passent par une gateway
+   sandboxée distincte du cœur. Elle détient les credentials, n'a aucune capacité
+   hôte et contrôle DNS/destinations/redirections, tailles, octets, coût et
+   classification. Tout label fourni par l'agent est réputé le plus restrictif.
+8. Les données sont classées public/interne/confidentiel/secret. Le secret ne part
+   jamais au cloud ; le confidentiel exige une policy/consentement explicite.
+9. Coûts et quotas sont réservés avant l'appel, comptés en micro-unités entières
+   avec table de prix versionnée, puis réconciliés. Un budget dépassé coupe avant
+   dispatch et met l'autonomie en pause.
+10. Toute tâche agent démarre non fiable/sticky car mémoire, skills et données
+    VM-locales peuvent déjà l'avoir influencée. Les chemins médiés ajoutent de la
+    provenance ; un modèle ne peut pas s'auto-déclarer fiable ni déclassifier.
+11. Rétention, export, suppression, redaction, télémétrie et localisation cloud
+    sont explicites et testables.
 
-## Principe VII — Observabilité totale
+## Principe VI — Portabilité par contrat et conformance
 
-- Chaque opération produit un objet d'audit append-only (caller, source, tool, risk,
-  target, plan_hash, approval_id, rollback, timestamps, result, trace_id,
-  `subagent_id` = **hint déclaratif** fourni par l'appelant (debug/coûts), **sans
-  valeur de sécurité**). La traçabilité fiable repose sur le **credential mTLS + le
-  plan signé**, jamais sur ce champ.
-- Traces complètes corrélées de la pensée au résultat ; coût et latence par étape ;
-  sessions rejouables.
-- Le suivi humain des tâches (Todos/Tasks/Kanban) reflète aussi l'état
-  « en attente d'approbation », dérivé de l'audit du noyau.
+1. Le cœur souverain et ses **verbes/policies** n'exposent aucun concept Windows,
+   Linux ou macOS. `os`/`arch` peuvent apparaître comme métadonnées de
+   preuve dans `CapabilityReport` ; les primitives de filesystem, service,
+   credential, processus, watcher, snapshot et compute résident dans des
+   adaptateurs.
+2. L'adaptateur publie un `CapabilityReport` observé. Les plans se fondent
+   sur les capacités présentes à cet instant, pas sur le nom de l'OS.
+3. L'adaptateur n'implémente ni policy, ni approbation, ni auth de l'appelant agent.
+   Il accepte un `ExecutionGrant` signé, court, one-shot et lié au plan,
+   au verb, aux arguments et à l'epoch.
+4. macOS Apple Silicon est la référence d'implémentation, pas une permission
+   d'introduire Metal, launchd, APFS ou Keychain dans le contrat commun.
+5. La portabilité est **prouvée au deuxième driver** par la même suite de
+   conformance inchangée. Avant cela, seule l'intention de portabilité peut être
+   revendiquée.
+6. Les fonctionnalités ont des tiers : socle portable, amélioration native
+   opportuniste, extension privilégiée/session. Une fonctionnalité absente est
+   signalée/refusée, jamais simulée par un fallback plus dangereux.
+7. Les fichiers partagés suivent un profil de noms portable et sont testés sur
+   APFS sensible/insensible à la casse, ext4/Btrfs et NTFS. Réseau, cloud drive,
+   placeholders et supports amovibles sont des classes séparées.
+8. Images et binaires sont natifs à l'architecture. Sur M4, `arm64` est le
+   défaut ; Rosetta/émulation n'est jamais une preuve de performance ou de support.
 
-## Principe VIII — Incrémentalité et contrats stables
+## Principe VII — Performance, disponibilité et budgets
 
-- Construction par lots livrables ; chaque lot laisse le système utilisable, dans
-  l'ordre : frontière → noyau → HITL signé → usages hôte → indexation → vocal/GPU
-  → autonomie.
-- Contrats versionnés sans rupture silencieuse : catalogue d'intentions, format de
-  plan signé, objet d'audit, API clients, schéma document indexé.
-- Toute nouvelle capacité s'intègre déclarativement (intention au catalogue + règle
-  de policy + classe de rollback), jamais par API brute.
-- **Portabilité** : le contrat d'intentions ne contient aucun concept spécifique
-  à un OS ; l'OS-spécifique est confiné aux drivers (recherche, snapshot, shell,
-  service). Le noyau est un **cœur portable unique (idéalement un binaire)** qui, sur
-  un OS donné, peut être secondé par un **driver-sidecar hors-processus** quand une
-  capacité hôte n'est atteignable proprement que par une autre pile (ex. VSS
-  backup-context / COM Windows via .NET). **Un driver-sidecar n'implémente jamais
-  policy, HITL ni auth d'appelant** : il n'exécute que des verbes typés déjà validés,
-  en localhost only, authentifié par le cœur, audité avec le `plan_hash`, remplaçable.
-  Le contrat est portable, les drivers s'implémentent un par un ; l'**architecture est
-  prête pour la portabilité** (prouvée au 2e driver).
-- La politique de routage de modèles (quel modèle/provider pour quel type de tâche,
-  coût et latence en contraintes) est une configuration déclarative versionnée —
-  la mécanique multi-modèles est native (Hermes), la politique appartient au projet.
-- L'autonomie (déclencheurs) porte des budgets explicites ; le contenu déclencheur
-  ne peut jamais élargir la politique de sa tâche. Kill switch global < 5 s.
+1. Tout objectif de performance précise hardware, OS/runtime, corpus, concurrence,
+   échantillon, percentile et artefact de mesure. Les moyennes seules sont
+   insuffisantes.
+2. Le contrôle et l'urgence ont des lanes réservées. Files bornées, backpressure,
+   deadlines, limites de concurrence et circuit breakers empêchent OOM,
+   starvation et boucle.
+3. Les jobs interactifs et background sont isolés par quotas CPU, mémoire, PIDs et
+   I/O. Sur Apple Silicon, la mémoire unifiée est budgétée avec une marge hôte et
+   le compute Metal reste natif.
+4. SLO minimaux provisoires : acquittement UI p95 ≤ 200 ms ; décision L0 p95
+   ≤ 250 ms ; dégradation interactive p95 ≤ 10 % sous un worker d'indexation ;
+   PAUSE persistée < 5 s. Ils sont ratifiés par benchmark M4.
+5. Chaque déclencheur autonome a budget d'actions, octets, fichiers, coût,
+   concurrence et durée, plus un plafond global. Le contenu déclencheur ne peut
+   jamais l'élargir.
+6. Une panne de policy, identité, budget, audit durable ou stockage de receipt
+   **avant dispatch** fait échouer la mutation en mode fermé. Après un effet
+   possible, un échec de persistance produit `OUTCOME_UNKNOWN/AUDIT_PENDING`
+   et PAUSE globale, jamais une fausse affirmation fail-closed. Des lectures
+   explicitement sûres peuvent se dégrader selon une règle versionnée.
+7. Liveness, readiness et dependency health sont distincts. Sleep/wake, session
+   verrouillée, FileVault, reboot, perte réseau et power failure sont exercés sur
+   le matériel réel.
+8. Un relais est une option de récupération/healthcheck hors bande, pas une
+   dépendance obligatoire ni une promesse de haute disponibilité.
+
+## Principe VIII — Observabilité vérifiable et sobre
+
+1. État opérationnel, audit sécurité, logs, métriques, traces et journal humain sont
+   des flux distincts avec leurs propres accès, rétention et sauvegarde.
+2. Chaque effet porte séquence, tâche/lease/workload, policy/catalog versions,
+   plan hash, décision, receipt, résultat, coût, latence et trace ID.
+3. Le ledger d'audit est hash-chainé, segmenté, checkpointé par signature et copié
+   chiffré hors hôte. Append-only local seul n'est pas une preuve anti-altération.
+4. Redaction et classification ont lieu avant sérialisation. Secrets, credentials,
+   contenu sensible complet et tokens d'approbation ne sont jamais loggés.
+5. Les traces stockent événements, outils, provenance, résumés de décision et
+   vérifications. Elles ne stockent ni ne réclament la chaîne de pensée privée du
+   modèle.
+6. Wall clock et horloge monotone sont conservées selon leur rôle ; sleep/resume,
+   correction d'heure, fuseau et DST ne doivent pas invalider leases ou mesures.
+7. Toute alerte a un owner, un seuil et un runbook. Les métriques sans décision
+   opérationnelle associée sont optionnelles.
+
+## Principe IX — Chaîne d'approvisionnement et cycle de vie
+
+1. Dépendances, images et composants tiers sont épinglés. Releases natives et OCI
+   sont signées, accompagnées de SBOM/provenance et vérifiées avant installation.
+2. Hermes, Graphify, webui, modèles et runtimes sont remplaçables et non souverains.
+   Leur popularité ou leur propre sandbox ne satisfait pas les invariants HelixOS.
+3. Les services natifs sont distribués par packages signés adaptés à l'OS ; les
+   conteneurs par manifests multi-arch et digests résolus.
+   Backend VM, guest kernel/init/rootfs, runtime et workers appartiennent aussi à
+   la matrice de signature/compatibilité/CVE/rollback.
+4. Une update suit : vérifier → quiesce/drain → backup → migration compatible →
+   A/B ou remplacement atomique → smoke → commit/rollback. Une seule instance
+   détient le fencing actif.
+5. Aucun auto-update du cœur souverain sans artefact vérifié, matrice de
+   compatibilité, preuve de restore et chemin de rollback.
+6. Les migrations utilisent expand/contract et déclarent la version minimale de
+   rollback. Un downgrade incompatible est refusé.
+7. La sauvegarde couvre DB online, policies, catalogue, audit/checkpoints, CAS de
+   récupération, clés/inventaires nécessaires et données non reproductibles.
+8. Une restauration est testée sur machine vierge. Elle démarre PAUSED, incrémente
+   l'epoch, expire leases/plans/approvals et réconcilie les effets avant reprise.
+9. Les identités réseau/machine sont ré-enrôlées ; cloner aveuglément un state file
+   ou une clé longue durée est interdit par défaut.
+
+## Principe X — Incrémentalité, preuves et gouvernance
+
+1. L'ordre est : contrats/harness → tranche Mac utile → sécurité/ops → second
+   driver → troisième driver → connaissance → autonomie → extensions.
+2. Aucun moteur de connaissance, vision, UI automation, snapshot privilégié ou
+   swarm n'entre dans le chemin critique avant la tranche verticale robuste.
+3. Chaque lot a des critères IN/OUT, SLO, menaces, tests négatifs, preuve de
+   rollback/restore et mode de retrait.
+4. Le catalogue d'acceptance est versionné. Chaque test décrit fixture, hardware,
+   workload, répétitions, seuil et artefact. « Documenté » n'équivaut pas à
+   « prouvé ».
+5. Une release ne peut annoncer Tier 1 que si sécurité, conformance,
+   backup/restore, upgrade/rollback et performance ont des preuves sur matériel
+   réel.
+6. Le Constitution Check bloque unknown intent/schema, cible souveraine,
+   host-share, egress direct, secret runtime, artefact non vérifié et test requis
+   absent.
 
 ---
 
-## Gouvernance
+## Règles de gouvernance
 
-- **Amendements** : MAJOR (principe change de sens), MINOR (ajout), PATCH
-  (clarification), avec justification datée.
-- **Dérogations** : temporaires, explicites, datées, plan de résorption.
-- **Historique** : 1.0.0 ratification initiale ; 1.1.0 intégration review sécurité
-  (Principes I, II, IV, V renforcés ; doctrine ajoutée) ; 1.2.0 surface
-  d'approbation souveraine, `subagent_id`, routage de modèles (Principes II, VII,
-  VIII) ; 1.3.0 portabilité multi-OS et retrait du vocal — GPU optionnel
-  (Principes I, V, VI, VIII) ; 1.4.0 stress-test hardening (Principes I, II, V, VI,
-  VII, VIII renforcés ; doctrine rayon-de-souffle ; sidecar ; ratification).
+### Amendements
 
-## Glossaire
+- **MAJOR** : change le modèle de confiance, l'autorité, la sémantique d'effet ou
+  une interdiction non négociable ;
+- **MINOR** : ajoute un principe/contrôle compatible ;
+- **PATCH** : clarification sans changement de garantie.
 
-- **Noyau de capacités** : service natif hôte, portier unique, implémentant
-  policy, plan signé, HITL, audit, rollback, idempotence — cœur portable Rust
-  + drivers par OS, éventuellement secondé par un driver-sidecar.
-- **Driver** : implémentation par OS des capacités du contrat (recherche,
-  snapshot, shell approuvé, service) — seul endroit où l'OS-spécifique existe.
-- **Driver-sidecar** : composant hors-processus (autre pile, ex. .NET) que le
-  cœur active quand une capacité hôte n'est atteignable proprement qu'ainsi (ex.
-  VSS backup-context / COM Windows) ; il n'implémente jamais policy, HITL ni auth
-  d'appelant, n'exécute que des verbes typés déjà validés, en localhost only,
-  authentifié par le cœur, audité avec le `plan_hash`, remplaçable.
-- **Runtime agent** : environnement conteneurisé isolé hébergeant Hermes et
-  Graphify (WSL2 durci + Docker sous Windows, Docker/Podman sous Linux, VM
-  Docker sous macOS).
-- **Intention typée** : action hôte de haut niveau, à portée bornée, sur laquelle
-  le noyau peut raisonner avant exécution.
-- **Plan signé** : représentation canonique hashée d'une action approuvée,
-  à usage unique, TTL court, liée au hash de sa cible.
-- **HITL L0/L1/L2** : niveaux d'approbation gradués.
-- **Tailnet** : réseau privé Tailscale, ACL deny-by-default.
-- **Relais** : petit nœud Linux toujours-allumé sur le LAN (Pi / mini-PC) portant
-  le magic packet Wake-on-LAN, le point d'entrée Tailscale stable (`tag:server`,
-  expiry désactivé) et le healthcheck externe — la workstation étant un poste, pas
-  un serveur.
+Un amendement documente : auteur/owner, date, motivation, menace, alternatives,
+impact migration, tests requis et plan de rollback documentaire/technique.
+
+### Dérogations
+
+Une dérogation est exceptionnelle, bornée et non silencieuse. Elle contient :
+
+- principe concerné et risque accepté ;
+- scope exact, owner, date de début et expiration ;
+- contrôle compensatoire ;
+- test qui démontre la dérogation ;
+- plan daté de résorption.
+
+Une dérogation ne peut autoriser secret brut dans le runtime, host-share de la VM,
+auto-émission de bail, unknown intent, mutation de cible souveraine ou approbation
+L2 par messagerie.
+
+### Historique
+
+- 1.0.0–1.4.0 : architecture Windows-first, noyau de capacités Rust, HITL distinct,
+  rollback par compensation, défense en aval.
+- 2.0.0 : refonte Mac-first conçue pour la portabilité ; VM sans share ; leases par
+  tâche ; model/egress et secret-use ; projection CAS ; état durable et
+  réconciliation ; récupération effect-specific ; superviseur indépendant ;
+  supply-chain et preuves Tier 1.
+
+---
+
+## Glossaire normatif
+
+- **helix-core** : binaire souverain de policy, plans, workflow, approvals,
+  budgets et audit.
+- **helix-edge** : ingress humain minimal authentifiant le principal et émettant
+  les `HumanRequestGrant` ; le profil initial est mono-utilisateur.
+- **helix-egress** : broker réseau/credentials sandboxé, sans capacité hôte.
+- **helix-supervisor** : composant minimal indépendant gérant fencing,
+  PAUSE/ABORT/HALT et descendants.
+- **WorkloadIdentity** : identité courte d'un service de la VM ; aucune portée
+  documentaire implicite ; elle n'isole pas deux conteneurs face à root guest.
+- **HumanRequestGrant** : assertion one-shot signée par l'ingress humain de
+  confiance, liée au principal, message, session, template de scope et expiry.
+- **TaskLease** : capacité signée, bornée à une tâche, des intentions, ressources,
+  budgets et une durée.
+- **ExecutionGrant** : autorisation one-shot du cœur vers un adaptateur, liée au
+  plan/verb/arguments/epoch.
+- **PlanEnvelope** : représentation canonique et signée de l'effet prévu.
+- **Outcome unknown** : l'effet a peut-être eu lieu mais le système ne peut pas le
+  prouver ; aucun retry automatique.
+- **Projection** : corpus filtré, immutable et manifesté produit par le cœur pour
+  un moteur non fiable.
+- **CapabilityReport** : capacités OS réellement observées, utilisées pour
+  construire le plan.
+- **Tier 1** : profil dont toutes les preuves sécurité, conformance, opérations et
+  performance requises passent sur matériel réel.

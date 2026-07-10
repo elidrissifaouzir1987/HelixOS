@@ -1,0 +1,146 @@
+schema: helixos.conformance-catalog/1
+entries:
+  - acceptance_id: PLAN-001
+    title: Portable canonical and signed plan identity
+    feature: specs/001-portable-signed-contracts/spec.md
+    adr: docs/adr/0005-canonical-signed-contracts.md
+    contract:
+      schema_id: helixos.plan-envelope/1
+      media_type: application/vnd.helixos.plan-envelope+json;version=1
+      json_schema: contracts/schemas/plan-envelope-v1.schema.json
+      negative_manifest_schema: contracts/schemas/negative-contract-corpus-v1.schema.json
+      fixture_root: contracts/fixtures/plan-envelope-v1
+      negative_manifest: contracts/fixtures/plan-envelope-v1/negative-cases.json
+      fixture_instructions: contracts/fixtures/plan-envelope-v1/README.md
+    ci_workflow: .github/workflows/contracts.yml
+    required_platforms:
+      - id: linux-x86_64
+        runner: ubuntu-24.04
+        rust_host: x86_64-unknown-linux-gnu
+        automation: required
+      - id: linux-arm64
+        runner: not-configured
+        rust_host: aarch64-unknown-linux-gnu
+        automation: pending-runner
+      - id: macos-arm64
+        runner: macos-26
+        rust_host: aarch64-apple-darwin
+        automation: required
+      - id: windows-x64
+        runner: windows-2022
+        rust_host: x86_64-pc-windows-msvc
+        automation: required
+    evidence_requirements:
+      - id: schema-and-wire
+        requirement: The reviewed positive envelope satisfies the Draft 2020-12 schema and the strict decoder accepts only its exact canonical wire bytes.
+      - id: golden-portability
+        requirement: Every automated required platform reproduces byte-identical protected JCS, plan identifier, signature, and complete envelope from the unchanged corpus.
+      - id: mutation-coverage
+        requirement: Mutating every protected effect-bearing or authority-bearing leaf changes the plan identifier and invalidates the original signature.
+      - id: deny-corpus
+        requirement: Ordering, Unicode, numeric bounds, resource validation, duplicate or unknown fields, version or algorithm denial, tampering, wrong or untrusted key, and malformed signature cases produce their declared typed results before simulated dispatch.
+      - id: robustness
+        requirement: Property tests complete without panic or platform drift and the deterministic ignored soak validates at least 100000 generated envelopes.
+      - id: immutable-ci
+        requirement: A successful unchanged matrix run is linked by immutable commit and run URL before PLAN-001 or cross-platform readiness is claimed.
+    claim_status: pending-evidence
+    evidence:
+      local_windows_benchmark: specs/001-portable-signed-contracts/evidence/benchmark-windows-x86_64-2026-07-10.json
+      immutable_commit: pending
+      immutable_ci_run: pending
+      linux_arm64_run: pending
+  - acceptance_id: PLAN-002
+    title: Current plan eligibility before durable preparation
+    feature: specs/002-plan-eligibility
+    spec: specs/002-plan-eligibility/spec.md
+    adr: docs/adr/0006-current-plan-eligibility.md
+    in_process_contract: specs/002-plan-eligibility/contracts/plan-eligibility-v1.md
+    data_model: specs/002-plan-eligibility/data-model.md
+    corpus:
+      root: contracts/fixtures/plan-eligibility-v1
+      manifest: contracts/fixtures/plan-eligibility-v1/cases.json
+      expected_outcomes: contracts/fixtures/plan-eligibility-v1/expected-outcomes.json
+      instructions: contracts/fixtures/plan-eligibility-v1/README.md
+      summary_schema: helixos.plan-eligibility-summary/1
+    ci_workflow: .github/workflows/plan-eligibility.yml
+    toolchain:
+      manifest: kernel/rust-toolchain.toml
+      rust: 1.96.1
+      profile: minimal
+      components:
+        - rustfmt
+        - clippy
+      cargo_lock: kernel/Cargo.lock
+    required_platforms:
+      - id: linux-x86_64
+        runner: ubuntu-24.04
+        rust_host: x86_64-unknown-linux-gnu
+        automation: required
+      - id: macos-arm64
+        runner: macos-26
+        rust_host: aarch64-apple-darwin
+        automation: required
+      - id: windows-x64
+        runner: windows-2022
+        rust_host: x86_64-pc-windows-msvc
+        automation: required
+    evidence_requirements:
+      - id: context-build-errors
+        requirement: Every frozen CONTEXT_BUILD_* case produces context_build_denied before evaluator or claimant construction, with the declared redacted code.
+      - id: single-fault-and-order
+        requirement: The coherent case reaches one final claim; every declared single-fault runtime case returns its exact first denial in normative order, and every pre-claim denial records zero claimant calls.
+      - id: signer-fingerprint-and-rotation
+        requirement: The exact verified Ed25519 public-key fingerprint, immutable key identifier, current trust fingerprint, trust generation, and minimum accepted issuance time are checked; key rotation or identifier reuse cannot revive a held plan or reopen its nonce.
+      - id: replay-receipt-binding
+        requirement: Replay uniqueness uses the stable plan-v1 issuer namespace and (instance_epoch, nonce), both uniqueness indexes change atomically, and a claimant receipt with any other domain-separated binding digest denies.
+      - id: replay-contention
+        requirement: At least 1000 barrier-synchronised release-mode rounds produce exactly one new eligible marker per replay authority domain, with all other contenders denied and no release, reset, retry, or idempotent second success.
+      - id: robustness-soak
+        requirement: The deterministic generated-context soak evaluates at least 100000 cases with the same seed and oracle without panic, overflow, false acceptance, or platform-summary drift.
+      - id: benchmark
+        requirement: A release benchmark evaluates at least 10000 complete local test-claimant iterations, proves p95 at or below 1 ms, and records exact hardware, OS and architecture, Rust toolchain, build profile, workload, concurrency, corpus digest, sample count, raw sorted samples, and p50/p95/p99/max.
+      - id: redaction
+        requirement: Context-build, denial, failure, marker, claims, replay, Display, Debug, and error-source sentinel tests expose no identifier, nonce, digest, signature, resource, protected content, expected or actual value, native path, or raw provider error.
+      - id: removal
+        requirement: The documented non-destructive removal drill proves no reverse dependency from feature-001 or the legacy runtime and preserves feature-001 canonical bytes, plan identifiers, signatures, fixtures, and MVP-0 behavior.
+      - id: immutable-ci
+        requirement: One unchanged Linux x86_64, macOS arm64, and Windows x64 matrix for the same commit publishes exact runner and rustc host, expected-outcomes digest, retained artifacts and attestations before PLAN-002, portability, Mac mini M4, or Tier 1 readiness is claimed.
+    claim_status: pending-evidence
+    evidence:
+      local:
+        status: pending
+        platform: pending
+        commit: pending
+        benchmark_artifact: pending
+        benchmark_digest_sha256: pending
+        contention_artifact: pending
+        soak_artifact: pending
+        redaction_artifact: pending
+        removal_artifact: pending
+      immutable:
+        status: pending
+        commit: pending
+        ci_run: pending
+        expected_outcomes_digest_sha256: pending
+        artifact: pending
+        artifact_digest_sha256: pending
+        attestation: pending
+        preservation_location: pending
+        linux_x86_64:
+          run: pending
+          artifact: pending
+          digest_sha256: pending
+          attestation: pending
+          preservation_location: pending
+        macos_arm64:
+          run: pending
+          artifact: pending
+          digest_sha256: pending
+          attestation: pending
+          preservation_location: pending
+        windows_x64:
+          run: pending
+          artifact: pending
+          digest_sha256: pending
+          attestation: pending
+          preservation_location: pending

@@ -1,0 +1,468 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:helixos:schema:plan-envelope:1",
+  "title": "HelixOS Signed Plan Envelope v1",
+  "description": "Closed language-neutral wire shape for helixos.plan-envelope/1. Typed validation additionally enforces RFC 8785 canonical bytes and semantic invariants.",
+  "$comment": "The complete UTF-8 wire value is limited to 1,048,576 bytes. JSON Schema cannot detect duplicate object names, prove RFC 8785 byte equality, count UTF-8 bytes, enforce NFC, or express every cross-field invariant; the trust-boundary decoder must enforce those rules.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "plan_id",
+    "protected",
+    "signature"
+  ],
+  "properties": {
+    "plan_id": {
+      "$ref": "#/$defs/sha256Digest"
+    },
+    "protected": {
+      "$ref": "#/$defs/protectedPlan"
+    },
+    "signature": {
+      "$ref": "#/$defs/ed25519Signature"
+    }
+  },
+  "$defs": {
+    "safeU64": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sha256Digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "nonce128": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$"
+    },
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "rootIdentifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+    },
+    "resourceComponent": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^(?!\\.$|\\.\\.$)(?!.*[\\\\/:<>\"|?*\\u0000-\\u001f\\u007f])(?!.*[ .]$).+$",
+      "$comment": "The typed validator also requires NFC, at most 255 UTF-8 bytes, at most 4096 UTF-8 bytes over all components, and rejects the v1 default-ignorable Unicode profile plus Windows reserved device basenames."
+    },
+    "base64UrlNoPad": {
+      "type": "string",
+      "pattern": "^(?:[A-Za-z0-9_-]{4})*(?:[A-Za-z0-9_-]{2}|[A-Za-z0-9_-]{3})?$"
+    },
+    "ed25519Signature": {
+      "type": "string",
+      "minLength": 86,
+      "maxLength": 86,
+      "pattern": "^[A-Za-z0-9_-]{86}$",
+      "$comment": "The typed decoder must decode base64url without padding and require exactly 64 bytes with canonical trailing bits."
+    },
+    "requestSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "digest_sha256",
+        "kind"
+      ],
+      "properties": {
+        "digest_sha256": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "kind": {
+          "enum": [
+            "human_request_grant",
+            "registered_trigger"
+          ]
+        }
+      }
+    },
+    "budgetReservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action_limit",
+        "currency_code",
+        "egress_bytes_limit",
+        "max_cost_micro_units",
+        "price_table_id",
+        "reservation_id"
+      ],
+      "properties": {
+        "action_limit": {
+          "$ref": "#/$defs/safeU64"
+        },
+        "currency_code": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "egress_bytes_limit": {
+          "$ref": "#/$defs/safeU64"
+        },
+        "max_cost_micro_units": {
+          "$ref": "#/$defs/safeU64"
+        },
+        "price_table_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "reservation_id": {
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    },
+    "resourceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "components",
+        "root_id"
+      ],
+      "properties": {
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "$ref": "#/$defs/resourceComponent"
+          }
+        },
+        "root_id": {
+          "$ref": "#/$defs/rootIdentifier"
+        }
+      }
+    },
+    "filePrecondition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "byte_length",
+        "content_sha256",
+        "file_id",
+        "volume_id"
+      ],
+      "properties": {
+        "byte_length": {
+          "$ref": "#/$defs/safeU64"
+        },
+        "content_sha256": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "file_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "volume_id": {
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    },
+    "replacementContent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "byte_length",
+        "content_base64url",
+        "media_type",
+        "sha256"
+      ],
+      "properties": {
+        "byte_length": {
+          "$ref": "#/$defs/safeU64"
+        },
+        "content_base64url": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/base64UrlNoPad"
+            },
+            {
+              "maxLength": 699051
+            }
+          ],
+          "$comment": "The decoder validates decoded length and digest, limits decoded replacement content to 512 KiB, and applies the 1 MiB limit to the complete wire envelope."
+        },
+        "media_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 127,
+          "pattern": "^[\\u0021-\\u007e]+$",
+          "allOf": [
+            {
+              "pattern": "/"
+            }
+          ]
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256Digest"
+        }
+      }
+    },
+    "recoveryProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "$comment": "preimage_sha256 is present and non-null only for compensation; it is omitted for irreversible. Null is never a v1 representation.",
+      "required": [
+        "atomicity",
+        "class",
+        "reserved_bytes"
+      ],
+      "properties": {
+        "atomicity": {
+          "enum": [
+            "atomic_replace",
+            "non_atomic"
+          ]
+        },
+        "class": {
+          "enum": [
+            "compensation",
+            "irreversible"
+          ]
+        },
+        "preimage_sha256": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "reserved_bytes": {
+          "$ref": "#/$defs/safeU64"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "class": {
+                "const": "compensation"
+              }
+            },
+            "required": [
+              "class"
+            ]
+          },
+          "then": {
+            "required": [
+              "preimage_sha256"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "class": {
+                "const": "irreversible"
+              }
+            },
+            "required": [
+              "class"
+            ]
+          },
+          "then": {
+            "not": {
+              "required": [
+                "preimage_sha256"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "fileVerification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "expected_byte_length",
+        "expected_sha256"
+      ],
+      "properties": {
+        "expected_byte_length": {
+          "$ref": "#/$defs/safeU64"
+        },
+        "expected_sha256": {
+          "$ref": "#/$defs/sha256Digest"
+        }
+      }
+    },
+    "filePatchIntent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "precondition",
+        "recovery",
+        "replacement",
+        "target",
+        "verification"
+      ],
+      "properties": {
+        "kind": {
+          "const": "host.file.patch"
+        },
+        "precondition": {
+          "$ref": "#/$defs/filePrecondition"
+        },
+        "recovery": {
+          "$ref": "#/$defs/recoveryProfile"
+        },
+        "replacement": {
+          "$ref": "#/$defs/replacementContent"
+        },
+        "target": {
+          "$ref": "#/$defs/resourceReference"
+        },
+        "verification": {
+          "$ref": "#/$defs/fileVerification"
+        }
+      }
+    },
+    "protectedPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "boot_id",
+        "budget",
+        "capability_observed_at_unix_ms",
+        "capability_report_digest",
+        "catalog_version",
+        "digest_algorithm",
+        "expires_at_unix_ms",
+        "fencing_epoch",
+        "instance_epoch",
+        "intent",
+        "issued_at_unix_ms",
+        "key_id",
+        "nonce",
+        "operation_id",
+        "policy_version",
+        "request_source",
+        "required_capabilities",
+        "risk_level",
+        "schema",
+        "signature_algorithm",
+        "task_id",
+        "task_lease_digest",
+        "workload_id"
+      ],
+      "properties": {
+        "boot_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "budget": {
+          "$ref": "#/$defs/budgetReservation"
+        },
+        "capability_observed_at_unix_ms": {
+          "$ref": "#/$defs/safeU64"
+        },
+        "capability_report_digest": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "catalog_version": {
+          "$ref": "#/$defs/identifier"
+        },
+        "digest_algorithm": {
+          "const": "sha-256"
+        },
+        "expires_at_unix_ms": {
+          "$ref": "#/$defs/safeU64"
+        },
+        "fencing_epoch": {
+          "$ref": "#/$defs/safeU64"
+        },
+        "instance_epoch": {
+          "$ref": "#/$defs/safeU64"
+        },
+        "intent": {
+          "$ref": "#/$defs/filePatchIntent"
+        },
+        "issued_at_unix_ms": {
+          "$ref": "#/$defs/safeU64"
+        },
+        "key_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "nonce": {
+          "$ref": "#/$defs/nonce128"
+        },
+        "operation_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "policy_version": {
+          "$ref": "#/$defs/identifier"
+        },
+        "request_source": {
+          "$ref": "#/$defs/requestSource"
+        },
+        "required_capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          },
+          "$comment": "The typed validator also requires ascending bytewise order."
+        },
+        "risk_level": {
+          "enum": [
+            "l1",
+            "l2"
+          ]
+        },
+        "schema": {
+          "const": "helixos.plan-envelope/1"
+        },
+        "signature_algorithm": {
+          "const": "ed25519"
+        },
+        "task_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "task_lease_digest": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "workload_id": {
+          "$ref": "#/$defs/identifier"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "intent": {
+                "properties": {
+                  "recovery": {
+                    "properties": {
+                      "class": {
+                        "const": "irreversible"
+                      }
+                    },
+                    "required": [
+                      "class"
+                    ]
+                  }
+                },
+                "required": [
+                  "recovery"
+                ]
+              }
+            },
+            "required": [
+              "intent"
+            ]
+          },
+          "then": {
+            "properties": {
+              "risk_level": {
+                "const": "l2"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

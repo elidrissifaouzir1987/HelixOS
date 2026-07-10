@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:helixos:schema:negative-contract-corpus:1",
+  "title": "HelixOS Negative Contract Corpus v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "base_fixture",
+    "cases",
+    "schema"
+  ],
+  "properties": {
+    "base_fixture": {
+      "const": "valid-plan.envelope.jcs"
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/case"
+      }
+    },
+    "schema": {
+      "const": "helixos.negative-contract-corpus/1"
+    }
+  },
+  "$defs": {
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "coverage",
+        "dispatch_reached",
+        "expected_error",
+        "id",
+        "resolver"
+      ],
+      "properties": {
+        "coverage": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "key",
+              "numeric",
+              "ordering",
+              "recovery",
+              "resource",
+              "shape",
+              "signature",
+              "size",
+              "tampering",
+              "unicode",
+              "version"
+            ]
+          }
+        },
+        "dispatch_reached": {
+          "const": false
+        },
+        "expected_error": {
+          "enum": [
+            "INVALID_ENCODING",
+            "INVALID_FIELD",
+            "MALFORMED_JSON",
+            "NON_CANONICAL_WIRE",
+            "PLAN_ID_MISMATCH",
+            "SIGNATURE_INVALID",
+            "UNKNOWN_KEY",
+            "UNSUPPORTED_ALGORITHM",
+            "UNSUPPORTED_INTENT",
+            "UNSUPPORTED_SCHEMA",
+            "WIRE_TOO_LARGE"
+          ]
+        },
+        "generator": {
+          "$ref": "#/$defs/generator"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "resolver": {
+          "enum": [
+            "trusted",
+            "unknown_key",
+            "wrong_key"
+          ]
+        },
+        "wire": {
+          "type": "string",
+          "pattern": "^(?:negative/[a-z0-9.-]+\\.json|valid-plan\\.envelope\\.jcs)$"
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "wire"
+          ],
+          "not": {
+            "required": [
+              "generator"
+            ]
+          }
+        },
+        {
+          "required": [
+            "generator"
+          ],
+          "not": {
+            "required": [
+              "wire"
+            ]
+          }
+        }
+      ]
+    },
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "byte",
+        "count",
+        "kind"
+      ],
+      "properties": {
+        "byte": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2097152
+        },
+        "kind": {
+          "const": "ascii_repeat"
+        }
+      }
+    }
+  }
+}

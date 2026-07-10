@@ -1,706 +1,921 @@
-# Roadmap Spec Kit v4 — construction par étapes
+# HelixOS — Roadmap & Specs v5.0.0
 
-Six specs + cinq runbooks/specs d'exploitation. Système **portable
-(Windows/Linux/macOS)**, conteneurisé, **sans exigence GPU**. La frontière
-d'abord, le noyau ensuite, l'autonomie en dernier — puis les runbooks qui le
-rendent vivable un an, seul, depuis un téléphone. Amendé depuis le décision-record
-du stress-test (`docs/design/2026-07-06-stress-test-decisions.md`) : runtime
-**natif** (dockerd WSL2 + systemd, pas Docker Desktop) et **relais Linux
-toujours-allumé (P1)** arrivent avec SPEC-001 ; cœur **Rust** + sidecar C#/.NET ;
-surface HITL sur origine distincte via ntfy ; médias Graphify = code + markdown +
-transcription 100 % local. Prompts `/specify` prêts à copier, puis `/clarify` →
-`/plan` → `/tasks`.
+> Construire d'abord une tranche Mac mini M4 réellement sûre et récupérable,
+> prouver ensuite le contrat sur Linux et Windows, puis seulement ajouter
+> connaissance et autonomie.
+
+**Date** : 2026-07-10
+**Architecture** : v2.0.0
+**Constitution** : v2.0.0
+**Principe de livraison** : une fonctionnalité n'est « supportée » que si son
+harness, son restore et son mode de retrait ont produit une preuve.
+
+Cette roadmap remplace les anciennes SPEC-001…006 Windows-first. Leurs numéros
+restent des références **dépréciées** dans l'historique/code existant, pas des
+alias normatifs. Les IDs sont désormais `SEC-*`, `REQUEST-*`,
+`IDENT-*`, `PLAN-*`, `GRANT-*`, `COST-*`,
+`PATH-*`, `FILE-*`, `DUR-*`, `HITL-*`,
+`OPS-*`, `SUPPLY-*`, `PRIV-*`, `KNOW-*`,
+`PORT-*`, `PERF-*` et `AUTO-*`.
+
+---
+
+## 0. État actuel et dette de migration
+
+Le dépôt n'est pas vide :
+
+- frontière WSL2/compose et harness PowerShell ;
+- cœur Rust MVP-0, mTLS, plans/approval et MCP shim ;
+- driver fichier minimal et tests de restart/replay ;
+- scripts d'usage et backup Windows.
+
+Les tests kernel/CLI valident une boucle partielle ; l'intégration Hermes live
+n'est pas encore prouvée. Le prototype ne satisfait pas l'architecture v2 :
+
+- plans en vol principalement mémoire et journaux JSONL séparés ;
+- sémantique de crash limitée, sans `OUTCOME_UNKNOWN` ni réconciliation ;
+- paths natifs et tests Windows dans le driver commun ;
+- copie/rename sans protocole complet metadata/fsync/file ID ;
+- WSL2 et PowerShell comme seul déploiement ;
+- compose legacy avec bind hôte actif `/mnt/vault:/vault:ro`, `.env`
+  runtime, digest `PIN_ME` et MCP shim non connecté live ;
+- pas de gateway modèle/egress contrôlant secrets et coût ;
+- pas de superviseur indépendant ni de supply-chain native multi-OS.
+
+Le compose et les scripts WSL existants sont **legacy/non conformes v2**. Un gate
+de migration supprime bind hôte, secrets runtime, placeholder digest et anciens
+chemins avant tout claim v2. L'état exact inclut aussi : `ScopeLease<PathBuf>`
+non signé, plans HashMap/`consumed.jsonl`, hash custom non Ed25519/JCS,
+approval sans WebAuthn final et driver `copy+rename` sans file-ID/fsync/
+métadonnées.
+
+La migration doit préserver les tests utiles et éviter un rewrite « big bang » :
+le nouveau coordinateur et les contrats sont introduits derrière les interfaces,
+puis le MVP-0 existant est adapté.
+
+---
+
+## 1. Carte de livraison
 
 ```mermaid
 flowchart LR
-    S1["SPEC-001<br/>Frontière + runtime natif + relais Linux (P1)"] --> S2["SPEC-002<br/>Noyau : cœur Rust + sidecar C#"]
-    S2 --> S3["SPEC-003<br/>HITL origine distincte (noyau)"]
-    S3 --> S4["SPEC-004<br/>Usages hôte"]
-    S4 --> S5["SPEC-005<br/>Graphify + médias (local)"]
-    S3 --> S6["SPEC-006<br/>Autonomie"]
-    S5 -.-> S6
+    R0["R0<br/>Décisions & spikes M4"] --> R1["R1<br/>Fondation portable"]
+    R1 --> R2["R2<br/>Tranche Mac M4"]
+    R2 --> R3["R3<br/>Hardening & opérations"]
+    R3 --> R4["R4<br/>Driver Linux<br/>preuve portabilité"]
+    R4 --> R5["R5<br/>Driver Windows"]
+    R5 --> R6["R6<br/>Projection & connaissance"]
+    R6 --> R7["R7<br/>Autonomie bornée"]
+    R7 --> R8["R8<br/>Extensions"]
 
-    subgraph RB["Runbooks & specs d'exploitation"]
-        R1["RUNBOOK-BACKUP-RESTORE"]
-        R2["SPEC-UPGRADE"]
-        R3["RUNBOOK-COLDSTART"]
-        R4["SPEC-BUDGET-COÛT"]
-        R5["RUNBOOK-DÉGRADATION + KILL SWITCH"]
-    end
+    O1["Backup/Restore"]
+    O2["Upgrade/Migrations"]
+    O3["Incident/Kill"]
+    O4["Identity/Recovery"]
 
-    S1 --> R3
-    S2 --> R1
-    S2 --> R2
-    S6 --> R4
-    S6 --> R5
+    R2 --> O1
+    R2 --> O3
+    R3 --> O2
+    R3 --> O4
+```
+
+### Definition of Done commune
+
+Un lot est terminé seulement si :
+
+- architecture/threat model et Constitution Check sont à jour ;
+- contrats et migrations sont versionnés ;
+- tests positifs **et négatifs** passent ;
+- fault injection couvre les points de commit concernés ;
+- logs/métriques/audit sont redacted et actionnables ;
+- backup/restore et rollback/update ont été exercés si le lot ajoute de l'état ;
+- runbook, mode dégradé et procédure de retrait existent ;
+- l'artefact de preuve est archivé avec OS, hardware, versions et digests.
+
+---
+
+## R0 — Décisions et spikes Mac mini M4
+
+**But** : éliminer les inconnues qui pourraient invalider le socle avant de
+refactorer le prototype.
+
+**Effort indicatif** : 2–3 semaines solo full-time.
+
+### R0.1 Threat model et flux
+
+Livrer :
+
+- trust zones et data-flow diagram correspondant à `ARCHITECTURE.md` ;
+- inventaire des données/secrets et classification initiale ;
+- liste des cibles souveraines non autorisables ;
+- scénario « VM entièrement compromise » avec résultat attendu ;
+- trust de `helix-edge`/TLS/ntfy, contrat `HumanRequestGrant` et
+  chat/WebSocket comme canal d'egress authentifié ;
+- décision mono-utilisateur initiale et plan administratif souverain ;
+- règle « payload agent = classification la plus restrictive » ;
+- `disclosure_domain_id` : tout octet VM-local est divulgué au domaine,
+  et aucun bail ne révoque une connaissance déjà acquise ;
+- décisions sur ce qui reste hors scope.
+
+**Gate** : chaque flux agent→hôte/cloud a un médiateur et un owner ; aucun
+host-share n'est nécessaire à une fonctionnalité MVP.
+
+### R0.2 Runtime macOS/arm64
+
+Comparer sur le M4 :
+
+1. VM dédiée Virtualization.framework ;
+2. Podman Machine rootless, avec `$HOME:$HOME` et tout montage implicite
+   explicitement supprimés ;
+3. Apple `container` sur macOS 26+, comme backend expérimental ;
+4. Docker Desktop/OrbStack uniquement comme profils de développement.
+
+Mesurer : boot, idle RAM, I/O volume VM-local, canal vsock, crash/restart,
+montages réels, egress host-enforced, import d'images `linux/arm64` sans
+egress guest et mise à jour.
+Consigner aussi si le backend peut créer un second compartiment/VM connaissance
+sans partage de disque ni réseau direct avec la VM agent ; l'absence de cette
+capacité limite le futur profil knowledge au Tier 2.
+
+**Décision** : choisir un backend de référence et un fallback ; conserver un
+`RuntimeAdapter` étroit. Ne pas lier les contrats métier à Compose.
+
+Livrer aussi la responsabilité `helix-vmhost` : entitlement, guest image/
+kernel/init, boot/readiness/crash-loop/shutdown, import OCI, vsock et rollback.
+
+**Gate** :
+
+- workload compromis → aucun socket runtime guest ;
+- root VM, runtime guest compris → aucun répertoire/socket/API runtime **hôte**,
+  NIC généraliste, DNS, NAT, LAN ou Internet ;
+- une règle relâchée fait virer le harness au rouge.
+
+### R0.3 Services, TCC et Keychain
+
+Prototypes :
+
+- `LaunchAgent` user pour le core normal ;
+- `LaunchDaemon` minimal pour supervisor/fencing ;
+- choix d'une racine via companion AppKit et security-scoped bookmark ;
+- alternative dédiée service account + ACL si App Sandbox/helper est impraticable ;
+- Keychain user et System/file-based Keychain selon contexte ;
+- signature ad hoc de dev puis chaîne Developer ID/notarisation de release.
+
+**Gate** : aucune demande Full Disk Access pour le MVP ; les opérations user attendent
+proprement un login si leur store/racine n'est pas disponible.
+
+### R0.4 Disponibilité et accès distant
+
+Valider sur la machine réelle :
+
+- deux hostnames stables `chat.*` et `approve.*` ;
+- domaine possédé + split DNS/ACME, ou deux identités tailnet ; aucun alias
+  MagicDNS supposé certifiable ;
+- cookies, CORS, RP ID WebAuthn et renouvellement automatique des certificats ;
+- variante Tailscale explicitement choisie avant/après login, sleep/wake et reboot ;
+- FileVault SSH/LAN préboot testé séparément du tailnet, Remote Login/recovery,
+  wake for network access ;
+- restart après retour du courant, UPS et fallback local ;
+- valeur réelle d'un relais Linux optionnel.
+
+**Gate** : le runbook ne promet pas de disponibilité pré-login non démontrée.
+
+### R0.5 Performance et dépendances
+
+Créer le baseline M4 :
+
+- RAM installée, version macOS, runtime/VM, allocation CPU/RAM ;
+- latence core factice, SQLite, transfert projection, indexation test ;
+- inference/transcription candidates natives et CPU ;
+- comportement sous pression de mémoire unifiée.
+- support manifest initial : macOS exact, Linux KVM/systemd/cgroup v2 exact,
+  Windows 11 Pro/Enterprise Hyper-V exact ; runners réels provisionnés ou profil
+  explicitement non activé.
+
+Auditer Hermes, hermes-webui et Graphify : version/digest, licence, architecture
+arm64, schémas, outils activables, stratégie de pinning et retrait.
+
+**Gate** : SLOs provisoires ratifiés ou amendés avec mesures ; aucune dépendance
+`amd64` cachée.
+
+### Artefacts R0
+
+```text
+docs/adr/0001-macos-runtime.md
+docs/adr/0002-service-and-keychain-contexts.md
+docs/adr/0003-network-and-egress.md
+docs/adr/0004-approval-origin-and-rpid.md
+docs/adr/0005-canonical-signed-contracts.md
+docs/evidence/m4-baseline/
 ```
 
 ---
 
-## MVP-0 — Tranche verticale minimale (walking skeleton)
+## R1 — Fondation portable et coordinateur durable
 
-**Avant les six SPEC pleines**, une tranche verticale **brutalement réduite** qui
-traverse frontière → noyau → **une seule intention utile** → approbation → audit →
-rollback, et qui doit devenir **agréable à utiliser au quotidien, au bureau, AVANT**
-tout élargissement. Le principal risque du projet n'est pas architectural, c'est la
-**complexité opérationnelle** : on ne construit pas une infrastructure quasi
-industrielle avant d'avoir une boucle fluide.
+**But** : faire du cœur une machine d'état portable testable sans OS réel.
 
-**Périmètre IN (le strict nécessaire)** :
-- Frontière runtime→hôte **prouvée** (harness : tests 1, 2 échouent ; runtime natif
-  dockerd/WSL2). **Le relais Linux et l'accès mobile sont HORS MVP-0** — ils servent
-  le réveil à distance, pas « la boucle est-elle agréable au bureau ».
-- **Noyau Rust minimal** : auth mTLS de l'appelant, pipeline d'**une** intention
-  (normalize→plan→diff→policy→HITL→execute→audit→verify), plan signé (hash/TTL),
-  idempotence, **bail de portée** (allowlist) limité au vault.
-- **Une seule intention utile** : rechercher / lire / **proposer+appliquer un patch
-  sur une note du vault**, au niveau **fichier** (`host.read_file` +
-  `host.propose_file_patch` + `host.apply_file_patch`) — **pas** la couche sémantique
-  `app.obsidian.*` (une note = un fichier markdown).
-- **Approbation simple mais déjà hors webui** : micro-page servie par le noyau sur
-  origine distincte, L1 tap / L2 passkey, **carte d'approbation lisible** (contrat
-  §4 de l'architecture). En local/tailnet ; ntfy-away non requis au bureau.
-- **Audit append-only** + **rollback `compensation`** (copie-aside + `ReplaceFile`,
-  **sans VSS, sans sidecar**).
-- **Plancher opérationnel mince** : backup du vault (Git) + de l'audit/état du noyau,
-  et un **redémarrage propre**. On ne gèle pas *tout* l'opérationnel : sans backup ni
-  restart, « agréable à utiliser » veut dire « jusqu'au premier crash ».
+**Effort indicatif** : 4–6 semaines.
 
-**Gelé tant que la tranche n'est pas agréable** : VSS / rollback `auto`, **sidecar
-C#**, **Graphify** (tout — pas de graphe de connaissances ; la recherche MVP-0 reste
-simple/par nom), **vision**, **autonomie cron**, **budgets** (pas d'autonomie = pas
-d'emballement), **kanban**, **upgrade blue/green sophistiqué**, drivers multi-OS,
-**relais / accès mobile**.
+### Périmètre IN
 
-**Sortie** : une note du vault se cherche, se lit, se patche par une intention
-approuvée hors webui, auditée, annulable — **et l'utiliser au quotidien est fluide**.
-C'est le feu vert pour dégeler la suite (SPEC-001 complète → 002 → …).
+#### Contrats
 
----
+Implémenter dans un crate/package indépendant :
 
-## SPEC-001 — La frontière : runtime natif durci + relais Linux (P1) + harness par OS
+- `HumanRequestGrant`, `TaskLease` et `PolicySnapshot` ;
+- `IntentRequest` ;
+- `PlanEnvelope` RFC 8785 + SHA-256 + signature Ed25519 ;
+- `ApprovalDecision` ;
+- `ExecutionGrant / ExecutionReceipt` ;
+- `BudgetReservation`, `SupervisorEpoch` et
+  `ReconciliationDecision` ;
+- `CapabilityReport` ;
+- `AuditEvent` et `IndexManifest`.
 
-**Objectif** : rendre la frontière runtime→hôte réelle et **prouvée**, de façon
-portable, sur un **runtime natif** (pas Docker Desktop) et avec le **relais Linux
-toujours-allumé** qui rend la workstation-poste opérable comme un service. Rien
-d'autre ne se construit tant que les tests de contournement n'échouent pas.
+Contraintes :
 
-**Runtime — dockerd natif, pas Docker Desktop** : sous Windows, le runtime est
-**dockerd natif dans la distro WSL2 durciе, lancé par systemd (ou Podman rootless)**,
-**jamais Docker Desktop**. Motivation (vérité-terrain) : Docker Desktop réintroduit
-des **ponts hôte massifs** (`\\.\pipe\docker_engine`, bind-mounts Windows
-automatiques, moteur cross-distro partagé) et **ne démarre pas sans session
-interactive** — inacceptable pour un poste opéré depuis un téléphone. La frontière
-WSL2 est une **réduction de surface, pas une frontière de VM** : `automount/interop/
-appendWindowsPath=off` durcissent surtout Linux→Windows et fuient (bugs MS) ;
-l'exposition host→distro (`\\wsl$`, vhdx offline, NAT) subsiste — d'où le verrou
-réseau et mTLS ci-dessous.
+- pas de floats, paths OS ou types non déterministes ;
+- fixtures golden cross-language ;
+- compatibilité N/N-1 explicite ;
+- unknown schema/intent = deny.
 
-**Relais Linux toujours-allumé (P1)** : un petit relais Linux (Pi / mini-PC) sur le
-LAN, allumé en permanence, porte (a) le **magic packet Wake-on-LAN** vers la
-workstation (**WoL est L2, Tailscale est L3** — le réveil est impossible depuis le
-tailnet directement), (b) un **point d'entrée Tailscale stable** (nœud `tag:server`,
-**expiry de clé désactivé** pour éviter le lockout silencieux à J+180), et (c) le
-**healthcheck externe**. C'est l'extension « machine dédiée » de la roadmap, **avancée
-en P1 de fait**.
+#### Identité et policy
 
-**Périmètre IN** : runtime conteneurs natif selon l'OS (Windows : distro WSL2 dédiée
-durcie — `automount=off`, `interop=off`, `appendWindowsPath=off`, user non-root —
-portant **dockerd natif + systemd, ou Podman rootless** ; Linux : Docker/Podman
-rootless ; macOS : VM Docker/OrbStack) ; **relais Linux P1** (WoL + entrée Tailscale
-`tag:server` expiry désactivé + healthcheck) ; `docker-compose.yml` en livrable :
-services hermes-agent et graphify, volumes nommés pour l'état (mémoire, skills,
-sessions), **aucun bind mount du filesystem hôte** ; **interdits explicitement testés
-dans le compose** : montage de `docker.sock`, `network_mode: host`, `privileged`,
-`pid: host`/`ipc: host`, `/dev/shm` hôte ; verrou « un seul port » = **le port routé**
-(NAT + `DefaultOutboundAction=Block` + une règle), **pas le loopback** (`LoopbackEnabled`
-est un toggle global, pas par-port) → **binder l'endpoint sur la gateway WSL, jamais
-`127.0.0.1`** ; **mTLS par cert client par conteneur** (l'identité est le cert, pas le
-réseau) ; verrou réseau par OS (firewall Hyper-V / nftables / pf) ; Tailscale avec ACL
-deny-by-default ; accès PWA mobile (passkeys webui) ; **harness de tests de
-contournement scripté, paramétré par OS, exécuté depuis l'intérieur des conteneurs
-ET depuis le runtime** (implémenté et exécuté sur l'OS principal d'abord) ;
-politique de routage de modèles en configuration déclarative (modèle fort via API ;
-endpoint local **optionnel si GPU présent** — jamais requis) ; vérification dans
-les docs Hermes de l'épinglage d'un modèle par sous-agent (à défaut : instances
-séparées) ; procédure de mise à jour couplée hermes-agent/hermes-webui.
-**Note WebAuthn (préparation SPEC-003)** : le RP ID sera le **nom MagicDNS**
-`helix.<tailnet>.ts.net` (`ts.net` ∈ Public Suffix List → eTLD+1 propre) et le secure
-context viendra de `tailscale cert` (Let's Encrypt) — jamais l'IP `100.x`.
-**Périmètre OUT** : toute capacité hôte (le noyau n'existe pas — Hermes ne peut
-RIEN faire sur l'hôte, c'est voulu et vérifié) ; drivers des OS secondaires.
+- root CA offline + issuer/intermediate online limité ; WorkloadIdentity courte et
+  key ID/algorithm versionnés ;
+- issuer de leases dans le cœur, jamais dans Hermes ;
+- délégation monotoniquement restrictive ;
+- policy snapshot versionné et default-deny ;
+- cibles souveraines codées en deny non surchargeable ;
+- quotas et budget réservables.
 
-**Prompt `/specify`** :
-> Mettre en place la frontière de sécurité d'un agentic OS personnel portable :
-> un runtime de conteneurs **natif** isolé de l'hôte (sous Windows : distro WSL2
-> dédiée et durcie — automount, interop et appendWindowsPath désactivés,
-> utilisateur non privilégié — hébergeant **dockerd natif lancé par systemd, ou
-> Podman rootless — jamais Docker Desktop, qui rouvre des ponts hôte et ne démarre
-> pas sans session** ; conception prête pour Docker rootless sous Linux et VM
-> Docker sous macOS), avec un docker-compose portant Hermes Agent et Graphify en
-> services séparés, volumes nommés pour l'état persistant, aucun bind mount du
-> filesystem hôte. Interdire **et tester explicitement dans le compose** tout
-> montage de docker.sock, network_mode host, privileged, pid/ipc host et /dev/shm
-> hôte. Le réseau n'autorise que l'unique port **routé** réservé au futur noyau de
-> capacités — endpoint **bindé sur la gateway WSL, jamais sur 127.0.0.1** (le
-> loopback Hyper-V n'a pas de filtrage par-port) — verrou réseau par OS (firewall
-> Hyper-V + DefaultOutboundAction Block, nftables ou pf), et l'identité de chaque
-> conteneur est un **cert client mTLS dédié**, pas son adresse réseau. Provisionner
-> un **relais Linux toujours-allumé** (Pi ou mini-PC sur le LAN) qui porte le
-> magic packet Wake-on-LAN vers la workstation (WoL est L2, hors tailnet), un
-> point d'entrée Tailscale stable en nœud tag:server **avec expiry de clé
-> désactivé**, et un healthcheck externe. Accès mobile via Tailscale avec ACL
-> explicites deny-by-default et passkeys hermes-webui. Livrer un harness de tests
-> de contournement scripté, rejouable et paramétré par OS, exécuté depuis
-> l'intérieur des conteneurs et depuis le runtime, prouvant que l'exécution de
-> binaires hôte, l'accès au filesystem hôte et au vault, et tout port hôte non
-> prévu échouent, que chacun des interdits de compose ci-dessus est refusé, et que
-> la révocation Tailscale d'un client coupe l'accès sans toucher les services.
-> Configurer le multi-modèles : modèle fort via API et endpoint local compatible
-> OpenAI optionnel si un GPU est présent (jamais requis), avec une politique de
-> routage documentée, un test du changement de modèle en conversation (/model)
-> et de l'épinglage d'un modèle par sous-agent. Documenter la mise à jour couplée
-> hermes-agent/hermes-webui. Critère : le harness **prouve que les réglages de
-> durcissement et les montages tiennent, et régresse (échoue) si on en relâche
-> un** — il ne prétend jamais démontrer une inévasibilité absolue.
+#### Coordinateur
 
-**Sortie** : Hermes utilisable en chat (et dictée navigateur) depuis le téléphone,
-structurellement incapable de toucher l'hôte, sur runtime natif, réveillable via le
-relais. Harness vert (et rouge si on relâche un réglage). Tests 1, 2, 10
-(le test 3 « appel sans credential » appartient à SPEC-002, où le noyau existe).
+- SQLite WAL, single writer logique, migrations et online backup ;
+- filesystem local, `synchronous=FULL`, checkpoints contrôlés et spike
+  macOS fullfsync ;
+- machine d'état complète avec `DISPATCHING/SETTLING/AUDIT_PENDING` ;
+- transactional outbox ;
+- inbox/consumed-grant et receipt durable côté adaptateur ;
+- operation ID/idempotency + epoch dans store supervisor indépendant ;
+- reconciliation interface et `OUTCOME_UNKNOWN` ;
+- UTC signée + deadline monotone liée à `boot_id` ; reboot expire les leases ;
+- état restored → nouvel instance/epoch, PAUSED et triggers quarantined.
+
+#### Gates automatisables
+
+- créer `conformance/catalog.yaml` : schéma ID, owner, phase active,
+  fixture, hardware, cadence, seuil et evidence URI ;
+- créer le Constitution Check qui bloque host-share, egress guest, secret runtime,
+  unknown intent, cible souveraine et artefact non vérifié ;
+- créer `docs/deviations/` avec schéma owner/expiry/compensation ;
+- backup/restore de la DB R1 sur répertoire vierge avant la DoD.
+
+#### Adaptateur simulé
+
+Un `FakeHostAdapter` déterministe permet :
+
+- success, fail, timeout et résultat ambigu ;
+- capability changes ;
+- compensation/conflict ;
+- crash entre toutes les transitions.
+
+### Périmètre OUT
+
+- filesystem Mac réel ;
+- WebAuthn/PWA finale ;
+- Graphify, cron et UI automation ;
+- VSS/APFS/Btrfs snapshots.
+
+### Tests/gates
+
+- `PLAN-001` canonicalisation/property/fuzz ;
+- `REQUEST-001` human grant forgé/rejoué ;
+- `SEC-002` auth/epoch/schema et `SEC-003` lease replay/expiry/
+  widening/cross-task ;
+- `GRANT-001` one-shot durable adapter ;
+- `DUR-001` crash à chaque transition ;
+- deux instances concurrentes → une seule fencing leader ;
+- migration DB N→N+1 et rollback autorisé/refusé correctement ;
+- initial clean restore R1 ;
+- aucune branche `cfg(target_os)` dans les contrats/policy/coordinator.
+
+**Sortie** : un plan factice passe de la requête au receipt, survit aux crashs et
+n'est jamais rejoué quand le résultat est ambigu.
 
 ---
 
-## SPEC-002 — Le noyau de capacités : cœur Rust + driver + sidecar C#/.NET JIT
+## R2 — Tranche verticale utile sur Mac mini M4
 
-**Objectif** : le composant souverain, conçu **prêt pour la portabilité** dès le
-premier jour (portabilité prouvée seulement au 2e driver). Le
-langage est **tranché** : **cœur Rust**, avec un **driver-sidecar C#/.NET JIT**
-pour l'interop Windows lourde. Le MVP est livrable **sans le sidecar**.
+**But** : chercher, lire et patcher une note Markdown du vault depuis Hermes, avec
+frontière, approval, preuve et récupération.
 
-**Langage tranché — Rust, pas Go** : le cœur est en **Rust** (`rustls` avec
-**révocation CRL native**, `webauthn-rs`, `#![forbid(unsafe_code)]` sur le cœur,
-binaire statique, service Windows). **Go est explicitement écarté** : pas de
-révocation mTLS dans la stdlib, et le backup-context VSS est impossible via WMI —
-deux invariants constitutionnels à recoder. Le cœur porte : mTLS, plan signé,
-policy, HITL, audit, idempotence, quotas, et le **contrat `DriverHost` (zéro concept
-OS)**.
+**Effort indicatif** : 4–6 semaines, plus le soak.
 
-**Sidecar C#/.NET JIT (`helixos-winhost`)** pour l'interop Windows que Rust n'atteint
-pas proprement (VSS backup-context via AlphaVSS, COM). Il n'exécute que des **verbes
-typés déjà validés et approuvés par le cœur**, en **localhost only**, authentifié par
-le cœur, audité avec le `plan_hash`. **Ni policy, ni HITL, ni auth d'appelant** :
-« une main, pas une tête ». Remplaçable. **Il exige l'amendement du Principe VIII de
-la constitution (v1.4.0)** : le noyau n'est plus « un seul binaire ». Le sidecar
-n'est livré qu'**en JIT** (AlphaVSS est incompatible AOT), **tard, isolé, optionnel**.
-Plan B documenté : monolithe C#/.NET JIT si le split coûte trop cher au solo.
+### Périmètre IN
 
-**Le sidecar est OUT du MVP** : le cœur Rust + driver léger (recherche + PowerShell
-out-of-proc + fichiers) est **livrable seul** ; sans le sidecar, l'intention
-`snapshot` **se dégrade en `compensation`** (voir taxonomie inversée).
+#### Runtime
 
-**Taxonomie de rollback — INVERSÉE (dégradation honnête)** : la classe garantie **par
-défaut** est `compensation` (copie-aside + `ReplaceFile` atomique, déterministe, tout
-filesystem, sans élévation). `auto` (VSS) est une **exception opportuniste derrière un
-probe** (NTFS fixe + writers sains + espace disque + élévation), **un snapshot par lot,
-jamais par fichier**. La classe `irreversible` reste explicite. La classe est
-**observée par le driver au runtime, jamais promise par le contrat** — on ne promet
-jamais mieux que `compensation`, on constate `auto` quand le probe passe.
+- VM Linux `arm64` choisie en R0, aucun host share ni NIC généraliste ;
+- `helix-vmhost`, vsock, import OCI host-side et filtre hôte/hyperviseur ;
+- Hermes minimal et MCP shim seulement ; outils shell/file hôte désactivés ;
+- image/dépendances par digest et user non-root ;
+- aucun Graphify ;
+- egress guest bloqué. Soit inférence locale seulement, soit gateway minimale déjà
+  conforme : credential Keychain, un provider/modèle/hostname épinglé, connexion
+  host-side, aucun redirect, classe public/interne seulement, limites bytes/tokens
+  et réservation de coût ; jamais un proxy générique ;
+- negative-control harness depuis conteneur **et root VM**.
 
-**Secrets hors runtime** : la **clé du noyau est cloisonnée hors de tout volume monté
-lisible, illisible par intention** (aucune intention ne peut la lire). En complément,
-une **deny-list de secrets** sur `host.read_file` (L2) : `*.env, *.key, *.pem, id_*,
-*.kdbx, .ssh/, .hermes/`, stores de credentials Windows → force **L2 + passkey même en
-lecture**.
+Les skills créées par Hermes restent dans son volume non fiable. Elles ne peuvent
+jamais devenir un package `process.package.run` sans revue/signature humaine.
 
-**Périmètre IN** : **cœur Rust** en service natif (`rustls`/CRL, `webauthn-rs`,
-`#![forbid(unsafe_code)]`, binaire statique) ; authentification par appelant
-(mTLS/token) ; **contrat d'intentions sans aucun concept spécifique à un OS**
-(`DriverHost`), l'OS-spécifique confiné à une interface de driver (recherche, lecture,
-patch, snapshot, scripts approuvés, notes Obsidian — voir SPEC-004 pour le catalogue
-applicatif) ; **driver de l'OS principal** (Windows : recherche remplaçable, PowerShell
-out-of-proc pour les scripts approuvés, fichiers) ; **sidecar C#/.NET JIT** pour VSS/COM
-(OUT du MVP) ; AUCUNE API freeform hors mode admin verrouillé ; pipeline
-request→normalize→classify→plan→diff→policy→(HITL)→execute(driver)→audit→verify→
-rollback ; plans canoniques hashés sha256, usage unique, TTL court, hash de cible
-anti-TOCTOU ; **taxonomie de rollback inversée** (`compensation` garantie par défaut,
-`auto`/VSS opportuniste derrière probe, `irreversible` explicite, classe observée jamais
-promise) ; **clé du noyau cloisonnée hors runtime** + **deny-list secrets** sur
-`read_file` ; audit append-only (objet complet, trace_id, `subagent_id` **hint
-déclaratif debug/coûts, sans valeur de sécurité** — la traçabilité fiable vient du
-credential mTLS + plan signé) ; idempotence et récupération après crash ; quotas par
-appelant ; policy YAML, défaut = approbation.
-**Périmètre OUT** : surface d'approbation riche (SPEC-003 — approbation CLI
-provisoire) ; **sidecar VSS/COM (extension, hors MVP)** ; drivers Linux/macOS
-(extensions) ; UI Automation.
+#### Core/driver macOS
 
-**Prompt `/specify`** :
-> Développer le noyau de capacités d'un agentic OS portable : un **cœur Rust**
-> déployé en service natif (rustls avec révocation CRL native, webauthn-rs,
-> #![forbid(unsafe_code)] sur le cœur, binaire statique), seul point d'entrée de
-> l'hôte, authentifiant chaque appelant par mTLS ou token dédié, et n'exposant que
-> des intentions typées de haut niveau dont le contrat (DriverHost) ne contient
-> aucun concept spécifique à un OS (recherche de fichiers, lecture bornée,
-> proposition puis application de patch, scripts pré-approuvés, rollback) —
-> l'implémentation étant confiée à une interface de driver par OS, avec le seul
-> driver de l'OS principal livré (recherche remplaçable, PowerShell out-of-proc,
-> fichiers). L'interop Windows lourde (snapshots VSS backup-context, COM) est
-> confiée à un **driver-sidecar C#/.NET en JIT (helixos-winhost)** qui n'exécute
-> que des verbes typés déjà validés et approuvés par le cœur, en localhost only,
-> sans policy ni HITL ni auth d'appelant, audité avec le plan_hash — ce sidecar
-> est **hors du MVP** ; sans lui, l'intention snapshot se dégrade en compensation.
-> Aucune API d'exécution freeform hors mode admin verrouillé. Pipeline complet :
-> normalisation, classification de risque (policy YAML déclarative, défaut =
-> approbation), plan canonique hashé sha256 à usage unique avec TTL court et hash
-> du contenu cible au moment du diff (refus et re-diff si la cible a changé),
-> décision de policy, approbation si requise, exécution par le driver, audit
-> append-only (operation_id, caller, subagent_id déclaratif — hint debug/coûts
-> sans valeur de sécurité —, source, tool, risk, target, plan_hash, approval_id,
-> rollback handle, driver, timestamps, result, trace_id), vérification
-> post-exécution. Taxonomie de rollback **inversée** : compensation best-effort
-> (copie-aside + ReplaceFile atomique) est la classe **garantie par défaut** ;
-> automatique (VSS) est une **exception opportuniste derrière un probe** (NTFS fixe,
-> writers sains, espace, élévation), un snapshot par lot jamais par fichier ;
-> irréversible reste explicite. La classe est **observée par le driver au runtime,
-> jamais promise ni surdéclarée par le contrat**. La **clé du noyau est cloisonnée
-> hors de tout volume monté et illisible par toute intention** ; host.read_file
-> applique une **deny-list de secrets** (*.env, *.key, *.pem, id_*, *.kdbx, .ssh/,
-> .hermes/, stores Windows) forçant L2 + passkey même en lecture. Garanties :
-> idempotence, récupération sans double exécution après crash, quotas par
-> appelant. Tests : rejeu refusé, plan expiré refusé, TOCTOU refusé, appel sans
-> credential refusé, crash sans double exécution, dégradation de classe de
-> rollback correcte sur un volume sans snapshot (snapshot → compensation), lecture
-> d'un fichier de la deny-list forçant L2.
+- binaire `aarch64-apple-darwin` ;
+- LaunchAgent user, supervisor LaunchDaemon minimal ;
+- racine vault enregistrée et identifiée par `root_id` ;
+- `host.file.search/read/patch` ;
+- résolution handle-relative, no-follow, file ID/volume ID, normalisation/collisions ;
+- Spotlight seulement comme accélérateur, fallback scan borné ;
+- protocole temp same-dir + pre-image + flush + replace + verify ;
+- métadonnées, xattrs et ACL couvertes selon capability report.
 
-**Sortie** : tests 3, 4, 9, 12, 13, 15, 16, 19 verts. Amendement Principe VIII (v1.4.0)
-ratifié. Sidecar VSS/COM planifié en extension.
+#### Approval
+
+- `helix-edge` authentifie le principal chat, signe le
+  `HumanRequestGrant` et borne réponses WebSocket/downloads ;
+- `approve.*` hostname dédié, page statique sans framework/tiers ;
+- RP ID = hostname exact et stratégie cert/noms validée ;
+- L1 authentifié et CSRF-safe ;
+- L2 WebAuthn lié au plan digest ;
+- carte : quoi, où, pourquoi/provenance, anomalie, préconditions, coût,
+  atomicité/récupération observées et vérification ;
+- ntfy optionnel avec lien opaque non-bearer.
+
+#### Reprise
+
+- receipt durable ;
+- crash injection dans le patch ;
+- rollback refuse d'écraser une modification humaine ;
+- PAUSE/ABORT/HALT indépendants et arbre de processus testé ;
+- backup minimal de la DB/CA/config/vault et restore local.
+
+### Périmètre OUT
+
+- autonomie, Graphify, OCR/vision, UI automation ;
+- shell/package runner ;
+- snapshot APFS ;
+- disponibilité pré-login garantie.
+
+### Gates
+
+- `SEC-001` frontière workload/root guest ; `SEC-002` auth/epoch ;
+  `SEC-003` lease ; `SEC-004` no-NIC/chat/minimal gateway ;
+  `SEC-005` managed secrets ; `SEC-006` agent malveillant ;
+- `REQUEST-001` et `GRANT-001` ;
+- `PLAN-002` capability/path/policy TOCTOU ;
+- `PATH-001` sur APFS case-insensitive et image case-sensitive ;
+- `FILE-001` et `FILE-002` ;
+- `HITL-001` webui malveillante/cookies/CSRF/replay ;
+- `OPS-001` PAUSE/ABORT/HALT ;
+- `PORT-002` arm64 natif sans Rosetta ;
+- SLO core/UI de `PERF-001` mesurés avant tout claim Tier 1 ;
+- soak de dix jours comprenant ≥100 patches/reads, ≥3 restarts forcés,
+  ≥3 conflits humains et zéro incident de sévérité 1–2.
+
+**Sortie utilisateur** : « trouve la note X et applique ce patch » fonctionne depuis
+le téléphone ou le Mac ; la webui peut être compromise sans gagner l'autorité.
 
 ---
 
-## SPEC-003 — HITL signé : surface d'approbation sur origine distincte servie par le noyau
+## R3 — Hardening, egress et opérations Tier 1 Mac
 
-**Objectif** : l'interface d'autorité humaine, anti-fatigue, rendue par le
-composant souverain sur une **origine distincte** — jamais par la pile agent. Le
-cadrage **« B+C / zéro fork » est abandonné** : `hermes-webui` exécute l'agent
-in-process et **n'expose aucune brique de transport** deep-link/push ; « la webui ne
-transporte qu'un deep link » n'a pas d'implémentation, et un passkey prouve « l'humain
-a cliqué », pas « l'humain a vu la vérité » (détournement de contexte same-device).
+**But** : rendre la tranche exploitable pendant un an, pas seulement démontrable.
 
-**Principe** : la surface d'approbation ne doit pas être rendue ni encadrable par le
-côté non fiable. Le noyau sert lui-même une **micro-PWA d'approbation sur une origine
-distincte** (host:port + certif dédiés, `frame-ancestors 'none'`, `X-Frame-Options:
-DENY`), ouverte **hors de toute vue contrôlable par la webui**. Le deep link est livré
-**hors-bande via ntfy** (self-hosté dans le tailnet) ; le **contenu** (résumé + hash du
-plan) est **émis par le noyau, jamais par l'agent**. « L'humain signe le plan, pas le
-texte affiché » — et le texte affiché vient de la source de vérité, sur une origine que
-la webui ne peut ni rendre ni cadrer.
+**Effort indicatif** : 6–10 semaines.
 
-**WebAuthn confirmé faisable** : RP ID = nom MagicDNS `helix.<tailnet>.ts.net` (`ts.net`
-∈ Public Suffix List → eTLD+1 propre), secure context via `tailscale cert`, servi
-same-origin depuis le noyau, attestation `none`, jamais l'IP `100.x`.
+### R3.1 Gateway modèle/egress
 
-**Périmètre IN** : **micro-PWA servie par le noyau sur une origine distincte** (page
-unique, sans framework, HTTPS tailnet, `frame-ancestors 'none'` / `X-Frame-Options:
-DENY`, Web Push) : résumé, diff, portée, classe de rollback (jamais surdéclarée),
-identité de la tâche et `subagent_id` (déclaratif), hash du plan, expiration, niveau de
-risque — le tout selon le **contrat de carte d'approbation (§4 architecture)** :
-quoi / où / risque + rollback réel / **pourquoi + drapeau taint** / **inhabituel**,
-**conçu et testé contre l'approbation mécanique** ; niveaux L0/L1/L2 (audit seul / tap
-/ WebAuthn-passkey), **avec comparaison de hash (≥ 4 premiers octets) exigée pour les
-L2** ; **deep link hors-bande via ntfy**
-(contenu émis par le noyau) ; notifications de commodité (toast/badge webui via message
-Hermes, **WhatsApp strictement informatif et non fiable via Baileys** — jamais un canal
-d'autorité) ; révocation en cours de tâche ; vue « opérations en vol ».
-**Périmètre OUT** : fork de webui ; rendu d'approbation côté agent ; kanban custom
-(SPEC-006+).
-**Dépendance** : le noyau seul (ntfy self-hosté dans le tailnet en support).
+- provider adapters typés ; aucun proxy URL générique ;
+- `helix-egress` séparé, sans fichiers/capacité hôte ; worker compute
+  non fiable sans Keychain/réseau/model-pull ;
+- credentials Keychain et verbes `secret.use` ;
+- DNS contrôlé, destination allowlist, redirect/IP privée refusés ;
+- limites bytes/requests/tokens/output ;
+- classification/DLP et provenance sticky ;
+- payload agent classé restrictif ; cloud moins restrictif seulement par
+  handles/manifests fiables ou policy humaine ;
+- coût maximal réservé avant dispatch, micro-unités, price table versionnée,
+  reconciliation réelle ;
+- timeout, retry idempotent, circuit breaker ; fallback de classification,
+  juridiction et rétention au moins aussi strictes avec nouvelle réservation ;
+- mode local natif M4 derrière la même interface.
 
-**Prompt `/specify`** :
-> Construire la surface d'approbation humaine de l'agentic OS, servie par le
-> noyau de capacités lui-même sur une **origine distincte** (host:port et certif
-> dédiés, frame-ancestors 'none' et X-Frame-Options DENY, ouverte hors de toute
-> vue contrôlable par la webui) : une **micro-PWA** minimale (sans framework, HTTPS
-> sur le tailnet, Web Push) rendant la représentation canonique du plan — résumé,
-> diff, portée, classe de rollback jamais surdéclarée, identité de la tâche et du
-> sous-agent, hash du plan, expiration, niveau de risque — et recueillant la
-> décision : tap simple pour L1, **WebAuthn/passkey plus comparaison de hash (au
-> moins les 4 premiers octets) pour L2**, L0 restant auto-approuvé et audité. Le
-> deep link est livré **hors-bande via ntfy self-hosté dans le tailnet**, et son
-> **contenu (résumé + hash) est émis par le noyau, jamais par l'agent** ; les
-> autres canaux (hermes-webui, WhatsApp via Baileys strictement informatif et non
-> fiable) ne sont que des commodités, jamais des canaux d'autorité ; aucun rendu
-> d'approbation côté agent. Le noyau rejette tout hash divergent, tout rejeu, tout
-> plan expiré ; révocation possible en cours de tâche avec arrêt propre ; une vue
-> liste les opérations en vol. Tests : approbation WhatsApp d'une action L2
-> refusée ; plan modifié après affichage refusé ; **webui activement malveillante
-> (pas seulement éteinte) — tentative de cadrer, rejouer ou détourner la surface
-> d'approbation — l'approbation et le refus d'une opération en vol restent
-> intègres et fonctionnels** ; **la carte d'approbation suit le contrat §4 (quoi / où /
-> risque + rollback réel / pourquoi + drapeau taint / inhabituel) et est testée pour sa
-> lisibilité — anti-approbation-mécanique : elle fait ressortir ce qui dévie du
-> comportement normal, pas seulement le diff** ; mesure du taux de sollicitations L1/L2
-> pour calibrer l'anti-fatigue.
+**Gate** : `SEC-004` et `SEC-005`, y compris chat/DNS/redirect/
+model/ntfy ; `COST-001` réservation/prix/fallback.
 
-**Sortie** : tests 6, 11, 14 verts depuis le téléphone, y compris face à une
-webui malveillante (le test 5 Obsidian est rattaché à SPEC-004 — §9 source unique).
+### R3.2 Superviseur et packages de processus
 
----
+- control lane séparée ;
+- epoch persistant ;
+- process group/session best-effort et descendant escape tests ; package hostile
+  dans VM éphémère ;
+- `process.package.run` seulement pour packages signés à paramètres typés ;
+- sorties bornées, cwd et environnement minimaux, réseau deny par défaut ;
+- break-glass humain local séparé.
 
-## SPEC-004 — Premiers usages hôte : Obsidian (catalogue applicatif) + recherche de fichiers
+**Gate** : `OPS-001` exige zéro descendant sous 5 s pour Tier 1 ; tout
+survivant échoue le gate **et** ouvre un incident. Reboot après HALT reste PAUSED.
 
-**Objectif** : la valeur quotidienne, à travers le driver. **Le test 5 (Obsidian)
-appartient à ce lot** (corrigé depuis la matrice — pas SPEC-003).
+### R3.3 Audit et observabilité
 
-**`obsidian.*` = catalogue applicatif, hors du cœur souverain** : Obsidian n'est pas
-un concept OS. Les intentions Obsidian vivent dans un **catalogue applicatif distinct**
-(`app.obsidian.create_note`, `app.obsidian.patch_note`), **remplaçable**, jamais dans
-le contrat souverain `DriverHost` — le cœur reste agnostique de l'application.
+- ledger hash-chainé, sealed segments et checkpoints signés hors hôte ;
+- OTLP/Unified Logging redacted ;
+- dashboards minimaux : queues, unknown, approvals, coûts, disk/memory, certs,
+  backups, descendants ;
+- liveness/readiness/dependencies séparés ;
+- aucune chaîne de pensée ou secret dans une destination de logs.
 
-**Recherche de fichiers = capacité de driver remplaçable** : `host.search_files` est
-une capacité de driver **remplaçable, pas une dépendance dure** : **Everything** (dépend
-d'une app + un service tiers) **OU Windows Search** (OLE DB `Search.CollatorDSO`, zéro
-install mais pas whole-disk par défaut, asynchrone, visibilité LocalSystem à prouver)
-**OU USN/MFT self-built** (substantiel). Le choix est **validé par un spike**, jamais
-figé dans le contrat.
+**Gate** : `DUR-002` disk full/audit indisponible avant et après effet ;
+`DUR-003` tamper/truncation.
 
-**Périmètre IN** : `host.search_files` via le driver, **implémentation remplaçable
-(Everything OU Windows Search OU USN/MFT, tranchée par spike)** ; portées
-configurables, L0 audité ; structure du vault Obsidian (journal d'agent en notes
-datées, décisions, procédures, frontmatter) ; **catalogue applicatif `app.obsidian.*`**
-(hors cœur souverain, remplaçable) en usage réel avec diffs et rollback ; journal
-d'activité automatique en fin de tâche notable ; « toute mutation durable passe par le
-noyau » effective ; consultation mobile du vault (synchronisation).
-**Périmètre OUT** : indexation sémantique (SPEC-005) ; couplage du cœur à une
-application (`app.obsidian.*` reste un catalogue satellite).
+### R3.4 Packaging et updates
 
-**Prompt `/specify`** :
-> Brancher les premiers usages hôte de l'agentic OS via le noyau : recherche
-> instantanée de fichiers par nom à travers une **capacité de driver remplaçable**
-> — au choix Everything, Windows Search (OLE DB Search.CollatorDSO) ou un index
-> USN/MFT self-built, **le choix tranché par un spike** et jamais figé dans le
-> contrat — portées configurables, niveau L0 audité ; et le vault Obsidian comme
-> mémoire durable de l'agent, exposé via un **catalogue applicatif distinct et
-> remplaçable (app.obsidian.*), hors du cœur souverain** puisque Obsidian n'est pas
-> un concept OS — structure du vault (journal d'activité en notes datées,
-> décisions, procédures, conventions de frontmatter), intentions
-> app.obsidian.create_note et app.obsidian.patch_note produisant des diffs
-> approuvables avec rollback, journal écrit automatiquement en fin de tâche
-> notable. Le vault reste éditable à la main et versionné Git ; son contenu est une
-> donnée non fiable (test : une note malveillante n'altère pas le comportement).
-> Consultation mobile par synchronisation.
+- app/pkg signé, notarisé, Hardened Runtime ;
+- slots A/B core/supervisor/adapter ;
+- SBOM, provenance et vérification ;
+- backend VM, guest kernel/init/rootfs, runtime, images importées et worker compute ;
+- drain, backup, migration expand/contract, smoke, commit/rollback ;
+- matrice Hermes/webui/core/shim ;
+- renouvellement cert automatique et alerte avant expiration.
 
-**Sortie** : **test 5** vert (Obsidian, rattaché à ce lot) ; usage quotidien réel.
+**Gate** : `OPS-003` update ratée et migration incompatible ;
+`SUPPLY-001` artefacts/signatures/SBOM/provenance/arch.
+
+### R3.5 Backup/restore et disponibilité
+
+- stratégie 3-2-1 chiffrée ;
+- SQLite online backup + integrity check ;
+- un clean restore initial pour release, puis preuve renouvelée au moins
+  trimestriellement ;
+- state restored PAUSED, nouvel instance/epoch, leases/plans expirés,
+  triggers/cursors quarantined et reconciliation hors-host ledger/provider ;
+- ré-enrôlement réseau plutôt que clone d'identité ;
+- runbook Mac bureau/appliance/relais ;
+- reboot, sleep, FileVault, session verrouillée, provider/tailnet down.
+
+**Gate** : `OPS-002` et `OPS-004` avec RPO ≤ 24 h et RTO ≤ 2 h,
+ou amendement chiffré ; `IDENT-001` cert/passkey rotation/recovery et
+`HITL-002` perte/revocation ; `PERF-001`/`PERF-002` sur
+M4 avant claim Tier 1.
+
+**Sortie** : profil Mac Tier 1 possible si toutes les preuves sont vertes.
 
 ---
 
-## SPEC-005 — Graphify + connaissance : code + markdown + transcription (100 % local)
+## R4 — Driver Linux, seconde preuve de portabilité
 
-**Objectif** : la connaissance, **vraiment locale, sans exigence GPU**. Graphify est
-**codebase-first** ; son watch **ne reconstruit pas le markdown**.
+**But** : casser tôt les abstractions accidentellement macOS.
 
-**MVP = code + markdown + transcription (100 % local)** : l'indexation MVP couvre
-**code + markdown + transcription audio** (faster-whisper int8 **sur CPU**, confirmé
-verbatim) — sans GPU. L'axe réel est **local vs cloud, pas CPU vs GPU** : les
-**images / PDF-vision** relèvent d'un **vision-LLM** et sont une **extension explicite**
-« Ollama-GPU ou cloud par exception, jamais socle ». La mention **« captions/OCR légers
-sur CPU » est supprimée** (l'extraction visuelle n'est pas de l'OCR local).
+**Effort indicatif** : 4–8 semaines.
 
-**Fraîcheur déclenchée par le noyau** : le watch **ne rebuild pas le markdown** ; la
-fraîcheur du vault est **déclenchée par le noyau à chaque mutation validée**. Cible : <
-1 min pour le **code** ; le vault est rafraîchi par le noyau à chaque mutation.
+### Périmètre
 
-**Deux conteneurs + cgroup + version pinnée** : **serving MCP en lecture seule (`:ro`)**
-d'un côté, **extracteur custom en écriture** de l'autre — **deux conteneurs distincts**,
-avec **limites cgroup** (les jobs lourds ne dégradent pas l'interactif) et une **version
-pinnée** (jamais un tag mouvant type `v8`). Le **schéma MCP exposé à Hermes est un
-contrat versionné**.
+- cible initiale figée (distro, glibc, kernel, systemd, cgroup v2) sur x86_64
+  réel ; arm64 build/smoke jusqu'au runner matériel ;
+- profil KVM Tier 1 sans NIC ; rootless Podman nu Tier 2 ;
+- systemd user/system selon la propriété des données ;
+- UDS + peer credentials ;
+- `openat2`/relative handles, case-sensitive paths ;
+- inotify/fanotify hints + full reconciliation ;
+- cgroup v2/systemd transient scopes ;
+- Secret Service ou systemd-creds/TPM, fallback chiffré documenté ;
+- packaging signé pour une famille Debian et une famille RPM ;
+- AppArmor/SELinux assets quand disponibles.
 
-**Périmètre IN** : Graphify (`graphifyy` sur PyPI — double y) **en deux conteneurs
-(serving MCP `:ro` + extracteur custom en écriture)**, plateforme Hermes, **version
-pinnée par digest, limites cgroup** ; périmètres d'indexation (vault + dossiers projets,
-exclusions) ; mode watch (**ne rebuild pas le markdown**) ; serveur MCP branché à Hermes
-via un **schéma contractuel versionné** ; accès en LECTURE aux fichiers hôte via un
-miroir contrôlé ou un volume lecture seule dédié (documenter l'impact sur le harness, le
-re-passer) ; extraction médias MVP **100 % locale** : transcription faster-whisper int8
-**sur CPU**, en heures creuses ; **fraîcheur déclenchée par le noyau** à chaque mutation
-validée ; invariant : les jobs lourds ne dégradent pas l'interactif (p95).
-**Périmètre OUT** : **images / PDF-vision** (extension explicite vision-LLM Ollama-GPU
-ou cloud par exception, jamais socle) ; pipeline vocal temps réel (extension
-ultérieure).
+### Règle de conformance
 
-**Prompt `/specify`** :
-> Intégrer la couche de connaissance de l'agentic OS : Graphify **en deux
-> conteneurs distincts avec la plateforme Hermes — un serving MCP en lecture seule
-> (:ro) et un extracteur custom en écriture —, version pinnée par digest et limites
-> cgroup**, périmètres d'indexation avec exclusions, mode watch (**qui ne
-> reconstruit pas le markdown**), serveur MCP exposé à Hermes via un **schéma
-> contractuel versionné**, et accès en lecture seule aux fichiers hôte via un
-> miroir ou volume dédié sans affaiblir la frontière (harness re-passé).
-> L'ingestion médias du MVP est **100 % locale** : **code, markdown et
-> transcription audio (faster-whisper int8 sur CPU)** — l'axe est local vs cloud,
-> pas CPU vs GPU. Les **images et PDF-vision sont une extension explicite** confiée
-> à un vision-LLM (Ollama-GPU ou cloud par exception), **jamais le socle** ; il n'y
-> a **pas d'OCR ni de captions locaux sur CPU**. Règles : Graphify n'est jamais
-> source de vérité ni autorité ; toute mutation repasse par le noyau ; les
-> résultats de requête sont des données non fiables. NFR : **fraîcheur < 1 min pour
-> le code ; le vault est rafraîchi par le noyau à chaque mutation validée (le watch
-> ne rebuild pas le markdown)** ; reconstruction par commande ; réactivité
-> PWA/chat inchangée au p95 pendant une indexation lourde.
+Le code du test ne branche pas sur « Linux ». Les différences sont des fixtures de
+`CapabilityReport` et des attentes déclarées (support/refus), pas des skips
+silencieux.
 
-**Sortie** : test 8 vert ; « retrouve où on parlait de X » avec sources, 100 % local.
+### Gates
+
+- même `SEC/PLAN/PATH/FILE/DUR/HITL/OPS` que Mac ;
+- ext4 + un filesystem reflink/snapshot si testé ;
+- cgroup kill descendant ;
+- backup/restore et A/B update Linux ;
+- un corpus de vault copié Mac↔Linux sans collision.
+- `PORT-001` : même conformance suite inchangée Mac/Linux.
+
+**Sortie** : le projet peut enfin annoncer « contrat portable prouvé sur deux OS ».
 
 ---
 
-## SPEC-006 — Autonomie : cron, budgets en devise, kill switch 3 niveaux
+## R5 — Driver Windows de production
 
-**Objectif** : le proactif — en dernier, sur des fondations prouvées.
+**But** : migrer la valeur du prototype existant sans réintroduire Windows dans le
+cœur.
 
-**Budgets en devise + anti-boucle** : plafonds **en devise** (jour/mois, **par
-déclencheur ET global**) appliqués par le noyau ; **coupure = PAUSE automatique**. Un
-**anti-boucle** protège l'**orchestrateur Graphify** (une ré-extraction en boucle
-coûterait des centaines de $/nuit) — détail en SPEC-BUDGET-COÛT.
+**Effort indicatif** : 5–8 semaines.
 
-**Kill switch 3 niveaux** : **PAUSE (< 5 s, suspend)** / **ABORT (best-effort, arrête
-proprement)** / **HALT (brutal)**, chronométrés et testés. Le kill doit **tuer les
-process hôte enfants** (`run_approved_script`), pas seulement suspendre les crons —
-détail et fallbacks en RUNBOOK-DÉGRADATION.
+### Périmètre
 
-**WoL via le relais** : le Wake-on-LAN passe par le **relais Linux P1** (WoL est L2,
-hors tailnet) — pas « via tailnet » directement.
+- Windows 11 Pro/Enterprise x64 + SLAT ; Hyper-V VM sans virtual switch comme
+  profil Tier 1, Hyper-V Socket vers un guest avec vsock configuré ; Windows
+  Home/WSL2 dédié-durci = Tier 2 ;
+- aucun `/mnt/c`, interop, Windows PATH, `\\wsl$` utilisé par le runtime ;
+- Windows Service sous identité dédiée pour policy/audit/supervision/VM et secrets
+  machine ; helper user pour racines, DPAPI CurrentUser, recherche et futures UIA ;
+- named pipe SDDL + validation caller token ;
+- file handles/volume IDs, reparse/junction/symlink, ADS, UNC, long paths,
+  reserved names, trailing spaces/dots ;
+- `ReplaceFileW` et métadonnées/ACL testées ;
+- Windows Search/USN remplaçable et post-filtré ;
+- Job Objects créés avant reprise, kill-on-close et sans breakaway ;
+- DPAPI/CNG/TPM ;
+- MSI Authenticode et Event Log/ETW ;
+- adaptation des scripts/harness PowerShell existants.
 
-**Périmètre IN** : déclencheurs (cron Hermes, watchers, webhooks) avec politique
-d'autonomie par déclencheur (intentions en auto, plafonds nb actions/fenêtre
-horaire, le reste → HITL) ; le contenu déclencheur ne peut jamais élargir la
-politique de sa tâche (**principe étendu à tout contenu non fiable lu dans le tour :
-taint → +1 cran HITL**) ; **budgets en devise (jour/mois, par déclencheur + global)
-appliqués par le noyau, coupure = PAUSE auto** ; **anti-boucle orchestrateur Graphify**
-; file persistante, checkpointing, reprise ; **Wake-on-LAN via le relais Linux P1** ;
-**kill switch 3 niveaux PAUSE (< 5 s) / ABORT (best-effort) / HALT (brutal), tuant les
-process hôte enfants** ; notifications (alertes webui + **WhatsApp secours non fiable**)
-; suivi Todos/Tasks/Kanban webui + vue kanban custom sur l'audit du noyau (« en attente
-d'approbation ») si besoin.
-**Périmètre OUT** : Swarm multi-agents (extension).
+### Périmètre OUT
 
-**Prompt `/specify`** :
-> Activer l'autonomie de l'agentic OS : des déclencheurs (cron Hermes,
-> surveillance de dossiers et de boîtes mail, webhooks) enfilent des tâches dans
-> une file persistante avec checkpointing et reprise après interruption. Chaque
-> déclencheur porte une politique d'autonomie explicite — intentions du noyau
-> autorisées en automatique, plafonds d'actions et fenêtres horaires — le reste
-> passant par le HITL gradué ; le contenu déclencheur (et **tout contenu non fiable
-> lu dans le tour**) est une donnée qui ne peut jamais élargir la politique de sa
-> tâche et force +1 cran HITL. Appliquer par le noyau des **budgets en devise
-> (jour/mois, par déclencheur et global) dont le dépassement déclenche une PAUSE
-> automatique**, et un **anti-boucle sur l'orchestrateur Graphify** pour empêcher
-> toute ré-extraction en boucle. Wake-on-LAN **via le relais Linux toujours-allumé**
-> (le WoL est L2, hors du tailnet). **Kill switch à trois niveaux — PAUSE en moins
-> de 5 secondes (suspend), ABORT best-effort (arrêt propre), HALT brutal —
-> chronométrés, qui tuent aussi les process hôte enfants lancés par
-> run_approved_script**, pas seulement les crons ; notification de résultat par les
-> alertes de complétion webui avec fallback WhatsApp informatif et non fiable ;
-> suivi de l'état des tâches, y compris « en attente d'approbation » dérivé de
-> l'audit du noyau. Le NFR « p95 sous charge » doit être **falsifiable via un
-> load-generator synthétique** (sinon théâtre). Tests : écriture cron hors
-> politique → notification et approbation traçable ; email piégé → aucune action
-> hors politique ; **les trois niveaux de kill effectifs et chronométrés (process
-> enfants inclus)** ; dépassement de budget → PAUSE auto ; téléphone éteint → la
-> tâche aboutit et le résultat attend.
+- VSS/COM sidecar ;
+- UI Automation ;
+- Windows ARM64 Tier 1.
 
-**Sortie** : test 7 vert ; « surveille ce dossier, résume tout nouveau PDF »
-fonctionne téléphone éteint ; budgets et kill 3 niveaux prouvés.
+### Gates
+
+- suite commune sur NTFS, case-sensitive directory et locks ;
+- firewall WSL/Hyper-V vérifié sans casser silencieusement les autres distros ;
+- crash/rollback sous fichier verrouillé ;
+- Job Object descendant escape ;
+- restore/update Windows.
+
+**Sortie** : Tier 1 Windows x64 quand les preuves existent ; WSL2 reste clairement
+étiqueté niveau d'isolation inférieur.
 
 ---
 
-# Runbooks & specs d'exploitation
+## R6 — Projection, connaissance et calcul natif
 
-Le modèle de sécurité est solide ; le modèle d'**exploitation** est ici. Ces cinq
-blocs ne changent pas l'architecture — ils la rendent **vivable un an, seul, depuis un
-téléphone**. Ordonnés par priorité réelle de mise en prod.
+**But** : ajouter retrieval et médias sans créer une porte de lecture hôte.
 
----
+**Effort indicatif** : 3–5 semaines.
 
-## RUNBOOK-BACKUP-RESTORE — 3-2-1 et restauration testée (CRITIQUE)
+### R6.1 Projection CAS
 
-**Objectif** : ne jamais perdre l'irremplaçable (`~/.hermes` : secrets + skills +
-mémoire non reproductibles) ni corrompre l'état SQLite, avec une restauration
-**prouvée pour de vrai**.
+- watcher OS comme hint + scanner périodique ;
+- allowlist de racines, classification, secret filters, file/total size limits ;
+- projection = déclassification explicite ; seul `agent-readable` entre dans
+  un compartiment partagé ;
+- CAS de contenu et manifests signés par génération ;
+- transfert unidirectionnel vers un compartiment connaissance sans lien direct
+  avec Hermes ;
+- sharding par domaine de confidentialité ; VM/compartiment séparé ou projection
+  éphémère pour les scopes qui ne peuvent pas se divulguer mutuellement ;
+- tombstones, garbage collection et reconstruction ;
+- chaque query passe par le cœur et est bornée par le `TaskLease` ;
+- le cœur relit les contenus autorisés et construit les snippets ;
+- provenance/source obligatoire ; résultat marque la tâche non fiable.
 
-**Périmètre IN** : stratégie **3-2-1** (3 copies, 2 supports, 1 hors-site) ; sauvegarde
-**chiffrée** de `~/.hermes` ; **SQLite via `.backup` + `PRAGMA integrity_check`**
-(jamais `cp` sur une base en WAL) ; **vault versionné restic en plus de Git** ; chiffre
-du state file Tailscale inclus ; **restauration testée périodiquement** sur cible vierge
-(RPO/RTO mesurés) ; rotation et purge des sauvegardes ; secrets 0600 / externalisés,
-**clé du noyau cloisonnée hors du périmètre lisible**.
-**Périmètre OUT** : réplication temps réel ; DR multi-site géré ; sauvegarde des
-conteneurs eux-mêmes (reconstruits par digest — voir SPEC-UPGRADE).
+### R6.2 Provider de connaissance
 
-**Prompt `/specify`** :
-> Écrire le runbook de sauvegarde-restauration de l'agentic OS selon une stratégie
-> 3-2-1 (trois copies, deux supports, une hors-site). Sauvegarder de façon
-> **chiffrée** le répertoire ~/.hermes (secrets, skills et mémoire non
-> reproductibles) ainsi que le state file Tailscale ; sauvegarder toute base SQLite
-> **exclusivement via la commande .backup suivie de PRAGMA integrity_check, jamais
-> par un cp sur un fichier en mode WAL** ; versionner le vault avec **restic en plus
-> de Git**. Définir rotation, purge, RPO et RTO cibles, et surtout une **procédure
-> de restauration testée périodiquement sur une machine vierge**, dont le succès est
-> vérifié (intégrité SQLite, démarrage du noyau, déchiffrement des secrets). La clé
-> du noyau reste cloisonnée hors du périmètre lisible par les intentions. Critère :
-> une restauration complète réussit et est **rejouée régulièrement**, pas seulement
-> documentée.
+Définir un contrat avant d'adopter Graphify :
 
-**Sortie** : une perte matérielle est récupérable ; la restauration a déjà été
-exécutée avec succès, pas seulement écrite.
+```text
+ingest_generation(manifest_id)
+query_candidates(domain_id, query, limits) -> manifest_ids_and_quantized_scores[]
+rebuild(generation)
+health/schema_version
+```
 
----
+Si Graphify est retenu :
 
-## SPEC-UPGRADE — mises à jour blue/green pinnées par digest (CRITIQUE)
+- version et digest épinglés, `linux/arm64` ;
+- serving read-only et extractor writable séparés si son architecture l'exige ;
+- aucun host mount, provider key ou egress direct ;
+- aucun endpoint joignable directement depuis Hermes ;
+- aucune sortie texte libre vers l'agent : IDs de manifest et scores bornés
+  uniquement, filtrés par le cœur ;
+- limites CPU/RAM/PID/I/O ;
+- schéma MCP versionné et adapter remplaçable.
 
-**Objectif** : mettre à jour sans casser ni ouvrir de faille, avec retour arrière
-immédiat et **couplages de versions respectés**.
+### R6.3 Médias et M4
 
-**Périmètre IN** : déploiement **blue/green** ; **images pinnées par digest sha256**
-(jamais un tag mouvant) ; **snapshot-avant-upgrade** ; **smoke test** post-bascule ;
-**rollback** immédiat vers l'ancien digest ; respect des couplages **agent↔webui ET
-agent↔Graphify** (schéma MCP versionné) ; traitement des **CVE** distinguant
-**exposée-tailnet vs non-exposée** (priorité et fenêtre différentes) ; journal des
-versions et digests déployés.
-**Périmètre OUT** : orchestrateur multi-nœuds ; canary progressif fin ; auto-upgrade
-non supervisé.
+- extraction déterministe code/markdown/PDF text/metadata ;
+- OCR local optionnel et borné ;
+- transcription backend benchmarké, CPU fallback ;
+- vision/enrichissement via gateway modèle ;
+- worker local natif Metal/MPS/MLX/Ollama non fiable, sans Keychain, réseau,
+  model-pull/admin ni filesystem général ;
+- cache par content hash et coût réservé.
 
-**Prompt `/specify`** :
-> Spécifier la mise à jour de l'agentic OS en **blue/green** : chaque composant
-> (hermes-agent, hermes-webui, Graphify serving et extracteur, noyau) est déployé
-> depuis une image **pinnée par digest sha256**, jamais par tag mouvant. Avant toute
-> bascule, prendre un **snapshot de l'état** ; après bascule, lancer un **smoke
-> test** ; en cas d'échec, **rollback immédiat** vers l'ancien digest. Respecter et
-> vérifier les **couplages de versions agent↔webui et agent↔Graphify** (le schéma
-> MCP est un contrat versionné) : refuser une bascule qui casserait un couplage. La
-> gestion des **CVE distingue les composants exposés au tailnet des non-exposés**
-> (fenêtre et priorité de patch différentes). Tenir un journal des digests déployés.
-> Critère : une mise à jour ratée revient à l'état antérieur sans perte, et aucune
-> bascule ne rompt un couplage de versions.
+### Gates
 
-**Sortie** : upgrades sûrs et réversibles ; jamais de désynchronisation
-agent/webui/Graphify.
+- `KNOW-001` : secret/excluded absent de projection, index, embeddings,
+  cache et backup dérivé ;
+- `KNOW-002` : delete/tombstone/rebuild ;
+- `KNOW-003` : fraîcheur, overflow watcher et scan de reconciliation ;
+- query inter-task/hors lease refusée ;
+- tentative du provider de renvoyer ID inconnu/hors domaine/snippet libre refusée ;
+- compromission de la VM agent incapable de lire le disque du compartiment
+  connaissance Tier 1 ;
+- `PERF-001` et `PERF-002` p95/p99, mémoire unifiée, overload ;
+- retrait complet de Graphify puis reconstruction depuis manifests.
+- backup/restore R6 puis reconstruction des dérivés sans réintroduire un tombstone.
 
----
-
-## RUNBOOK-COLDSTART & disponibilité — reprise et boot (CRITIQUE)
-
-**Objectif** : que le système **revienne seul** après un reboot (Windows Update
-compris), sur un poste opéré depuis un téléphone.
-
-**Périmètre IN** : **dockerd natif lancé au boot** (systemd dans la distro WSL2,
-auto-start WSL) — **jamais Docker Desktop** ; **graphe de dépendances noyau↔conteneurs +
-healthchecks** (ordre de démarrage, readiness) ; **reprise post-reboot Windows Update**
-(WU) ; **expiry de clé Tailscale désactivé** (nœuds workstation + relais en `tag:server`)
-pour éviter le lockout silencieux ; **relais Linux P1** (WoL + entrée Tailscale stable +
-healthcheck externe) ; procédure de réveil (WoL via le relais) ; vérification de bout en
-bout après boot (chat joignable depuis le téléphone).
-**Périmètre OUT** : HA multi-machine ; bascule automatique de site.
-
-**Prompt `/specify`** :
-> Écrire le runbook de cold-start et de disponibilité de l'agentic OS pour une
-> workstation-poste opérée à distance : **dockerd natif démarré au boot par systemd
-> dans la distro WSL2 (auto-start WSL activé), jamais Docker Desktop** ; un **graphe
-> de dépendances entre le noyau et les conteneurs avec healthchecks** fixant l'ordre
-> de démarrage et la readiness ; une **reprise automatique après reboot Windows
-> Update** (services et conteneurs remontent seuls) ; l'**expiry de clé Tailscale
-> désactivé sur la workstation et le relais (nœuds tag:server)** pour prévenir tout
-> lockout silencieux ; et un **relais Linux toujours-allumé** portant le Wake-on-LAN,
-> l'entrée Tailscale stable et le healthcheck externe. Documenter la procédure de
-> réveil (WoL émis par le relais) et une vérification de bout en bout après boot (le
-> chat est joignable depuis le téléphone). Critère : après un reboot inopiné, le
-> système redevient pleinement opérable **sans intervention au clavier local**.
-
-**Sortie** : après un reboot WU, tout remonte seul et reste joignable depuis le
-téléphone.
+**Sortie** : « où avons-nous parlé de X ? » avec sources et scopes, sans accès hôte
+direct du moteur.
 
 ---
 
-## SPEC-BUDGET-COÛT — plafonds en devise appliqués par le noyau (CRITIQUE)
+## R7 — Autonomie bornée
 
-**Objectif** : empêcher qu'une boucle ou une extraction emballée ne coûte des centaines
-de dollars, sans surveillance humaine.
+**But** : exécuter sans client connecté, après preuve que pause, restore et budgets
+fonctionnent.
 
-**Périmètre IN** : **plafonds en devise (jour/mois, par déclencheur ET global)**
-appliqués **par le noyau** ; **coupure = PAUSE automatique** au dépassement ;
-**extraction / backfill sur Haiku ou Ollama par défaut** (modèle cher = exception
-explicite) ; **anti-boucle** sur l'orchestrateur Graphify (garde contre une
-ré-extraction vision-LLM en boucle) ; comptabilité par déclencheur et globale, exposée
-en audit ; alerte à l'approche du plafond.
-**Périmètre OUT** : facturation multi-tenant ; prévision de coût fine ; arbitrage
-qualité/coût automatique au-delà du choix de modèle par défaut.
+**Effort indicatif** : 4–6 semaines.
 
-**Prompt `/specify`** :
-> Spécifier le contrôle de coût de l'agentic OS : des **plafonds exprimés en devise
-> (jour et mois, par déclencheur et global)** appliqués **par le noyau**, dont le
-> dépassement déclenche une **PAUSE automatique** de l'autonomie. Par défaut,
-> l'**extraction et les backfills utilisent un modèle économique (Haiku ou Ollama)**,
-> un modèle cher restant une exception explicite. Un **anti-boucle protège
-> l'orchestrateur Graphify** contre toute ré-extraction (notamment vision-LLM) en
-> boucle qui coûterait des centaines de dollars par nuit. La consommation est
-> comptabilisée par déclencheur et globalement, exposée dans l'audit, avec une alerte
-> à l'approche du plafond. Critère : une boucle d'extraction emballée est **stoppée
-> par PAUSE avant de dépasser le budget**, et le coût est traçable.
+### Périmètre
 
-**Sortie** : aucune surprise de facture ; une boucle emballée s'arrête d'elle-même.
+- trigger registry souverain : cron, watcher et webhook enregistrés par humain ;
+- chaque trigger crée un nouveau `TaskLease` minimal ;
+- durable queue/checkpoints avec déduplication et dead-letter ;
+- quotas actions/fichiers/octets/concurrence/durée ;
+- budgets modèle en devise/micro-unités par trigger/jour/mois + global ;
+- réservation pessimiste avant dispatch, reconciliation et safety margin ;
+- anti-loop par cause/event/content hash et limite de répétition ;
+- policy empêchant tout contenu déclencheur/lu d'élargir le bail ;
+- quiet hours, maintenance windows et priorité interactive ;
+- notification de résultat et digest ;
+- PAUSE automatique sur budget, anomaly ou health critique ;
+- opérations externes sans idempotency key classées ambiguës après crash.
 
----
+### Périmètre OUT
 
-## RUNBOOK-DÉGRADATION + KILL SWITCH — modes dégradés chronométrés (MAJEUR)
+- swarm libre ;
+- auto-install de skills/plugins ;
+- email/action financière non bornés ;
+- UI automation.
 
-**Objectif** : des modes dégradés **honnêtes et testés**, et un kill switch dont la
-sémantique est prouvée.
+### Tests/gates
 
-**Périmètre IN** : **kill switch 3 niveaux chronométrés + testés — PAUSE (< 5 s,
-suspend) / ABORT (best-effort, arrêt propre) / HALT (brutal)** ; le kill **tue les
-process hôte enfants** (`run_approved_script`), pas seulement les crons ; **fallback
-provider LLM** (bascule si le provider primaire tombe) ; **disque plein → VSS honnête**
-(dégradation `auto`→`compensation`, jamais de fausse promesse) ; conduite quand
-**Tailscale ou Baileys est down** (l'autorité reste sur l'origine distincte, WhatsApp
-non fiable assumé) ; NFR **« p95 sous charge » falsifiable via un load-generator
-synthétique** (sinon théâtre).
-**Périmètre OUT** : chaos-engineering continu ; auto-remédiation avancée.
+- `AUTO-001` : trigger falsifié/rejoué, queue dedup/dead-letter,
+  contenu injecté, anti-loop et cross-task lease ;
+- `COST-001` : provider price change/fallback pendant réservation ;
+- boucle coûteuse arrêtée avant plafond ;
+- queue pleine et poison job ;
+- téléphone/tailnet éteint sans corruption ;
+- reboot pendant tâche externe → reconcile, pas double envoi ;
+- PAUSE/ABORT/HALT sur workload réel ;
+- restore d'un système autonome démarre PAUSED.
 
-**Prompt `/specify`** :
-> Écrire le runbook de dégradation et la sémantique du kill switch de l'agentic OS.
-> Le **kill switch a trois niveaux chronométrés et testés — PAUSE en moins de 5
-> secondes (suspend), ABORT best-effort (arrêt propre des tâches en vol), HALT
-> brutal — et doit tuer les process hôte enfants lancés par run_approved_script**,
-> pas seulement suspendre les crons. Définir les modes dégradés : **fallback vers un
-> provider LLM secondaire** si le primaire tombe ; **disque plein → dégradation VSS
-> honnête** (snapshot auto qui retombe en compensation, jamais de classe
-> surdéclarée) ; comportement quand **Tailscale ou Baileys est indisponible**
-> (l'autorité d'approbation reste sur l'origine distincte servie par le noyau ; la
-> notification WhatsApp est assumée non fiable). Le NFR de latence **« p95 sous
-> charge » doit être falsifiable au moyen d'un load-generator synthétique**, faute de
-> quoi c'est du théâtre. Critère : chaque niveau de kill est **mesuré (durée,
-> process enfants inclus)** et chaque mode dégradé est **exercé**, pas seulement
-> décrit.
-
-**Sortie** : les trois kills sont chronométrés et prouvés ; chaque panne a un mode
-dégradé exercé et honnête.
+**Sortie** : un dossier/projecteur peut être surveillé et résumé avec coût maximal,
+source, état et kill prouvés.
 
 ---
 
-## Extensions ultérieures
+## R8 — Extensions isolées
 
-- **Drivers Linux puis macOS** du noyau (plocate/Btrfs/systemd ;
-  mdfind/APFS/launchd + TCC) — le contrat est déjà portable, seul le driver et
-  le harness de l'OS s'ajoutent.
-- **Sidecar VSS/COM (`helixos-winhost`)** : le driver-sidecar C#/.NET JIT pour
-  snapshots VSS backup-context et COM — hors du MVP (le cœur est livrable sans, avec
-  `snapshot`→`compensation`), arrive tard, isolé, optionnel.
-- **Vision multimodale complète** (images / PDF-vision par vision-LLM Ollama-GPU ou
-  cloud par exception) — extension explicite de SPEC-005, jamais le socle.
-- **Pipeline vocal full streaming** (wake word, STT/TTS expressif local,
-  ordonnanceur GPU préemptif) — spec conservée, réactivable telle quelle sur une
-  machine GPU.
-- Swarm Mode (hermes-workspace) : workers persistants à rôles, kanban de mission.
-- Machine dédiée : sortir **les conteneurs** sur un mini-serveur Linux, la
-  workstation ne portant que le noyau — la conteneurisation rend la migration
-  triviale. **(Le relais Linux toujours-allumé n'est plus ici : il est passé en P1,
-  livré avec SPEC-001 — WoL + entrée Tailscale stable + healthcheck.)**
-- Client natif Tauri 2 mobile ; `host.ui_automation(plan)` ; voix custom RVC ;
-  mémoire procédurale (macros de séquences réussies).
+Chaque extension est une release séparée avec threat-model delta, capability probe,
+tests et retrait :
+
+- helper C#/.NET VSS/COM Windows ;
+- snapshots APFS/Btrfs/ZFS comme optimisation de lot ;
+- UI Automation (TCC/AT-SPI/UIA) dans helper de session ;
+- vision locale lourde ;
+- pipeline vocal temps réel ;
+- packages d'actions externes (email, calendrier, git hosting) ;
+- swarm/multi-agent persistant ;
+- nœud Linux distant ou relay haute disponibilité ;
+- client natif mobile.
+
+Une extension ne peut jamais faire dépendre le socle portable de sa primitive OS.
+
+---
+
+## Spécifications des runbooks
+
+Les sections suivantes sont des **exigences**, pas encore des procédures
+exécutables. Chaque fichier final dans `ops/runbooks/` porte owner,
+prérequis, commandes/actions, validations, rollback, escalation, date et preuve du
+dernier drill.
+
+| Runbook | Spec owner | Première procédure exécutable |
+|---|---|---|
+| Mac appliance | R0 | R2 |
+| Backup/restore | R1 | R2, complet R3 |
+| Upgrade/migration | R1 | R3 |
+| Incident/kill/reconciliation | R1 | R2 |
+| Identity recovery | R1 | R3 |
+| Degradation | R1 | R2 |
+| Data lifecycle | R0 | R3 |
+
+### RUNBOOK-MAC-APPLIANCE
+
+Doit couvrir :
+
+- installation signée/notarisée et consentements ;
+- LaunchAgent vs LaunchDaemon, login requis et état `WAITING_FOR_USER_SESSION` ;
+- Keychain user/System et récupération ;
+- `helix-vmhost`, VM start/readiness sans NIC/share, vsock, import OCI,
+  images arm64 et rollback guest ;
+- hostnames possédés ou identités tailnet distinctes, RP ID/cert renewal ;
+- sleep/wake, wake network, FileVault, Remote Login, power restore, UPS ;
+- variante Tailscale avant/après login et ré-enrôlement ; FileVault SSH/LAN
+  préboot n'est pas supposé passer par le tailnet ;
+- relais optionnel, ce qu'il peut et ne peut pas réparer ;
+- vérification end-to-end chat + approval + patch après reboot ;
+- procédure locale si la récupération distante échoue.
+
+### RUNBOOK-BACKUP-RESTORE
+
+Doit couvrir :
+
+- inventaire de toutes les sources de vérité ;
+- 3-2-1, chiffrement, rotation, purge et key custody ;
+- SQLite online backup + integrity check, jamais copie brute d'un WAL actif ;
+- cohérence CAS/manifests/audit/checkpoints ;
+- vault + état Hermes non reproductible ;
+- aucune clé brute dans les logs/archives non chiffrées ;
+- restore vierge trimestriel, RPO/RTO ;
+- PAUSED + epoch bump + invalidation leases/plans/approvals ;
+- reconciliation des opérations ambiguës ;
+- ré-enrôlement Tailscale/workload certs.
+
+### RUNBOOK-UPGRADE-MIGRATION
+
+Doit couvrir :
+
+- vérification signature/SBOM/provenance/digest ;
+- matrice de compatibilité ;
+- drain/quiesce et backup ;
+- slots A/B natifs, digests OCI ;
+- backend VM, guest kernel/init/rootfs, runtime, images importées, protocol
+  host↔guest et worker compute ;
+- migrations expand/contract et fenêtre de downgrade ;
+- smoke fonctionnel + sécurité ;
+- rollback core/runtime/schema ;
+- révocation d'une release vulnérable ;
+- preuve qu'une seule instance a le fencing actif.
+
+### RUNBOOK-INCIDENT-KILL
+
+Doit couvrir :
+
+- signaux de compromission, exfiltration, budget ou audit ;
+- PAUSE, ABORT, HALT et fallback local ;
+- isolation VM/tailnet, révocation workload/leases/passkeys ;
+- descendants et `OUTCOME_UNKNOWN` ;
+- préservation du ledger sans secrets ;
+- rotation credentials et restore propre ;
+- critères de reprise et postmortem.
+- procédure détaillée de reconciliation
+  `OUTCOME_UNKNOWN/AUDIT_PENDING` avec receipt adapter, provider
+  idempotency et décision humaine.
+
+### RUNBOOK-IDENTITY-RECOVERY
+
+Doit couvrir :
+
+- CA root/offline, workload cert rotation, serial denylist et expiry ;
+- audit-signing/state-encryption/backup keys séparées ;
+- deux passkeys, perte/révocation/recovery ;
+- changement de hostname/RP ID interdit ou migration explicite ;
+- certificate transparency des noms tailnet ;
+- node key rotation et ré-enrôlement ;
+- aucune dépendance à une unique clé stockée sur le Mac.
+
+### RUNBOOK-DEGRADATION
+
+Matrice minimum :
+
+| Panne | Comportement |
+|---|---|
+| policy/lease store down | mutations refusées |
+| audit/receipt indisponible avant dispatch | mutation refusée |
+| persistance core échoue après effet possible | receipt adapter conservé, `OUTCOME_UNKNOWN/AUDIT_PENDING`, PAUSE |
+| provider primaire down | circuit open ; fallback policy ou attente |
+| budget/prix inconnu | aucun dispatch payant |
+| Keychain verrouillé | `WAITING_FOR_SECRET_STORE` |
+| user session absente | tâches user `WAITING_FOR_USER_SESSION` |
+| VM down + session user active | core, approval et kill restent observables |
+| VM down + aucune session | seul supervisor/status headless ; tâches user attendent |
+| approval/ntfy down | opération attend/expire ; aucune auto-approval |
+| disk low/full | background pause ; patch refusé avant préparation |
+| watcher overflow | scan complet de reconciliation |
+| résultat externe ambigu | `RECONCILIATION_REQUIRED` |
+| tailnet down | tâches locales continuent selon lease ; aucun ingress |
+
+### RUNBOOK-DATA-LIFECYCLE
+
+Doit couvrir :
+
+- classification, consentement cloud, régions/providers et redaction ;
+- inventaire projection/index/cache/embeddings/backups ;
+- export utilisateur ;
+- suppression/tombstone/GC et preuve sans conserver le contenu supprimé ;
+- rétention par flux et legal hold éventuel ;
+- test `PRIV-001` et owner des exceptions.
+
+---
+
+## Catalogue d'acceptance
+
+`ARCHITECTURE.md §15` définit le sens des IDs.
+`conformance/catalog.yaml`, livré en R1, ajoute owner, activation par
+milestone/profil, fixture, cadence, seuil et preuve.
+
+| Cadence | Couverture obligatoire |
+|---|---|
+| chaque PR | Rust unit/property/fuzz, schémas, migrations, fake adapter, build macOS arm64/Linux/Windows |
+| nightly | profils activés seulement : vrai M4/macOS de référence/VM sans NIC ; Linux x64 KVM/cgroup v2/ext4 dès R4 ; Windows 11 Pro/Enterprise Hyper-V/NTFS dès R5 ; WSL job Tier 2 séparé |
+| hebdomadaire destructif | crash chaque transition, disk full, watcher overflow, kill descendants, reboot/no-login, restore, upgrade ratée |
+| release | VM compromise harness, egress/exfil, approval-origin, passkey recovery, signatures/SBOM, restore vierge, performance |
+
+QEMU et CI hébergée suffisent pour compile/smoke. Ils ne prouvent ni isolation,
+filesystem, TCC/Keychain, GPU, boot, sleep ni performance ; ces preuves exigent du
+matériel réel.
+
+### Filesystems à exercer
+
+- APFS case-insensitive et image case-sensitive ;
+- ext4 et Btrfs/ZFS si la capability est annoncée ;
+- NTFS, case-sensitive directory, long paths, junction/symlink/ADS/locks ;
+- SMB/NFS, iCloud/OneDrive/placeholders/removable : refus ou Tier 2 explicitement
+  prouvé.
+
+---
+
+## Structure cible du dépôt
+
+Transition progressive proposée :
+
+```text
+contracts/                 schémas + fixtures golden
+kernel/                    helix-core Rust (nom historique conservable)
+edge/                      ingress humain + HumanRequestGrant
+egress/                    broker réseau/credentials sandboxé
+adapters/
+  macos/
+  linux/
+  windows/
+supervisor/                kill/fencing indépendant
+vmhost/                    lifecycle VM/vsock/import OCI
+runtime/                   manifests backend-agnostic + renderers
+conformance/               suite commune + fault injection
+ops/runbooks/              procédures normatives
+docs/adr/                  décisions
+docs/evidence/             résultats signés/horodatés
+```
+
+Ne pas déplacer mécaniquement tout le code au début. Créer les frontières, migrer
+un chemin vertical, puis supprimer l'ancien seulement quand les tests couvrent le
+nouveau.
+
+---
+
+## Estimation et gates de produit
+
+Ordres de grandeur solo full-time, après R0 et sans engagement calendaire :
+
+| Objectif | Cumul indicatif | Claim permis |
+|---|---:|---|
+| tranche Mac utile R2 | 10–15 semaines + soak | prototype Mac sécurisé, pas Tier 1 |
+| Mac durci R3 | 18–26 semaines | Tier 1 si toutes preuves passent |
+| Linux R4 | +4–8 semaines | portable prouvé sur deux OS |
+| Windows R5 | +5–8 semaines | cross-platform Tier 1 selon preuves |
+| connaissance R6 | +3–5 semaines | knowledge provider sûr/remplaçable |
+| autonomie R7 | +4–6 semaines | autonomie bornée, pas agent omnipotent |
+
+La priorité n'est pas de cocher trois logos OS au plus vite. Elle est de figer un
+petit contrat sur M4, le briser volontairement sur Linux, le corriger, puis porter
+Windows avant que Graphify et l'autonomie n'augmentent le coût du changement.
+
+---
+
+## Constitution Check de release
+
+Une release est bloquée si l'une de ces réponses est « oui » :
+
+- un workload voit-il un chemin/sock/device hôte ?
+- root guest voit-il un share/API runtime hôte, NIC généraliste ou route externe ?
+- peut-il sortir sans la gateway ou choisir une URL/DNS/chat client arbitraire ?
+- un secret brut apparaît-il dans runtime, prompt, log ou backup non chiffré ?
+- un message Hermes nu peut-il remplacer un `HumanRequestGrant` ?
+- un agent peut-il émettre/élargir son lease ?
+- une intention/version inconnue peut-elle être approuvée ?
+- une cible souveraine est-elle atteignable ?
+- un effet ambigu peut-il être rejoué automatiquement ?
+- une récupération est-elle annoncée sans préparation/vérification ?
+- approval et chat partagent-ils hostname/cookie/CORS/service-worker ?
+- une projection est-elle partagée entre domaines de divulgation incompatibles ?
+- le kill dépend-il du scheduler qu'il doit arrêter ?
+- un artefact natif/OCI n'est-il pas signé/épinglé/vérifié ?
+- une migration n'a-t-elle pas de backup et règle de rollback ?
+- un test requis est-il seulement documenté, skippé ou sans preuve matériel ?
+
+Si toutes les réponses sont « non », la release peut être évaluée contre son Tier ;
+elle n'est pas automatiquement Tier 1.

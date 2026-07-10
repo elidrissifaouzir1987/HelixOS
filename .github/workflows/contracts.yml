@@ -1,0 +1,156 @@
+name: Portable signed contracts
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/contracts.yml"
+      - "contracts/**"
+      - "conformance/**"
+      - "docs/adr/0005-canonical-signed-contracts.md"
+      - "kernel/Cargo.lock"
+      - "kernel/Cargo.toml"
+      - "kernel/helix-contracts/**"
+      - "specs/001-portable-signed-contracts/**"
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/contracts.yml"
+      - "contracts/**"
+      - "conformance/**"
+      - "docs/adr/0005-canonical-signed-contracts.md"
+      - "kernel/Cargo.lock"
+      - "kernel/Cargo.toml"
+      - "kernel/helix-contracts/**"
+      - "specs/001-portable-signed-contracts/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: contracts-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: "1"
+
+jobs:
+  conformance:
+    name: PLAN-001 / ${{ matrix.platform }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux-x86_64
+            runner: ubuntu-24.04
+            expected_host: x86_64-unknown-linux-gnu
+          # Verified 2026-07-10 against GitHub's official runner-images table:
+          # https://github.com/actions/runner-images#available-images
+          # macos-26 is arm64; the host assertion prevents a silent arch drift.
+          - platform: macos-arm64
+            runner: macos-26
+            expected_host: aarch64-apple-darwin
+          - platform: windows-x64
+            runner: windows-2022
+            expected_host: x86_64-pc-windows-msvc
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install Python for contract validation
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.13"
+
+      - name: Install exact-pinned JSON Schema validator
+        shell: pwsh
+        run: >-
+          python -m pip install
+          --disable-pip-version-check
+          --no-input
+          check-jsonschema==0.37.4
+
+      - name: Install pinned Rust 1.96.1 with formatting and lint components
+        shell: pwsh
+        run: |
+          rustup toolchain install 1.96.1 --profile minimal --component rustfmt,clippy --no-self-update
+          rustup default 1.96.1
+          rustc --version --verbose
+          cargo --version
+
+      - name: Assert runner architecture
+        shell: pwsh
+        run: |
+          $hostLine = (rustc --version --verbose | Select-String '^host:').Line
+          if (-not $hostLine) {
+            throw 'rustc did not report a host triple'
+          }
+          $actualHost = $hostLine.Substring(5).Trim()
+          $expectedHost = '${{ matrix.expected_host }}'
+          if ($actualHost -ne $expectedHost) {
+            throw "runner host mismatch: expected $expectedHost, got $actualHost"
+          }
+
+      - name: Validate Draft 2020-12 contract artifacts
+        shell: pwsh
+        run: |
+          $schemaPath = 'contracts/schemas/plan-envelope-v1.schema.json'
+          $negativeSchemaPath = 'contracts/schemas/negative-contract-corpus-v1.schema.json'
+          $goldenEnvelope = 'contracts/fixtures/plan-envelope-v1/valid-plan.envelope.jcs'
+          $negativeManifest = 'contracts/fixtures/plan-envelope-v1/negative-cases.json'
+          $expectedDialect = 'https://json-schema.org/draft/2020-12/schema'
+
+          foreach ($candidate in @($schemaPath, $negativeSchemaPath)) {
+            $schemaDocument = Get-Content -Raw -LiteralPath $candidate | ConvertFrom-Json
+            if ($schemaDocument.'$schema' -ne $expectedDialect) {
+              throw "$candidate must declare $expectedDialect"
+            }
+            python -m check_jsonschema --check-metaschema $candidate
+            if ($LASTEXITCODE -ne 0) {
+              throw "$candidate is not valid Draft 2020-12 JSON Schema"
+            }
+          }
+
+          python -m check_jsonschema --schemafile $schemaPath --force-filetype json $goldenEnvelope
+          if ($LASTEXITCODE -ne 0) {
+            throw 'golden plan envelope does not satisfy the contract schema'
+          }
+
+          python -m check_jsonschema --schemafile $negativeSchemaPath $negativeManifest
+          if ($LASTEXITCODE -ne 0) {
+            throw 'negative contract corpus manifest does not satisfy its schema'
+          }
+
+      - name: Check contract formatting
+        working-directory: kernel
+        run: cargo fmt --package helix-contracts -- --check
+
+      - name: Lint workspace
+        working-directory: kernel
+        run: cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
+
+      - name: Test contract crate
+        working-directory: kernel
+        run: cargo test --locked -p helix-contracts --all-targets --all-features
+
+      - name: Test workspace
+        working-directory: kernel
+        run: cargo test --locked --workspace --all-targets --all-features
+
+      - name: Reproduce exact fixture corpus
+        shell: pwsh
+        working-directory: kernel
+        run: |
+          cargo run --locked -p helix-contracts --example plan_benchmark -- --write-fixtures ../contracts/fixtures/plan-envelope-v1
+          $drift = git status --porcelain -- ../contracts/fixtures/plan-envelope-v1
+          if ($drift) {
+            $drift | Write-Output
+            throw 'fixture generator output differs from the committed corpus'
+          }
