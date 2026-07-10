@@ -61,6 +61,7 @@ mod tests {
     /// jonction (`mklink /J`) ne demande aucun privilège particulier. On tente donc le
     /// symlink d'abord, puis on retombe sur la jonction. Retourne `false` si aucune des deux
     /// formes n'a pu être créée (cas rare, ex. FS non-NTFS).
+    #[cfg(windows)]
     fn make_reparse_dir(link: &Path, target: &Path) -> bool {
         if std::os::windows::fs::symlink_dir(target, link).is_ok() {
             return true;
@@ -76,6 +77,17 @@ mod tests {
             Ok(status) => status.success(),
             Err(_) => false,
         }
+    }
+
+    #[cfg(unix)]
+    fn make_reparse_dir(link: &Path, target: &Path) -> bool {
+        std::os::unix::fs::symlink(target, link).is_ok()
+    }
+
+    #[cfg(not(any(windows, unix)))]
+    fn make_reparse_dir(link: &Path, target: &Path) -> bool {
+        let _ = (link, target);
+        false
     }
 
     /// Prouve qu'un lien-dir placé DANS une racine et pointant VERS L'EXTÉRIEUR n'est pas suivi

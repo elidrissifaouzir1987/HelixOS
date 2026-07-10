@@ -16,7 +16,11 @@ use std::thread;
 
 const THREAD_CONTENDERS: usize = 64;
 const PROCESS_CONTENDERS: usize = 8;
-const CONTENTION_BUSY_WAIT_MS: u64 = 5_000;
+// This is a correctness/linearizability fixture, not the SC-004 latency fixture. Hosted
+// Windows runners can serialize 64 FULL-sync contenders for more than five seconds;
+// keep enough budget for every call to observe the durable winner instead of honestly
+// timing out as `Unavailable` under runner load.
+const CONTENTION_BUSY_WAIT_MS: u64 = 30_000;
 const RELEASE_THREAD_ROUNDS_PER_SCENARIO: usize = 100;
 const RELEASE_PROCESS_ROUNDS: usize = 20;
 

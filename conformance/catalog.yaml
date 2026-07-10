@@ -255,6 +255,11 @@ entries:
         status: pending
         commit: pending
         ci_run: pending
+        last_failed_commit: b63d0bd25f979117a807c1c8e399c291cea39563
+        last_failed_ci_run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29114609468
+        last_failed_portability_run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29114609485
+        failure_diagnosis_artifact: specs/003-durable-replay-store/evidence/ci-remediation-local.md
+        failure_diagnosis_digest_sha256: 9051edc6c381b0e61f7e9aea4ee6814fadd3eed11fa7e6436d9d1b9a21a42736
         cases_digest_sha256: pending
         expected_outcomes_digest_sha256: pending
         store_schema_digest_sha256: pending

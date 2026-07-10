@@ -19,6 +19,10 @@ const DEFAULT_SOURCES: [(&str, &str); 10] = [
 ];
 const TEST_FAULT_SOURCE: &str = include_str!("../src/test_fault.rs");
 
+fn normalize_line_endings(source: &str) -> String {
+    source.replace("\r\n", "\n")
+}
+
 fn assert_absent(sources: &[(&str, &str)], forbidden: &[&str]) {
     for (name, source) in sources {
         for needle in forbidden {
@@ -110,27 +114,38 @@ fn default_adapter_has_no_network_ambient_clock_or_diagnostic_sink() {
 
 #[test]
 fn fault_process_io_is_non_default_and_not_publicly_exported() {
-    assert!(LIB.contains("#[cfg(feature = \"test-fault-injection\")]\nmod test_fault;"));
-    assert!(!LIB.contains("pub mod test_fault"));
+    let lib = normalize_line_endings(LIB);
+    assert!(lib.contains("#[cfg(feature = \"test-fault-injection\")]\nmod test_fault;"));
+    assert!(!lib.contains("pub mod test_fault"));
     assert!(TEST_FAULT_SOURCE.contains("Non-default process-crash barriers"));
     assert!(TEST_FAULT_SOURCE.contains("HELIX_REPLAY_TEST_FAULT_POINT"));
 }
 
 #[test]
 fn claim_fault_selection_is_feature_gated_private_and_native_by_default() {
+    let claim_source = normalize_line_endings(CLAIM_SOURCE);
     assert!(CARGO_TOML.contains("default = []"));
     assert!(CARGO_TOML.contains("test-fault-injection = []"));
-    assert!(CLAIM_SOURCE
+    assert!(claim_source
         .contains("#[cfg(feature = \"test-fault-injection\")]\nconst TEST_CLAIM_SCENARIO_ENV"));
-    assert!(CLAIM_SOURCE
+    assert!(claim_source
         .contains("#[cfg(feature = \"test-fault-injection\")]\n        if let Some(scenario)"));
-    assert!(CLAIM_SOURCE.contains("self.claim_once_with_io::<NativeClaimIoV1>(binding)\n    }"));
-    assert!(CLAIM_SOURCE.contains("struct NativeClaimRandomV1;"));
-    assert!(CLAIM_SOURCE.contains("struct NativeClaimIoV1;"));
+    assert!(claim_source.contains("self.claim_once_with_io::<NativeClaimIoV1>(binding)\n    }"));
+    assert!(claim_source.contains("struct NativeClaimRandomV1;"));
+    assert!(claim_source.contains("struct NativeClaimIoV1;"));
     assert!(!LIB.contains("pub mod claim"));
     assert!(!LIB.contains("TEST_CLAIM_SCENARIO_ENV"));
-    assert!(!CLAIM_SOURCE.contains("pub enum TestClaimScenarioV1"));
-    assert!(!CLAIM_SOURCE.contains("pub struct UnavailableClaimRandomV1"));
+    assert!(!claim_source.contains("pub enum TestClaimScenarioV1"));
+    assert!(!claim_source.contains("pub struct UnavailableClaimRandomV1"));
+}
+
+#[test]
+fn source_guard_normalization_is_lf_and_crlf_independent() {
+    assert_eq!(normalize_line_endings("first\nsecond\n"), "first\nsecond\n");
+    assert_eq!(
+        normalize_line_endings("first\r\nsecond\r\n"),
+        "first\nsecond\n"
+    );
 }
 
 #[test]

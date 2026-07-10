@@ -24,7 +24,7 @@ const SQLITE_HEADER: &[u8; 16] = b"SQLite format 3\0";
 
 #[test]
 fn initialization_fault_seam_is_source_guarded_and_private() {
-    let source = include_str!("../src/connection.rs");
+    let source = include_str!("../src/connection.rs").replace("\r\n", "\n");
     assert!(source
         .contains("#[cfg(feature = \"test-fault-injection\")]\nconst INITIALIZATION_FAULT_ENV"));
     assert!(

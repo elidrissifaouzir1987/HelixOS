@@ -166,12 +166,7 @@ fn acquire_or_create_root_lease<C: ReplayMonotonicClockV1>(
                 }
                 Err(TryLockError::Error(_)) => return Err(InternalStoreError::StoreUnavailable),
             }
-            if state == RootStateV1::LiveReady
-                && !root_contains_exact_live_reservation(root.path())?
-            {
-                return Err(InternalStoreError::LocationNotDedicated);
-            }
-            write_and_sync_exact(&mut file, state.content())?;
+            verify_or_repair_locked_root_role(root, state, &mut file)?;
             if state == RootStateV1::LiveReady {
                 consume_live_initialization_intent(root)?;
             }
@@ -216,17 +211,7 @@ fn acquire_existing_root_lease<C: ReplayMonotonicClockV1>(
         remaining_monotonic_ms(clock, deadline_monotonic_ms)?;
         match file.try_lock() {
             Ok(()) => {
-                if let Err(error) = verify_exact_file(&mut file, state.content()) {
-                    let recoverable_empty_live_reservation = state == RootStateV1::LiveReady
-                        && root_contains_exact_live_reservation(root.path())?;
-                    if !recoverable_empty_live_reservation {
-                        return Err(error);
-                    }
-                    file.set_len(0)
-                        .and_then(|()| file.seek(SeekFrom::Start(0)).map(|_| ()))
-                        .map_err(|_| InternalStoreError::StoreUnavailable)?;
-                    write_and_sync_exact(&mut file, state.content())?;
-                }
+                verify_or_repair_locked_root_role(root, state, &mut file)?;
                 return Ok(RootLeaseV1 { file });
             }
             Err(TryLockError::WouldBlock) if attempt + 1 < attempts => {
@@ -237,6 +222,31 @@ fn acquire_existing_root_lease<C: ReplayMonotonicClockV1>(
         }
     }
     Err(InternalStoreError::StoreBusy)
+}
+
+/// Accepts a role another initializer published before this lock holder ran,
+/// or completes only the exact empty live-initialization reservation.
+/// Unknown or partially published role contents are never overwritten.
+fn verify_or_repair_locked_root_role(
+    root: &TrustedLocalStoreRootV1,
+    state: RootStateV1,
+    file: &mut File,
+) -> Result<(), InternalStoreError> {
+    match verify_exact_file(file, state.content()) {
+        Ok(()) => Ok(()),
+        Err(InternalStoreError::LocationNotDedicated) => {
+            let recoverable_empty_live_reservation = state == RootStateV1::LiveReady
+                && root_contains_exact_live_reservation(root.path(), file)?;
+            if !recoverable_empty_live_reservation {
+                return Err(InternalStoreError::LocationNotDedicated);
+            }
+            file.set_len(0)
+                .and_then(|()| file.seek(SeekFrom::Start(0)).map(|_| ()))
+                .map_err(|_| InternalStoreError::StoreUnavailable)?;
+            write_and_sync_exact(file, state.content())
+        }
+        Err(error) => Err(error),
+    }
 }
 
 pub(crate) fn check_live_root_markers(
@@ -426,11 +436,25 @@ fn root_contains_only_regular_live_intent(root: &Path) -> Result<bool, InternalS
     )
 }
 
-fn root_contains_exact_live_reservation(root: &Path) -> Result<bool, InternalStoreError> {
-    Ok(root_contains_exact_regular_names(
-        root,
-        &[LIVE_INITIALIZATION_INTENT_FILENAME, ROOT_LOCK_FILENAME],
-    )? && live_initialization_intent_is_empty(root)?)
+fn root_contains_exact_live_reservation(
+    root: &Path,
+    locked_role: &File,
+) -> Result<bool, InternalStoreError> {
+    let locked_metadata = locked_role
+        .metadata()
+        .map_err(|_| InternalStoreError::StoreUnavailable)?;
+    let published_metadata = fs::symlink_metadata(root.join(ROOT_LOCK_FILENAME))
+        .map_err(|_| InternalStoreError::StoreUnavailable)?;
+    Ok(locked_metadata.is_file()
+        && locked_metadata.len() == 0
+        && !published_metadata.file_type().is_symlink()
+        && published_metadata.is_file()
+        && published_metadata.len() == 0
+        && root_contains_exact_regular_names(
+            root,
+            &[LIVE_INITIALIZATION_INTENT_FILENAME, ROOT_LOCK_FILENAME],
+        )?
+        && live_initialization_intent_is_empty(root)?)
 }
 
 fn live_initialization_intent_is_empty(root: &Path) -> Result<bool, InternalStoreError> {
@@ -467,3 +491,6 @@ fn root_contains_exact_regular_names(
             .any(|actual| actual == std::ffi::OsStr::new(expected))
     }))
 }
+
+#[cfg(test)]
+mod tests;

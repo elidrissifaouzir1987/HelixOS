@@ -67,6 +67,7 @@ mod tests {
     /// (Vérifié : avec `share_mode(0)` — verrou total — `fs::copy` lui-même échouerait déjà à
     /// l'étape 1, avant toute création de `.tmp`, ce qui rendrait le test trivialement vrai
     /// sans exercer le nettoyage ajouté par le correctif.)
+    #[cfg(windows)]
     #[test]
     fn stage_and_apply_cleans_up_tmp_file_when_rename_fails() {
         use std::os::windows::fs::OpenOptionsExt;
