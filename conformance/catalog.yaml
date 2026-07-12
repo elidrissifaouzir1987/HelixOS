@@ -512,6 +512,10 @@ entries:
       sqlite_link_profile: rusqlite-0.40.1/libsqlite3-sys-0.38.1/bundled-static
       windows_file_identity: file-id-0.2.3/high-resolution-volume-and-128-bit-file-id
       windows_clean_root_restore: unsupported-v1-refuses-before-package-capture
+      cargo_cyclonedx: 0.5.9
+      cargo_audit: 0.22.2
+      rustsec_database_revision: 6e3286f4efa8c142fb33e5ea4342c8db6693cf34
+      spdx_license_list_revision: c4a7237ec8f4654e867546f9f409749300f1bf4c
       required_runtime_profile:
         journal_mode: WAL
         synchronous: FULL
@@ -584,6 +588,12 @@ entries:
         attestation_url: pending
         preservation_location: pending
         linux_x86_64:
+          run: pending
+          artifact: pending
+          digest_sha256: pending
+          attestation: pending
+          preservation_location: pending
+        release_bundle:
           run: pending
           artifact: pending
           digest_sha256: pending

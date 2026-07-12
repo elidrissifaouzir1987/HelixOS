@@ -403,7 +403,42 @@ Expected coordinator gate:
 Run recovery transfer as a separate workload/artifact by declared material size. Do not
 include it in or relabel it as the coordinator latency threshold.
 
-## 16. Release interpretation
+## 16. Supply-chain bundle and isolated removal drill
+
+The evidence tooling itself is standard-library Python and is exercised before the
+release jobs:
+
+```sh
+python3 -m unittest discover -s tools/tests -p 'test_plan004_evidence.py' -v
+```
+
+The hosted `release-evidence` job pins the RustSec and SPDX repositories and invokes
+`tools/plan004_supply_chain.py`; do not replace those exact revisions with an ambient
+scanner database for an immutable run. To exercise removal locally from a commit whose
+full history is available:
+
+```sh
+python3 tools/plan004_removal_drill.py \
+  --repository . \
+  --output /dedicated/redacted/removal-evidence \
+  --source-commit "$(git rev-parse HEAD)" \
+  --cargo-target-dir /dedicated/temporary/cargo-target
+```
+
+Expected: the drill uses a detached clean worktree, restores the exact pre-Feature-004
+`Cargo.lock`, exposes exactly the six baseline packages, proves protected bytes
+unchanged, and passes PLAN-001, PLAN-002 semantics, PLAN-003 and legacy MVP-0. It must
+record the sole structural PLAN-002 skip by exact test name; it must not patch or
+silently filter any other test. Generated reports contain placeholders such as
+`<removal-root>`, `<repo>` and `<home>`, never machine paths or credentials.
+
+The final immutable workflow-dispatch must publish four non-empty current-run
+artifacts: Linux x64, macOS arm64, Windows x64 and the release bundle. A separate job
+resolves each artifact through the GitHub API, verifies its run and commit provenance,
+and attests the exact `upload-artifact` digest. Until those URLs and digests are entered
+in the catalogue, the overall claim remains `pending-evidence`.
+
+## 17. Release interpretation
 
 A passing local or hosted suite proves only the named contract/profile. It does not by
 itself prove:

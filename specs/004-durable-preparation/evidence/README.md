@@ -101,6 +101,25 @@ locations pending. Absence of a locally installed advisory scanner is not a pass
 scan. A new advisory after evidence capture invalidates the release decision until it
 is triaged and the immutable evidence is regenerated.
 
+The release workflow implements this gate as one fourth, Linux-built artifact after
+the unchanged three-platform conformance matrix. It pins `cargo-cyclonedx 0.5.9`,
+`cargo-audit 0.22.2`, RustSec database revision
+`6e3286f4efa8c142fb33e5ea4342c8db6693cf34` and SPDX license-list-data revision
+`c4a7237ec8f4654e867546f9f409749300f1bf4c`. The normalized CycloneDX 1.5 document
+rekeys all local workspace references so no checkout path is retained, removes the
+generator UUID/timestamp, compares every normal/build dependency edge with Cargo
+metadata, covers all target dependencies, and adds the exact bundled SQLite source as
+an explicit native component. The bundle also retains package licence files, the applicable canonical
+SPDX texts without silently choosing among `OR` alternatives, the verified
+`libsqlite3-sys` crate archive and SQLite amalgamation, complete RustSec JSON/stderr,
+runner/toolchain/workflow provenance, and an internal sorted SHA-256 manifest.
+
+The two physical-M4 JSON files are copied into that bundle with the explicit status
+`local-only-not-immutable-not-power-loss`. Uploading the directory produces the outer
+artifact digest; a separate least-privilege job resolves that exact current-run
+artifact through the GitHub API and attests the returned digest. The descriptor cannot
+and does not self-reference the digest of its containing archive.
+
 ## Clean-root scope and retention
 
 The backup contains only the Feature 004 coordinator root and recovery-provider
@@ -143,3 +162,16 @@ Removal is source-level and non-destructive: remove the PLAN-004 crates, catalog
 workflow and fixtures only after running the documented cross-crate removal gates. Do
 not rewrite, downgrade or reuse an existing coordinator/recovery root. Retained evidence
 remains historical and must not be relabelled as evidence for another commit.
+
+The automated drill runs from the exact commit in an isolated detached worktree. It
+removes both Feature 004 crates and workspace members, the PLAN-004 catalogue block,
+workflow and fixtures, restores the frozen pre-Feature-004 lockfile, requires exactly
+the six baseline packages, and compares 146 protected files before and after removal.
+It then runs the complete default, non-ignored PLAN-001 and PLAN-003 suites, the
+default PLAN-002 semantic suite, and the three legacy MVP-0 packages. Release/soak
+tests that are already explicitly ignored remain ignored. Exactly one PLAN-002
+structural consumer-list test is explicitly skipped because its reviewed expectation
+names the intentionally removed preparation crate; the drill first proves that exact
+test still exists once, and its source bytes remain protected and unchanged. This is
+software removal evidence, not secure erasure or production-machine decommission
+evidence.

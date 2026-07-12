@@ -14,6 +14,8 @@
 /specs/004-durable-preparation/evidence/* text eol=lf whitespace=-blank-at-eof
 /contracts/fixtures/durable-preparation-v1/* text eol=lf
 /.github/workflows/durable-preparation.yml text eol=lf
+/tools/plan004_*.py text eol=lf
+/tools/tests/test_plan004_evidence.py text eol=lf
 
 # The generated roadmap snapshot must compare byte-for-byte on every CI host.
 /docs/roadmap/index.html text eol=lf

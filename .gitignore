@@ -13,6 +13,12 @@ kernel/target/
 Thumbs.db
 *.tmp
 *.swp
+__pycache__/
+*.py[cod]
+/plan-004-evidence/
+/plan-004-inputs/
+/plan-004-release-evidence/
+**/plan-004-sbom.cdx.json
 
 # Secrets stay local. A documented empty example may be committed.
 .env
