@@ -2,11 +2,15 @@
 
 This directory retains redacted evidence for Feature 004. Unless an artifact is listed
 with an immutable commit, digest, platform and preservation URL in
-`conformance/catalog.yaml`, its status is **pending evidence**. Local synthetic tests do
-not establish production compensability, power-loss durability, restored-system
-activation or Tier 1 readiness. A clean local physical-M4 result now exists for the
-exact source commit `f7b021db52503aaedcc59b9c9c8d95d357555352`; it satisfies the local
-synthetic latency thresholds but is not immutable release evidence.
+`conformance/catalog.yaml`, its status is **pending evidence**. The immutable software
+matrix, exact-lock supply-chain bundle and removal drill now pass for source commit
+`69c15001284e613aca534fd8862dd001f9831fdc`; the complete run, artifact, attestation and
+independent verification record is retained in
+`ci-immutable-69c15001284e613aca534fd8862dd001f9831fdc.md`. Local and hosted synthetic
+tests still do not establish production compensability, power-loss durability,
+restored-system activation or Tier 1 readiness. A clean local physical-M4 result exists
+for exact source commit `f7b021db52503aaedcc59b9c9c8d95d357555352`; it satisfies the local
+synthetic latency thresholds but remains local-only execution evidence.
 
 ## Retained clean-source local evidence
 
@@ -27,10 +31,13 @@ from coordinator percentiles. See `local-validation.md` for the complete Quickst
 verification correction.
 
 The local explicit-session process-kill release driver also passes all five selected
-harness tests, covering 123 real fault boundaries and 167 controlled cases. This is a
-local synthetic process-kill pass, not an immutable CI result and not power-loss
-evidence. Both the benchmark and process-kill result still need immutable preservation,
-uploaded-artifact digest binding and attestations.
+harness tests, covering 123 real fault boundaries and 167 controlled cases. That local
+run remains synthetic and is not power-loss evidence. The final immutable hosted run
+independently passes all 167 cases on Linux/macOS and the exact 150 reachable Windows
+cases after proving the 17 restore cases refuse before capture. Its three platform
+artifacts have uploaded-ZIP digest binding and attestations. The physical-M4 benchmark
+execution itself remains local-only even though its two JSON files are retained inside
+the attested release bundle.
 
 The hosted run at source commit `b3132586245acea415104381b337d3fea3303444`
 identified one Windows harness mismatch after every earlier Windows gate, including the
@@ -44,7 +51,10 @@ the fail-closed refusal. The failed run, local correction evidence and hosted re
 status are retained in `ci-remediation-local.md`. The corrected pull-request run
 `29198018266` passed on macOS arm64, Linux x86_64 and Windows x64 at exact source
 `2720fbe1042095d74db65f3d3fe71244cf38c810`; because it is validation-only and has no
-artifact attestation, it is not promoted to immutable release evidence.
+artifact attestation, it is not promoted to immutable release evidence. The later
+`workflow_dispatch` run `29202526816` passed the same matrix plus supply-chain/removal
+jobs and four separate attestations at exact source
+`69c15001284e613aca534fd8862dd001f9831fdc`.
 
 The recorded at-rest label says only that FileVault was observed enabled on the local
 internal APFS volume. It does not approve an at-rest profile or establish a
@@ -82,7 +92,7 @@ fallback is admitted by this feature.
 
 ## License, advisory and SBOM evidence
 
-Before any immutable PLAN-004 claim, CI must retain all of the following for the exact
+An immutable PLAN-004 software record must retain all of the following for the exact
 lockfile and commit:
 
 1. a machine-readable CycloneDX or SPDX SBOM covering Rust packages, target-specific
@@ -96,10 +106,13 @@ lockfile and commit:
 5. an immutable artifact attestation whose subject is the upload-artifact digest, not
    merely an individual file inside the archive.
 
-The current catalog intentionally leaves advisory, SBOM, immutable CI and attestation
-locations pending. Absence of a locally installed advisory scanner is not a passing
-scan. A new advisory after evidence capture invalidates the release decision until it
-is triaged and the immutable evidence is regenerated.
+Run `29202526816` retains all five groups for the exact commit, and the catalog now binds
+the four artifact IDs, uploaded-ZIP SHA-256 values, attestations and preservation URLs.
+The RustSec result covers 213 locked dependencies with zero vulnerabilities and retains
+the informational unmaintained warning `RUSTSEC-2025-0134`. Absence of a locally
+installed advisory scanner is never treated as a passing scan. A new advisory after
+evidence capture invalidates the release decision until it is triaged and the immutable
+evidence is regenerated.
 
 The release workflow implements this gate as one fourth, Linux-built artifact after
 the unchanged three-platform conformance matrix. It pins `cargo-cyclonedx 0.5.9`,
@@ -140,20 +153,15 @@ orphan protocol. No secure-erasure claim is made.
 
 ## Evidence still pending
 
-- a green unchanged Linux x64, macOS arm64 and Windows x64 immutable matrix with
-  retained artifacts and attestations;
-- immutable CI preservation, digest binding and attestation of the locally passing
-  explicit-session process-kill matrix for every frozen boundary;
-- immutable preservation, uploaded-artifact binding and attestation of the retained clean-source
-  physical Mac mini M4 latency and separate recovery-transfer artifacts;
+- immutable physical-run provenance for the clean-source Mac mini M4 latency and
+  separate recovery-transfer executions; their exact JSON bytes are preserved in the
+  attested release bundle, but both remain explicitly
+  `local-only-not-immutable-not-power-loss`;
 - an approved at-rest profile; FileVault is currently only a local observation;
 - production recovery-provider durability/corruption/clean-restore qualification;
 - power-loss, sector-loss, directory-fsync and secure-erasure evidence;
-- an exact-lockfile SBOM, license archive and retained RustSec scan with database and
-  scanner identity;
 - complete full-machine restore and any activation/dispatch evidence; and
-- a reviewed removal drill proving PLAN-001 bytes, PLAN-002 semantics, PLAN-003 rows and
-  the legacy MVP-0 path remain unchanged.
+- Tier 1 readiness and sovereign host-maintenance authorization.
 
 ## Rollback and removal rule
 
@@ -174,4 +182,6 @@ structural consumer-list test is explicitly skipped because its reviewed expecta
 names the intentionally removed preparation crate; the drill first proves that exact
 test still exists once, and its source bytes remain protected and unchanged. This is
 software removal evidence, not secure erasure or production-machine decommission
-evidence.
+evidence. The immutable run completed this drill successfully; its report, command logs
+and digests are inside release artifact `8262995815` and summarized in the immutable
+evidence record.

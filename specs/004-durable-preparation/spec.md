@@ -4,7 +4,8 @@
 
 **Created**: 2026-07-11
 
-**Status**: Implementation and local validation in progress
+**Status**: Implementation and immutable software evidence complete; physical and
+external evidence pending
 
 **Input**: Continue the HelixOS delivery sequence by consuming one current
 `EligiblePlanV1`, comparing its complete authority vector again, reserving its declared

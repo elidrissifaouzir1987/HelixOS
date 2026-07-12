@@ -8,18 +8,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "title": "R0 n'est pas formellement ferm\u00e9"
     }
   ],
-  "currentFocus": {
-    "description": "Generate and fail-closed verify the exact-commit PLAN-004 supply-chain and provenance bundle, including an all-required-target CycloneDX/SPDX SBOM, license inventory and source/license texts, complete pinned RustSec output with scanner/database identity, runner/toolchain/workflow/Cargo.lock/bundled-SQLite provenance, reviewed digests, and explicitly local-only physical-M4 artifacts in .github/workflows/durable-preparation.yml and specs/004-durable-preparation/evidence/ per FR-043, FR-044, plan: PLAN-004-SUPPLY, and Constitution IX (partial)",
-    "done": false,
-    "id": "T087",
-    "kind": "implementation",
-    "phase": "Convergence",
-    "phaseNumber": 10,
-    "planId": "PLAN-004",
-    "planTitle": "Durable preparation before dispatch",
-    "source": "specs/004-durable-preparation/tasks.md#L362",
-    "tags": []
-  },
+  "currentFocus": null,
   "definitionOfDone": [
     "architecture/threat model et Constitution Check sont \u00e0 jour",
     "contrats et migrations sont versionn\u00e9s",
@@ -1783,12 +1772,12 @@ window.HELIXOS_ROADMAP_DATA = {
       "total": 69
     },
     {
-      "completed": 86,
+      "completed": 89,
       "conformance": {
         "ciWorkflow": ".github/workflows/durable-preparation.yml",
         "claimStatus": "pending-evidence",
         "evidence": {
-          "immutable": "pending",
+          "immutable": "passing-immutable-software-evidence-overall-claim-pending",
           "local": "passing-local-not-immutable",
           "macMiniM4": "passing-controlled-local-not-immutable"
         },
@@ -1854,14 +1843,14 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 1
         },
         {
-          "done": 0,
+          "done": 3,
           "number": 10,
           "title": "Convergence",
           "total": 3
         }
       ],
-      "remaining": 3,
-      "taskPercent": 96.6,
+      "remaining": 0,
+      "taskPercent": 100.0,
       "taskSource": "specs/004-durable-preparation/tasks.md",
       "taskTitle": "Durable Preparation Before Dispatch",
       "tasks": [
@@ -2873,7 +2862,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Generate and fail-closed verify the exact-commit PLAN-004 supply-chain and provenance bundle, including an all-required-target CycloneDX/SPDX SBOM, license inventory and source/license texts, complete pinned RustSec output with scanner/database identity, runner/toolchain/workflow/Cargo.lock/bundled-SQLite provenance, reviewed digests, and explicitly local-only physical-M4 artifacts in .github/workflows/durable-preparation.yml and specs/004-durable-preparation/evidence/ per FR-043, FR-044, plan: PLAN-004-SUPPLY, and Constitution IX (partial)",
-          "done": false,
+          "done": true,
           "id": "T087",
           "kind": "implementation",
           "phase": "Convergence",
@@ -2883,7 +2872,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Execute a non-destructive removal drill in an isolated clean copy that removes the Feature 004 crates, workspace members, catalog entry, workflow and fixtures, then proves unchanged PLAN-001 bytes/signatures, PLAN-002 outcomes, PLAN-003 rows/tests and legacy MVP-0 behavior while retaining commands, results and digests in specs/004-durable-preparation/evidence/ per FR-044, SC-012, and Constitution X (partial)",
-          "done": false,
+          "done": true,
           "id": "T088",
           "kind": "implementation",
           "phase": "Convergence",
@@ -2893,7 +2882,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Dispatch the finalized PLAN-004 workflow for one exact commit, require successful unchanged Linux x64, macOS arm64 and Windows x64 artifacts with upload digests, attestations and preservation URLs, retain the immutable evidence record, populate the corresponding conformance/catalog.yaml fields without promoting the overall pending-evidence claim, and regenerate the roadmap per FR-043, SC-008, and plan: PLAN-004-SUPPLY (partial)",
-          "done": false,
+          "done": true,
           "id": "T089",
           "kind": "implementation",
           "phase": "Convergence",
@@ -2906,47 +2895,10 @@ window.HELIXOS_ROADMAP_DATA = {
       "total": 89
     }
   ],
-  "openTasks": [
-    {
-      "description": "Generate and fail-closed verify the exact-commit PLAN-004 supply-chain and provenance bundle, including an all-required-target CycloneDX/SPDX SBOM, license inventory and source/license texts, complete pinned RustSec output with scanner/database identity, runner/toolchain/workflow/Cargo.lock/bundled-SQLite provenance, reviewed digests, and explicitly local-only physical-M4 artifacts in .github/workflows/durable-preparation.yml and specs/004-durable-preparation/evidence/ per FR-043, FR-044, plan: PLAN-004-SUPPLY, and Constitution IX (partial)",
-      "done": false,
-      "id": "T087",
-      "kind": "implementation",
-      "phase": "Convergence",
-      "phaseNumber": 10,
-      "planId": "PLAN-004",
-      "planTitle": "Durable preparation before dispatch",
-      "source": "specs/004-durable-preparation/tasks.md#L362",
-      "tags": []
-    },
-    {
-      "description": "Execute a non-destructive removal drill in an isolated clean copy that removes the Feature 004 crates, workspace members, catalog entry, workflow and fixtures, then proves unchanged PLAN-001 bytes/signatures, PLAN-002 outcomes, PLAN-003 rows/tests and legacy MVP-0 behavior while retaining commands, results and digests in specs/004-durable-preparation/evidence/ per FR-044, SC-012, and Constitution X (partial)",
-      "done": false,
-      "id": "T088",
-      "kind": "implementation",
-      "phase": "Convergence",
-      "phaseNumber": 10,
-      "planId": "PLAN-004",
-      "planTitle": "Durable preparation before dispatch",
-      "source": "specs/004-durable-preparation/tasks.md#L363",
-      "tags": []
-    },
-    {
-      "description": "Dispatch the finalized PLAN-004 workflow for one exact commit, require successful unchanged Linux x64, macOS arm64 and Windows x64 artifacts with upload digests, attestations and preservation URLs, retain the immutable evidence record, populate the corresponding conformance/catalog.yaml fields without promoting the overall pending-evidence claim, and regenerate the roadmap per FR-043, SC-008, and plan: PLAN-004-SUPPLY (partial)",
-      "done": false,
-      "id": "T089",
-      "kind": "implementation",
-      "phase": "Convergence",
-      "phaseNumber": 10,
-      "planId": "PLAN-004",
-      "planTitle": "Durable preparation before dispatch",
-      "source": "specs/004-durable-preparation/tasks.md#L364",
-      "tags": []
-    }
-  ],
+  "openTasks": [],
   "roadmapDate": "2026-07-10",
   "schema": "helixos.roadmap-data/1",
-  "sourceFingerprint": "33b8fc74baaf68ee16a8003b564b1b62816b96b2a9791e8be158bdedd8ed677f",
+  "sourceFingerprint": "12447bd3c615bef8dacbcd47c30912048c9630932c06e09ec693d70041c79e45",
   "sources": [
     {
       "path": "ROADMAP-SPECS.md",
@@ -2954,7 +2906,7 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "conformance/catalog.yaml",
-      "sha256": "53040e8b30f5c5e5172f0415ed5bd92be1b11a600dcc8ff8bb297e5d35b5c22f"
+      "sha256": "2f6e7e6a32f3a2af99e055ff3a860ca96429253e65944913a2a5a3769d1fcf5a"
     },
     {
       "path": "specs/001-portable-signed-contracts/tasks.md",
@@ -2970,7 +2922,7 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "specs/004-durable-preparation/tasks.md",
-      "sha256": "983647b04a1e38b079a6a632d68f53e7730b91ba528dc17ffde4ebc5ae62a050"
+      "sha256": "16a86cc2669c17799c588ddf43d1bb6a2d0c91ecc60acd5d4f93886b9c5556c9"
     }
   ],
   "strategicStages": [
@@ -2989,7 +2941,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "id": "R1",
       "status": "active",
       "title": "Fondation portable et coordinateur durable",
-      "trackedTaskCompleted": 218,
+      "trackedTaskCompleted": 221,
       "trackedTaskTotal": 221
     },
     {
@@ -3051,12 +3003,12 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "summary": {
     "acceptedClaims": 0,
-    "completedTasks": 218,
+    "completedTasks": 221,
     "focusPlan": "PLAN-004",
-    "remainingTasks": 3,
+    "remainingTasks": 0,
     "strategicStage": "R1",
     "totalClaims": 4,
-    "trackedTaskPercent": 98.6,
+    "trackedTaskPercent": 100.0,
     "trackedTasks": 221
   }
 };
