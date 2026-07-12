@@ -120,3 +120,36 @@ generator restored LF, producing false drift. A targeted `text eol=lf` attribute
 pins that fixture's checkout bytes without changing its wire, generator or validation
 semantics. A forced checkout under the Windows `core.autocrlf=true` configuration
 produced 2,103 bytes ending in LF, and the exact generator drift command stayed clean.
+
+## Later hosted setup-gate starvation finding
+
+**Observed source commits**: `2a802692df4d255fc3877dcdf5389728357c9fff` and
+`cdf69dd6c6014738320cb264c79c9b0fcf7c6898`
+
+- The Windows PLAN-003 pull-request run
+  `https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29191999872` and the
+  PLAN-001 workflow-dispatch run
+  `https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192002449` first failed
+  the two-initializer corpus case while its public error code was still hidden.
+- Aligning that corpus fixture with the existing 5,000 ms correctness budget exposed
+  the exact remaining failure in Windows PLAN-003 run
+  `https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192411636`:
+  the direct eight-initializer test returned `STORE_BUSY`.
+- The process-local setup gate serialized all SQLite setup, but still capped itself at
+  1,000 one-millisecond polls even when the checked configuration allowed 5,000 ms.
+  The failed 3.86-second test binary was too short for the later 5,000 ms root/SQLite
+  budgets to be the exhausted boundary. The earlier fixture-only remediation was
+  therefore incomplete under hosted Windows scheduler pressure.
+
+The bounded correction raises only that process-local polling cap to 5,000 attempts.
+Every poll still checks the injected boot-monotonic deadline; the configured busy bound,
+SQLite busy timeout, root lease, claim deadlines and the separate SC-004 latency oracle
+remain unchanged. Both concurrent initializers must still succeed, verify the exact
+schema and reopen one healthy empty store. The corpus now preserves the payload-free
+public error code if a later failure recurs. The unchanged PLAN-003 pull-request matrix
+at `https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192809998` and the
+unchanged PLAN-001 workspace/attestation run
+`https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192812460` then passed on
+Linux x86_64, macOS arm64 and Windows x64 at commit
+`b3132586245acea415104381b337d3fea3303444`, closing T069. None of the failed runs above
+is represented as new immutable success evidence.

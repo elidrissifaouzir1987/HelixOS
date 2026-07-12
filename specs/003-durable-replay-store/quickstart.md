@@ -32,7 +32,11 @@ resolution is locked.
 ## 2. Fast quality gate
 
 ```powershell
-cargo fmt --all -- --check
+cargo fmt `
+  --package helix-contracts `
+  --package helix-plan-eligibility `
+  --package helix-replay-sqlite `
+  -- --check
 cargo check --locked --workspace --all-targets
 cargo clippy --locked --workspace --all-targets -- -D warnings
 cargo test --locked --workspace
@@ -40,10 +44,15 @@ cargo test --locked --workspace
 
 Expected:
 
-- no format or lint warning;
+- no formatting drift in the three trust-chain packages and no workspace lint warning;
 - feature 001 and 002 suites remain green;
 - the new crate compiles with `#![forbid(unsafe_code)]`;
 - no default build contains the test fault hook.
+
+The package-scoped format command is the immutable CI gate for features 001-003. The
+legacy `helixos-kernel`, `helixos-mcp-shim` and `helixos-provision` formatting debt is
+recorded separately in `evidence/validation-local.md`; it is not rewritten or presented
+as feature-003 evidence by this runbook.
 
 ## 3. Contract and evaluator integration
 
@@ -309,7 +318,7 @@ identifiers, nonces, database contents, credentials or private reasoning in Grap
 Even after every local feature-003 command passes, the following remain blocked:
 
 - immutable unchanged three-platform CI evidence if no remote run exists;
-- actual Mac mini M4 latency and power-loss/fullfsync spike;
+- Mac mini M4 `F_FULLFSYNC` and power-cut/power-loss spike;
 - atomic fresh comparison, budgets and durable `PREPARING`;
 - recovery material, audit/outbox and restored-system activation;
 - `DISPATCHING`, `ExecutionGrant`, adapter inbox/receipt and host effects;

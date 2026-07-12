@@ -100,8 +100,8 @@ no target-specific branches and reports the same outcomes.
 - [x] T023 [P] [US3] Register `PLAN-001`, fixture paths, platforms, and evidence requirements in `conformance/catalog.yaml`
 - [x] T024 [P] [US3] Add stable-toolchain format, clippy, contract, and workspace test jobs for Ubuntu, macOS arm64, and Windows in `.github/workflows/contracts.yml`
 
-**Checkpoint**: Local conformance passes; the Tier 1 portability claim remains pending
-until the remote matrix produces evidence.
+**Checkpoint**: The hosted Linux x86_64/macOS arm64/Windows x64 execution evidence is
+retained. Linux arm64 and physical Mac mini M4/Tier 1 evidence remain pending.
 
 ---
 
@@ -112,7 +112,7 @@ until the remote matrix produces evidence.
 - [x] T025 Run `cargo fmt --check`, strict clippy, `cargo test -p helix-contracts`, and `cargo test --workspace`; update `specs/001-portable-signed-contracts/quickstart.md` only if commands differ
 - [x] T026 Run the ignored soak and release benchmark, record local Windows evidence without claiming Mac Tier 1 in `specs/001-portable-signed-contracts/quickstart.md`
 - [x] T027 Refresh Graphify, save the verified implementation/test outcome, and regenerate lessons in `graphify-out/memory/` and `graphify-out/reflections/LESSONS.md`
-- [ ] T028 Capture a successful unchanged Linux/macOS-arm64/Windows CI matrix and link its immutable run artifact from `conformance/catalog.yaml`
+- [x] T028 Capture a successful unchanged Linux/macOS-arm64/Windows CI matrix and link its immutable run artifact from `conformance/catalog.yaml`
 
 ---
 

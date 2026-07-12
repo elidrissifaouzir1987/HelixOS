@@ -1,0 +1,13 @@
+
+running 6 tests
+test already_expired_binding_returns_unavailable_without_mutation ... ok
+test clock_unavailable_after_open_returns_unavailable_without_mutation ... ok
+test deadline_reached_after_commit_returns_ambiguous_and_retains_the_row ... ok
+test deadline_reached_after_writer_acquisition_rolls_back_without_a_row ... ok
+test held_writer_returns_within_the_configured_busy_bound_and_is_unavailable ... PLAN-003 held-writer scenario=bounded-unavailable busy_cap_ms=40 scheduler_tolerance_ms=50 elapsed_ns=6651708 status=pass
+ok
+test timed_out_held_writer_does_not_create_a_row_after_return ... PLAN-003 held-writer scenario=no-detached-row busy_cap_ms=40 scheduler_tolerance_ms=50 elapsed_ns=6640417 status=pass
+ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+

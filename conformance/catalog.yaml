@@ -13,6 +13,16 @@ entries:
       negative_manifest: contracts/fixtures/plan-envelope-v1/negative-cases.json
       fixture_instructions: contracts/fixtures/plan-envelope-v1/README.md
     ci_workflow: .github/workflows/contracts.yml
+    ci_evidence_policy:
+      artifact_subject: actions-upload-artifact-output-digest
+      artifact_digest: actions-upload-artifact-artifact-digest-output
+      retention_days: 90
+      attestation_action: actions/attest@a1948c3f048ba23858d222213b7c278aabede763
+      attestation_events:
+        - push
+        - workflow_dispatch
+      pull_request_evidence: validation-only-no-attestation
+      catalog_update_required_before_claim: true
     required_platforms:
       - id: linux-x86_64
         runner: ubuntu-24.04
@@ -46,9 +56,70 @@ entries:
     claim_status: pending-evidence
     evidence:
       local_windows_benchmark: specs/001-portable-signed-contracts/evidence/benchmark-windows-x86_64-2026-07-10.json
-      immutable_commit: pending
-      immutable_ci_run: pending
       linux_arm64_run: pending
+      immutable:
+        status: passing-immutable
+        commit: b3132586245acea415104381b337d3fea3303444
+        ci_run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192812460
+        validation_artifact: specs/001-portable-signed-contracts/evidence/ci-immutable-b3132586245acea415104381b337d3fea3303444.md
+        validation_digest_sha256: d26f0f68c62320ffec16189426031306dd426960c8fbfd5ebfc21803d9c88783
+        descriptor_schema: helixos.portable-signed-contracts-ci-evidence/1
+        reviewed_input_digests: per-platform-below
+        artifact: per-platform-below
+        uploaded_artifact_digest_sha256: per-platform-below
+        artifact_retention_days: 90
+        artifact_expires_at: "2026-10-10T12:32:53Z"
+        attestation_status: published-all-platforms
+        attestation_url: per-platform-below
+        preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192812460
+        linux_x86_64:
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192812460/job/86650374234
+          runner_label: ubuntu-24.04
+          runner_image_os: ubuntu24
+          runner_image_version: 20260705.232.1
+          runner_os_description: Ubuntu 24.04.4 LTS
+          runner_arch: X64
+          rustc_host: x86_64-unknown-linux-gnu
+          plan_envelope_schema_sha256: 95d4b762715e0cbcb53045744fd330589f09ac870e18bce9f6d991a5e7377269
+          negative_corpus_schema_sha256: 6fff2356bf1b1a8b4c7b38f27046340e3bbb85fdf0d678cfd7744c47dde1270f
+          fixture_corpus_manifest_sha256: 2a49ff3e56b44245fe5926e489d33cf02b9528062317e08779e6688987c168b6
+          artifact: plan-001-linux-x86_64-b3132586245acea415104381b337d3fea3303444
+          uploaded_artifact_digest_sha256: 836aff9901c11c4f8dd827bc42039353b796fc0a2cf3fd5a56e3348e7e1da983
+          attestation_url: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34947654
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192812460/artifacts/8260078290
+        macos_arm64:
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192812460/job/86650374252
+          runner_label: macos-26
+          runner_image_os: macos26
+          runner_image_version: 20260630.0213.1
+          runner_os_description: macOS 26.4 build 25E246
+          runner_arch: ARM64
+          rustc_host: aarch64-apple-darwin
+          plan_envelope_schema_sha256: 95d4b762715e0cbcb53045744fd330589f09ac870e18bce9f6d991a5e7377269
+          negative_corpus_schema_sha256: 6fff2356bf1b1a8b4c7b38f27046340e3bbb85fdf0d678cfd7744c47dde1270f
+          fixture_corpus_manifest_sha256: 2a49ff3e56b44245fe5926e489d33cf02b9528062317e08779e6688987c168b6
+          artifact: plan-001-macos-arm64-b3132586245acea415104381b337d3fea3303444
+          uploaded_artifact_digest_sha256: 6fb1f881af512378fafcbe2b02ad9ddb76e4eeea9371d3764f7a7fb1992952de
+          attestation_url: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34947657
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192812460/artifacts/8260075745
+        windows_x64:
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192812460/job/86650374240
+          runner_label: windows-2022
+          runner_image_os: win22
+          runner_image_version: 20260706.237.1
+          runner_os_description: Windows Server 2022 10.0.20348 Datacenter
+          runner_arch: X64
+          rustc_host: x86_64-pc-windows-msvc
+          plan_envelope_schema_sha256: 0a86626fa511c4a7e553e8482f20f4d581e4e116ad85a7aeb5d1c49c07f09f26
+          negative_corpus_schema_sha256: 7932798fd63d0ebade2f77a0c17294d75d494295a1c4646d741db0394092795e
+          fixture_corpus_manifest_sha256: 50036c22931149cb8768a049e581e137f84be8887f20b1c7e23ae7835c8e8dc9
+          artifact: plan-001-windows-x64-b3132586245acea415104381b337d3fea3303444
+          uploaded_artifact_digest_sha256: 5c00bc271c593c566cff5a45da7b14ebb602e8dc3d225412ce213d78a15ae7d3
+          attestation_url: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34947656
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192812460/artifacts/8260109131
   - acceptance_id: PLAN-002
     title: Current plan eligibility before durable preparation
     feature: specs/002-plan-eligibility
@@ -63,6 +134,16 @@ entries:
       instructions: contracts/fixtures/plan-eligibility-v1/README.md
       summary_schema: helixos.plan-eligibility-summary/1
     ci_workflow: .github/workflows/plan-eligibility.yml
+    ci_evidence_policy:
+      artifact_subject: actions-upload-artifact-output-digest
+      artifact_digest: actions-upload-artifact-artifact-digest-output
+      retention_days: 90
+      attestation_action: actions/attest@a1948c3f048ba23858d222213b7c278aabede763
+      attestation_events:
+        - push
+        - workflow_dispatch
+      pull_request_evidence: validation-only-no-attestation
+      catalog_update_required_before_claim: true
     toolchain:
       manifest: kernel/rust-toolchain.toml
       rust: 1.96.1
@@ -118,32 +199,58 @@ entries:
         redaction_artifact: pending
         removal_artifact: pending
       immutable:
-        status: pending
-        commit: pending
-        ci_run: pending
-        expected_outcomes_digest_sha256: pending
-        artifact: pending
-        artifact_digest_sha256: pending
-        attestation: pending
-        preservation_location: pending
+        status: passing-immutable
+        commit: ef6a8ddf904542fa699bd43cf113fd83de581f8d
+        ci_run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29188649589
+        validation_artifact: specs/002-plan-eligibility/evidence/ci-immutable-ef6a8ddf904542fa699bd43cf113fd83de581f8d.md
+        validation_digest_sha256: aeecf88140ef26aebbaf077c337f24e60a1127c0d63e177498a5ef1b16c9fca3
+        expected_outcomes_digest_sha256: 258fcd002c335a1f25070e593ae97eb7472b2fe55342134058e2e4e470af7bbb
+        artifact: per-platform-below
+        uploaded_artifact_digest_sha256: per-platform-below
+        artifact_retention_days: 90
+        artifact_expires_at: "2026-10-10T10:09:07Z"
+        attestation_status: published-all-platforms
+        attestation_url: per-platform-below
+        preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29188649589
         linux_x86_64:
-          run: pending
-          artifact: pending
-          digest_sha256: pending
-          attestation: pending
-          preservation_location: pending
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29188649589/job/86639323398
+          runner_label: ubuntu-24.04
+          runner_image_os: ubuntu24
+          runner_image_version: 20260705.232.1
+          runner_os_description: Ubuntu 24.04.4 LTS
+          runner_arch: X64
+          rustc_host: x86_64-unknown-linux-gnu
+          artifact: plan-002-linux-x86_64-ef6a8ddf904542fa699bd43cf113fd83de581f8d
+          uploaded_artifact_digest_sha256: 54e94789b97ca9799b7854a0f4ba95881bc3f9afa202aa908ae7db72be60bfdf
+          attestation_url: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34941187
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29188649589/artifacts/8258816762
         macos_arm64:
-          run: pending
-          artifact: pending
-          digest_sha256: pending
-          attestation: pending
-          preservation_location: pending
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29188649589/job/86639323420
+          runner_label: macos-26
+          runner_image_os: macos26
+          runner_image_version: 20260630.0213.1
+          runner_os_description: macOS 26.4.0
+          runner_arch: ARM64
+          rustc_host: aarch64-apple-darwin
+          artifact: plan-002-macos-arm64-ef6a8ddf904542fa699bd43cf113fd83de581f8d
+          uploaded_artifact_digest_sha256: 9e9d76dd9f8023601c53c7b4d7fc0019658831bf95d6ed4c52256b754e85dec4
+          attestation_url: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34941186
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29188649589/artifacts/8258821832
         windows_x64:
-          run: pending
-          artifact: pending
-          digest_sha256: pending
-          attestation: pending
-          preservation_location: pending
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29188649589/job/86639323395
+          runner_label: windows-2022
+          runner_image_os: win22
+          runner_image_version: 20260706.237.1
+          runner_os_description: Microsoft Windows 10.0.20348
+          runner_arch: X64
+          rustc_host: x86_64-pc-windows-msvc
+          artifact: plan-002-windows-x64-ef6a8ddf904542fa699bd43cf113fd83de581f8d
+          uploaded_artifact_digest_sha256: 5499b9c142f149e257f5c55146ca08a5421e1e0708fcbc782d905c9c92289495
+          attestation_url: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34941188
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29188649589/artifacts/8258822450
   - acceptance_id: PLAN-003
     title: Durable atomic replay claim store
     feature: specs/003-durable-replay-store
@@ -320,6 +427,281 @@ entries:
           attestation_url: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34810893
           preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29118903798/artifacts/8237862796
       mac_mini_m4:
-        benchmark: pending
+        status: passing-controlled-process-commit
+        commit: 3355639837f9523b563d2084c0b78f60be5f6c60
+        validation_artifact: specs/003-durable-replay-store/evidence/benchmark-mac-mini-m4-3355639837f9523b563d2084c0b78f60be5f6c60.md
+        validation_digest_sha256: fb6a00215058aef510f40b71d0eda8a00a735af2447e0d2d71f3b7f82e84ff0c
+        benchmark_artifact: specs/003-durable-replay-store/evidence/benchmark-mac-mini-m4-3355639837f9523b563d2084c0b78f60be5f6c60.json
+        benchmark_digest_sha256: d31fa6d648b788466eef9fafbdc030242096cf2a519e66afb8c9d539a737b402
+        hardware: Mac mini M4 10-core CPU 16GB internal SSD
+        model_identifier: Mac16,10
+        os_version: macOS 26.0
+        os_build: 25A354
+        architecture: aarch64
+        filesystem_assurance: validated-local-APFS-internal-SSD-lock-create-hardlink-sync-primitives
+        rustc_release: 1.96.1
+        rustc_host: aarch64-apple-darwin
+        build_profile: release
+        sqlite_source_id: "2026-06-03 19:12:13 d6e03d8c777cfa2d35e3b60d8ec3e0187f3e9f99d8e2ee9cac695fd6fcdf1a24"
+        sqlite_runtime_profile: "journal_mode:WAL,synchronous:FULL,wal_autocheckpoint_pages:0"
+        warmup_claims: 500
+        measured_claims: 10000
+        p50_ns: 449792
+        p95_ns: 528500
+        p99_ns: 583250
+        max_ns: 4169542
+        meets_p95_limit: true
+        meets_p99_limit: true
+        deadline_artifact: specs/003-durable-replay-store/evidence/deadline-mac-mini-m4-3355639837f9523b563d2084c0b78f60be5f6c60.stdout.txt
+        deadline_digest_sha256: 786e637c97a08c9ab38bb6d6df90452cca39a683f013dc3049ad64043639ad29
+        contention_artifact: specs/003-durable-replay-store/evidence/contention-mac-mini-m4-3355639837f9523b563d2084c0b78f60be5f6c60.stdout.txt
+        contention_digest_sha256: 4fd39974b0444ecd8e8322004d64a8efe85a1354ccdf7a500c7bd8ddbbc5cfe7
+        process_kill_artifact: specs/003-durable-replay-store/evidence/process-kill-mac-mini-m4-3355639837f9523b563d2084c0b78f60be5f6c60.stdout.txt
+        process_kill_digest_sha256: 5129a2ff0c69b8d64a324e4df89588062acd1ccd532eff19d2e20f204d37813b
+        backup_restore_artifact: specs/003-durable-replay-store/evidence/backup-restore-mac-mini-m4-3355639837f9523b563d2084c0b78f60be5f6c60.stdout.txt
+        backup_restore_digest_sha256: 099e4a44448d097abcf428b7cd39aa83f551b881cbb5421e2a48cd7853c8ba7f
+        fullfsync_spike: pending
+        power_loss_evidence: pending
+  - acceptance_id: PLAN-004
+    title: Durable preparation before dispatch
+    feature: specs/004-durable-preparation
+    spec: specs/004-durable-preparation/spec.md
+    research: specs/004-durable-preparation/research.md
+    in_process_contract: specs/004-durable-preparation/contracts/durable-preparation-v1.md
+    authority_contract: specs/004-durable-preparation/contracts/authority-compare-v1.md
+    recovery_provider_contract: specs/004-durable-preparation/contracts/recovery-provider-v1.md
+    store_schema: specs/004-durable-preparation/contracts/preparation-store-schema-v1.sql
+    backup_manifest_schema: specs/004-durable-preparation/contracts/preparation-backup-manifest-v1.schema.json
+    provenance_attestation_schema: specs/004-durable-preparation/contracts/preparation-backup-provenance-attestation-v1.schema.json
+    recovery_snapshot_schema: specs/004-durable-preparation/contracts/recovery-snapshot-manifest-v1.schema.json
+    recovery_root_schema: specs/004-durable-preparation/contracts/recovery-root-metadata-v1.schema.json
+    data_model: specs/004-durable-preparation/data-model.md
+    corpus:
+      root: contracts/fixtures/durable-preparation-v1
+      manifest: contracts/fixtures/durable-preparation-v1/cases.json
+      manifest_sha256: 086ec8c5b7395d494b6140a7f24411e788beb6978598a28fc81588b75f29411d
+      expected_outcomes: contracts/fixtures/durable-preparation-v1/expected-outcomes.json
+      expected_outcomes_sha256: 87bd23eeed048fe47ca4f785d17cdca80364454bae30c81dc4b3e9e7ecf3ac2b
+      instructions: contracts/fixtures/durable-preparation-v1/README.md
+      summary_schema: helixos.durable-preparation-summary/1
+      runner_summary_schema: helixos.durable-preparation-corpus-run/1
+      runner_summary_sha256: e0dac29c01276a7f6168a83bff51accefc86a129f1046065ebea5f136bbddd87
+    ci_workflow: .github/workflows/durable-preparation.yml
+    ci_evidence_policy:
+      artifact_subject: actions-upload-artifact-output-digest
+      artifact_digest: actions-upload-artifact-artifact-digest-output
+      retention_days: 90
+      attestation_action: actions/attest@a1948c3f048ba23858d222213b7c278aabede763
+      attestation_events:
+        - push
+        - workflow_dispatch
+      pull_request_evidence: validation-only-no-attestation
+      catalog_update_required_before_claim: true
+    toolchain:
+      manifest: kernel/rust-toolchain.toml
+      rust: 1.96.1
+      profile: minimal
+      components:
+        - rustfmt
+        - clippy
+      cargo_lock: kernel/Cargo.lock
+      rusqlite: 0.40.1
+      libsqlite3_sys: 0.38.1
+      bundled_sqlite: 3.53.2
+      bundled_sqlite_source_id: "2026-06-03 19:12:13 d6e03d8c777cfa2d35e3b60d8ec3e0187f3e9f99d8e2ee9cac695fd6fcdf1a24"
+      sqlite_link_profile: rusqlite-0.40.1/libsqlite3-sys-0.38.1/bundled-static
+      windows_file_identity: file-id-0.2.3/high-resolution-volume-and-128-bit-file-id
+      windows_clean_root_restore: unsupported-v1-refuses-before-package-capture
+      cargo_cyclonedx: 0.5.9
+      cargo_audit: 0.22.2
+      rustsec_database_revision: 6e3286f4efa8c142fb33e5ea4342c8db6693cf34
+      spdx_license_list_revision: c4a7237ec8f4654e867546f9f409749300f1bf4c
+      required_runtime_profile:
+        journal_mode: WAL
+        synchronous: FULL
+        wal_autocheckpoint_pages: 0
+        foreign_keys: "ON"
+        trusted_schema: "OFF"
+        cell_size_check: "ON"
+        recursive_triggers: "ON"
+    required_platforms:
+      - id: linux-x86_64
+        runner: ubuntu-24.04
+        rust_host: x86_64-unknown-linux-gnu
+        automation: required
+      - id: macos-arm64
+        runner: macos-26
+        rust_host: aarch64-apple-darwin
+        automation: required
+      - id: windows-x64
+        runner: windows-2022
+        rust_host: x86_64-pc-windows-msvc
+        automation: required
+      - id: mac-mini-m4
+        runner: physical-target
+        rust_host: aarch64-apple-darwin
+        automation: pending-device
+    evidence_requirements:
+      - id: PLAN-004-AUTHORITY
+        requirement: Both complete captures, eligibility-built replay verification, exact comparison order and one caller-owned permit bounded by the earlier deadline or 250 ms deny every changed authority fact before the sole PREPARING linearization point.
+      - id: PLAN-004-BUDGET
+        requirement: Read-only preflight, checked exact arithmetic, create-only scopes, shared-scope contention and no-dispatch-guarded failure reconcile one permanent held reservation without oversubscription or double release.
+      - id: PLAN-004-RECOVERY
+        requirement: Manifest-last recovery publication, exact binding/capacity, authenticated L2 no-material evidence and both guarded retirement paths survive corruption, contention and process-crash tests without fabricating an operation.
+      - id: PLAN-004-DURABILITY
+        requirement: The bundled SQLite store owns the canonical atomic preparation set under strict schema, WAL/FULL profile, exact readback and a closed fault-boundary inventory; possible commit is never retried as definite absence.
+      - id: PLAN-004-RESTORE
+        requirement: A paused quiescent backup publishes complete inventory and detached signed provenance; clean empty-root restore leaves independently durable matching RESTORE_PENDING coordinator and recovery roots, rotated authority and zero activation path.
+      - id: PLAN-004-DATA
+        requirement: Source-classified plans and recovery bytes stay under approved at-rest custody, never enter agent/model, Graphify, egress or public diagnostics, and follow explicit no-pruning plus guarded-retirement retention.
+      - id: PLAN-004-PORTABILITY
+        requirement: One unchanged 335-case corpus, 123-boundary registry, package/restore KATs and reviewed SQL/JSON schema bytes reproduce on Linux x64, macOS arm64 and Windows x64 without a weaker identity fallback; Windows v1 additionally proves the fixed RESTORE_PLATFORM_UNSUPPORTED refusal before package capture because the available high-resolution identity API cannot bind a retained handle.
+      - id: PLAN-004-PERFORMANCE
+        requirement: Physical Mac mini M4 evidence retains 500 warmups and at least 10000 coordinator samples with p95 at most 25 ms and p99 at most 100 ms; recovery transfer is measured in a separate artifact and all waits remain deadline bounded.
+      - id: PLAN-004-SUPPLY
+        requirement: Exact lockfile, native SQLite source, licenses, advisories, SBOM/provenance expectations, immutable artifacts, rollback refusal, subsystem clean restore and removal evidence are retained before any PLAN-004 or Tier 1 claim.
+    claim_status: pending-evidence
+    evidence:
+      local:
+        status: passing-local-not-immutable
+        platform: macos-arm64
+        commit: f7b021db52503aaedcc59b9c9c8d95d357555352
+        validation_artifact: specs/004-durable-preparation/evidence/local-validation.md
+        validation_digest_sha256: 3ff94a261fb7f1a2bd6cd3cefc5d9bf0f3126437974bf03033c9c056c65f33b9
+        benchmark_artifact: specs/004-durable-preparation/evidence/benchmark-mac-mini-m4-f7b021db52503aaedcc59b9c9c8d95d357555352.json
+        benchmark_digest_sha256: ed90faf0645589deb98d454466854771569eb53d69616584c092a25ae3bd1c12
+        recovery_transfer_artifact: specs/004-durable-preparation/evidence/benchmark-mac-mini-m4-f7b021db52503aaedcc59b9c9c8d95d357555352.recovery-transfer.json
+        recovery_transfer_digest_sha256: da442c396f280cf21f4125498676fa52b17e68cfc97bbff0aeb1afbc1cb60e1e
+        process_kill_status: passing-local-synthetic-not-power-loss
+        process_kill_artifact: specs/004-durable-preparation/evidence/local-validation.md
+        process_kill_digest_sha256: 3ff94a261fb7f1a2bd6cd3cefc5d9bf0f3126437974bf03033c9c056c65f33b9
+        backup_restore_status: passing-local-synthetic-not-production-qualified
+        backup_restore_artifact: specs/004-durable-preparation/evidence/local-validation.md
+        backup_restore_digest_sha256: 3ff94a261fb7f1a2bd6cd3cefc5d9bf0f3126437974bf03033c9c056c65f33b9
+        supply_chain_status: passing-immutable-exact-commit
+        supply_chain_commit: 69c15001284e613aca534fd8862dd001f9831fdc
+        supply_chain_artifact: specs/004-durable-preparation/evidence/ci-immutable-69c15001284e613aca534fd8862dd001f9831fdc.md
+        supply_chain_artifact_digest_sha256: 5d49bde07576b6d2bcb33c6653e9fead361961dd7618045ab97f46f17a9f2196
+        removal_status: passing-immutable-isolated-clean-copy
+        removal_commit: 69c15001284e613aca534fd8862dd001f9831fdc
+        removal_artifact: specs/004-durable-preparation/evidence/ci-immutable-69c15001284e613aca534fd8862dd001f9831fdc.md
+        removal_artifact_digest_sha256: 5d49bde07576b6d2bcb33c6653e9fead361961dd7618045ab97f46f17a9f2196
+      immutable:
+        status: passing-immutable-software-evidence-overall-claim-pending
+        commit: 69c15001284e613aca534fd8862dd001f9831fdc
+        event: workflow_dispatch
+        run_id: 29202526816
+        run_attempt: 1
+        ci_run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29202526816
+        validation_artifact: specs/004-durable-preparation/evidence/ci-immutable-69c15001284e613aca534fd8862dd001f9831fdc.md
+        validation_digest_sha256: 5d49bde07576b6d2bcb33c6653e9fead361961dd7618045ab97f46f17a9f2196
+        uploaded_artifact_digest_sha256: per-artifact-below
+        attestation_url: per-artifact-below
+        preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29202526816
+        retention_days: 90
+        expires_at: "2026-10-10T17:43:17Z"
+        linux_x86_64:
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29202526816/job/86676215017
+          runner_label: ubuntu-24.04
+          runner_image_os: ubuntu24
+          runner_image_version: 20260705.232.1
+          runner_os: Linux
+          runner_arch: X64
+          rust_host: x86_64-unknown-linux-gnu
+          artifact: plan-004-linux-x86_64-69c15001284e613aca534fd8862dd001f9831fdc
+          artifact_id: 8262881247
+          artifact_size_bytes: 7441
+          digest_sha256: 555e109daa7fd11f006e1d0707de4829283e13d233bb2054473b171d53e9e094
+          attestation: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34965289
+          attestation_id: 34965289
+          rekor_log_index: 2154177590
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29202526816/artifacts/8262881247
+          expires_at: "2026-10-10T17:43:17Z"
+        release_bundle:
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29202526816/job/86677593480
+          runner_label: ubuntu-24.04
+          runner_image_os: ubuntu24
+          runner_image_version: 20260705.232.1
+          runner_os: Linux
+          runner_arch: X64
+          rust_host: x86_64-unknown-linux-gnu
+          artifact: plan-004-release-69c15001284e613aca534fd8862dd001f9831fdc
+          artifact_id: 8262995815
+          artifact_size_bytes: 8564928
+          digest_sha256: 0dd065aff42343368af27ce1dcd807df8749d1e8225491e290f109bfbc88e2e3
+          attestation: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34965291
+          attestation_id: 34965291
+          rekor_log_index: 2154178179
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29202526816/artifacts/8262995815
+          expires_at: "2026-10-10T17:43:17Z"
+          sbom: CycloneDX-1.5-all-targets-with-bundled-sqlite
+          production_package_count: 77
+          external_package_count: 73
+          rustsec_dependency_count: 213
+          rustsec_vulnerability_count: 0
+          rustsec_warning: RUSTSEC-2025-0134-unmaintained-rustls-pemfile-2.2.0
+          removal_result: passing-isolated-clean-copy-removal
+          removal_baseline_commit: 01a9181ef83539c0516139f8285551a9dfabc3b5
+          removal_protected_file_count: 146
+          restored_baseline_lock_sha256: f3b6c0cb07f9e9ddec2f6b64cb3b00f7df99fd93066315e92f1a5dfa4b3498f8
+          physical_m4_status: preserved-bytes-execution-local-only-not-immutable-not-power-loss
+        macos_arm64:
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29202526816/job/86676215006
+          runner_label: macos-26
+          runner_image_os: macos26
+          runner_image_version: 20260630.0213.1
+          runner_os: macOS
+          runner_arch: ARM64
+          rust_host: aarch64-apple-darwin
+          artifact: plan-004-macos-arm64-69c15001284e613aca534fd8862dd001f9831fdc
+          artifact_id: 8262883137
+          artifact_size_bytes: 7455
+          digest_sha256: a184d96abf8ba2cd5ef99dd2a28afd59d92f1f0143fd95fae30578d2d5d82ee9
+          attestation: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34965290
+          attestation_id: 34965290
+          rekor_log_index: 2154177758
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29202526816/artifacts/8262883137
+          expires_at: "2026-10-10T17:43:17Z"
+        windows_x64:
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29202526816/job/86676215026
+          runner_label: windows-2022
+          runner_image_os: win22
+          runner_image_version: 20260706.237.1
+          runner_os: Windows
+          runner_arch: X64
+          rust_host: x86_64-pc-windows-msvc
+          artifact: plan-004-windows-x64-69c15001284e613aca534fd8862dd001f9831fdc
+          artifact_id: 8262941011
+          artifact_size_bytes: 7402
+          digest_sha256: d45281c276286d0cf0a177ffda6f5e3369c76d479f905e9a1dea762736e4bd95
+          attestation: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34965287
+          attestation_id: 34965287
+          rekor_log_index: 2154177545
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29202526816/artifacts/8262941011
+          expires_at: "2026-10-10T17:43:17Z"
+      mac_mini_m4:
+        status: passing-controlled-local-not-immutable
+        commit: f7b021db52503aaedcc59b9c9c8d95d357555352
+        benchmark_artifact: specs/004-durable-preparation/evidence/benchmark-mac-mini-m4-f7b021db52503aaedcc59b9c9c8d95d357555352.json
+        benchmark_digest_sha256: ed90faf0645589deb98d454466854771569eb53d69616584c092a25ae3bd1c12
+        recovery_transfer_artifact: specs/004-durable-preparation/evidence/benchmark-mac-mini-m4-f7b021db52503aaedcc59b9c9c8d95d357555352.recovery-transfer.json
+        recovery_transfer_digest_sha256: da442c396f280cf21f4125498676fa52b17e68cfc97bbff0aeb1afbc1cb60e1e
+        hardware: Mac mini M4 10-core CPU 16GB internal SSD
+        filesystem_assurance: validated-local-APFS-internal-SSD-lock-create-sync-primitives
+        at_rest_profile: FileVault-on-internal-APFS-observed-local
+        at_rest_profile_approval: pending
+        warmup_operations: 500
+        measured_operations: 10000
+        committed_operations: 10500
+        p50_ns: 11218708
+        p95_ns: 24096375
+        p99_ns: 25443666
+        max_ns: 26528459
+        meets_p95_limit: true
+        meets_p99_limit: true
         fullfsync_spike: pending
         power_loss_evidence: pending

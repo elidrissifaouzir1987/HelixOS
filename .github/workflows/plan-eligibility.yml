@@ -33,6 +33,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: plan-eligibility-${{ github.workflow }}-${{ github.ref }}
@@ -47,6 +48,9 @@ jobs:
     name: PLAN-002 / ${{ matrix.platform }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 35
+    permissions:
+      contents: read
+      actions: read
     strategy:
       fail-fast: false
       matrix:
@@ -144,24 +148,51 @@ jobs:
       - name: Build immutable evidence descriptor
         shell: pwsh
         run: |
+          if ([string]::IsNullOrWhiteSpace($env:ImageOS)) {
+            throw 'GitHub-hosted runner did not expose ImageOS'
+          }
+          if ([string]::IsNullOrWhiteSpace($env:ImageVersion)) {
+            throw 'GitHub-hosted runner did not expose ImageVersion'
+          }
+
           $summary = 'contracts/fixtures/plan-eligibility-v1/expected-outcomes.json'
           $summaryHash = (Get-FileHash -LiteralPath $summary -Algorithm SHA256).Hash.ToLowerInvariant()
           $rust = (rustc --version --verbose | Out-String).Trim()
+          if ($LASTEXITCODE -ne 0) {
+            throw 'rustc version capture failed'
+          }
           $rustSingleLine = $rust -replace '\r?\n', ';'
+          $cargo = (cargo --version --verbose | Out-String).Trim()
+          if ($LASTEXITCODE -ne 0) {
+            throw 'cargo version capture failed'
+          }
+          $cargoSingleLine = $cargo -replace '\r?\n', ';'
+          $osDescription = [System.Runtime.InteropServices.RuntimeInformation]::OSDescription
           $artifactName = 'plan-002-${{ matrix.platform }}-${{ github.sha }}'
           $body = @(
             'schema=helixos.plan-eligibility-ci-evidence/1'
             'acceptance_id=PLAN-002'
+            'evidence_status=validated-not-yet-catalogued'
             'platform=${{ matrix.platform }}'
-            'runner=${{ matrix.runner }}'
+            'runner_label=${{ matrix.runner }}'
+            "runner_image_os=$env:ImageOS"
+            "runner_image_version=$env:ImageVersion"
+            'runner_os=${{ runner.os }}'
+            'runner_arch=${{ runner.arch }}'
+            "runner_os_description=$osDescription"
             'rust_host=${{ matrix.expected_host }}'
             'commit=${{ github.sha }}'
             'workflow_ref=${{ github.workflow_ref }}'
+            'event_name=${{ github.event_name }}'
             'run_id=${{ github.run_id }}'
             'run_attempt=${{ github.run_attempt }}'
+            'run_url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
             "artifact_name=$artifactName"
+            'uploaded_artifact_sha256=published-after-upload'
+            'artifact_attestation=push-or-workflow-dispatch-only'
             "expected_outcomes_sha256=$summaryHash"
             "rust=$rustSingleLine"
+            "cargo=$cargoSingleLine"
           ) -join "`n"
           Set-Content -LiteralPath 'plan-002-evidence.txt' -Value $body -Encoding utf8 -NoNewline
 
@@ -175,6 +206,7 @@ jobs:
           retention-days: 90
 
       - name: Validate and publish evidence artifact digest
+        if: always() && steps.upload-evidence.outcome == 'success'
         shell: pwsh
         env:
           EVIDENCE_ARTIFACT_ID: ${{ steps.upload-evidence.outputs.artifact-id }}
@@ -192,15 +224,208 @@ jobs:
           }
 
           $artifactDigest = $env:EVIDENCE_ARTIFACT_DIGEST.ToLowerInvariant()
+          if ('${{ github.event_name }}' -eq 'pull_request') {
+            $evidenceStatus = 'validation-only-no-attestation'
+          }
+          else {
+            $evidenceStatus = 'uploaded-awaiting-dedicated-attestation-job'
+          }
           $summary = @(
-            'PLAN-002 immutable evidence artifact'
+            'PLAN-002 evidence artifact'
+            "evidence_status=$evidenceStatus"
             'platform=${{ matrix.platform }}'
-            'runner=${{ matrix.runner }}'
+            'runner_label=${{ matrix.runner }}'
+            'runner_os=${{ runner.os }}'
+            'runner_arch=${{ runner.arch }}'
             'rust_host=${{ matrix.expected_host }}'
             'commit=${{ github.sha }}'
+            'event_name=${{ github.event_name }}'
             'run_id=${{ github.run_id }}'
             "artifact_id=$($env:EVIDENCE_ARTIFACT_ID)"
             "artifact_url=$($env:EVIDENCE_ARTIFACT_URL)"
-            "artifact_sha256=$artifactDigest"
+            "uploaded_artifact_sha256=$artifactDigest"
+            'attestation_status=handled-by-dedicated-job-for-push-or-workflow-dispatch'
+            'catalog_claim_status=pending-until-conformance-catalog-is-updated'
+          ) -join "`n"
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value $summary -Encoding utf8
+
+  attest-evidence:
+    name: PLAN-002 attest / ${{ matrix.platform }}
+    if: needs.conformance.result == 'success' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    needs: conformance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - linux-x86_64
+          - macos-arm64
+          - windows-x64
+
+    steps:
+      - name: Resolve exact current-run evidence artifact
+        id: resolve-artifact
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EVIDENCE_ARTIFACT_NAME: plan-002-${{ matrix.platform }}-${{ github.sha }}
+        run: |
+          $headers = @{
+            Authorization = "Bearer $env:GITHUB_TOKEN"
+            Accept = 'application/vnd.github+json'
+            'X-GitHub-Api-Version' = '2022-11-28'
+            'User-Agent' = 'helixos-plan-002-attestation'
+          }
+          $encodedName = [Uri]::EscapeDataString($env:EVIDENCE_ARTIFACT_NAME)
+          $requestUri = "$env:GITHUB_API_URL/repos/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID/artifacts?per_page=100&name=$encodedName"
+          $artifact = $null
+
+          for ($attempt = 1; $attempt -le 5; $attempt++) {
+            try {
+              $response = Invoke-RestMethod `
+                -Method Get `
+                -Uri $requestUri `
+                -Headers $headers `
+                -TimeoutSec 30 `
+                -ErrorAction Stop
+            }
+            catch {
+              if ($attempt -eq 5) {
+                throw 'GitHub Actions artifact API did not return a usable response'
+              }
+              Start-Sleep -Seconds 2
+              continue
+            }
+
+            $matches = @(
+              $response.artifacts | Where-Object {
+                [string]$_.name -ceq $env:EVIDENCE_ARTIFACT_NAME
+              }
+            )
+            if ($matches.Count -gt 1) {
+              throw 'current workflow run exposed duplicate exact-name evidence artifacts'
+            }
+            if ($matches.Count -eq 1) {
+              $artifact = $matches[0]
+              break
+            }
+            if ($attempt -lt 5) {
+              Start-Sleep -Seconds 2
+            }
+          }
+
+          if ($null -eq $artifact) {
+            throw 'current workflow run did not expose the exact evidence artifact'
+          }
+          if ([string]$artifact.name -cne $env:EVIDENCE_ARTIFACT_NAME) {
+            throw 'artifact API returned an unexpected evidence artifact name'
+          }
+          if ($artifact.expired -eq $true) {
+            throw 'current-run evidence artifact is already expired'
+          }
+
+          $artifactId = [long]$artifact.id
+          $artifactApiUrl = [string]$artifact.url
+          $artifactArchiveUrl = [string]$artifact.archive_download_url
+          $artifactDigest = [string]$artifact.digest
+          $artifactExpiresAt = [string]$artifact.expires_at
+          if ($artifactId -le 0) {
+            throw 'artifact API returned an invalid artifact ID'
+          }
+          if ($artifactApiUrl -notmatch '^https://') {
+            throw 'artifact API returned an invalid artifact URL'
+          }
+          if ($artifactArchiveUrl -notmatch '^https://') {
+            throw 'artifact API returned an invalid archive URL'
+          }
+          if ($artifactDigest -notmatch '^sha256:[0-9a-fA-F]{64}$') {
+            throw 'artifact API did not return a SHA-256 artifact digest'
+          }
+          if ([string]::IsNullOrWhiteSpace($artifactExpiresAt)) {
+            throw 'artifact API did not return a retention expiry'
+          }
+
+          $digestSha256 = $artifactDigest.Substring(7).ToLowerInvariant()
+          $artifactWebUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID/artifacts/$artifactId"
+          @(
+            "artifact-id=$artifactId"
+            "artifact-api-url=$artifactApiUrl"
+            "artifact-archive-url=$artifactArchiveUrl"
+            "artifact-web-url=$artifactWebUrl"
+            "artifact-digest-sha256=$digestSha256"
+            "artifact-expires-at=$artifactExpiresAt"
+          ) | Add-Content -LiteralPath $env:GITHUB_OUTPUT -Encoding utf8
+
+      - name: Attest uploaded evidence artifact provenance
+        id: attest-artifact
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
+        with:
+          subject-name: plan-002-${{ matrix.platform }}-${{ github.sha }}
+          subject-digest: sha256:${{ steps.resolve-artifact.outputs.artifact-digest-sha256 }}
+
+      - name: Require and publish immutable artifact attestation
+        if: always() && steps.resolve-artifact.outcome == 'success'
+        shell: pwsh
+        env:
+          EVIDENCE_ARTIFACT_ID: ${{ steps.resolve-artifact.outputs.artifact-id }}
+          EVIDENCE_ARTIFACT_API_URL: ${{ steps.resolve-artifact.outputs.artifact-api-url }}
+          EVIDENCE_ARTIFACT_ARCHIVE_URL: ${{ steps.resolve-artifact.outputs.artifact-archive-url }}
+          EVIDENCE_ARTIFACT_WEB_URL: ${{ steps.resolve-artifact.outputs.artifact-web-url }}
+          EVIDENCE_ARTIFACT_DIGEST: ${{ steps.resolve-artifact.outputs.artifact-digest-sha256 }}
+          EVIDENCE_ARTIFACT_EXPIRES_AT: ${{ steps.resolve-artifact.outputs.artifact-expires-at }}
+          EVIDENCE_ATTESTATION_ID: ${{ steps.attest-artifact.outputs.attestation-id }}
+          EVIDENCE_ATTESTATION_URL: ${{ steps.attest-artifact.outputs.attestation-url }}
+          EVIDENCE_ATTESTATION_OUTCOME: ${{ steps.attest-artifact.outcome }}
+        run: |
+          if ($env:EVIDENCE_ARTIFACT_ID -notmatch '^[1-9][0-9]*$') {
+            throw 'artifact API did not resolve a positive artifact ID'
+          }
+          if ($env:EVIDENCE_ARTIFACT_API_URL -notmatch '^https://') {
+            throw 'artifact API URL is missing or invalid'
+          }
+          if ($env:EVIDENCE_ARTIFACT_ARCHIVE_URL -notmatch '^https://') {
+            throw 'artifact archive URL is missing or invalid'
+          }
+          if ($env:EVIDENCE_ARTIFACT_WEB_URL -notmatch '^https://') {
+            throw 'artifact preservation URL is missing or invalid'
+          }
+          if ($env:EVIDENCE_ARTIFACT_DIGEST -notmatch '^[0-9a-f]{64}$') {
+            throw 'artifact API digest is not a lowercase SHA-256 value'
+          }
+          if ([string]::IsNullOrWhiteSpace($env:EVIDENCE_ARTIFACT_EXPIRES_AT)) {
+            throw 'artifact retention expiry is missing'
+          }
+          if ($env:EVIDENCE_ATTESTATION_OUTCOME -ne 'success' `
+              -or [string]::IsNullOrWhiteSpace($env:EVIDENCE_ATTESTATION_ID) `
+              -or $env:EVIDENCE_ATTESTATION_URL -notmatch '^https://') {
+            throw 'immutable evidence job did not publish its required attestation ID and URL'
+          }
+
+          $summary = @(
+            'PLAN-002 immutable evidence attestation'
+            'evidence_status=immutable-evidence-uncatalogued'
+            'platform=${{ matrix.platform }}'
+            'commit=${{ github.sha }}'
+            'event_name=${{ github.event_name }}'
+            'run_id=${{ github.run_id }}'
+            'run_attempt=${{ github.run_attempt }}'
+            'run_url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+            "artifact_name=plan-002-${{ matrix.platform }}-${{ github.sha }}"
+            "artifact_id=$env:EVIDENCE_ARTIFACT_ID"
+            "artifact_api_url=$env:EVIDENCE_ARTIFACT_API_URL"
+            "artifact_archive_url=$env:EVIDENCE_ARTIFACT_ARCHIVE_URL"
+            "artifact_preservation_url=$env:EVIDENCE_ARTIFACT_WEB_URL"
+            "artifact_expires_at=$env:EVIDENCE_ARTIFACT_EXPIRES_AT"
+            "uploaded_artifact_sha256=$env:EVIDENCE_ARTIFACT_DIGEST"
+            "attestation_id=$env:EVIDENCE_ATTESTATION_ID"
+            "attestation_url=$env:EVIDENCE_ATTESTATION_URL"
+            'catalog_claim_status=pending-until-conformance-catalog-is-updated'
           ) -join "`n"
           Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value $summary -Encoding utf8

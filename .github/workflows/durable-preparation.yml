@@ -1,0 +1,735 @@
+name: Durable preparation before dispatch
+
+on:
+  pull_request:
+    paths:
+      - ".gitattributes"
+      - ".gitignore"
+      - ".github/workflows/durable-preparation.yml"
+      - "conformance/catalog.yaml"
+      - "contracts/fixtures/plan-envelope-v1/**"
+      - "contracts/fixtures/plan-eligibility-v1/**"
+      - "contracts/fixtures/durable-replay-store-v1/**"
+      - "contracts/fixtures/durable-preparation-v1/**"
+      - "kernel/Cargo.lock"
+      - "kernel/Cargo.toml"
+      - "kernel/rust-toolchain.toml"
+      - "kernel/helix-contracts/**"
+      - "kernel/helix-plan-eligibility/**"
+      - "kernel/helix-plan-preparation/**"
+      - "kernel/helix-replay-sqlite/**"
+      - "kernel/helix-coordinator-sqlite/**"
+      - "kernel/helixos-kernel/**"
+      - "kernel/helixos-mcp-shim/**"
+      - "kernel/helixos-provision/**"
+      - "specs/001-portable-signed-contracts/**"
+      - "specs/002-plan-eligibility/**"
+      - "specs/003-durable-replay-store/**"
+      - "specs/004-durable-preparation/**"
+      - "tools/plan004_*.py"
+      - "tools/tests/test_plan004_evidence.py"
+  push:
+    branches:
+      - master
+    paths:
+      - ".gitattributes"
+      - ".gitignore"
+      - ".github/workflows/durable-preparation.yml"
+      - "conformance/catalog.yaml"
+      - "contracts/fixtures/plan-envelope-v1/**"
+      - "contracts/fixtures/plan-eligibility-v1/**"
+      - "contracts/fixtures/durable-replay-store-v1/**"
+      - "contracts/fixtures/durable-preparation-v1/**"
+      - "kernel/Cargo.lock"
+      - "kernel/Cargo.toml"
+      - "kernel/rust-toolchain.toml"
+      - "kernel/helix-contracts/**"
+      - "kernel/helix-plan-eligibility/**"
+      - "kernel/helix-plan-preparation/**"
+      - "kernel/helix-replay-sqlite/**"
+      - "kernel/helix-coordinator-sqlite/**"
+      - "kernel/helixos-kernel/**"
+      - "kernel/helixos-mcp-shim/**"
+      - "kernel/helixos-provision/**"
+      - "specs/001-portable-signed-contracts/**"
+      - "specs/002-plan-eligibility/**"
+      - "specs/003-durable-replay-store/**"
+      - "specs/004-durable-preparation/**"
+      - "tools/plan004_*.py"
+      - "tools/tests/test_plan004_evidence.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: durable-preparation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: "1"
+
+jobs:
+  path-policy:
+    name: PLAN-004 / path and LF policy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Verify digest-sensitive path policy
+        shell: pwsh
+        run: |
+          $required = @(
+            '/kernel/Cargo.lock text eol=lf',
+            '/contracts/fixtures/durable-preparation-v1/* text eol=lf',
+            '/specs/004-durable-preparation/contracts/*.json text eol=lf',
+            '/specs/004-durable-preparation/contracts/*.sql text eol=lf',
+            '/specs/004-durable-preparation/evidence/* text eol=lf whitespace=-blank-at-eof',
+            '/.github/workflows/durable-preparation.yml text eol=lf',
+            '/tools/plan004_*.py text eol=lf',
+            '/tools/tests/test_plan004_evidence.py text eol=lf'
+          )
+          $attributes = Get-Content -Raw -LiteralPath '.gitattributes'
+          foreach ($line in $required) {
+            if (-not $attributes.Contains($line)) {
+              throw "missing PLAN-004 .gitattributes rule: $line"
+            }
+          }
+          git diff --check
+          if ($LASTEXITCODE -ne 0) {
+            throw 'git diff --check failed'
+          }
+
+      - name: Test PLAN-004 evidence tooling
+        run: python3 -m unittest discover -s tools/tests -p 'test_plan004_evidence.py' -v
+
+  conformance:
+    name: PLAN-004 / ${{ matrix.platform }}
+    needs: path-policy
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux-x86_64
+            runner: ubuntu-24.04
+            expected_host: x86_64-unknown-linux-gnu
+          - platform: macos-arm64
+            runner: macos-26
+            expected_host: aarch64-apple-darwin
+          - platform: windows-x64
+            runner: windows-2022
+            expected_host: x86_64-pc-windows-msvc
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install pinned Rust 1.96.1
+        shell: pwsh
+        run: |
+          rustup toolchain install 1.96.1 --profile minimal --component rustfmt,clippy --no-self-update
+          rustup default 1.96.1
+          $hostLine = (rustc --version --verbose | Select-String '^host:').Line
+          if (-not $hostLine) {
+            throw 'rustc did not report a host triple'
+          }
+          $actualHost = $hostLine.Substring(5).Trim()
+          if ($actualHost -ne '${{ matrix.expected_host }}') {
+            throw "runner host mismatch: expected ${{ matrix.expected_host }}, got $actualHost"
+          }
+          rustc --version --verbose
+          cargo --version --verbose
+
+      - name: Check format and locked production surface
+        working-directory: kernel
+        run: >-
+          cargo fmt
+          --package helix-contracts
+          --package helix-plan-eligibility
+          --package helix-replay-sqlite
+          --package helix-plan-preparation
+          --package helix-coordinator-sqlite
+          -- --check
+
+      - name: Lint all coordinator and fault targets
+        working-directory: kernel
+        run: >-
+          cargo clippy --locked
+          --package helix-coordinator-sqlite
+          --all-targets
+          --all-features
+          -- -D warnings
+
+      - name: Test prerequisite contract chain
+        working-directory: kernel
+        run: >-
+          cargo test --locked
+          --package helix-contracts
+          --package helix-plan-eligibility
+          --package helix-replay-sqlite
+          --package helix-plan-preparation
+
+      - name: Test hosted coordinator surfaces outside the controlled timing oracle
+        working-directory: kernel
+        run: >-
+          cargo test --locked
+          --package helix-coordinator-sqlite
+          --all-targets
+          --all-features
+          -- --test-threads=1
+          --skip held_writer_returns_by_absolute_injected_deadline_and_never_mutates_later
+
+      - name: Verify frozen corpus and stable runner summary
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path 'plan-004-evidence' | Out-Null
+          cargo run --locked --manifest-path kernel/Cargo.toml `
+            --package helix-coordinator-sqlite `
+            --example durable_preparation_corpus 2>&1 | Tee-Object `
+            -FilePath 'plan-004-evidence/corpus-runner.txt'
+          if ($LASTEXITCODE -ne 0) {
+            throw 'portable corpus runner failed'
+          }
+          cargo test --locked --manifest-path kernel/Cargo.toml `
+            --package helix-coordinator-sqlite `
+            --features test-fault-injection `
+            --test conformance_execution -- --test-threads=1 --nocapture 2>&1 | `
+            Tee-Object -FilePath 'plan-004-evidence/fault-registry.txt'
+          if ($LASTEXITCODE -ne 0) {
+            throw 'fault registry conformance failed'
+          }
+
+      - name: Verify provenance and production backup/restore paths
+        shell: pwsh
+        run: |
+          cargo test --locked --manifest-path kernel/Cargo.toml `
+            --package helix-coordinator-sqlite `
+            --test backup_restore -- --nocapture 2>&1 | Tee-Object `
+            -FilePath 'plan-004-evidence/backup-restore.txt'
+          if ($LASTEXITCODE -ne 0) {
+            throw 'backup/restore provenance tests failed'
+          }
+          cargo test --locked --manifest-path kernel/Cargo.toml `
+            --package helix-coordinator-sqlite `
+            --features test-fault-injection `
+            --test production_backup_conformance -- --nocapture
+          if ($LASTEXITCODE -ne 0) {
+            throw 'production backup conformance failed'
+          }
+          cargo test --locked --manifest-path kernel/Cargo.toml `
+            --package helix-coordinator-sqlite `
+            --features test-fault-injection `
+            --test production_restore_conformance -- --nocapture
+          if ($LASTEXITCODE -ne 0) {
+            throw 'production restore conformance/refusal profile failed'
+          }
+
+      - name: Prove controlled release contention
+        working-directory: kernel
+        run: >-
+          cargo test --locked --release
+          --package helix-coordinator-sqlite
+          --test contention --
+          --ignored --nocapture --test-threads=1
+
+      - name: Prove explicit process-kill recovery
+        shell: pwsh
+        run: |
+          cargo test --locked --release --manifest-path kernel/Cargo.toml `
+            --package helix-coordinator-sqlite `
+            --features test-fault-injection `
+            --test process_crash -- --ignored --nocapture --test-threads=1 2>&1 | `
+            Tee-Object -FilePath 'plan-004-evidence/process-kill.txt'
+          if ($LASTEXITCODE -ne 0) {
+            throw 'process-kill matrix failed'
+          }
+
+      - name: Capture dependency, toolchain and reviewed artifact digests
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:ImageOS) `
+              -or [string]::IsNullOrWhiteSpace($env:ImageVersion) `
+              -or [string]::IsNullOrWhiteSpace($env:RUNNER_NAME)) {
+            throw 'hosted runner image provenance is unavailable'
+          }
+          cargo tree --locked --manifest-path kernel/Cargo.toml `
+            --package helix-coordinator-sqlite --edges normal --target all | Set-Content `
+            -LiteralPath 'plan-004-evidence/cargo-tree.txt' -Encoding utf8
+          if ($LASTEXITCODE -ne 0) {
+            throw 'cargo tree failed'
+          }
+          rustc --version --verbose | Set-Content `
+            -LiteralPath 'plan-004-evidence/rustc-version.txt' -Encoding utf8
+          cargo --version --verbose | Set-Content `
+            -LiteralPath 'plan-004-evidence/cargo-version.txt' -Encoding utf8
+          $files = @(
+            'contracts/fixtures/durable-preparation-v1/cases.json',
+            'contracts/fixtures/durable-preparation-v1/expected-outcomes.json',
+            'specs/004-durable-preparation/contracts/preparation-store-schema-v1.sql',
+            'specs/004-durable-preparation/contracts/preparation-backup-manifest-v1.schema.json',
+            'specs/004-durable-preparation/contracts/preparation-backup-provenance-attestation-v1.schema.json',
+            'specs/004-durable-preparation/contracts/recovery-snapshot-manifest-v1.schema.json',
+            'specs/004-durable-preparation/contracts/recovery-root-metadata-v1.schema.json',
+            'kernel/Cargo.lock',
+            'kernel/rust-toolchain.toml',
+            'kernel/helix-coordinator-sqlite/Cargo.toml',
+            '.github/workflows/durable-preparation.yml',
+            'tools/plan004_supply_chain.py',
+            'tools/plan004_removal_drill.py',
+            'tools/tests/test_plan004_evidence.py'
+          )
+          $digests = foreach ($file in $files) {
+            [ordered]@{
+              path = $file
+              sha256 = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant()
+            }
+          }
+          $descriptor = [ordered]@{
+            schema = 'helixos.durable-preparation-ci-evidence/1'
+            acceptance_id = 'PLAN-004'
+            evidence_kind = 'synthetic-conformance-and-process-kill-not-power-loss'
+            claim_status = 'pending-until-catalogued'
+            platform = '${{ matrix.platform }}'
+            runner = '${{ matrix.runner }}'
+            runner_image_os = $env:ImageOS
+            runner_image_version = $env:ImageVersion
+            runner_os = '${{ runner.os }}'
+            runner_arch = '${{ runner.arch }}'
+            runner_name = $env:RUNNER_NAME
+            rust_host = '${{ matrix.expected_host }}'
+            commit = '${{ github.sha }}'
+            workflow_ref = '${{ github.workflow_ref }}'
+            run_id = '${{ github.run_id }}'
+            run_attempt = '${{ github.run_attempt }}'
+            artifact_name = 'plan-004-${{ matrix.platform }}-${{ github.sha }}'
+            artifact_digest = 'published-after-upload'
+            attestation = 'workflow-dispatch-or-push-separate-strict-artifact-api-job'
+            toolchain = [ordered]@{
+              rust = '1.96.1'
+              rustc_version = ((Get-Content -Raw -LiteralPath 'plan-004-evidence/rustc-version.txt').Trim())
+              cargo_version = ((Get-Content -Raw -LiteralPath 'plan-004-evidence/cargo-version.txt').Trim())
+            }
+            native_sqlite = [ordered]@{
+              rusqlite = '0.40.1'
+              libsqlite3_sys = '0.38.1'
+              sqlite = '3.53.2'
+              source_id = '2026-06-03 19:12:13 d6e03d8c777cfa2d35e3b60d8ec3e0187f3e9f99d8e2ee9cac695fd6fcdf1a24'
+              link_profile = 'bundled-static'
+            }
+            test_scope = [ordered]@{
+              coordinator = 'all-targets-all-features'
+              test_threads = 1
+              excluded_runtime_oracle = 'held_writer_returns_by_absolute_injected_deadline_and_never_mutates_later'
+              exclusion_owner = 'PLAN-004-T043-SC-010-controlled-target'
+              physical_performance_evidence = $false
+            }
+            reviewed_artifacts = $digests
+          }
+          $descriptor | ConvertTo-Json -Depth 5 -Compress | Set-Content `
+            -LiteralPath 'plan-004-evidence/descriptor.json' -Encoding utf8 -NoNewline
+
+      - name: Assert validation did not rewrite reviewed bytes
+        shell: pwsh
+        run: |
+          $drift = git status --porcelain -- `
+            .gitattributes `
+            contracts/fixtures/durable-preparation-v1 `
+            specs/004-durable-preparation/contracts `
+            kernel/Cargo.lock
+          if ($drift) {
+            $drift | Write-Output
+            throw 'reviewed PLAN-004 bytes changed during validation'
+          }
+
+      - name: Upload retained evidence
+        id: upload-evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: plan-004-${{ matrix.platform }}-${{ github.sha }}
+          path: plan-004-evidence
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Publish artifact digest and pending-claim status
+        if: always() && steps.upload-evidence.outcome == 'success'
+        shell: pwsh
+        env:
+          ARTIFACT_ID: ${{ steps.upload-evidence.outputs.artifact-id }}
+          ARTIFACT_URL: ${{ steps.upload-evidence.outputs.artifact-url }}
+          ARTIFACT_DIGEST: ${{ steps.upload-evidence.outputs.artifact-digest }}
+        run: |
+          if ($env:ARTIFACT_ID -notmatch '^[1-9][0-9]*$') {
+            throw 'upload-artifact did not return a valid artifact ID'
+          }
+          if ([string]::IsNullOrWhiteSpace($env:ARTIFACT_URL)) {
+            throw 'upload-artifact did not return an artifact URL'
+          }
+          if ($env:ARTIFACT_DIGEST -notmatch '^[0-9a-fA-F]{64}$') {
+            throw 'upload-artifact did not return a SHA-256 digest'
+          }
+          if ('${{ github.event_name }}' -eq 'pull_request') {
+            $attestationStatus = 'not-produced-pr-validation-only'
+          }
+          else {
+            $attestationStatus = 'pending-separate-strict-artifact-api-job'
+          }
+          $summary = @(
+            'PLAN-004 validation artifact',
+            'claim_status=pending-until-conformance-catalog-is-updated',
+            'platform=${{ matrix.platform }}',
+            'commit=${{ github.sha }}',
+            'coordinator_test_scope=all-targets-all-features',
+            'coordinator_test_threads=1',
+            'excluded_runtime_oracle=held_writer_returns_by_absolute_injected_deadline_and_never_mutates_later',
+            'exclusion_owner=PLAN-004-T043-SC-010-controlled-target',
+            'physical_performance_evidence=false',
+            "artifact_id=$($env:ARTIFACT_ID)",
+            "artifact_url=$($env:ARTIFACT_URL)",
+            "uploaded_artifact_sha256=$($env:ARTIFACT_DIGEST.ToLowerInvariant())",
+            "attestation_status=$attestationStatus"
+          ) -join "`n"
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value $summary -Encoding utf8
+
+  release-evidence:
+    name: PLAN-004 / supply chain and removal
+    needs: conformance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out exact repository history
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check out pinned RustSec advisory database
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: RustSec/advisory-db
+          ref: 6e3286f4efa8c142fb33e5ea4342c8db6693cf34
+          path: plan-004-inputs/rustsec-db
+          persist-credentials: false
+
+      - name: Check out pinned SPDX license texts
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: spdx/license-list-data
+          ref: c4a7237ec8f4654e867546f9f409749300f1bf4c
+          path: plan-004-inputs/spdx-license-list
+          persist-credentials: false
+
+      - name: Install pinned Rust and evidence tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.96.1 --profile minimal --no-self-update
+          rustup default 1.96.1
+          cargo install cargo-cyclonedx --version 0.5.9 --locked
+          cargo install cargo-audit --version 0.22.2 --locked
+          rustc --version --verbose
+          cargo --version --verbose
+          cargo cyclonedx --version
+          cargo audit --version
+
+      - name: Generate exact-lock supply-chain inputs
+        id: generate-inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p plan-004-inputs/raw
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          export SOURCE_DATE_EPOCH="$(git show -s --format=%ct "$GITHUB_SHA")"
+          source_timestamp="$(git show -s --format=%cI "$GITHUB_SHA")"
+          scan_timestamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+          cargo fetch --locked --manifest-path kernel/Cargo.toml
+          cargo metadata --locked --all-features --format-version 1 \
+            --manifest-path kernel/Cargo.toml > plan-004-inputs/raw/cargo-metadata.json
+          cargo tree --locked --manifest-path kernel/Cargo.toml \
+            --package helix-coordinator-sqlite --edges features --target all \
+            > plan-004-inputs/raw/cargo-tree.txt
+          cargo cyclonedx \
+            --manifest-path kernel/helix-coordinator-sqlite/Cargo.toml \
+            --format json \
+            --all-features \
+            --target all \
+            --spec-version 1.5 \
+            --override-filename plan-004-sbom.cdx
+          mv kernel/helix-coordinator-sqlite/plan-004-sbom.cdx.json \
+            plan-004-inputs/raw/plan-004-sbom.cdx.json
+          find kernel -name 'plan-004-sbom.cdx.json' -type f -delete
+          test -s plan-004-inputs/raw/plan-004-sbom.cdx.json
+
+          set +e
+          cargo audit \
+            --db plan-004-inputs/rustsec-db \
+            --no-fetch \
+            --file kernel/Cargo.lock \
+            --json \
+            > plan-004-inputs/raw/cargo-audit.json \
+            2> plan-004-inputs/raw/cargo-audit.stderr.txt
+          audit_status=$?
+          set -e
+          if [ "$audit_status" -ne 0 ]; then
+            sed -n '1,200p' plan-004-inputs/raw/cargo-audit.stderr.txt
+            exit "$audit_status"
+          fi
+
+          rustc --version --verbose > plan-004-inputs/raw/rustc-version.txt
+          cargo --version --verbose > plan-004-inputs/raw/cargo-version.txt
+          cargo cyclonedx --version > plan-004-inputs/raw/cargo-cyclonedx-version.txt
+          cargo audit --version > plan-004-inputs/raw/cargo-audit-version.txt
+          python3 --version > plan-004-inputs/raw/python-version.txt 2>&1
+          cyclonedx_digest="$(sha256sum "$(command -v cargo-cyclonedx)" | cut -d ' ' -f 1)"
+          audit_digest="$(sha256sum "$(command -v cargo-audit)" | cut -d ' ' -f 1)"
+          printf '%s  cargo-cyclonedx\n%s  cargo-audit\n' \
+            "$cyclonedx_digest" "$audit_digest" \
+            > plan-004-inputs/raw/tool-binary-digests.txt
+          printf 'scan_timestamp=%s\nsource_timestamp=%s\n' \
+            "$scan_timestamp" "$source_timestamp" >> "$GITHUB_OUTPUT"
+
+      - name: Build and fail-closed verify supply-chain bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${ImageOS:-}"
+          test -n "${ImageVersion:-}"
+          test -n "${RUNNER_NAME:-}"
+          python3 tools/plan004_supply_chain.py build \
+            --repository . \
+            --output plan-004-release-evidence \
+            --sbom plan-004-inputs/raw/plan-004-sbom.cdx.json \
+            --metadata plan-004-inputs/raw/cargo-metadata.json \
+            --audit-report plan-004-inputs/raw/cargo-audit.json \
+            --audit-stderr plan-004-inputs/raw/cargo-audit.stderr.txt \
+            --advisory-db plan-004-inputs/rustsec-db \
+            --spdx-license-list plan-004-inputs/spdx-license-list \
+            --rustc-version plan-004-inputs/raw/rustc-version.txt \
+            --cargo-version plan-004-inputs/raw/cargo-version.txt \
+            --cargo-cyclonedx-version plan-004-inputs/raw/cargo-cyclonedx-version.txt \
+            --cargo-audit-version plan-004-inputs/raw/cargo-audit-version.txt \
+            --python-version plan-004-inputs/raw/python-version.txt \
+            --tool-binary-digests plan-004-inputs/raw/tool-binary-digests.txt \
+            --cargo-tree plan-004-inputs/raw/cargo-tree.txt \
+            --scan-timestamp '${{ steps.generate-inputs.outputs.scan_timestamp }}' \
+            --source-commit "$GITHUB_SHA" \
+            --source-timestamp '${{ steps.generate-inputs.outputs.source_timestamp }}' \
+            --artifact-name "plan-004-release-$GITHUB_SHA" \
+            --github-repository "$GITHUB_REPOSITORY" \
+            --workflow-ref "$GITHUB_WORKFLOW_REF" \
+            --run-id "$GITHUB_RUN_ID" \
+            --run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --runner-os "$RUNNER_OS" \
+            --runner-arch "$RUNNER_ARCH" \
+            --runner-name "$RUNNER_NAME" \
+            --image-os "$ImageOS" \
+            --image-version "$ImageVersion"
+
+      - name: Execute isolated clean-copy removal drill
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/plan004_removal_drill.py \
+            --repository . \
+            --output plan-004-release-evidence/removal \
+            --source-commit "$GITHUB_SHA" \
+            --cargo-target-dir "$RUNNER_TEMP/plan004-removal-target"
+          python3 tools/plan004_supply_chain.py manifest \
+            --output plan-004-release-evidence
+          python3 tools/plan004_supply_chain.py verify \
+            --repository . \
+            --output plan-004-release-evidence \
+            --require-removal
+
+      - name: Assert release evidence did not rewrite tracked bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code
+          git diff --cached --exit-code
+
+      - name: Upload release evidence bundle
+        id: upload-release-evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: plan-004-release-${{ github.sha }}
+          path: plan-004-release-evidence
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 90
+
+      - name: Publish release bundle digest and pending status
+        if: always() && steps.upload-release-evidence.outcome == 'success'
+        shell: bash
+        env:
+          ARTIFACT_ID: ${{ steps.upload-release-evidence.outputs.artifact-id }}
+          ARTIFACT_URL: ${{ steps.upload-release-evidence.outputs.artifact-url }}
+          ARTIFACT_DIGEST: ${{ steps.upload-release-evidence.outputs.artifact-digest }}
+        run: |
+          set -euo pipefail
+          [[ "$ARTIFACT_ID" =~ ^[1-9][0-9]*$ ]]
+          test -n "$ARTIFACT_URL"
+          [[ "$ARTIFACT_DIGEST" =~ ^[0-9a-fA-F]{64}$ ]]
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            attestation_status=not-produced-pr-validation-only
+          else
+            attestation_status=pending-separate-strict-artifact-api-job
+          fi
+          {
+            echo 'PLAN-004 release evidence bundle'
+            echo 'claim_status=pending-until-conformance-catalog-is-updated'
+            echo "commit=$GITHUB_SHA"
+            echo 'sbom=cyclonedx-1.5-all-targets-with-bundled-sqlite'
+            echo 'licenses=package-files-and-pinned-spdx-texts'
+            echo 'rustsec=pinned-scanner-and-database-zero-vulnerabilities'
+            echo 'removal_drill=passing-isolated-clean-copy'
+            echo "artifact_id=$ARTIFACT_ID"
+            echo "artifact_url=$ARTIFACT_URL"
+            echo "uploaded_artifact_sha256=${ARTIFACT_DIGEST,,}"
+            echo "attestation_status=$attestation_status"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  attest-evidence:
+    name: PLAN-004 attestation / ${{ matrix.label }}
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    needs:
+      - conformance
+      - release-evidence
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: linux-x86_64
+            artifact_prefix: plan-004-linux-x86_64
+          - label: macos-arm64
+            artifact_prefix: plan-004-macos-arm64
+          - label: windows-x64
+            artifact_prefix: plan-004-windows-x64
+          - label: release-bundle
+            artifact_prefix: plan-004-release
+
+    steps:
+      - name: Resolve exact artifact from current workflow run
+        id: resolve-artifact
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          ARTIFACT_NAME: ${{ matrix.artifact_prefix }}-${{ github.sha }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
+            throw 'GitHub API token is unavailable'
+          }
+          $headers = @{
+            Accept = 'application/vnd.github+json'
+            Authorization = "Bearer $($env:GITHUB_TOKEN)"
+            'X-GitHub-Api-Version' = '2026-03-10'
+          }
+          $encodedName = [System.Uri]::EscapeDataString($env:ARTIFACT_NAME)
+          $apiBase = '${{ github.api_url }}'
+          $repository = '${{ github.repository }}'
+          $runId = '${{ github.run_id }}'
+          $commit = '${{ github.sha }}'
+          $uri = "$apiBase/repos/$repository/actions/runs/$runId/artifacts?name=$encodedName&per_page=100"
+          try {
+            $response = Invoke-RestMethod -Method Get -Uri $uri -Headers $headers -ErrorAction Stop
+          }
+          catch {
+            throw 'GitHub Actions artifact metadata lookup failed'
+          }
+          $artifacts = @($response.artifacts)
+          if ($response.total_count -ne 1 -or $artifacts.Count -ne 1) {
+            throw "expected exactly one current-run artifact named $($env:ARTIFACT_NAME)"
+          }
+          $artifact = $artifacts[0]
+          $artifactId = [string]$artifact.id
+          $artifactDigest = [string]$artifact.digest
+          if ($artifact.name -cne $env:ARTIFACT_NAME `
+              -or $artifactId -notmatch '^[1-9][0-9]*$' `
+              -or $artifactDigest -notmatch '^sha256:[0-9a-f]{64}$') {
+            throw 'GitHub API returned invalid artifact identity or digest'
+          }
+          if ($artifact.expired -ne $false -or [int64]$artifact.size_in_bytes -le 0) {
+            throw 'GitHub API returned an expired or empty artifact'
+          }
+          if ([string]$artifact.workflow_run.id -ne $runId `
+              -or [string]$artifact.workflow_run.head_sha -cne $commit) {
+            throw 'artifact provenance does not bind current run and commit'
+          }
+          $expectedApiUrl = "$apiBase/repos/$repository/actions/artifacts/$artifactId"
+          if ([string]$artifact.url -cne $expectedApiUrl `
+              -or [string]$artifact.archive_download_url -cne "$expectedApiUrl/zip") {
+            throw 'GitHub API returned unexpected artifact metadata URLs'
+          }
+          if ([string]::IsNullOrWhiteSpace([string]$artifact.created_at) `
+              -or [string]::IsNullOrWhiteSpace([string]$artifact.expires_at)) {
+            throw 'GitHub API omitted artifact retention timestamps'
+          }
+          $artifactUrl = '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/' + $artifactId
+          @(
+            "artifact_id=$artifactId"
+            "artifact_url=$artifactUrl"
+            "artifact_digest=$artifactDigest"
+            "artifact_digest_hex=$($artifactDigest.Substring(7))"
+          ) | Add-Content -LiteralPath $env:GITHUB_OUTPUT -Encoding utf8
+
+      - name: Attest exact uploaded PLAN-004 artifact digest
+        id: attest-artifact
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
+        with:
+          subject-name: ${{ matrix.artifact_prefix }}-${{ github.sha }}
+          subject-digest: ${{ steps.resolve-artifact.outputs.artifact_digest }}
+
+      - name: Validate and publish attestation outputs
+        shell: pwsh
+        env:
+          ARTIFACT_ID: ${{ steps.resolve-artifact.outputs.artifact_id }}
+          ARTIFACT_URL: ${{ steps.resolve-artifact.outputs.artifact_url }}
+          ARTIFACT_DIGEST: ${{ steps.resolve-artifact.outputs.artifact_digest_hex }}
+          ATTESTATION_ID: ${{ steps.attest-artifact.outputs.attestation-id }}
+          ATTESTATION_URL: ${{ steps.attest-artifact.outputs.attestation-url }}
+        run: |
+          if ($env:ARTIFACT_ID -notmatch '^[1-9][0-9]*$' `
+              -or $env:ARTIFACT_DIGEST -notmatch '^[0-9a-f]{64}$') {
+            throw 'resolved artifact identity is invalid'
+          }
+          if ($env:ATTESTATION_ID -notmatch '^[1-9][0-9]*$' `
+              -or $env:ATTESTATION_URL -notmatch '^https://') {
+            throw 'actions/attest did not return valid immutable evidence outputs'
+          }
+          $expectedAttestationUrl = '${{ github.server_url }}/${{ github.repository }}/attestations/' + $env:ATTESTATION_ID
+          if ($env:ATTESTATION_URL -cne $expectedAttestationUrl) {
+            throw 'actions/attest returned an unexpected attestation URL'
+          }
+          $summary = @(
+            'PLAN-004 immutable artifact attestation'
+            'claim_status=pending-until-conformance-catalog-is-updated'
+            'label=${{ matrix.label }}'
+            'commit=${{ github.sha }}'
+            'run_id=${{ github.run_id }}'
+            "artifact_id=$($env:ARTIFACT_ID)"
+            "artifact_url=$($env:ARTIFACT_URL)"
+            "uploaded_artifact_sha256=$($env:ARTIFACT_DIGEST)"
+            "attestation_id=$($env:ATTESTATION_ID)"
+            "attestation_url=$($env:ATTESTATION_URL)"
+          ) -join "`n"
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value $summary -Encoding utf8

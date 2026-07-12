@@ -44,6 +44,7 @@ const CLAIM_DEADLINE_MONOTONIC_MS: u64 = common::feature002::PLAN_DEADLINE_MS;
 const THREAD_CONTENDERS: usize = 64;
 const PROCESS_CONTENDERS: usize = 8;
 const CONTENTION_BUSY_WAIT_MS: u64 = 5_000;
+const INITIALIZATION_CORRECTNESS_BUSY_WAIT_MS: u64 = 5_000;
 const SQLITE_HEADER: &[u8; 16] = b"SQLite format 3\0";
 
 const WORKER_ENV: &str = "HELIX_REPLAY_CORPUS_WORKER";
@@ -1155,8 +1156,15 @@ fn run_initialization_case(case_id: &str) -> Actual {
                 handles.push(thread::spawn(move || {
                     let trusted = TrustedLocalStoreRootV1::try_from_provisioned((*path).clone())
                         .unwrap_or_else(|_| panic!("concurrent root rejected"));
-                    let config = ReplayStoreConfigV1::try_new(trusted, 250, 16, 1)
-                        .unwrap_or_else(|_| panic!("concurrent config rejected"));
+                    // This proves convergence, not a 250 ms scheduling oracle. Production
+                    // retains its independent, deadline-checked 5,000-attempt setup-gate cap.
+                    let config = ReplayStoreConfigV1::try_new(
+                        trusted,
+                        INITIALIZATION_CORRECTNESS_BUSY_WAIT_MS,
+                        16,
+                        1,
+                    )
+                    .unwrap_or_else(|_| panic!("concurrent config rejected"));
                     barrier.wait();
                     SqliteReplayClaimantV1::open_or_create(
                         config,
@@ -1169,7 +1177,9 @@ fn run_initialization_case(case_id: &str) -> Actual {
                 handle
                     .join()
                     .unwrap_or_else(|_| panic!("concurrent initializer panicked"))
-                    .unwrap_or_else(|_| panic!("concurrent initializer failed"));
+                    .unwrap_or_else(|error| {
+                        panic!("concurrent initializer failed: {}", error.code())
+                    });
             }
             let claimant = open_store(&root, InjectedClock::coherent());
             assert_eq!(verified_count(&claimant), 0);

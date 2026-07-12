@@ -11,6 +11,7 @@ on:
       - "kernel/Cargo.lock"
       - "kernel/Cargo.toml"
       - "kernel/helix-contracts/**"
+      - "kernel/helixos-provision/**"
       - "specs/001-portable-signed-contracts/**"
   push:
     branches:
@@ -24,10 +25,12 @@ on:
       - "kernel/Cargo.lock"
       - "kernel/Cargo.toml"
       - "kernel/helix-contracts/**"
+      - "kernel/helixos-provision/**"
       - "specs/001-portable-signed-contracts/**"
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: read
 
 concurrency:
@@ -43,6 +46,9 @@ jobs:
     name: PLAN-001 / ${{ matrix.platform }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 30
+    permissions:
+      actions: read
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -100,6 +106,27 @@ jobs:
             throw "runner host mismatch: expected $expectedHost, got $actualHost"
           }
 
+      - name: Select the OpenSSL 3 strict-verification oracle
+        shell: pwsh
+        run: |
+          if ($IsMacOS) {
+            $prefix = (& brew --prefix openssl@3).Trim()
+            if ($LASTEXITCODE -ne 0 -or -not $prefix) {
+              throw 'Homebrew openssl@3 is unavailable on the macOS runner'
+            }
+            $openssl = Join-Path $prefix 'bin/openssl'
+          } else {
+            $openssl = (Get-Command openssl -CommandType Application -ErrorAction Stop |
+              Select-Object -First 1).Source
+          }
+
+          $version = (& $openssl version 2>&1 | Out-String).Trim()
+          if ($LASTEXITCODE -ne 0 -or $version -notmatch '^OpenSSL 3\.') {
+            throw "expected an OpenSSL 3.x verifier at $openssl, got: $version"
+          }
+          "OPENSSL=$openssl" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          Write-Output "Strict verification oracle: $version"
+
       - name: Validate Draft 2020-12 contract artifacts
         shell: pwsh
         run: |
@@ -144,7 +171,10 @@ jobs:
 
       - name: Test workspace
         working-directory: kernel
-        run: cargo test --locked --workspace --all-targets --all-features
+        run: >-
+          cargo test --locked --workspace --all-targets --all-features --
+          --test-threads=1
+          --skip held_writer_returns_by_absolute_injected_deadline_and_never_mutates_later
 
       - name: Reproduce exact fixture corpus
         shell: pwsh
@@ -156,3 +186,381 @@ jobs:
             $drift | Write-Output
             throw 'fixture generator output differs from the committed corpus'
           }
+
+      - name: Build immutable PLAN-001 evidence descriptor
+        shell: pwsh
+        run: |
+          $schemaPath = 'contracts/schemas/plan-envelope-v1.schema.json'
+          $negativeSchemaPath = 'contracts/schemas/negative-contract-corpus-v1.schema.json'
+          $fixtureRoot = 'contracts/fixtures/plan-envelope-v1'
+          $resolvedFixtureRoot = (Resolve-Path -LiteralPath $fixtureRoot).Path
+
+          $fixtureMembers = @(
+            Get-ChildItem -LiteralPath $fixtureRoot -File -Recurse |
+              ForEach-Object {
+                $relativePath = [System.IO.Path]::GetRelativePath(
+                  $resolvedFixtureRoot,
+                  $_.FullName
+                ).Replace('\', '/')
+                [pscustomobject][ordered]@{
+                  path = $relativePath
+                  sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+                }
+              } |
+              Sort-Object -Property path
+          )
+          if ($fixtureMembers.Count -eq 0) {
+            throw 'PLAN-001 fixture corpus is empty'
+          }
+
+          $corpusDigestInput = ($fixtureMembers | ForEach-Object {
+            "$($_.sha256)  $($_.path)"
+          }) -join "`n"
+          $corpusDigestBytes = [System.Text.Encoding]::UTF8.GetBytes($corpusDigestInput)
+          $sha256 = [System.Security.Cryptography.SHA256]::Create()
+          try {
+            $corpusDigest = [System.BitConverter]::ToString(
+              $sha256.ComputeHash($corpusDigestBytes)
+            ).Replace('-', '').ToLowerInvariant()
+          }
+          finally {
+            $sha256.Dispose()
+          }
+
+          $schemaDigest = (Get-FileHash -LiteralPath $schemaPath -Algorithm SHA256).Hash.ToLowerInvariant()
+          $negativeSchemaDigest = (Get-FileHash -LiteralPath $negativeSchemaPath -Algorithm SHA256).Hash.ToLowerInvariant()
+          foreach ($digest in @($schemaDigest, $negativeSchemaDigest, $corpusDigest)) {
+            if ($digest -notmatch '^[0-9a-f]{64}$') {
+              throw 'reviewed PLAN-001 artifact did not produce a lowercase SHA-256 digest'
+            }
+          }
+
+          $rustcVerbose = (rustc --version --verbose | Out-String).Trim()
+          if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($rustcVerbose)) {
+            throw 'rustc version capture failed'
+          }
+          $rustHostLine = ($rustcVerbose -split '\r?\n' | Where-Object { $_ -match '^host:' } | Select-Object -First 1)
+          if (-not $rustHostLine) {
+            throw 'rustc evidence did not contain a host triple'
+          }
+          $rustHost = $rustHostLine.Substring(5).Trim()
+          if ($rustHost -ne '${{ matrix.expected_host }}') {
+            throw "evidence host mismatch: expected ${{ matrix.expected_host }}, got $rustHost"
+          }
+
+          $cargoVersion = (cargo --version | Out-String).Trim()
+          if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($cargoVersion)) {
+            throw 'cargo version capture failed'
+          }
+          $pythonVersion = (python --version 2>&1 | Out-String).Trim()
+          if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($pythonVersion)) {
+            throw 'Python version capture failed'
+          }
+          $checkJsonschemaVersion = (
+            python -c "import importlib.metadata; print(importlib.metadata.version('check-jsonschema'))" 2>&1 |
+              Out-String
+          ).Trim()
+          if ($LASTEXITCODE -ne 0 -or $checkJsonschemaVersion -ne '0.37.4') {
+            throw "check-jsonschema version drifted: $checkJsonschemaVersion"
+          }
+          if ([string]::IsNullOrWhiteSpace($env:OPENSSL)) {
+            throw 'OpenSSL verifier path was not preserved for evidence capture'
+          }
+          $opensslVersion = (& $env:OPENSSL version 2>&1 | Out-String).Trim()
+          if ($LASTEXITCODE -ne 0 -or $opensslVersion -notmatch '^OpenSSL 3\.') {
+            throw "OpenSSL evidence capture failed: $opensslVersion"
+          }
+
+          $runnerImageOs = $env:ImageOS
+          $runnerImageVersion = $env:ImageVersion
+          $runnerOs = '${{ runner.os }}'
+          $runnerArch = '${{ runner.arch }}'
+          $runnerOsDescription = [System.Runtime.InteropServices.RuntimeInformation]::OSDescription
+          foreach ($value in @(
+            $runnerImageOs,
+            $runnerImageVersion,
+            $runnerOs,
+            $runnerArch,
+            $runnerOsDescription
+          )) {
+            if ([string]::IsNullOrWhiteSpace($value)) {
+              throw 'GitHub hosted-runner evidence metadata is incomplete'
+            }
+          }
+
+          $eventName = '${{ github.event_name }}'
+          if ($eventName -eq 'pull_request') {
+            $evidenceStatus = 'validation-only-no-attestation'
+          }
+          elseif ($eventName -eq 'push' -or $eventName -eq 'workflow_dispatch') {
+            $evidenceStatus = 'immutable-evidence-uncatalogued'
+          }
+          else {
+            throw "unsupported evidence event: $eventName"
+          }
+
+          $artifactName = 'plan-001-${{ matrix.platform }}-${{ github.sha }}'
+          $descriptor = [ordered]@{
+            schema = 'helixos.portable-signed-contracts-ci-evidence/1'
+            acceptance_id = 'PLAN-001'
+            evidence_status = $evidenceStatus
+            platform = '${{ matrix.platform }}'
+            runner = [ordered]@{
+              label = '${{ matrix.runner }}'
+              image_os = $runnerImageOs
+              image_version = $runnerImageVersion
+              os = $runnerOs
+              arch = $runnerArch
+              os_description = $runnerOsDescription
+            }
+            source = [ordered]@{
+              commit = '${{ github.sha }}'
+              workflow_ref = '${{ github.workflow_ref }}'
+              event_name = $eventName
+              run_id = '${{ github.run_id }}'
+              run_attempt = '${{ github.run_attempt }}'
+              run_url = 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+            }
+            toolchain = [ordered]@{
+              rust_host = $rustHost
+              rustc_verbose = $rustcVerbose
+              cargo = $cargoVersion
+              python = $pythonVersion
+              check_jsonschema = $checkJsonschemaVersion
+              openssl_version = $opensslVersion
+            }
+            test_scope = [ordered]@{
+              workspace = 'all-targets-all-features'
+              test_threads = 1
+              excluded_runtime_oracle = 'held_writer_returns_by_absolute_injected_deadline_and_never_mutates_later'
+              exclusion_owner = 'PLAN-004-T043-SC-010-controlled-target'
+            }
+            reviewed_artifacts = [ordered]@{
+              plan_envelope_schema_sha256 = $schemaDigest
+              negative_corpus_schema_sha256 = $negativeSchemaDigest
+              fixture_corpus_manifest_sha256 = $corpusDigest
+              fixture_members = $fixtureMembers
+            }
+            artifact = [ordered]@{
+              name = $artifactName
+              uploaded_artifact_sha256 = 'published-after-upload'
+              attestation = 'separate-job-push-or-workflow-dispatch-only'
+              retention_days = 90
+            }
+          }
+          New-Item -ItemType Directory -Path 'plan-001-evidence' | Out-Null
+          $descriptor | ConvertTo-Json -Depth 8 -Compress | Set-Content `
+            -LiteralPath 'plan-001-evidence/descriptor.json' -Encoding utf8 -NoNewline
+
+      - name: Upload retained PLAN-001 evidence
+        id: upload-evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: plan-001-${{ matrix.platform }}-${{ github.sha }}
+          path: plan-001-evidence
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Validate and publish retained PLAN-001 artifact outputs
+        if: always() && steps.upload-evidence.outcome == 'success'
+        shell: pwsh
+        env:
+          EVIDENCE_ARTIFACT_ID: ${{ steps.upload-evidence.outputs.artifact-id }}
+          EVIDENCE_ARTIFACT_URL: ${{ steps.upload-evidence.outputs.artifact-url }}
+          EVIDENCE_ARTIFACT_DIGEST: ${{ steps.upload-evidence.outputs.artifact-digest }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:EVIDENCE_ARTIFACT_ID)) {
+            throw 'upload-artifact did not return an artifact ID'
+          }
+          if ([string]::IsNullOrWhiteSpace($env:EVIDENCE_ARTIFACT_URL)) {
+            throw 'upload-artifact did not return an artifact URL'
+          }
+          if ($env:EVIDENCE_ARTIFACT_DIGEST -notmatch '^[0-9a-fA-F]{64}$') {
+            throw 'upload-artifact did not return a SHA-256 artifact digest'
+          }
+
+          $eventName = '${{ github.event_name }}'
+          $artifactDigest = $env:EVIDENCE_ARTIFACT_DIGEST.ToLowerInvariant()
+          if ($eventName -eq 'pull_request') {
+            $evidenceStatus = 'validation-only-no-attestation'
+            $attestationStatus = 'not-produced-pr-validation-only'
+          }
+          elseif ($eventName -eq 'push' -or $eventName -eq 'workflow_dispatch') {
+            $evidenceStatus = 'immutable-evidence-awaiting-separate-attestation-job'
+            $attestationStatus = 'pending-separate-job'
+          }
+          else {
+            throw "unsupported evidence event: $eventName"
+          }
+
+          $summary = @(
+            'PLAN-001 portable signed contracts validation artifact'
+            "evidence_status=$evidenceStatus"
+            'platform=${{ matrix.platform }}'
+            'runner_label=${{ matrix.runner }}'
+            'rust_host=${{ matrix.expected_host }}'
+            'commit=${{ github.sha }}'
+            "event_name=$eventName"
+            'run_id=${{ github.run_id }}'
+            'run_url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+            "artifact_id=$($env:EVIDENCE_ARTIFACT_ID)"
+            "artifact_url=$($env:EVIDENCE_ARTIFACT_URL)"
+            "uploaded_artifact_sha256=$artifactDigest"
+            "attestation_status=$attestationStatus"
+            'workspace_test_threads=1'
+            'excluded_runtime_oracle=held_writer_returns_by_absolute_injected_deadline_and_never_mutates_later'
+            'exclusion_owner=PLAN-004-T043-SC-010-controlled-target'
+            'catalog_claim_status=pending-until-conformance-catalog-is-updated'
+          ) -join "`n"
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value $summary -Encoding utf8
+
+  attest-evidence:
+    name: PLAN-001 attestation / ${{ matrix.platform }}
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    needs: conformance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - linux-x86_64
+          - macos-arm64
+          - windows-x64
+
+    steps:
+      - name: Resolve exact artifact from the current workflow run
+        id: resolve-artifact
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          ARTIFACT_NAME: plan-001-${{ matrix.platform }}-${{ github.sha }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
+            throw 'GitHub API token is unavailable'
+          }
+          if ([string]::IsNullOrWhiteSpace($env:ARTIFACT_NAME)) {
+            throw 'expected artifact name is unavailable'
+          }
+
+          $headers = @{
+            Accept = 'application/vnd.github+json'
+            Authorization = "Bearer $($env:GITHUB_TOKEN)"
+            'X-GitHub-Api-Version' = '2026-03-10'
+          }
+          $encodedName = [System.Uri]::EscapeDataString($env:ARTIFACT_NAME)
+          $apiBase = '${{ github.api_url }}'
+          $repository = '${{ github.repository }}'
+          $runId = '${{ github.run_id }}'
+          $commit = '${{ github.sha }}'
+          $uri = "$apiBase/repos/$repository/actions/runs/$runId/artifacts?name=$encodedName&per_page=100"
+
+          try {
+            $response = Invoke-RestMethod -Method Get -Uri $uri -Headers $headers -ErrorAction Stop
+          }
+          catch {
+            throw 'GitHub Actions artifact metadata lookup failed'
+          }
+
+          $artifacts = @($response.artifacts)
+          if ($response.total_count -ne 1 -or $artifacts.Count -ne 1) {
+            throw "expected exactly one current-run artifact named $($env:ARTIFACT_NAME)"
+          }
+          $artifact = $artifacts[0]
+          $artifactId = [string]$artifact.id
+          $artifactDigest = [string]$artifact.digest
+          if ($artifact.name -cne $env:ARTIFACT_NAME) {
+            throw 'GitHub API returned an artifact with an unexpected name'
+          }
+          if ($artifactId -notmatch '^[1-9][0-9]*$') {
+            throw 'GitHub API returned an invalid artifact ID'
+          }
+          if ($artifactDigest -notmatch '^sha256:[0-9a-f]{64}$') {
+            throw 'GitHub API returned an invalid artifact SHA-256 digest'
+          }
+          if ($artifact.expired -ne $false -or [int64]$artifact.size_in_bytes -le 0) {
+            throw 'GitHub API returned an expired or empty artifact'
+          }
+          if ([string]$artifact.workflow_run.id -ne $runId `
+              -or [string]$artifact.workflow_run.head_sha -cne $commit) {
+            throw 'artifact provenance does not bind the current run and commit'
+          }
+
+          $expectedApiUrl = "$apiBase/repos/$repository/actions/artifacts/$artifactId"
+          if ([string]$artifact.url -cne $expectedApiUrl `
+              -or [string]$artifact.archive_download_url -cne "$expectedApiUrl/zip") {
+            throw 'GitHub API returned unexpected artifact metadata URLs'
+          }
+          if ([string]::IsNullOrWhiteSpace([string]$artifact.created_at) `
+              -or [string]::IsNullOrWhiteSpace([string]$artifact.expires_at)) {
+            throw 'GitHub API omitted artifact retention timestamps'
+          }
+
+          $artifactUrl = '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/' + $artifactId
+          $artifactDigestHex = $artifactDigest.Substring(7)
+          @(
+            "artifact_id=$artifactId"
+            "artifact_url=$artifactUrl"
+            "artifact_digest=$artifactDigest"
+            "artifact_digest_hex=$artifactDigestHex"
+          ) | Add-Content -LiteralPath $env:GITHUB_OUTPUT -Encoding utf8
+
+      - name: Attest exact uploaded PLAN-001 artifact digest
+        id: attest-artifact
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
+        with:
+          subject-name: plan-001-${{ matrix.platform }}-${{ github.sha }}
+          subject-digest: ${{ steps.resolve-artifact.outputs.artifact_digest }}
+
+      - name: Validate and publish PLAN-001 attestation outputs
+        if: always() && steps.attest-artifact.outcome == 'success'
+        shell: pwsh
+        env:
+          ARTIFACT_ID: ${{ steps.resolve-artifact.outputs.artifact_id }}
+          ARTIFACT_URL: ${{ steps.resolve-artifact.outputs.artifact_url }}
+          ARTIFACT_DIGEST: ${{ steps.resolve-artifact.outputs.artifact_digest_hex }}
+          ATTESTATION_ID: ${{ steps.attest-artifact.outputs.attestation-id }}
+          ATTESTATION_URL: ${{ steps.attest-artifact.outputs.attestation-url }}
+        run: |
+          if ($env:ARTIFACT_ID -notmatch '^[1-9][0-9]*$') {
+            throw 'resolved artifact ID is invalid'
+          }
+          if ([string]::IsNullOrWhiteSpace($env:ARTIFACT_URL)) {
+            throw 'resolved artifact URL is unavailable'
+          }
+          if ($env:ARTIFACT_DIGEST -notmatch '^[0-9a-f]{64}$') {
+            throw 'resolved artifact digest is invalid'
+          }
+          if ($env:ATTESTATION_ID -notmatch '^[1-9][0-9]*$') {
+            throw 'actions/attest did not return a valid attestation ID'
+          }
+          if ([string]::IsNullOrWhiteSpace($env:ATTESTATION_URL)) {
+            throw 'actions/attest did not return an attestation URL'
+          }
+
+          $expectedAttestationUrl = '${{ github.server_url }}/${{ github.repository }}/attestations/' + $env:ATTESTATION_ID
+          if ($env:ATTESTATION_URL -cne $expectedAttestationUrl) {
+            throw 'actions/attest returned an unexpected attestation URL'
+          }
+          $summary = @(
+            'PLAN-001 immutable evidence attestation'
+            'evidence_status=immutable-evidence-uncatalogued'
+            'platform=${{ matrix.platform }}'
+            'commit=${{ github.sha }}'
+            'event_name=${{ github.event_name }}'
+            'run_id=${{ github.run_id }}'
+            'run_url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+            "artifact_id=$($env:ARTIFACT_ID)"
+            "artifact_url=$($env:ARTIFACT_URL)"
+            "uploaded_artifact_sha256=$($env:ARTIFACT_DIGEST)"
+            "attestation_id=$($env:ATTESTATION_ID)"
+            "attestation_url=$($env:ATTESTATION_URL)"
+            'catalog_claim_status=pending-until-conformance-catalog-is-updated'
+          ) -join "`n"
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value $summary -Encoding utf8

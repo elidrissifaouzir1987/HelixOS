@@ -124,7 +124,7 @@ overstating system authority or portability.
 - [x] T032 Run the locked whole-workspace regression plus inverse-dependency and `--exclude helix-plan-eligibility` removal-isolation drill on the local supported host, and record the existing legacy macOS hazard without presenting targeted crate success as whole-system Tier 1 in `specs/002-plan-eligibility/quickstart.md`
 - [x] T033 Run the ignored contention/soak and release benchmark, preserve complete raw metadata/samples under `specs/002-plan-eligibility/evidence/`, report p95 against SC-005, and label a real Mac mini M4 run only when executed on that hardware
 - [x] T034 Refresh Graphify; save concise redacted records for the claim-last/non-authority design decision, corrected replay namespace and verified implementation outcome (plus a dead end only if one occurred); regenerate lessons and confirm nodes in `graphify-out/graph.json`, `graphify-out/memory/`, and `graphify-out/reflections/LESSONS.md`
-- [ ] T035 Capture a successful unchanged Linux/macOS-arm64/Windows `PLAN-002` matrix and record exact commit, run URL, artifact SHA-256/attestation and preserved retention location in `conformance/catalog.yaml`
+- [x] T035 Capture a successful unchanged Linux/macOS-arm64/Windows `PLAN-002` matrix and record exact commit, run URL, artifact SHA-256/attestation and preserved retention location in `conformance/catalog.yaml`
 
 ---
 

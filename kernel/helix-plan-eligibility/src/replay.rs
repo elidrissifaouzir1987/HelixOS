@@ -1,6 +1,6 @@
 use crate::context::{safe, validate_identifier};
 use crate::EligibilityContextBuildErrorV1;
-use helix_contracts::{Nonce128, SafeU64, Sha256Digest};
+use helix_contracts::{Nonce128, PlanEligibilityClaimsV1, SafeU64, Sha256Digest};
 use std::fmt;
 
 const REPLAY_BINDING_DOMAIN: &[u8] = b"HELIXOS\0PLAN-ELIGIBILITY-REPLAY-BINDING\0V1\0";
@@ -207,6 +207,96 @@ impl fmt::Debug for ReplayClaimReceiptV1 {
             .debug_struct("ReplayClaimReceiptV1")
             .finish_non_exhaustive()
     }
+}
+
+/// Opaque borrowed view of the exact permanent replay row carried by eligibility.
+///
+/// Only [`crate::EligiblePlanV1::replay_verification_view`] can create this view. It
+/// exposes the minimum immutable lookup and comparison fields needed by a read-only
+/// verifier; it is not a replay binding, a new claim request, or release authority.
+pub struct ReplayClaimVerificationViewV1<'eligible> {
+    instance_epoch: u64,
+    nonce: Nonce128,
+    operation_id: &'eligible str,
+    claim_id: Sha256Digest,
+    claimant_generation: u64,
+    binding_digest: Sha256Digest,
+}
+
+impl<'eligible> ReplayClaimVerificationViewV1<'eligible> {
+    pub(crate) fn new(
+        claims: PlanEligibilityClaimsV1<'eligible>,
+        receipt: &ReplayClaimReceiptV1,
+    ) -> Self {
+        Self {
+            instance_epoch: claims.instance_epoch(),
+            nonce: claims.nonce(),
+            operation_id: claims.operation_id(),
+            claim_id: receipt.claim_id(),
+            claimant_generation: receipt.claimant_generation(),
+            binding_digest: receipt.binding_digest(),
+        }
+    }
+
+    pub const fn nonce_key(&self) -> (u64, Nonce128) {
+        (self.instance_epoch, self.nonce)
+    }
+
+    pub const fn instance_epoch(&self) -> u64 {
+        self.instance_epoch
+    }
+
+    pub const fn nonce(&self) -> Nonce128 {
+        self.nonce
+    }
+
+    pub const fn operation_id(&self) -> &'eligible str {
+        self.operation_id
+    }
+
+    pub const fn claim_id(&self) -> Sha256Digest {
+        self.claim_id
+    }
+
+    pub const fn claimant_generation(&self) -> u64 {
+        self.claimant_generation
+    }
+
+    pub const fn binding_digest(&self) -> Sha256Digest {
+        self.binding_digest
+    }
+}
+
+impl fmt::Debug for ReplayClaimVerificationViewV1<'_> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("ReplayClaimVerificationViewV1")
+            .finish_non_exhaustive()
+    }
+}
+
+/// Closed read-only classification of the exact replay row carried by eligibility.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum ReplayClaimVerificationV1 {
+    Exact,
+    Missing,
+    Conflict,
+    Unavailable,
+    Unhealthy,
+}
+
+/// Read-only verifier for the permanent replay row carried by an eligible plan.
+///
+/// Implementations compare the view's exact nonce namespace, operation, binding,
+/// claim identity, and claimant generation. They must not call `claim_once`, compare
+/// the store's latest global generation, mutate metadata, issue a receipt, or release a
+/// claim.
+pub trait ReplayClaimVerifierV1: Send + Sync {
+    fn verify_exact_claim(
+        &self,
+        view: &ReplayClaimVerificationViewV1<'_>,
+        deadline_monotonic_ms: u64,
+    ) -> ReplayClaimVerificationV1;
 }
 
 /// Closed outcome of one replay claim attempt; ambiguous outcomes are never retried.

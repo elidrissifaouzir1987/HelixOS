@@ -176,7 +176,7 @@ portable evidence without overstating remote or M4 status.
 - [x] T052 Run the locked whole-workspace fmt/clippy/test suite plus an inverse-dependency/removal-isolation drill excluding `helix-replay-sqlite`, and document that fallback to the in-memory claimant is test-only in `specs/003-durable-replay-store/evidence/validation-local.md`
 - [x] T053 Refresh Graphify with `graphify update .`, save concise redacted `useful` records for the bounded replay-only decision, random attempt-ID correction and verified outcomes, refresh reflections, and confirm the records in `graphify-out/memory/` and `graphify-out/reflections/LESSONS.md`
 - [x] T054 Capture one successful unchanged Linux x64/macOS arm64/Windows x64 `PLAN-003` workflow for the same immutable commit and record run URLs, runner/rustc hosts, corpus/schema/artifact SHA-256, attestations and preserved locations in `conformance/catalog.yaml`
-- [ ] T055 Run the controlled release probe on the actual Mac mini M4, archive its hardware/filesystem/profile/raw samples in `specs/003-durable-replay-store/evidence/`, and keep the separate `F_FULLFSYNC`/power-cut spike explicitly pending unless it is genuinely executed
+- [x] T055 Run the controlled release probe on the actual Mac mini M4, archive its hardware/filesystem/profile/raw samples in `specs/003-durable-replay-store/evidence/`, and keep the separate `F_FULLFSYNC`/power-cut spike explicitly pending unless it is genuinely executed
 
 ---
 
@@ -225,6 +225,16 @@ Windows-only false fixture drift without changing any contract bytes.
 
 ---
 
+## Phase 12: Hosted Setup-Gate Starvation Correction (append-only finding)
+
+**Purpose**: Preserve the later Windows evidence that the earlier fixture-only
+remediation still allowed the process-local setup gate to return before its configured
+correctness window under scheduler pressure.
+
+- [x] T069 Raise only the deadline-checked process-local setup-gate polling cap from 1,000 to 5,000 attempts, preserve the caller busy/deadline clamp plus all SQLite/root-lease/SC-004 limits, keep every concurrent initializer and healthy reopen mandatory, and confirm the unchanged three-host workspace matrices in `kernel/helix-replay-sqlite/src/connection.rs`, `kernel/helix-replay-sqlite/tests/schema_corruption.rs`, `kernel/helix-replay-sqlite/tests/conformance_execution.rs`, and `specs/003-durable-replay-store/evidence/ci-remediation-local.md`
+
+---
+
 ## Acceptance Traceability
 
 | Requirement / criterion | Primary tasks |
@@ -232,18 +242,18 @@ Windows-only false fixture drift without changing any contract bytes.
 | FR-001 | T001-T005, T015, T021-T022 |
 | FR-002-FR-006 | T008-T010, T016, T018-T021, T029-T034 |
 | FR-007-FR-010 | T012, T016, T019-T020, T029-T034 |
-| FR-011-FR-012 | T011-T012, T023, T026, T028-T029 |
-| FR-013-FR-017 | T008-T010, T013-T014, T031, T036, T039, T056-T057, T061, T064 |
+| FR-011-FR-012 | T011-T012, T023, T026, T028-T029, T069 |
+| FR-013-FR-017 | T008-T010, T013-T014, T031, T036, T039, T056-T057, T061, T064, T069 |
 | FR-018-FR-022 | T035-T042, T046, T054-T055, T057, T059 |
 | FR-023-FR-026 | T006-T007, T009, T015, T045, T051-T053 |
-| FR-027-FR-029 | T024-T025, T031-T034, T043-T046, T049, T054, T058-T068 |
+| FR-027-FR-029 | T024-T025, T031-T034, T043-T046, T049, T054, T058-T069 |
 | FR-030-FR-031 | T015, T021-T022, T045, T050-T053, T060 |
 | SC-001 | T016-T022, T043-T046, T058 |
-| SC-002 | T024-T025, T027-T028, T048, T054, T056, T059, T061, T063-T068 |
+| SC-002 | T024-T025, T027-T028, T048, T054, T056, T059, T061, T063-T069 |
 | SC-003 | T029-T034, T048, T054, T059, T061, T064 |
 | SC-004 | T023, T026, T028, T048, T055 |
 | SC-005 | T035-T042, T046, T048, T054, T057, T059 |
-| SC-006 | T043-T046, T049-T050, T054, T058, T060-T068 |
+| SC-006 | T043-T046, T049-T050, T054, T058, T060-T069 |
 | SC-007 | T047-T048, T055 |
 | SC-008 | T006-T007, T015, T045, T052, T054, T060 |
 | SC-009 | T005, T009-T010, T035-T042, T049-T052, T054, T056-T057, T060 |
@@ -260,8 +270,9 @@ Windows-only false fixture drift without changing any contract bytes.
 - US3 reuses the US2 child-process protocol after T027; its private classification tests
   T029 can start as soon as US1 exists.
 - US4 maintenance can be developed in parallel with US2/US3 once US1 is stable.
-- Phase 7 local convergence depends on selected user stories. T054 requires remote CI;
-  T055 requires the user's physical M4 and neither can be checked from Windows evidence.
+- Phase 7 local convergence depends on selected user stories. T054 required remote CI;
+  T055 required the user's physical M4, and both now retain commit-pinned evidence for
+  their completed scopes. Windows evidence alone could not close either task.
 
 ### Parallel opportunities
 
@@ -337,7 +348,7 @@ T038: negative corruption/package tests
 
 ## Task Summary
 
-- Total tasks: 68
+- Total tasks: 69
 - Setup: 5
 - Foundational: 9
 - US1: 8
@@ -349,9 +360,11 @@ T038: negative corruption/package tests
 - First immutable CI remediation: 3
 - First remediation rerun: 3
 - Immutable evidence and workspace EOL closure: 2
+- Hosted setup-gate starvation correction: 1
 - Suggested MVP scope: T001-T022
-- Suggested locally actionable scope before external evidence: T001-T053 and T056-T068
+- Suggested locally actionable scope before external evidence: T001-T053 and T056-T069
 - External unchanged CI: T054 (complete at `d3d763bf44443d93b8ccbf1d3cc3ac22b82dd0e3`)
-- Physical Mac mini M4 evidence: T055
+- Physical Mac mini M4 evidence: T055 (complete at
+  `3355639837f9523b563d2084c0b78f60be5f6c60`)
 - Every task row follows the required checkbox, sequential ID, optional `[P]`, story
   label and exact path format.

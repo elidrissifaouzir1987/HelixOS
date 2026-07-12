@@ -4,7 +4,8 @@
 
 **Created**: 2026-07-10
 
-**Status**: Implemented and locally verified; immutable multi-OS CI evidence pending
+**Status**: Implemented; unchanged hosted Linux x86_64/macOS arm64/Windows x64
+evidence retained; broader PLAN-001 evidence pending
 
 **Input**: User description: "Use Graphify as project memory, use Spec Kit for
 specification, tasks and implementation, then begin creating HelixOS."
@@ -186,8 +187,9 @@ platform-specific branches and produce a machine-readable pass/fail report.
 - Version 1 starts with one supported major version. Backward compatibility is added only
   through an explicit future version policy and fixtures.
 - Keys used by tests are deterministic fixtures and are never production credentials.
-- macOS arm64 is the reference target, but the first implementation is built on the
-  current Windows host and CI must exercise Linux and macOS as they become available.
+- macOS arm64 remains the reference target. Hosted evidence covers Linux x86_64,
+  macOS arm64 and Windows x64; Linux arm64 and physical Mac mini M4 evidence remain
+  pending.
 - The core remains responsible for trust-store and policy decisions; this feature only
   accepts an explicit trusted-key input and returns verification results.
 
