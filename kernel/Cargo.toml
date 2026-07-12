@@ -1,3 +1,12 @@
 [workspace]
-members = ["helix-contracts", "helix-plan-eligibility", "helix-replay-sqlite", "helixos-kernel", "helixos-mcp-shim", "helixos-provision"]
+members = [
+    "helix-contracts",
+    "helix-plan-eligibility",
+    "helix-plan-preparation",
+    "helix-replay-sqlite",
+    "helix-coordinator-sqlite",
+    "helixos-kernel",
+    "helixos-mcp-shim",
+    "helixos-provision",
+]
 resolver = "2"

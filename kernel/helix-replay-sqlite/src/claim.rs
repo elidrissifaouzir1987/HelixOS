@@ -7,7 +7,8 @@ use crate::schema::{verify_full, verify_lightweight};
 use crate::{ReplayMonotonicClockV1, SqliteReplayClaimantV1};
 use helix_contracts::{Sha256Digest, MAX_SAFE_U64};
 use helix_plan_eligibility::{
-    ReplayBindingV1, ReplayClaimOutcomeV1, ReplayClaimReceiptV1, ReplayClaimantV1,
+    ReplayBindingV1, ReplayClaimOutcomeV1, ReplayClaimReceiptV1, ReplayClaimVerificationViewV1,
+    ReplayClaimantV1,
 };
 use rusqlite::{params, Connection, OptionalExtension, Row, Transaction, TransactionBehavior};
 use sha2::{Digest as _, Sha256};
@@ -79,7 +80,7 @@ impl ClaimAttemptV1 {
 }
 
 #[derive(Clone, PartialEq, Eq)]
-struct StoredClaimV1 {
+pub(crate) struct StoredClaimV1 {
     instance_epoch: u64,
     nonce: [u8; 16],
     operation_id: String,
@@ -102,6 +103,18 @@ impl StoredClaimV1 {
             && self.claim_id == receipt.claim_id()
             && self.claimant_generation == receipt.claimant_generation()
             && self.binding_digest == receipt.binding_digest()
+    }
+
+    pub(crate) fn matches_verification_view(
+        &self,
+        view: &ReplayClaimVerificationViewV1<'_>,
+    ) -> bool {
+        self.instance_epoch == view.instance_epoch()
+            && self.nonce == *view.nonce().as_bytes()
+            && self.operation_id == view.operation_id()
+            && self.binding_digest == view.binding_digest()
+            && self.claim_id == view.claim_id()
+            && self.claimant_generation == view.claimant_generation()
     }
 }
 
@@ -657,7 +670,11 @@ impl<C: ReplayMonotonicClockV1> SqliteReplayClaimantV1<C> {
             return ReplayClaimOutcomeV1::Ambiguous;
         }
 
-        let nonce_claim = match lookup_by_nonce_connection(&transaction, attempt) {
+        let nonce_claim = match lookup_by_nonce_connection(
+            &transaction,
+            attempt.instance_epoch,
+            &attempt.nonce,
+        ) {
             Ok(claim) => claim,
             Err(error) => {
                 self.observe_readback_error(error, &mut root_lease);
@@ -665,15 +682,16 @@ impl<C: ReplayMonotonicClockV1> SqliteReplayClaimantV1<C> {
                 return ReplayClaimOutcomeV1::Ambiguous;
             }
         };
-        let operation_claim = match lookup_by_operation_connection(&transaction, attempt) {
-            Ok(claim) => claim,
-            Err(error) => {
-                self.observe_readback_error(error, &mut root_lease);
-                let _ = transaction.rollback();
-                return ReplayClaimOutcomeV1::Ambiguous;
-            }
-        };
-        let candidate_claim = match lookup_by_claim_id_connection(&transaction, attempt) {
+        let operation_claim =
+            match lookup_by_operation_connection(&transaction, &attempt.operation_id) {
+                Ok(claim) => claim,
+                Err(error) => {
+                    self.observe_readback_error(error, &mut root_lease);
+                    let _ = transaction.rollback();
+                    return ReplayClaimOutcomeV1::Ambiguous;
+                }
+            };
+        let candidate_claim = match lookup_by_claim_id_connection(&transaction, attempt.claim_id) {
             Ok(claim) => claim,
             Err(error) => {
                 self.observe_readback_error(error, &mut root_lease);
@@ -904,19 +922,20 @@ fn lookup_by_nonce(
     transaction: &Transaction<'_>,
     attempt: &ClaimAttemptV1,
 ) -> Result<Option<StoredClaimV1>, InternalStoreError> {
-    lookup_by_nonce_connection(transaction, attempt)
+    lookup_by_nonce_connection(transaction, attempt.instance_epoch, &attempt.nonce)
 }
 
 fn lookup_by_operation(
     transaction: &Transaction<'_>,
     attempt: &ClaimAttemptV1,
 ) -> Result<Option<StoredClaimV1>, InternalStoreError> {
-    lookup_by_operation_connection(transaction, attempt)
+    lookup_by_operation_connection(transaction, &attempt.operation_id)
 }
 
-fn lookup_by_nonce_connection(
+pub(crate) fn lookup_by_nonce_connection(
     connection: &Connection,
-    attempt: &ClaimAttemptV1,
+    instance_epoch: u64,
+    nonce: &[u8; 16],
 ) -> Result<Option<StoredClaimV1>, InternalStoreError> {
     let raw = connection
         .query_row(
@@ -924,7 +943,7 @@ fn lookup_by_nonce_connection(
                     claimant_generation
              FROM replay_claims
              WHERE instance_epoch = ?1 AND nonce = ?2",
-            params![attempt.instance_epoch as i64, attempt.nonce.as_slice()],
+            params![instance_epoch as i64, nonce.as_slice()],
             read_raw_claim,
         )
         .optional()
@@ -932,9 +951,9 @@ fn lookup_by_nonce_connection(
     raw.map(decode_raw_claim).transpose()
 }
 
-fn lookup_by_operation_connection(
+pub(crate) fn lookup_by_operation_connection(
     connection: &Connection,
-    attempt: &ClaimAttemptV1,
+    operation_id: &str,
 ) -> Result<Option<StoredClaimV1>, InternalStoreError> {
     let raw = connection
         .query_row(
@@ -942,7 +961,7 @@ fn lookup_by_operation_connection(
                     claimant_generation
              FROM replay_claims
              WHERE operation_id = ?1",
-            [attempt.operation_id.as_str()],
+            [operation_id],
             read_raw_claim,
         )
         .optional()
@@ -950,9 +969,9 @@ fn lookup_by_operation_connection(
     raw.map(decode_raw_claim).transpose()
 }
 
-fn lookup_by_claim_id_connection(
+pub(crate) fn lookup_by_claim_id_connection(
     connection: &Connection,
-    attempt: &ClaimAttemptV1,
+    claim_id: Sha256Digest,
 ) -> Result<Option<StoredClaimV1>, InternalStoreError> {
     let raw = connection
         .query_row(
@@ -960,7 +979,7 @@ fn lookup_by_claim_id_connection(
                     claimant_generation
              FROM replay_claims
              WHERE claim_id = ?1",
-            [attempt.claim_id.as_bytes().as_slice()],
+            [claim_id.as_bytes().as_slice()],
             read_raw_claim,
         )
         .optional()

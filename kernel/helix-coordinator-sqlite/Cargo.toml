@@ -1,0 +1,37 @@
+[package]
+name = "helix-coordinator-sqlite"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "SQLite-backed durable preparation coordinator state for HelixOS"
+
+[dependencies]
+base64 = { version = "=0.22.1", default-features = false, features = ["std"] }
+ed25519-dalek = { version = "=2.2.0", default-features = false, features = ["std"] }
+getrandom = { version = "=0.4.3", default-features = false }
+helix-contracts = { path = "../helix-contracts" }
+helix-plan-preparation = { path = "../helix-plan-preparation" }
+rusqlite = { version = "=0.40.1", default-features = false, features = ["backup", "bundled", "serialize"] }
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = "=1.0.150"
+serde_json_canonicalizer = "=0.3.2"
+sha2 = { version = "=0.10.9", default-features = false }
+
+[target.'cfg(windows)'.dependencies]
+file-id = { version = "=0.2.3", default-features = false }
+
+[features]
+default = []
+controlled-benchmark = ["helix-plan-preparation/controlled-benchmark"]
+test-fault-injection = [
+    "helix-plan-preparation/test-fault-injection",
+    "helix-plan-preparation/controlled-benchmark",
+]
+
+[dev-dependencies]
+helix-replay-sqlite = { path = "../helix-replay-sqlite" }
+proptest = "=1.11.0"
+
+[[example]]
+name = "durable_preparation_benchmark"
+required-features = ["controlled-benchmark"]

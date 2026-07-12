@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://helixos.local/schemas/preparation-backup-manifest-v1.schema.json",
+  "title": "HelixOS Preparation Backup Manifest v1",
+  "description": "Restricted consistency evidence for one quiescent coordinator and recovery-provider backup cut. A detached provisioner-signed provenance attestation is published afterward as the final package member. Neither object is activation or dispatch authority.",
+  "$comment": "The stored file is exactly the RFC 8785 UTF-8 bytes of this complete object, with no BOM, prefix, suffix, whitespace or trailing newline; top_level_manifest_sha256 is lowercase SHA-256 of those exact bytes and is carried only in the detached attestation. The closed decoder rejects duplicate keys and cross-validates operation_retirement_pending against coordinator recovery evidence and orphan_retirement_pending against coordinator quarantine. Both counts are zero and agree with recovery_snapshot.no_retirement_pending and provider enumeration before publication.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "application_id",
+    "store_schema_version",
+    "source_coordinator_root_identity_sha256",
+    "source_recovery_root_identity_sha256",
+    "source_instance_identity_sha256",
+    "source_root_lifecycle_state",
+    "coordinator_schema_sha256",
+    "coordinator_database_sha256",
+    "sqlite",
+    "durability_profile",
+    "at_rest_profile_id",
+    "generations",
+    "counts",
+    "recovery_snapshot",
+    "recovery_root_metadata_schema",
+    "provenance_attestation_schema",
+    "requires_detached_provenance_attestation",
+    "required_restore_root_lifecycle_state",
+    "requires_paused_restore",
+    "requires_boot_epoch_rotation",
+    "requires_instance_epoch_rotation",
+    "requires_fencing_epoch_rotation",
+    "nonterminal_preparations_not_reactivatable",
+    "may_omit_work_after_generation"
+  ],
+  "properties": {
+    "schema": {
+      "const": "helixos.preparation-backup/1"
+    },
+    "application_id": {
+      "const": 1212962883
+    },
+    "store_schema_version": {
+      "const": 1
+    },
+    "source_coordinator_root_identity_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "source_recovery_root_identity_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "source_instance_identity_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "source_root_lifecycle_state": {
+      "const": "ACTIVE"
+    },
+    "coordinator_schema_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "coordinator_database_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "sqlite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rusqlite_version",
+        "libsqlite3_sys_version",
+        "bundled_sqlite_version",
+        "bundled_sqlite_source_id",
+        "link_profile"
+      ],
+      "properties": {
+        "rusqlite_version": {
+          "const": "0.40.1"
+        },
+        "libsqlite3_sys_version": {
+          "const": "0.38.1"
+        },
+        "bundled_sqlite_version": {
+          "const": "3.53.2"
+        },
+        "bundled_sqlite_source_id": {
+          "const": "2026-06-03 19:12:13 d6e03d8c777cfa2d35e3b60d8ec3e0187f3e9f99d8e2ee9cac695fd6fcdf1a24"
+        },
+        "link_profile": {
+          "const": "rusqlite-0.40.1/libsqlite3-sys-0.38.1/bundled-static"
+        }
+      }
+    },
+    "durability_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "journal_mode",
+        "synchronous",
+        "wal_autocheckpoint_pages",
+        "foreign_keys",
+        "recursive_triggers",
+        "trusted_schema",
+        "cell_size_check"
+      ],
+      "properties": {
+        "journal_mode": {
+          "const": "WAL"
+        },
+        "synchronous": {
+          "const": "FULL"
+        },
+        "wal_autocheckpoint_pages": {
+          "const": 0
+        },
+        "foreign_keys": {
+          "const": true
+        },
+        "recursive_triggers": {
+          "const": true
+        },
+        "trusted_schema": {
+          "const": false
+        },
+        "cell_size_check": {
+          "const": true
+        }
+      }
+    },
+    "at_rest_profile_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "generations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "store",
+        "operation",
+        "budget",
+        "event",
+        "quarantine"
+      ],
+      "properties": {
+        "store": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "operation": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "budget": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "event": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "quarantine": {
+          "$ref": "#/$defs/safeInteger"
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "budget_scopes",
+        "operations",
+        "operation_transitions",
+        "held_reservations",
+        "released_reservations",
+        "pending_events",
+        "delivered_events",
+        "active_quarantines",
+        "resolved_quarantines",
+        "operation_retirement_pending",
+        "orphan_retirement_pending"
+      ],
+      "properties": {
+        "budget_scopes": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "operations": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "operation_transitions": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "held_reservations": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "released_reservations": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "pending_events": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "delivered_events": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "active_quarantines": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "resolved_quarantines": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "operation_retirement_pending": {
+          "const": 0
+        },
+        "orphan_retirement_pending": {
+          "const": 0
+        }
+      }
+    },
+    "recovery_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "inventory_sha256",
+        "provider_set_count",
+        "entry_count",
+        "all_required_entries_verified"
+      ],
+      "properties": {
+        "schema": {
+          "const": "helixos.recovery-snapshot-summary/1"
+        },
+        "inventory_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "provider_set_count": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "entry_count": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "all_required_entries_verified": {
+          "const": true
+        }
+      }
+    },
+    "recovery_root_metadata_schema": {
+      "const": "helixos.recovery-root-metadata/1"
+    },
+    "provenance_attestation_schema": {
+      "const": "helixos.preparation-backup-provenance-attestation/1"
+    },
+    "requires_detached_provenance_attestation": {
+      "const": true
+    },
+    "required_restore_root_lifecycle_state": {
+      "const": "RESTORE_PENDING"
+    },
+    "requires_paused_restore": {
+      "const": true
+    },
+    "requires_boot_epoch_rotation": {
+      "const": true
+    },
+    "requires_instance_epoch_rotation": {
+      "const": true
+    },
+    "requires_fencing_epoch_rotation": {
+      "const": true
+    },
+    "nonterminal_preparations_not_reactivatable": {
+      "const": true
+    },
+    "may_omit_work_after_generation": {
+      "const": true
+    }
+  },
+  "$defs": {
+    "safeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

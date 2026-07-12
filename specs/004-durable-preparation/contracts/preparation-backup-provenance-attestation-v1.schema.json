@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://helixos.local/schemas/preparation-backup-provenance-attestation-v1.schema.json",
+  "title": "HelixOS Preparation Backup Provenance Attestation v1",
+  "description": "Detached provisioner-signed provenance envelope published after the canonical preparation backup manifest. It is not restore activation or dispatch authority.",
+  "$comment": "top_level_manifest_sha256 is lowercase SHA-256 of the exact RFC 8785 UTF-8 bytes of the complete helixos.preparation-backup/1 object, with no BOM, prefix, suffix, whitespace or trailing newline; neither this envelope nor the digest field is a member of that object. The Ed25519 signature input is the byte sequence HELIXOS\\u0000PREPARATION-BACKUP-ATTESTATION\\u0000V1\\u0000 followed by the exact RFC 8785 bytes of protected. The verifier additionally requires every repeated protected field to match the decoded top-level manifest/inventory, recovery_provider_set_count to equal recovery_provider_generations.length and those entries to be strictly sorted/unique by (provider_profile_id, provider_id, provider_generation). Trust profile/key selection and revocation state come only from pinned provisioner configuration.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "protected",
+    "signature_algorithm",
+    "signature_base64url"
+  ],
+  "properties": {
+    "schema": {
+      "const": "helixos.preparation-backup-provenance-attestation/1"
+    },
+    "protected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "top_level_manifest_sha256",
+        "source_coordinator_root_identity_sha256",
+        "source_recovery_root_identity_sha256",
+        "source_instance_identity_sha256",
+        "coordinator_generations",
+        "recovery_inventory_sha256",
+        "recovery_provider_set_count",
+        "recovery_entry_count",
+        "recovery_provider_generations",
+        "at_rest_profile_id",
+        "attestation_profile_id",
+        "attestation_profile_version",
+        "key_id",
+        "digest_algorithm"
+      ],
+      "properties": {
+        "schema": {
+          "const": "helixos.preparation-backup-provenance-protected/1"
+        },
+        "top_level_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "source_coordinator_root_identity_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "source_recovery_root_identity_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "source_instance_identity_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "coordinator_generations": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "store",
+            "operation",
+            "budget",
+            "event",
+            "quarantine"
+          ],
+          "properties": {
+            "store": {
+              "$ref": "#/$defs/safeInteger"
+            },
+            "operation": {
+              "$ref": "#/$defs/safeInteger"
+            },
+            "budget": {
+              "$ref": "#/$defs/safeInteger"
+            },
+            "event": {
+              "$ref": "#/$defs/safeInteger"
+            },
+            "quarantine": {
+              "$ref": "#/$defs/safeInteger"
+            }
+          }
+        },
+        "recovery_inventory_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "recovery_provider_set_count": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "recovery_entry_count": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "recovery_provider_generations": {
+          "type": "array",
+          "maxItems": 1000000,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "provider_profile_id",
+              "provider_profile_version",
+              "provider_id",
+              "provider_generation"
+            ],
+            "properties": {
+              "provider_profile_id": {
+                "$ref": "#/$defs/identifier"
+              },
+              "provider_profile_version": {
+                "const": 1
+              },
+              "provider_id": {
+                "$ref": "#/$defs/identifier"
+              },
+              "provider_generation": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              }
+            }
+          }
+        },
+        "at_rest_profile_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "attestation_profile_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "attestation_profile_version": {
+          "const": 1
+        },
+        "key_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "digest_algorithm": {
+          "const": "sha-256"
+        }
+      }
+    },
+    "signature_algorithm": {
+      "const": "ed25519"
+    },
+    "signature_base64url": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{86}$"
+    }
+  },
+  "$defs": {
+    "safeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    }
+  }
+}

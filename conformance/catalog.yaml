@@ -355,3 +355,152 @@ entries:
         backup_restore_digest_sha256: 099e4a44448d097abcf428b7cd39aa83f551b881cbb5421e2a48cd7853c8ba7f
         fullfsync_spike: pending
         power_loss_evidence: pending
+  - acceptance_id: PLAN-004
+    title: Durable preparation before dispatch
+    feature: specs/004-durable-preparation
+    spec: specs/004-durable-preparation/spec.md
+    research: specs/004-durable-preparation/research.md
+    in_process_contract: specs/004-durable-preparation/contracts/durable-preparation-v1.md
+    authority_contract: specs/004-durable-preparation/contracts/authority-compare-v1.md
+    recovery_provider_contract: specs/004-durable-preparation/contracts/recovery-provider-v1.md
+    store_schema: specs/004-durable-preparation/contracts/preparation-store-schema-v1.sql
+    backup_manifest_schema: specs/004-durable-preparation/contracts/preparation-backup-manifest-v1.schema.json
+    provenance_attestation_schema: specs/004-durable-preparation/contracts/preparation-backup-provenance-attestation-v1.schema.json
+    recovery_snapshot_schema: specs/004-durable-preparation/contracts/recovery-snapshot-manifest-v1.schema.json
+    recovery_root_schema: specs/004-durable-preparation/contracts/recovery-root-metadata-v1.schema.json
+    data_model: specs/004-durable-preparation/data-model.md
+    corpus:
+      root: contracts/fixtures/durable-preparation-v1
+      manifest: contracts/fixtures/durable-preparation-v1/cases.json
+      manifest_sha256: 086ec8c5b7395d494b6140a7f24411e788beb6978598a28fc81588b75f29411d
+      expected_outcomes: contracts/fixtures/durable-preparation-v1/expected-outcomes.json
+      expected_outcomes_sha256: 87bd23eeed048fe47ca4f785d17cdca80364454bae30c81dc4b3e9e7ecf3ac2b
+      instructions: contracts/fixtures/durable-preparation-v1/README.md
+      summary_schema: helixos.durable-preparation-summary/1
+      runner_summary_schema: helixos.durable-preparation-corpus-run/1
+      runner_summary_sha256: e0dac29c01276a7f6168a83bff51accefc86a129f1046065ebea5f136bbddd87
+    ci_workflow: .github/workflows/durable-preparation.yml
+    ci_evidence_policy:
+      artifact_subject: actions-upload-artifact-output-digest
+      artifact_digest: actions-upload-artifact-artifact-digest-output
+      retention_days: 90
+      attestation_action: actions/attest@a1948c3f048ba23858d222213b7c278aabede763
+      attestation_events:
+        - push
+        - workflow_dispatch
+      pull_request_evidence: validation-only-no-attestation
+      catalog_update_required_before_claim: true
+    toolchain:
+      manifest: kernel/rust-toolchain.toml
+      rust: 1.96.1
+      profile: minimal
+      components:
+        - rustfmt
+        - clippy
+      cargo_lock: kernel/Cargo.lock
+      rusqlite: 0.40.1
+      libsqlite3_sys: 0.38.1
+      bundled_sqlite: 3.53.2
+      bundled_sqlite_source_id: "2026-06-03 19:12:13 d6e03d8c777cfa2d35e3b60d8ec3e0187f3e9f99d8e2ee9cac695fd6fcdf1a24"
+      sqlite_link_profile: rusqlite-0.40.1/libsqlite3-sys-0.38.1/bundled-static
+      windows_file_identity: file-id-0.2.3/high-resolution-volume-and-128-bit-file-id
+      windows_clean_root_restore: unsupported-v1-refuses-before-package-capture
+      required_runtime_profile:
+        journal_mode: WAL
+        synchronous: FULL
+        wal_autocheckpoint_pages: 0
+        foreign_keys: "ON"
+        trusted_schema: "OFF"
+        cell_size_check: "ON"
+        recursive_triggers: "ON"
+    required_platforms:
+      - id: linux-x86_64
+        runner: ubuntu-24.04
+        rust_host: x86_64-unknown-linux-gnu
+        automation: required
+      - id: macos-arm64
+        runner: macos-26
+        rust_host: aarch64-apple-darwin
+        automation: required
+      - id: windows-x64
+        runner: windows-2022
+        rust_host: x86_64-pc-windows-msvc
+        automation: required
+      - id: mac-mini-m4
+        runner: physical-target
+        rust_host: aarch64-apple-darwin
+        automation: pending-device
+    evidence_requirements:
+      - id: PLAN-004-AUTHORITY
+        requirement: Both complete captures, eligibility-built replay verification, exact comparison order and one caller-owned permit bounded by the earlier deadline or 250 ms deny every changed authority fact before the sole PREPARING linearization point.
+      - id: PLAN-004-BUDGET
+        requirement: Read-only preflight, checked exact arithmetic, create-only scopes, shared-scope contention and no-dispatch-guarded failure reconcile one permanent held reservation without oversubscription or double release.
+      - id: PLAN-004-RECOVERY
+        requirement: Manifest-last recovery publication, exact binding/capacity, authenticated L2 no-material evidence and both guarded retirement paths survive corruption, contention and process-crash tests without fabricating an operation.
+      - id: PLAN-004-DURABILITY
+        requirement: The bundled SQLite store owns the canonical atomic preparation set under strict schema, WAL/FULL profile, exact readback and a closed fault-boundary inventory; possible commit is never retried as definite absence.
+      - id: PLAN-004-RESTORE
+        requirement: A paused quiescent backup publishes complete inventory and detached signed provenance; clean empty-root restore leaves independently durable matching RESTORE_PENDING coordinator and recovery roots, rotated authority and zero activation path.
+      - id: PLAN-004-DATA
+        requirement: Source-classified plans and recovery bytes stay under approved at-rest custody, never enter agent/model, Graphify, egress or public diagnostics, and follow explicit no-pruning plus guarded-retirement retention.
+      - id: PLAN-004-PORTABILITY
+        requirement: One unchanged 335-case corpus, 123-boundary registry, package/restore KATs and reviewed SQL/JSON schema bytes reproduce on Linux x64, macOS arm64 and Windows x64 without a weaker identity fallback; Windows v1 additionally proves the fixed RESTORE_PLATFORM_UNSUPPORTED refusal before package capture because the available high-resolution identity API cannot bind a retained handle.
+      - id: PLAN-004-PERFORMANCE
+        requirement: Physical Mac mini M4 evidence retains 500 warmups and at least 10000 coordinator samples with p95 at most 25 ms and p99 at most 100 ms; recovery transfer is measured in a separate artifact and all waits remain deadline bounded.
+      - id: PLAN-004-SUPPLY
+        requirement: Exact lockfile, native SQLite source, licenses, advisories, SBOM/provenance expectations, immutable artifacts, rollback refusal, subsystem clean restore and removal evidence are retained before any PLAN-004 or Tier 1 claim.
+    claim_status: pending-evidence
+    evidence:
+      local:
+        status: pending
+        platform: pending
+        commit: pending
+        validation_artifact: pending
+        validation_digest_sha256: pending
+        benchmark_artifact: pending
+        benchmark_digest_sha256: pending
+        recovery_transfer_artifact: pending
+        recovery_transfer_digest_sha256: pending
+        process_kill_artifact: pending
+        process_kill_digest_sha256: pending
+        backup_restore_artifact: pending
+        backup_restore_digest_sha256: pending
+        supply_chain_artifact: pending
+        removal_artifact: pending
+      immutable:
+        status: pending
+        commit: pending
+        ci_run: pending
+        uploaded_artifact_digest_sha256: pending
+        attestation_url: pending
+        preservation_location: pending
+        linux_x86_64:
+          run: pending
+          artifact: pending
+          digest_sha256: pending
+          attestation: pending
+          preservation_location: pending
+        macos_arm64:
+          run: pending
+          artifact: pending
+          digest_sha256: pending
+          attestation: pending
+          preservation_location: pending
+        windows_x64:
+          run: pending
+          artifact: pending
+          digest_sha256: pending
+          attestation: pending
+          preservation_location: pending
+      mac_mini_m4:
+        status: pending-device-evidence
+        commit: pending
+        benchmark_artifact: pending
+        benchmark_digest_sha256: pending
+        recovery_transfer_artifact: pending
+        recovery_transfer_digest_sha256: pending
+        hardware: pending
+        filesystem_assurance: pending
+        at_rest_profile: pending
+        fullfsync_spike: pending
+        power_loss_evidence: pending

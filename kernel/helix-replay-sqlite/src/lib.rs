@@ -15,6 +15,7 @@ mod maintenance;
 mod manifest;
 mod root_safety;
 mod schema;
+mod verification;
 
 #[cfg(feature = "test-fault-injection")]
 mod test_fault;

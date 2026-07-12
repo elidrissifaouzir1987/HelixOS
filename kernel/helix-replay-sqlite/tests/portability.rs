@@ -5,17 +5,20 @@ use std::collections::BTreeSet;
 const CARGO_TOML: &str = include_str!("../Cargo.toml");
 const LIB: &str = include_str!("../src/lib.rs");
 const CLAIM_SOURCE: &str = include_str!("../src/claim.rs");
-const DEFAULT_SOURCES: [(&str, &str); 10] = [
+const CONNECTION_SOURCE: &str = include_str!("../src/connection.rs");
+const VERIFICATION_SOURCE: &str = include_str!("../src/verification.rs");
+const DEFAULT_SOURCES: [(&str, &str); 11] = [
     ("claim.rs", CLAIM_SOURCE),
     ("clock.rs", include_str!("../src/clock.rs")),
     ("config.rs", include_str!("../src/config.rs")),
-    ("connection.rs", include_str!("../src/connection.rs")),
+    ("connection.rs", CONNECTION_SOURCE),
     ("error.rs", include_str!("../src/error.rs")),
     ("lib.rs", LIB),
     ("maintenance.rs", include_str!("../src/maintenance.rs")),
     ("manifest.rs", include_str!("../src/manifest.rs")),
     ("root_safety.rs", include_str!("../src/root_safety.rs")),
     ("schema.rs", include_str!("../src/schema.rs")),
+    ("verification.rs", VERIFICATION_SOURCE),
 ];
 const TEST_FAULT_SOURCE: &str = include_str!("../src/test_fault.rs");
 
@@ -140,6 +143,51 @@ fn claim_fault_selection_is_feature_gated_private_and_native_by_default() {
 }
 
 #[test]
+fn exact_verifier_is_private_query_only_and_separate_from_replay_admission() {
+    let lib = normalize_line_endings(LIB);
+    assert!(lib.contains("mod verification;"));
+    assert!(!lib.contains("pub mod verification;"));
+
+    let query_only_attempt = CONNECTION_SOURCE
+        .split_once("fn open_existing_query_only_attempt")
+        .expect("query-only open attempt exists")
+        .1
+        .split_once("fn preflight_database_file")
+        .expect("query-only open attempt is bounded")
+        .0;
+    assert!(query_only_attempt.contains("OpenFlags::SQLITE_OPEN_READ_ONLY"));
+    assert!(query_only_attempt.contains("configure_query_only_connection"));
+    assert!(!query_only_attempt.contains("SQLITE_OPEN_READ_WRITE"));
+    assert!(!query_only_attempt.contains("SQLITE_OPEN_CREATE"));
+    assert!(!query_only_attempt.contains("configure_writable_connection"));
+
+    let query_only_profile = CONNECTION_SOURCE
+        .split_once("fn configure_query_only_connection")
+        .expect("query-only connection profile exists")
+        .1
+        .split_once("fn verify_initialization_candidate")
+        .expect("query-only connection profile is bounded")
+        .0;
+    assert!(query_only_profile.contains("\"query_only\", \"ON\""));
+    assert!(query_only_profile.contains("pragma_i64(connection, \"query_only\")? != 1"));
+    assert!(!query_only_profile.contains("pragma_update(None, \"journal_mode\""));
+
+    assert_absent(
+        &[("verification.rs", VERIFICATION_SOURCE)],
+        &[
+            "claim_once(",
+            "ReplayClaimReceiptV1",
+            "getrandom",
+            "INSERT INTO",
+            "UPDATE replay_",
+            "DELETE FROM",
+            "DROP TABLE",
+            "DROP INDEX",
+        ],
+    );
+}
+
+#[test]
 fn source_guard_normalization_is_lf_and_crlf_independent() {
     assert_eq!(normalize_line_endings("first\nsecond\n"), "first\nsecond\n");
     assert_eq!(
@@ -197,6 +245,40 @@ fn crate_surface_remains_storage_evidence_not_execution_authority() {
             "prepare_effect",
             "authorize_effect",
             "effect_capability",
+        ],
+    );
+}
+
+#[test]
+fn feature_004_removal_keeps_replay_adapter_read_only_and_dependency_free() {
+    for forbidden in [
+        "helix-plan-preparation",
+        "helix-coordinator-sqlite",
+        "PreparationStoreV1",
+        "PreparedOperationV1",
+        "PreparationOutcomeV1",
+        "RESTORE_PENDING",
+    ] {
+        assert!(
+            !CARGO_TOML.contains(forbidden),
+            "replay manifest acquired a Feature 004 edge {forbidden}"
+        );
+        assert!(
+            !VERIFICATION_SOURCE.contains(forbidden),
+            "read-only replay verifier acquired Feature 004 authority {forbidden}"
+        );
+    }
+    assert!(VERIFICATION_SOURCE.contains("ReplayClaimVerificationViewV1"));
+    assert!(VERIFICATION_SOURCE.contains("ReplayClaimVerificationV1"));
+    assert_absent(
+        &[("verification.rs", VERIFICATION_SOURCE)],
+        &[
+            "claim_once",
+            "release",
+            "reset",
+            "INSERT",
+            "UPDATE",
+            "DELETE",
         ],
     );
 }

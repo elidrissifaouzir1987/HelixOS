@@ -1,4 +1,4 @@
-use crate::{EligibilityDenialV1, ReplayClaimReceiptV1};
+use crate::{EligibilityDenialV1, ReplayClaimReceiptV1, ReplayClaimVerificationViewV1};
 use helix_contracts::{AuthenticPlanEnvelopeV1, SafeU64, Sha256Digest};
 use std::fmt;
 
@@ -314,6 +314,14 @@ impl EligiblePlanV1 {
     }
     pub const fn replay_claim(&self) -> &ReplayClaimReceiptV1 {
         &self.replay_claim
+    }
+
+    /// Borrows the minimum exact-row evidence required for read-only replay verification.
+    ///
+    /// The returned view cannot create, renew, release, or otherwise mutate a replay
+    /// claim and has no independent public constructor.
+    pub fn replay_verification_view(&self) -> ReplayClaimVerificationViewV1<'_> {
+        ReplayClaimVerificationViewV1::new(self.authentic.eligibility_claims(), &self.replay_claim)
     }
 }
 

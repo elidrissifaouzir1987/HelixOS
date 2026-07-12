@@ -617,6 +617,14 @@ impl AuthenticPlanEnvelopeV1 {
         PlanEligibilityClaimsV1 { envelope: self }
     }
 
+    pub fn preparation_claims(&self) -> PlanPreparationClaimsV1<'_> {
+        PlanPreparationClaimsV1 { envelope: self }
+    }
+
+    pub fn canonical_signed_envelope_bytes(&self) -> Result<Vec<u8>> {
+        self.signed.to_canonical_json()
+    }
+
     pub fn into_signed(self) -> SignedPlanEnvelopeV1 {
         self.signed
     }
@@ -628,6 +636,184 @@ impl AuthenticPlanEnvelopeV1 {
         Self {
             signed,
             verified_key_fingerprint,
+        }
+    }
+}
+
+/// Borrowed, read-only preparation bindings from an authenticated plan.
+///
+/// The projection is deliberately not a wire or persistence type and has no
+/// independent public constructor.
+///
+/// ```compile_fail,E0277
+/// use helix_contracts::PlanPreparationClaimsV1;
+/// use serde::Serialize;
+///
+/// fn require_serialize<T: Serialize>() {}
+/// require_serialize::<PlanPreparationClaimsV1<'static>>();
+/// ```
+///
+/// ```compile_fail,E0277
+/// use helix_contracts::PlanPreparationClaimsV1;
+/// use serde::Deserialize;
+///
+/// fn require_deserialize<T: for<'de> Deserialize<'de>>() {}
+/// require_deserialize::<PlanPreparationClaimsV1<'static>>();
+/// ```
+///
+/// ```compile_fail,E0451
+/// use helix_contracts::{AuthenticPlanEnvelopeV1, PlanPreparationClaimsV1};
+///
+/// fn forge<'plan>(
+///     envelope: &'plan AuthenticPlanEnvelopeV1,
+/// ) -> PlanPreparationClaimsV1<'plan> {
+///     PlanPreparationClaimsV1 { envelope }
+/// }
+/// ```
+#[derive(Clone, Copy)]
+pub struct PlanPreparationClaimsV1<'plan> {
+    envelope: &'plan AuthenticPlanEnvelopeV1,
+}
+
+impl fmt::Debug for PlanPreparationClaimsV1<'_> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("PlanPreparationClaimsV1")
+            .finish_non_exhaustive()
+    }
+}
+
+impl<'plan> PlanPreparationClaimsV1<'plan> {
+    pub const fn plan_id(&self) -> Sha256Digest {
+        self.envelope.signed.plan_id
+    }
+
+    pub fn operation_id(&self) -> &'plan str {
+        self.envelope.signed.protected.operation_id.as_str()
+    }
+
+    pub fn task_id(&self) -> &'plan str {
+        self.envelope.signed.protected.task_id.as_str()
+    }
+
+    pub fn workload_id(&self) -> &'plan str {
+        self.envelope.signed.protected.workload_id.as_str()
+    }
+
+    pub const fn task_lease_digest(&self) -> Sha256Digest {
+        self.envelope.signed.protected.task_lease_digest
+    }
+
+    pub fn target(&self) -> &'plan ResourceRefV1 {
+        &self.envelope.signed.protected.intent.target
+    }
+
+    pub fn precondition_volume_id(&self) -> &'plan str {
+        self.envelope
+            .signed
+            .protected
+            .intent
+            .precondition
+            .volume_id
+            .as_str()
+    }
+
+    pub fn precondition_file_id(&self) -> &'plan str {
+        self.envelope
+            .signed
+            .protected
+            .intent
+            .precondition
+            .file_id
+            .as_str()
+    }
+
+    pub const fn precondition_content_sha256(&self) -> Sha256Digest {
+        self.envelope
+            .signed
+            .protected
+            .intent
+            .precondition
+            .content_sha256
+    }
+
+    pub const fn precondition_byte_length(&self) -> u64 {
+        self.envelope
+            .signed
+            .protected
+            .intent
+            .precondition
+            .byte_length
+            .get()
+    }
+
+    pub const fn replacement_sha256(&self) -> Sha256Digest {
+        self.envelope.signed.protected.intent.replacement.sha256
+    }
+
+    pub const fn replacement_byte_length(&self) -> u64 {
+        self.envelope
+            .signed
+            .protected
+            .intent
+            .replacement
+            .byte_length
+            .get()
+    }
+
+    pub fn replacement_media_type(&self) -> &'plan str {
+        &self.envelope.signed.protected.intent.replacement.media_type
+    }
+
+    pub const fn recovery_class(&self) -> RecoveryClassV1 {
+        self.envelope.signed.protected.intent.recovery.class
+    }
+
+    pub const fn atomicity(&self) -> AtomicityV1 {
+        self.envelope.signed.protected.intent.recovery.atomicity
+    }
+
+    pub const fn preimage_sha256(&self) -> Option<Sha256Digest> {
+        self.envelope
+            .signed
+            .protected
+            .intent
+            .recovery
+            .preimage_sha256
+    }
+
+    pub const fn recovery_reserved_bytes(&self) -> u64 {
+        self.envelope
+            .signed
+            .protected
+            .intent
+            .recovery
+            .reserved_bytes
+            .get()
+    }
+
+    pub const fn verification_sha256(&self) -> Sha256Digest {
+        self.envelope
+            .signed
+            .protected
+            .intent
+            .verification
+            .expected_sha256
+    }
+
+    pub const fn verification_byte_length(&self) -> u64 {
+        self.envelope
+            .signed
+            .protected
+            .intent
+            .verification
+            .expected_byte_length
+            .get()
+    }
+
+    pub fn budget(&self) -> PlanEligibilityBudgetClaimsV1<'plan> {
+        PlanEligibilityBudgetClaimsV1 {
+            budget: &self.envelope.signed.protected.budget,
         }
     }
 }

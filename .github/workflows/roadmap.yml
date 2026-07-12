@@ -1,0 +1,50 @@
+name: Roadmap freshness
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/roadmap.yml"
+      - "AGENTS.md"
+      - "ROADMAP-SPECS.md"
+      - "conformance/catalog.yaml"
+      - "docs/roadmap/**"
+      - "specs/**/tasks.md"
+      - "tools/update_roadmap.py"
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/roadmap.yml"
+      - "AGENTS.md"
+      - "ROADMAP-SPECS.md"
+      - "conformance/catalog.yaml"
+      - "docs/roadmap/**"
+      - "specs/**/tasks.md"
+      - "tools/update_roadmap.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: roadmap-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  freshness:
+    name: Roadmap freshness / check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.13"
+
+      - name: Verify generated roadmap snapshot
+        run: python3 tools/update_roadmap.py --check

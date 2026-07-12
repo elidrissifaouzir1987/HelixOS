@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://helixos.local/schemas/recovery-root-metadata-v1.schema.json",
+  "title": "HelixOS Recovery Root Metadata v1",
+  "description": "Independently durable lifecycle metadata for one approved recovery-provider root. RESTORE_PENDING is non-activation custody and denies ordinary preparation or retirement.",
+  "$comment": "For RESTORE_PENDING, restore_identity_sha256 is SHA-256 over HELIXOS\\u0000RESTORE-IDENTITY\\u0000V1\\u0000 followed by the detached attestation SHA-256 and a fresh restricted 32-byte restore attempt nonce. The coordinator root must independently persist the same restore and attestation digests.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "root_identity_sha256",
+    "root_lifecycle_state",
+    "state_generation",
+    "at_rest_profile_id"
+  ],
+  "properties": {
+    "schema": {
+      "const": "helixos.recovery-root-metadata/1"
+    },
+    "root_identity_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "root_lifecycle_state": {
+      "enum": [
+        "ACTIVE",
+        "RESTORE_PENDING"
+      ]
+    },
+    "state_generation": {
+      "$ref": "#/$defs/safeInteger"
+    },
+    "at_rest_profile_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "restore_identity_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "provenance_attestation_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "source_inventory_sha256": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "root_lifecycle_state": {
+            "const": "ACTIVE"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "state_generation": {
+            "const": 0
+          }
+        },
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "restore_identity_sha256"
+              ]
+            },
+            {
+              "required": [
+                "provenance_attestation_sha256"
+              ]
+            },
+            {
+              "required": [
+                "source_inventory_sha256"
+              ]
+            }
+          ]
+        }
+      },
+      "else": {
+        "required": [
+          "restore_identity_sha256",
+          "provenance_attestation_sha256",
+          "source_inventory_sha256"
+        ],
+        "properties": {
+          "state_generation": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "safeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    }
+  }
+}
