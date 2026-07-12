@@ -1346,7 +1346,7 @@ mod tests {
         fs::create_dir(&root).expect("test root creates");
         let config = CoordinatorStoreConfigV1::try_new_empty_attested(root.clone(), 10)
             .expect("empty config validates");
-        let _lease = reserve_empty_root(
+        let lease = reserve_empty_root(
             config.empty_root().expect("empty role retained"),
             &FixedClock,
             100,
@@ -1375,6 +1375,9 @@ mod tests {
             .expect("identical replacement writes");
         replacement.sync_all().expect("replacement syncs");
         assert!(verify_reserved_database_fingerprint(&config, &mut reservation).is_err());
+        // The exclusive marker lease has already protected the full swap and identity check.
+        // Release it only before the path-based marker read, which Windows otherwise refuses.
+        drop(lease);
         let role_marker =
             fs::read(root.join(".helix-coordinator-root-v1.lock")).expect("role marker reads");
         assert!(role_marker.ends_with(b"STATE=EMPTY\n"));

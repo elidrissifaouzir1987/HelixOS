@@ -174,6 +174,7 @@ jobs:
         run: >-
           cargo test --locked --workspace --all-targets --all-features --
           --test-threads=1
+          --skip held_writer_returns_by_absolute_injected_deadline_and_never_mutates_later
 
       - name: Reproduce exact fixture corpus
         shell: pwsh
@@ -328,6 +329,12 @@ jobs:
               check_jsonschema = $checkJsonschemaVersion
               openssl_version = $opensslVersion
             }
+            test_scope = [ordered]@{
+              workspace = 'all-targets-all-features'
+              test_threads = 1
+              excluded_runtime_oracle = 'held_writer_returns_by_absolute_injected_deadline_and_never_mutates_later'
+              exclusion_owner = 'PLAN-004-T043-SC-010-controlled-target'
+            }
             reviewed_artifacts = [ordered]@{
               plan_envelope_schema_sha256 = $schemaDigest
               negative_corpus_schema_sha256 = $negativeSchemaDigest
@@ -400,6 +407,9 @@ jobs:
             "artifact_url=$($env:EVIDENCE_ARTIFACT_URL)"
             "uploaded_artifact_sha256=$artifactDigest"
             "attestation_status=$attestationStatus"
+            'workspace_test_threads=1'
+            'excluded_runtime_oracle=held_writer_returns_by_absolute_injected_deadline_and_never_mutates_later'
+            'exclusion_owner=PLAN-004-T043-SC-010-controlled-target'
             'catalog_claim_status=pending-until-conformance-catalog-is-updated'
           ) -join "`n"
           Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value $summary -Encoding utf8
