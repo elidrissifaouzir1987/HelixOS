@@ -2390,13 +2390,15 @@ fn sync_directory_entry(_root: &Path) -> Result<(), InternalCoordinatorError> {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(unix)]
+    use super::ROOT_LOCK_FILENAME;
     use super::{
         begin_empty_restore_root_custody_v1, capture_immutable_members_v1,
         inspect_existing_restore_root_custody_v1, reopen_restore_pending_root_custody_v1,
         CoordinatorRootIdentityV1, ProvisionedEmptyCoordinatorRootV1, ProvisionedRestorePackageV1,
         COORDINATOR_DATABASE_FILENAME, MAX_RESTORE_PACKAGE_DIRECTORIES_V1,
         MAX_RESTORE_PACKAGE_FILES_V1, MAX_RESTORE_PACKAGE_SINGLE_FILE_BYTES_V1,
-        MAX_RESTORE_PACKAGE_TOTAL_FILE_BYTES_V1, ROOT_LOCK_FILENAME,
+        MAX_RESTORE_PACKAGE_TOTAL_FILE_BYTES_V1,
     };
     use crate::clock::CoordinatorMonotonicClockV1;
     use crate::error::{CoordinatorClockUnavailableV1, InternalCoordinatorError};
