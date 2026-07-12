@@ -9497,7 +9497,7 @@ mod t071_production_conformance {
             .map_err(|_| "root-attest-empty")?;
         let clock = FixedClockV1;
         let historical_plan_keys = NoHistoricalPlanKeysV1;
-        let (existing, summary) = initialize_or_verify_store(
+        let (existing, summary, _) = initialize_or_verify_store(
             initial,
             &clock,
             &historical_plan_keys,
@@ -9619,7 +9619,7 @@ mod t071_production_conformance {
         };
         let corrupt_initial = CoordinatorStoreConfigV1::try_new_empty_attested(corrupt_root, 2)
             .map_err(|_| "corrupt-root-attest-empty")?;
-        let (corrupt_existing, corrupt_summary) = initialize_or_verify_store(
+        let (corrupt_existing, corrupt_summary, _) = initialize_or_verify_store(
             corrupt_initial,
             &clock,
             &historical_plan_keys,

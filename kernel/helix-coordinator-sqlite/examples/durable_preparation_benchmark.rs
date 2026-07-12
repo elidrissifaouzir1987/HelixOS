@@ -1432,4 +1432,49 @@ mod tests {
         assert_eq!(verification.committed_operations, 2);
         fs::remove_dir_all(root).unwrap();
     }
+
+    #[test]
+    fn external_row_change_forces_full_verification_before_next_preparation() {
+        let root = test_root_v1("external-change");
+        let database = root.join("coordinator.sqlite3");
+        let clock = ControlledBenchmarkClockV1::start_v1();
+        let coordinator_clock = BenchmarkCoordinatorClockV1(clock.clone());
+        let signer = BenchmarkPlanSignerV1::new();
+        let (store, _) = initialize_coordinator_root_v1(
+            &root,
+            coordinator_clock,
+            signer.resolver_v1(),
+            clock.deadline_after_ms_v1(60_000).unwrap(),
+        )
+        .unwrap();
+        let eligibility_deadline = clock.deadline_after_ms_v1(60_000).unwrap();
+        let mut fixtures = vec![
+            SampleFixtureV1::try_new(1, &signer, clock.clone(), eligibility_deadline).unwrap(),
+            SampleFixtureV1::try_new(2, &signer, clock.clone(), eligibility_deadline).unwrap(),
+        ];
+        provision_scopes_v1(&database, &fixtures).unwrap();
+        let second = fixtures.pop().unwrap();
+        commit_once_v1(&store, fixtures.pop().unwrap(), &clock).unwrap();
+
+        let outside = Connection::open(&database).unwrap();
+        assert_eq!(
+            outside
+                .execute(
+                    "UPDATE preparation_comparisons
+                     SET capture_generation = capture_generation + 1",
+                    [],
+                )
+                .unwrap(),
+            1
+        );
+        drop(outside);
+
+        let error = commit_once_v1(&store, second, &clock).unwrap_err();
+        assert_eq!(
+            format!("{error:?}"),
+            "CONTROLLED_BENCHMARK_PREPARATION_REFUSED"
+        );
+        drop(store);
+        fs::remove_dir_all(root).unwrap();
+    }
 }

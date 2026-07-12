@@ -109,7 +109,14 @@ pub(crate) fn initialize_or_verify_store<C, R>(
     clock: &C,
     historical_plan_keys: &R,
     deadline_monotonic_ms: u64,
-) -> Result<(CoordinatorStoreConfigV1, StoreSummary), InternalCoordinatorError>
+) -> Result<
+    (
+        CoordinatorStoreConfigV1,
+        StoreSummary,
+        VerifiedStoreObserverV1,
+    ),
+    InternalCoordinatorError,
+>
 where
     C: CoordinatorMonotonicClockV1,
     R: Ed25519KeyResolver,
@@ -199,9 +206,9 @@ where
         {
             root_lease.finalize_committed_initialization(root_identity)?;
         }
-        drop(connection);
         let existing_config = config.into_existing(root_identity)?;
-        return Ok((existing_config, summary));
+        let observer = VerifiedStoreObserverV1::from_fully_verified(connection)?;
+        return Ok((existing_config, summary, observer));
     }
 
     let existing_root = config
@@ -225,7 +232,60 @@ where
     verify_existing_database_binding(&config, &mut binding)?;
     root_lease.verify_role(CoordinatorRootRoleV1::Existing)?;
     remaining_monotonic_ms(clock, deadline_monotonic_ms)?;
-    Ok((config, summary))
+    let observer = VerifiedStoreObserverV1::from_fully_verified(connection)?;
+    Ok((config, summary, observer))
+}
+
+/// Persistent observer for commits made outside one opened store instance.
+///
+/// SQLite's `data_version` changes on this connection only when another connection
+/// commits. Ordinary coordinator mutations use short-lived bound connections, so the
+/// store refreshes this baseline after its own acknowledged commit. Any other change
+/// forces a new full historical verification before the fast operation proof can be
+/// reused.
+pub(crate) struct VerifiedStoreObserverV1 {
+    connection: Connection,
+    accepted_data_version: i64,
+}
+
+impl VerifiedStoreObserverV1 {
+    fn from_fully_verified(connection: Connection) -> Result<Self, InternalCoordinatorError> {
+        connection
+            .pragma_update(None, "query_only", "ON")
+            .map_err(|error| map_sqlite_error(&error, InternalCoordinatorError::RootUnavailable))?;
+        let query_only: i64 = connection
+            .pragma_query_value(None, "query_only", |row| row.get(0))
+            .map_err(|error| map_sqlite_error(&error, InternalCoordinatorError::RootUnavailable))?;
+        if query_only != 1 {
+            return Err(InternalCoordinatorError::DurabilityProfileUnavailable);
+        }
+        let accepted_data_version = observed_data_version_v1(&connection)?;
+        Ok(Self {
+            connection,
+            accepted_data_version,
+        })
+    }
+
+    pub(crate) fn external_commit_observed_v1(&self) -> Result<bool, InternalCoordinatorError> {
+        Ok(observed_data_version_v1(&self.connection)? != self.accepted_data_version)
+    }
+
+    pub(crate) fn accept_current_data_version_v1(
+        &mut self,
+    ) -> Result<(), InternalCoordinatorError> {
+        self.accepted_data_version = observed_data_version_v1(&self.connection)?;
+        Ok(())
+    }
+}
+
+fn observed_data_version_v1(connection: &Connection) -> Result<i64, InternalCoordinatorError> {
+    let version: i64 = connection
+        .pragma_query_value(None, "data_version", |row| row.get(0))
+        .map_err(|error| map_sqlite_error(&error, InternalCoordinatorError::RootUnavailable))?;
+    if version < 0 {
+        return Err(InternalCoordinatorError::InvariantFailed);
+    }
+    Ok(version)
 }
 
 fn open_database(
@@ -399,8 +459,10 @@ impl fmt::Debug for BoundCoordinatorBackupPairV1 {
 /// Opens an already initialized store without releasing its root/file custody.
 ///
 /// This is the operation-level counterpart of `initialize_or_verify_store`: it
-/// establishes the bounded busy timeout and exact WAL/FULL connection profile, but
-/// lets the operation choose the snapshot in which `schema::verify_full` executes.
+/// establishes the bounded busy timeout and exact WAL/FULL connection profile. The
+/// store was fully verified at open; an ordinary operation revalidates the exact
+/// ACTIVE header/schema-cookie proof in its own snapshot, while uncertain readback and
+/// maintenance retain full historical verification.
 pub(crate) fn open_bound_existing_connection<C: CoordinatorMonotonicClockV1 + ?Sized>(
     config: &CoordinatorStoreConfigV1,
     clock: &C,
@@ -1154,7 +1216,7 @@ mod tests {
 
         let restarted = CoordinatorStoreConfigV1::try_new_empty_attested(root.clone(), 10)
             .expect("initializing root remains an admissible restart input");
-        let (existing, summary) =
+        let (existing, summary, _) =
             initialize_or_verify_store(restarted, &FixedClock, &NoHistoricalKeys, 100)
                 .expect("restart verifies marker-bound v1 and finalizes publication");
         assert_eq!(summary.root_identity, identity);
@@ -1176,7 +1238,7 @@ mod tests {
         let initial = CoordinatorStoreConfigV1::try_new_empty_attested(root.clone(), 10)
             .expect("empty config validates");
 
-        let (returned_config, initial_summary) =
+        let (returned_config, initial_summary, _) =
             initialize_or_verify_store(initial, &FixedClock, &NoHistoricalKeys, 100)
                 .expect("initialization commits and publishes exact existing marker");
         let identity = initial_summary.root_identity;
@@ -1186,7 +1248,7 @@ mod tests {
 
         let recovery = CoordinatorStoreConfigV1::try_new_empty_attested(root.clone(), 10)
             .expect("provisioner re-attests the interrupted publication layout");
-        let (recovered_config, recovered_summary) =
+        let (recovered_config, recovered_summary, _) =
             initialize_or_verify_store(recovery, &FixedClock, &NoHistoricalKeys, 100)
                 .expect("full marker-bound v1 verification returns the reserved identity");
         assert_eq!(recovered_summary.root_identity, identity);
@@ -1213,7 +1275,7 @@ mod tests {
         fs::create_dir(&root).expect("test root creates");
         let initial = CoordinatorStoreConfigV1::try_new_empty_attested(root.clone(), 10)
             .expect("empty config validates");
-        let (existing, summary) =
+        let (existing, summary, _) =
             initialize_or_verify_store(initial, &FixedClock, &NoHistoricalKeys, 100)
                 .expect("source store initializes");
 

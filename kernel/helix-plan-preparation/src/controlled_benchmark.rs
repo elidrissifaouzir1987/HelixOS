@@ -67,7 +67,11 @@ pub const CONTROLLED_BENCHMARK_CATALOGUE_VERSION_V1: &str = "catalog:controlled-
 
 const BASE_MONOTONIC_MS: u64 = 1_000_000;
 const BASE_UTC_MS: u64 = CONTROLLED_BENCHMARK_ISSUED_AT_UTC_MS_V1 + 10_000;
-const CAPABILITY_MAX_AGE_MS: u64 = 200_000;
+// The controlled fixture remains fresh until its already signed UTC expiry. A shorter
+// synthetic age would make the required 10,500-operation run self-invalidating even
+// when every measured percentile satisfies the acceptance limits.
+const CAPABILITY_MAX_AGE_MS: u64 = CONTROLLED_BENCHMARK_EXPIRES_AT_UTC_MS_V1
+    - CONTROLLED_BENCHMARK_CAPABILITY_OBSERVED_AT_UTC_MS_V1;
 const INSTANCE_EPOCH: u64 = 1;
 const FENCING_EPOCH: u64 = 9;
 const CAPTURE_GENERATION: u64 = 10;
@@ -1136,6 +1140,12 @@ mod tests {
         );
         assert!(CONTROLLED_BENCHMARK_KEY_ID_V1.len() <= 128);
         assert!(CONTROLLED_BENCHMARK_BOOT_ID_V1.len() <= 128);
+        assert_eq!(
+            CONTROLLED_BENCHMARK_CAPABILITY_OBSERVED_AT_UTC_MS_V1
+                .checked_add(CAPABILITY_MAX_AGE_MS),
+            Some(CONTROLLED_BENCHMARK_EXPIRES_AT_UTC_MS_V1),
+            "benchmark capability freshness must end exactly at signed plan expiry"
+        );
     }
 
     #[cfg(feature = "test-fault-injection")]

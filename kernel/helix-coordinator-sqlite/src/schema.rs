@@ -446,6 +446,43 @@ pub(crate) fn verify_full<R: Ed25519KeyResolver>(
     .map(|verified| verified.summary)
 }
 
+/// Revalidates the constant-size ACTIVE-store proof used by ordinary preparation.
+///
+/// `verify_full` remains mandatory when the store is opened or reopened and for
+/// maintenance/readback boundaries that classify arbitrary historical state. A
+/// persistent `data_version` observer forces another full proof after any commit from
+/// outside the opened store instance. Once an ordinary operation holds the exclusive
+/// provisioned-root lease, this guard checks the schema cookie, exact database identity,
+/// root/lifecycle metadata and bounded generation vector inside its transaction snapshot.
+/// The writer separately proves the newly staged eight-member set through exact CAS
+/// writes, the shared typed comparison digest and targeted relationship checks.
+pub(crate) fn verify_active_operation_snapshot_v1(
+    connection: &Connection,
+    expected_root_identity: CoordinatorRootIdentityV1,
+    expected_schema_cookie: i64,
+) -> Result<(), InternalCoordinatorError> {
+    verify_embedded_schema_digest()?;
+    verify_identity(connection)?;
+    if schema_cookie(connection)? != expected_schema_cookie {
+        return Err(InternalCoordinatorError::SchemaInvalid);
+    }
+
+    let metadata = decode_single_metadata_row(connection)?;
+    verify_expected_lifecycle_v1(
+        metadata,
+        LifecycleExpectationV1::ActiveBound(expected_root_identity),
+    )?;
+    let generations = metadata.generations();
+    CoordinatorLifecycleGenerationsV1::try_new(
+        generations.store(),
+        generations.operation(),
+        generations.budget(),
+        generations.event(),
+        generations.quarantine(),
+    )?;
+    Ok(())
+}
+
 /// Verifies an authenticated SQLite backup before destination-root authority is published.
 ///
 /// Unlike ordinary open, source root identity is historical package evidence rather than
@@ -1821,12 +1858,13 @@ mod tests {
     use super::{
         classify_initialization_candidate, initialize_empty_to_v1,
         stamp_restored_source_generation_v1, transition_imported_backup_to_restore_pending_v1,
-        verify_expected_lifecycle_v1, verify_failure_reason_codes, verify_full,
-        verify_generation_high_water, verify_historical_canonical_plans,
-        verify_imported_active_backup_v1, verify_recovery_immutable_bindings,
-        verify_restore_pending_v1, verify_transition_graph, CoordinatorLifecycleGenerationsV1,
-        CoordinatorStoreMetadataRow, InitializationCandidateV1, LifecycleExpectationV1,
-        RestorePendingBindingsV1, RootLifecycleV1, COORDINATOR_STORE_SCHEMA_V1_SQL,
+        verify_active_operation_snapshot_v1, verify_expected_lifecycle_v1,
+        verify_failure_reason_codes, verify_full, verify_generation_high_water,
+        verify_historical_canonical_plans, verify_imported_active_backup_v1,
+        verify_recovery_immutable_bindings, verify_restore_pending_v1, verify_transition_graph,
+        CoordinatorLifecycleGenerationsV1, CoordinatorStoreMetadataRow, InitializationCandidateV1,
+        LifecycleExpectationV1, RestorePendingBindingsV1, RootLifecycleV1,
+        COORDINATOR_STORE_SCHEMA_V1_SQL,
     };
     use crate::clock::CoordinatorMonotonicClockV1;
     use crate::comparison_digest::IMMUTABLE_COMPARISON_DIGEST_PROJECTION_V1_SQL;
@@ -1929,6 +1967,46 @@ mod tests {
         assert_eq!(
             classify_initialization_candidate(&committed).unwrap(),
             InitializationCandidateV1::CommittedV1
+        );
+    }
+
+    #[test]
+    fn active_operation_snapshot_reuses_only_the_exact_open_time_header_proof() {
+        let mut connection = Connection::open_in_memory().expect("memory database opens");
+        let root_identity = CoordinatorRootIdentityV1::from_bytes([0x31; 32]);
+        initialize_empty_to_v1(&mut connection, root_identity, &FixedClock, 10_000)
+            .expect("v1 initializes");
+        let summary = verify_full(&connection, root_identity, &UnknownHistoricalResolver)
+            .expect("open-time full proof passes");
+
+        verify_active_operation_snapshot_v1(&connection, root_identity, summary.schema_cookie)
+            .expect("exact active header remains valid");
+        assert_eq!(
+            verify_active_operation_snapshot_v1(
+                &connection,
+                root_identity,
+                summary.schema_cookie + 1,
+            )
+            .unwrap_err(),
+            InternalCoordinatorError::SchemaInvalid
+        );
+        assert_eq!(
+            verify_active_operation_snapshot_v1(
+                &connection,
+                CoordinatorRootIdentityV1::from_bytes([0x32; 32]),
+                summary.schema_cookie,
+            )
+            .unwrap_err(),
+            InternalCoordinatorError::RootIdentityMismatch
+        );
+
+        connection
+            .execute_batch("CREATE TABLE unreviewed(value INTEGER) STRICT;")
+            .expect("schema drift applies");
+        assert_eq!(
+            verify_active_operation_snapshot_v1(&connection, root_identity, summary.schema_cookie,)
+                .unwrap_err(),
+            InternalCoordinatorError::SchemaInvalid
         );
     }
 

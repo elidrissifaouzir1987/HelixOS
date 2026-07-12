@@ -189,7 +189,9 @@ where
     Ok(())
 }
 
-use crate::connection::{initialize_or_verify_store, open_bound_existing_connection};
+use crate::connection::{
+    initialize_or_verify_store, open_bound_existing_connection, VerifiedStoreObserverV1,
+};
 use crate::error::InternalCoordinatorError;
 use crate::failure::fail_before_dispatch_transaction_with_probe_v1;
 use crate::preflight::{
@@ -235,6 +237,7 @@ pub struct SqliteCoordinatorStoreV1<C, R> {
     pub(crate) schema_cookie: i64,
     pub(crate) operation_count: u64,
     root_identity: CoordinatorRootIdentityEvidenceV1,
+    live_verification: Mutex<VerifiedStoreObserverV1>,
     uncertain_custody: Mutex<HashMap<Sha256Digest, CoordinatorUncertainCommitCustodyV1>>,
     fault_probe: CoordinatorFaultProbeV1,
 }
@@ -251,7 +254,7 @@ where
         historical_plan_keys: R,
         deadline_monotonic_ms: u64,
     ) -> Result<Self, CoordinatorStoreOpenErrorV1> {
-        let (config, summary) = initialize_or_verify_store(
+        let (config, summary, live_verification) = initialize_or_verify_store(
             config,
             &clock,
             &historical_plan_keys,
@@ -265,6 +268,7 @@ where
             schema_cookie: summary.schema_cookie,
             operation_count: summary.operation_count,
             root_identity: CoordinatorRootIdentityEvidenceV1::from_internal(summary.root_identity),
+            live_verification: Mutex::new(live_verification),
             uncertain_custody: Mutex::new(HashMap::new()),
             fault_probe: CoordinatorFaultProbeV1::disabled_v1(),
         })
@@ -310,13 +314,17 @@ where
         let operation = classify_preflight_operation_v1(&transaction, &coordinator_input);
         let outcome = match operation {
             CoordinatorOperationPreflightV1::Absent => {
-                if schema::verify_full(
-                    &transaction,
-                    expected_root_identity,
-                    &self.historical_plan_keys,
-                )
-                .is_ok()
-                {
+                let verified = self.live_verification.lock().is_ok_and(|mut observer| {
+                    verify_live_operation_snapshot_v1(
+                        &mut observer,
+                        &transaction,
+                        expected_root_identity,
+                        self.schema_cookie,
+                        &self.historical_plan_keys,
+                    )
+                    .is_ok()
+                });
+                if verified {
                     classify_preflight_budget_v1(&transaction, &coordinator_input)
                 } else {
                     PreparationPreflightOutcomeV1::BudgetAuthorityUnavailable
@@ -361,6 +369,10 @@ where
             return map_commit_connection_error_v1(error);
         }
         let expected_root_identity = bound.expected_root_identity();
+        let mut live_verification = match self.live_verification.lock() {
+            Ok(observer) => observer,
+            Err(_) => return PreparationCommitOutcomeV1::Unhealthy,
+        };
         let bindings = CoordinatorCommitBindingsV1 {
             commit: input,
             event_id: derived.event_id,
@@ -376,17 +388,22 @@ where
             &self.fault_probe,
             || self.clock.now_monotonic_ms().map_err(|_| ()),
             |connection| {
-                schema::verify_full(
+                verify_live_operation_snapshot_v1(
+                    &mut live_verification,
                     connection,
                     expected_root_identity,
+                    self.schema_cookie,
                     &self.historical_plan_keys,
                 )
                 .map(|_| ())
                 .map_err(map_commit_verification_error_v1)
             },
         );
+        let observer_refresh_failed = matches!(&internal, CoordinatorCommitOutcomeV1::Committed(_))
+            && live_verification.accept_current_data_version_v1().is_err();
+        drop(live_verification);
         let binding_revalidation_failed = bound.revalidate(&self.clock, deadline).is_err();
-        if binding_revalidation_failed
+        if (binding_revalidation_failed || observer_refresh_failed)
             && !matches!(&internal, CoordinatorCommitOutcomeV1::Uncertain(_))
         {
             return PreparationCommitOutcomeV1::Unclassified;
@@ -514,6 +531,24 @@ where
         }
         outcome
     }
+}
+
+fn verify_live_operation_snapshot_v1<R: Ed25519KeyResolver>(
+    observer: &mut VerifiedStoreObserverV1,
+    connection: &rusqlite::Connection,
+    expected_root_identity: root_safety::CoordinatorRootIdentityV1,
+    expected_schema_cookie: i64,
+    historical_plan_keys: &R,
+) -> Result<(), InternalCoordinatorError> {
+    if observer.external_commit_observed_v1()? {
+        schema::verify_full(connection, expected_root_identity, historical_plan_keys)?;
+        observer.accept_current_data_version_v1()?;
+    }
+    schema::verify_active_operation_snapshot_v1(
+        connection,
+        expected_root_identity,
+        expected_schema_cookie,
+    )
 }
 
 fn coordinator_preflight_input_v1<'input>(

@@ -267,7 +267,7 @@ pub(crate) mod production {
         gate: &mut G,
         fault_probe: &CoordinatorFaultProbeV1,
         mut permit_clock: N,
-        mut verify_full_connection: V,
+        mut verify_live_connection: V,
     ) -> CoordinatorCommitOutcomeV1<
         <<G as FinalCommitGateV1>::Permit as FinalCommitPermitV1>::InFlight,
     >
@@ -284,7 +284,7 @@ pub(crate) mod production {
             connection,
             bindings,
             fault_probe,
-            &mut verify_full_connection,
+            &mut verify_live_connection,
         ) {
             Ok(staged) => staged,
             Err(error) => return map_staging_error_v1(error),
@@ -424,7 +424,7 @@ pub(crate) mod production {
         connection: &'connection mut Connection,
         bindings: &CoordinatorCommitBindingsV1<'_, '_>,
         fault_probe: &CoordinatorFaultProbeV1,
-        verify_full_connection: &mut V,
+        verify_live_connection: &mut V,
     ) -> Result<StagedCommitV1<'connection>, StagingErrorV1>
     where
         V: FnMut(&Connection) -> Result<(), CoordinatorCommitVerificationErrorV1>,
@@ -435,7 +435,7 @@ pub(crate) mod production {
         reach_begin_immediate_acquired_v1(fault_probe);
 
         if let Err(error) =
-            verify_commit_connection_v1(&transaction, verify_full_connection, fault_probe)
+            verify_commit_connection_v1(&transaction, verify_live_connection, fault_probe)
         {
             return rollback_staging_error_v1(transaction, error);
         }
@@ -458,11 +458,19 @@ pub(crate) mod production {
                 // The comparison member is complete only after all joined rows exist and
                 // its shared digest has replaced the transaction-local placeholder.
                 reach_production_member_staged_v1(fault_probe);
-                if verify_staged_foreign_keys_v1(&transaction).is_err() {
+                if verify_staged_preparation_v1(
+                    &transaction,
+                    bindings,
+                    generations,
+                    &scope,
+                    comparison_digest,
+                )
+                .is_err()
+                {
                     return rollback_staging_error_v1(transaction, StagingErrorV1::StoreUnhealthy);
                 }
                 if let Err(error) =
-                    verify_injected_full_snapshot_v1(&transaction, verify_full_connection)
+                    verify_injected_snapshot_v1(&transaction, verify_live_connection)
                 {
                     return rollback_staging_error_v1(transaction, error);
                 }
@@ -665,7 +673,7 @@ pub(crate) mod production {
 
     fn verify_commit_connection_v1<V>(
         connection: &Connection,
-        verify_full_connection: &mut V,
+        verify_live_connection: &mut V,
         fault_probe: &CoordinatorFaultProbeV1,
     ) -> Result<(), StagingErrorV1>
     where
@@ -674,7 +682,7 @@ pub(crate) mod production {
         // Trusted adapter wiring binds the exact provisioner-attested root identity,
         // reviewed schema, historical PLAN-001 keys, comparison digests, and every
         // cross-record invariant before the lightweight profile checks below.
-        verify_injected_full_snapshot_v1(connection, verify_full_connection)?;
+        verify_injected_snapshot_v1(connection, verify_live_connection)?;
         let application_id = pragma_i64_v1(connection, "application_id")
             .map_err(|()| StagingErrorV1::StoreUnhealthy)?;
         let user_version = pragma_i64_v1(connection, "user_version")
@@ -733,14 +741,14 @@ pub(crate) mod production {
         Ok(())
     }
 
-    fn verify_injected_full_snapshot_v1<V>(
+    fn verify_injected_snapshot_v1<V>(
         connection: &Connection,
-        verify_full_connection: &mut V,
+        verify_live_connection: &mut V,
     ) -> Result<(), StagingErrorV1>
     where
         V: FnMut(&Connection) -> Result<(), CoordinatorCommitVerificationErrorV1>,
     {
-        verify_full_connection(connection).map_err(map_verification_error_v1)
+        verify_live_connection(connection).map_err(map_verification_error_v1)
     }
 
     fn map_verification_error_v1(error: CoordinatorCommitVerificationErrorV1) -> StagingErrorV1 {
@@ -1345,12 +1353,99 @@ pub(crate) mod production {
         Ok(Sha256Digest::from_bytes(digest))
     }
 
-    fn verify_staged_foreign_keys_v1(transaction: &Transaction<'_>) -> Result<(), ()> {
-        let has_violation = transaction
-            .prepare("PRAGMA foreign_key_check")
-            .and_then(|mut statement| statement.exists([]))
+    fn verify_staged_preparation_v1(
+        transaction: &Transaction<'_>,
+        bindings: &CoordinatorCommitBindingsV1<'_, '_>,
+        generations: GenerationsV1,
+        scope: &ScopeV1,
+        comparison_digest: Sha256Digest,
+    ) -> Result<(), ()> {
+        let input = bindings.commit;
+        let claims = input.eligible().authentic().preparation_claims();
+        let exact: i64 = transaction
+            .query_row(
+                "SELECT EXISTS (
+                     SELECT 1
+                     FROM coordinator_store_meta AS metadata
+                     JOIN prepared_operations AS operation
+                       ON operation.operation_id = ?1
+                     JOIN operation_transitions AS transition
+                       ON transition.operation_id = operation.operation_id
+                      AND transition.state_generation = operation.state_generation
+                      AND transition.event_id = operation.current_event_id
+                     JOIN preparation_comparisons AS comparison
+                       ON comparison.operation_id = operation.operation_id
+                     JOIN budget_reservations AS reservation
+                       ON reservation.operation_id = operation.operation_id
+                      AND reservation.reservation_id = operation.reservation_id
+                     JOIN budget_scopes AS scope
+                       ON scope.scope_id = reservation.scope_id
+                     JOIN preparation_recovery_evidence AS recovery
+                       ON recovery.operation_id = operation.operation_id
+                     JOIN preparation_events AS event
+                       ON event.event_id = operation.current_event_id
+                      AND event.operation_id = operation.operation_id
+                      AND event.operation_state_generation = operation.state_generation
+                    WHERE metadata.singleton = 1
+                      AND metadata.root_lifecycle_state = 'ACTIVE'
+                      AND metadata.store_generation = ?7
+                      AND metadata.operation_generation = ?8
+                      AND metadata.budget_generation = ?9
+                      AND metadata.event_generation = ?10
+                      AND operation.attempt_id = ?2
+                      AND operation.plan_id = ?3
+                      AND operation.reservation_id = ?4
+                      AND operation.current_event_id = ?5
+                      AND operation.operation_state = 'PREPARING'
+                      AND operation.state_generation = ?8
+                      AND operation.created_generation = ?7
+                      AND operation.failed_generation IS NULL
+                      AND operation.failed_reason_code IS NULL
+                      AND operation.restored_source_generation IS NULL
+                      AND transition.previous_state IS NULL
+                      AND transition.new_state = 'PREPARING'
+                      AND comparison.comparison_digest = ?15
+                      AND reservation.attempt_id = ?2
+                      AND reservation.plan_id = ?3
+                      AND reservation.scope_id = ?6
+                      AND reservation.reservation_state = 'HELD'
+                      AND reservation.created_generation = ?7
+                      AND reservation.released_generation IS NULL
+                      AND scope.held_cost_micro_units = ?11
+                      AND scope.held_action_count = ?12
+                      AND scope.held_egress_bytes = ?13
+                      AND scope.held_recovery_bytes = ?14
+                      AND event.event_generation = ?10
+                      AND event.operation_state = 'PREPARING'
+                      AND event.event_kind = 'PREPARED'
+                      AND event.reason_code IS NULL
+                      AND event.delivery_state = 'PENDING'
+                      AND event.delivered_generation IS NULL
+                 )",
+                params![
+                    claims.operation_id(),
+                    input.attempt().as_bytes().as_slice(),
+                    claims.plan_id().as_bytes().as_slice(),
+                    claims.budget().reservation_id(),
+                    bindings.event_id.as_bytes().as_slice(),
+                    scope.id.as_slice(),
+                    to_i64_v1(generations.store).map_err(|_| ())?,
+                    to_i64_v1(generations.operation).map_err(|_| ())?,
+                    to_i64_v1(generations.budget).map_err(|_| ())?,
+                    to_i64_v1(generations.event).map_err(|_| ())?,
+                    to_i64_v1(scope.next_held[0]).map_err(|_| ())?,
+                    to_i64_v1(scope.next_held[1]).map_err(|_| ())?,
+                    to_i64_v1(scope.next_held[2]).map_err(|_| ())?,
+                    to_i64_v1(scope.next_held[3]).map_err(|_| ())?,
+                    comparison_digest.as_bytes().as_slice(),
+                ],
+                |row| row.get(0),
+            )
             .map_err(|_| ())?;
-        if has_violation {
+        let recomputed =
+            immutable_comparison_digest_for_operation_v1(transaction, claims.operation_id())
+                .map_err(|_| ())?;
+        if exact != 1 || recomputed != *comparison_digest.as_bytes() {
             return Err(());
         }
         Ok(())
@@ -1780,7 +1875,7 @@ pub(crate) mod production {
         }
 
         #[test]
-        fn both_injected_full_verifications_observe_one_live_immediate_snapshot() {
+        fn both_injected_verifications_observe_one_live_immediate_snapshot() {
             let mut connection = Connection::open_in_memory().expect("database opens");
             let transaction = connection
                 .transaction_with_behavior(TransactionBehavior::Immediate)
@@ -1789,14 +1884,14 @@ pub(crate) mod production {
             let mut verifier = |snapshot: &Connection| {
                 assert!(
                     !snapshot.is_autocommit(),
-                    "full verification escaped the transaction snapshot"
+                    "injected verification escaped the transaction snapshot"
                 );
                 calls += 1;
                 Ok(())
             };
 
-            assert!(verify_injected_full_snapshot_v1(&transaction, &mut verifier).is_ok());
-            assert!(verify_injected_full_snapshot_v1(&transaction, &mut verifier).is_ok());
+            assert!(verify_injected_snapshot_v1(&transaction, &mut verifier).is_ok());
+            assert!(verify_injected_snapshot_v1(&transaction, &mut verifier).is_ok());
 
             assert_eq!(calls, 2, "both verification passes use the live snapshot");
             transaction.rollback().expect("writer rolls back");
