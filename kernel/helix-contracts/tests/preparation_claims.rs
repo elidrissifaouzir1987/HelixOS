@@ -105,10 +105,13 @@ fn preparation_projection_is_only_a_copyable_borrowed_view() {
 
 #[test]
 fn preparation_projection_has_no_wire_constructor_or_replacement_byte_surface() {
-    let start = PLAN_SOURCE
+    // `include_str!` preserves the checkout's line endings. Normalize CRLF so this source-level
+    // guard has the same meaning on Windows and Unix runners.
+    let normalized_source = PLAN_SOURCE.replace("\r\n", "\n");
+    let start = normalized_source
         .find("#[derive(Clone, Copy)]\npub struct PlanPreparationClaimsV1<'plan>")
         .expect("preparation projection declaration");
-    let tail = &PLAN_SOURCE[start..];
+    let tail = &normalized_source[start..];
     let end = tail
         .find("/// Borrowed, read-only eligibility bindings from an authenticated plan.")
         .expect("next projection declaration");

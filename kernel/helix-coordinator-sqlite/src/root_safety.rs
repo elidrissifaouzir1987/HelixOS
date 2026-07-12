@@ -1106,7 +1106,39 @@ pub(crate) fn inspect_existing_restore_root_custody_v1<C: CoordinatorMonotonicCl
     remaining_monotonic_ms(clock, deadline_monotonic_ms)?;
     revalidate_directory_identity(root.path(), root.directory_identity)?;
     validate_initialization_attestation_members(root.path())?;
-    #[cfg(unix)]
+    inspect_validated_existing_restore_root_custody_v1(
+        root,
+        expected_reservation_binding_sha256,
+        expected_root_identity,
+        maximum_wait_ms,
+        clock,
+        deadline_monotonic_ms,
+    )
+}
+
+#[cfg(not(unix))]
+fn inspect_validated_existing_restore_root_custody_v1<C: CoordinatorMonotonicClockV1 + ?Sized>(
+    _root: &ProvisionedEmptyCoordinatorRootV1,
+    _expected_reservation_binding_sha256: Sha256Digest,
+    _expected_root_identity: CoordinatorRootIdentityV1,
+    _maximum_wait_ms: u64,
+    _clock: &C,
+    _deadline_monotonic_ms: u64,
+) -> Result<CoordinatorRestoreInspectionCustodyV1, InternalCoordinatorError> {
+    // Stable std cannot retain an exact directory handle on these targets. Refuse this
+    // reconciliation path until the provisioner supplies an equivalent native custody.
+    Err(InternalCoordinatorError::RootUnavailable)
+}
+
+#[cfg(unix)]
+fn inspect_validated_existing_restore_root_custody_v1<C: CoordinatorMonotonicClockV1 + ?Sized>(
+    root: &ProvisionedEmptyCoordinatorRootV1,
+    expected_reservation_binding_sha256: Sha256Digest,
+    expected_root_identity: CoordinatorRootIdentityV1,
+    maximum_wait_ms: u64,
+    clock: &C,
+    deadline_monotonic_ms: u64,
+) -> Result<CoordinatorRestoreInspectionCustodyV1, InternalCoordinatorError> {
     let directory = {
         let directory =
             File::open(root.path()).map_err(|_| InternalCoordinatorError::RootUnavailable)?;
@@ -1120,13 +1152,6 @@ pub(crate) fn inspect_existing_restore_root_custody_v1<C: CoordinatorMonotonicCl
         }
         directory
     };
-    #[cfg(not(unix))]
-    {
-        // Stable std cannot retain an exact directory handle on these targets. Refuse this
-        // reconciliation path until the provisioner supplies an equivalent native custody.
-        let _ = (expected_root_identity, maximum_wait_ms);
-        return Err(InternalCoordinatorError::RootUnavailable);
-    }
 
     let (observed_marker, mut root_lease) = if lock_path_identity_if_present(root.path())?.is_some()
     {
@@ -1183,7 +1208,6 @@ pub(crate) fn inspect_existing_restore_root_custody_v1<C: CoordinatorMonotonicCl
         expected_root_identity,
         observed_marker,
         database_binding,
-        #[cfg(unix)]
         directory,
         root_lease,
     };

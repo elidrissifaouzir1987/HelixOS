@@ -21,10 +21,9 @@ use crate::failure::{
 use crate::manifest::ProvisionerTrustViewV1;
 #[cfg(not(test))]
 use crate::manifest::{
-    finalize_recovery_root_metadata_v1, verify_recovery_root_pending_bindings_v1,
-    verify_restore_package_manifests_v1, ProvisionerTrustCustodyOutcomeV1,
-    ProvisionerTrustCustodyV1, ProvisionerTrustResolverV1, RecoveryCustodyV1,
-    RecoveryRootMetadataInputV1, RecoverySnapshotStateV1, VerifiedRestorePackageBindingsV1,
+    verify_recovery_root_pending_bindings_v1, verify_restore_package_manifests_v1,
+    ProvisionerTrustCustodyOutcomeV1, ProvisionerTrustCustodyV1, ProvisionerTrustResolverV1,
+    RecoveryCustodyV1, RecoverySnapshotStateV1, VerifiedRestorePackageBindingsV1,
 };
 #[cfg(not(test))]
 use crate::quarantine::{
@@ -37,10 +36,10 @@ use crate::quarantine::{
 use crate::root_safety::COORDINATOR_DATABASE_FILENAME;
 #[cfg(not(test))]
 use crate::root_safety::{
-    begin_empty_restore_root_custody_v1, capture_immutable_members_v1,
-    inspect_existing_restore_root_custody_v1, reopen_restore_pending_root_custody_v1,
-    CoordinatorPendingRootCustodyV1, CoordinatorRestoreRootCustodyV1, CoordinatorRootIdentityV1,
-    ProvisionedEmptyCoordinatorRootV1, ProvisionedRestorePackageV1, RestorePackageCustodyV1,
+    capture_immutable_members_v1, inspect_existing_restore_root_custody_v1,
+    reopen_restore_pending_root_custody_v1, CoordinatorRestoreRootCustodyV1,
+    CoordinatorRootIdentityV1, ProvisionedEmptyCoordinatorRootV1, ProvisionedRestorePackageV1,
+    RestorePackageCustodyV1,
 };
 #[cfg(not(test))]
 use crate::root_safety::{
@@ -3765,13 +3764,15 @@ where
     };
     let mut quarantine_evidence = quarantine_evidence;
     let mut coordinator_import_custody: Option<CoordinatorRestoreRootCustodyV1> = None;
-    let mut coordinator_pending_custody: Option<CoordinatorPendingRootCustodyV1> = None;
+    let mut coordinator_pending_custody: Option<
+        crate::root_safety::CoordinatorPendingRootCustodyV1,
+    > = None;
     let mut recovery_import_custody: Option<P::ImportCustody> = None;
     let mut recovery_pending_custody: Option<P::PendingCustody> = None;
 
     let restored = (|| {
         quarantine_evidence.coordinator_destination_started = true;
-        match begin_empty_restore_root_custody_v1(
+        match crate::root_safety::begin_empty_restore_root_custody_v1(
             coordinator_root,
             new_coordinator_root_identity,
             maximum_root_wait_ms,
@@ -3964,16 +3965,17 @@ where
                 .ok_or(PreparationRestoreErrorV1::RecoveryDestinationUnavailable)?,
             &recovery_source,
         )?;
-        let recovery_metadata =
-            finalize_recovery_root_metadata_v1(RecoveryRootMetadataInputV1::RestorePending {
+        let recovery_metadata = crate::manifest::finalize_recovery_root_metadata_v1(
+            crate::manifest::RecoveryRootMetadataInputV1::RestorePending {
                 root_identity_sha256: recovery_source.root_identity_sha256(),
                 state_generation: recovery_source.provider_generation(),
                 at_rest_profile_id: accepted.bindings.at_rest_profile_id().clone(),
                 restore_identity_sha256,
                 provenance_attestation_sha256: accepted.bindings.attestation_sha256(),
                 source_inventory_sha256: accepted.bindings.inventory_sha256(),
-            })
-            .map_err(|_| PreparationRestoreErrorV1::RecoveryImportInvalid)?;
+            },
+        )
+        .map_err(|_| PreparationRestoreErrorV1::RecoveryImportInvalid)?;
         recovery_import_custody
             .as_mut()
             .ok_or(PreparationRestoreErrorV1::RecoveryDestinationUnavailable)?
