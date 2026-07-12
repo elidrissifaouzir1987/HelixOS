@@ -635,6 +635,28 @@ impl CoordinatorRootLeaseV1 {
         Ok(members.database_present)
     }
 
+    /// Reads the exact marker through the retained lease handle for fault tests.
+    #[cfg(test)]
+    pub(crate) fn exact_marker_bytes_for_test_v1(
+        &mut self,
+    ) -> Result<Vec<u8>, InternalCoordinatorError> {
+        self.revalidate_filesystem_identity()?;
+        let marker = read_exact_file(&mut self.file)?;
+        self.revalidate_filesystem_identity()?;
+        Ok(marker)
+    }
+
+    /// Replaces marker bytes through the retained lease handle for fault tests.
+    #[cfg(test)]
+    pub(crate) fn replace_marker_bytes_for_test_v1(
+        &mut self,
+        replacement: &[u8],
+    ) -> Result<(), InternalCoordinatorError> {
+        self.revalidate_filesystem_identity()?;
+        rewrite_and_sync_exact(&mut self.file, replacement)?;
+        self.revalidate_filesystem_identity()
+    }
+
     /// Publishes exact EXISTING identity after connection-level committed-store proof.
     ///
     /// The identity prefix is written and synchronized by `begin_initialization` before

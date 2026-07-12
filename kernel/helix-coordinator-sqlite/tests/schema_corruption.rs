@@ -356,12 +356,14 @@ fn empty_and_existing_roles_hold_one_exclusive_redacted_root_lease() {
         .database_present()
         .expect("database absence reads"));
     assert_eq!(
-        fs::read_to_string(root.path().join(ROOT_LOCK_FILENAME))
-            .expect("initializing marker reads"),
+        initialization
+            .exact_marker_bytes_for_test_v1()
+            .expect("initializing marker reads through retained lease"),
         format!(
             "HELIXOS_COORDINATOR_ROOT_LOCK_V1\nROOT_IDENTITY={}\nSTATE=INITIALIZING\n",
             "a5".repeat(32)
         )
+        .into_bytes()
     );
     File::create(root.path().join(COORDINATOR_DATABASE_FILENAME))
         .expect("placeholder database creates");
@@ -412,14 +414,16 @@ fn committed_initialization_recovers_an_interrupted_role_marker_rewrite() {
         .expect("initializing identity publishes first");
     File::create(root.path().join(COORDINATOR_DATABASE_FILENAME))
         .expect("committed database fixture creates");
-    let marker_path = root.path().join(ROOT_LOCK_FILENAME);
-    let marker = fs::read(&marker_path).expect("initializing marker reads");
+    let marker = lease
+        .exact_marker_bytes_for_test_v1()
+        .expect("initializing marker reads through retained lease");
     let state_offset = marker
         .windows(b"STATE=".len())
         .position(|window| window == b"STATE=")
         .expect("state field exists");
-    fs::write(&marker_path, &marker[..state_offset + b"STATE=EX".len()])
-        .expect("interrupted marker fixture writes");
+    lease
+        .replace_marker_bytes_for_test_v1(&marker[..state_offset + b"STATE=EX".len()])
+        .expect("interrupted marker fixture writes through retained lease");
 
     lease
         .finalize_committed_initialization(identity)
