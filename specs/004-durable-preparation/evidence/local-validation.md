@@ -1,133 +1,170 @@
 # PLAN-004 Local Validation
 
-**Captured**: 2026-07-11
-**Base source commit**: `01a9181ef83539c0516139f8285551a9dfabc3b5`
-**Evidence class**: local, synthetic, mutable-worktree validation
+**Captured**: 2026-07-12
+
+**Clean benchmark source commit**: `f7b021db52503aaedcc59b9c9c8d95d357555352`
+
+**Evidence class**: retained local validation from an exact clean source commit; not immutable release evidence
 
 This record contains no native test paths, user identifiers, plan payloads, key
-material or provider bindings. The recovered worktree was intentionally dirty and the
-Feature 004 files were not committed, so these results are implementation feedback,
-not immutable release evidence or a catalog claim.
+material, provider bindings, device identifiers or volume identifiers. The physical
+benchmark started from a detached clean worktree at the exact commit above and created
+new dedicated local roots. Its JSON files are retained in this repository with local
+SHA-256 digests, but no immutable CI preservation URL, artifact attestation or release
+catalog claim exists yet.
 
 ## Environment and reviewed inputs
 
 | Item | Captured value |
 |---|---|
-| Hardware | Apple M4, model `Mac16,10` |
+| Hardware | Mac mini, Apple M4, model `Mac16,10`, 10-core CPU, 16 GB RAM, internal SSD |
 | OS | macOS `26.5.2`, build `25F84`, `arm64` |
 | Rust | `1.96.1 (31fca3adb 2026-06-26)`, host `aarch64-apple-darwin`, LLVM `22.1.2` |
 | Cargo | `1.96.1 (356927216 2026-06-26)` |
-| Free space before final gates | 107 GiB |
+| Filesystem assurance label | `validated-local-APFS-internal-SSD-lock-create-sync-primitives` |
+| At-rest observation | `FileVault-on-internal-APFS-observed-local` |
 | `kernel/Cargo.lock` SHA-256 | `ede1e9ac8e936efc4c65cf99a2fc79ca037934b5aabeac783b1ba265b1c6687f` |
 | Locked no-dependency metadata SHA-256 | `38327f54af1883a6a07392084138074619e4dd09fc115364376afb1c743948e2` |
 | Reviewed dependency-tree artifact SHA-256 | `36e7c81a8bc3296be2e510c2c4c7db49a719ebcd3c559f1ea4c0d4412aca4f76` |
-| Frozen cases SHA-256 | `086ec8c5b7395d494b6140a7f24411e788beb6978598a28fc81588b75f29411d` |
-| Frozen outcomes SHA-256 | `87bd23eeed048fe47ca4f785d17cdca80364454bae30c81dc4b3e9e7ecf3ac2b` |
-| Coordinator schema SHA-256 | `e7b7c6c70f356afe4e45b3e2c7210b38c4ccc0f69a012cbdaddd103a8827880e` |
 
-`cargo metadata --locked --no-deps --format-version 1` listed both Feature 004
-packages and resolved without changing the lockfile. The pinned bundled SQLite identity
-was `rusqlite 0.40.1`, `libsqlite3-sys 0.38.1`, SQLite `3.53.2`, source ID
-`2026-06-03 19:12:13 d6e03d8c777cfa2d35e3b60d8ec3e0187f3e9f99d8e2ee9cac695fd6fcdf1a24`.
+FileVault being enabled was observed locally; it is not an approved at-rest profile,
+a cryptographic qualification or an authorization claim. The benchmark deliberately
+records only bounded, non-identifying environment labels.
 
-## Passing local gates
+## Quickstart sections 1–15
 
-The following commands completed successfully under `--locked`:
+Every command and interpretation gate in sections 1–14 was rerun from the clean
+detached source commit `f7b021db52503aaedcc59b9c9c8d95d357555352`. The exact
+benchmark example passed 7/7, workspace and fault-feature quality gates passed, and the
+worktree remained clean after validation. Section 15 then ran alone from the same exact
+clean commit with fresh create-new roots and artifacts. An earlier clean attempt at
+`32c6e27d3377df96357452ff5631262d15860888` exposed the bounded benchmark defect
+described below and produced no artifact.
 
-| Gate | Exact local result |
+| Quickstart section | Exact retained local result |
 |---|---|
-| PLAN-001/002/003 prerequisite suites | all ordinary tests passed; the frozen pre-feature totals remain 194 passed, 0 failed, 12 explicitly ignored as recorded in `baseline.md` |
-| Contract/type boundaries | preparation claims 5/5, portable contract 10/10, coordinator contract 22/22 |
-| Coordinator unit library | 120/120 |
-| Freshness and replay verification | freshness 22/22; replay preparation verification 6/6 |
-| Budget | 4/4 plus property suite 2/2, including 100,000 deterministic vectors |
-| Cancellation | targeted default suite 13/13; all-feature source-expanded suite 24/24 |
-| Portable recovery | 17/17 |
-| Coordinator recovery integration | 61 passed, 0 failed, 1 private/release child ignored |
-| Backup/restore | 22/22 |
-| Non-test production conformance | backup 1/1 and restore 1/1 |
-| Normal contention | targeted default suite 18 passed, 0 failed, 4 explicitly ignored; all-feature source-expanded suite 45 passed, 0 failed, 6 ignored |
-| Release contention | 4/4; 105.77 seconds test time; includes 100 x 64 threads, 20 x 8 processes and shared-allowance coverage |
-| Deadline/revocation ordinary coverage | deadline 18 passed plus 1 release gate ignored; revocation 19/19 |
-| Release held-writer gate | 1/1; 355.05 seconds test time; 1,000 attempts with the required post-return observation |
-| Schema corruption | 53/53 |
-| Retention | 27/27 |
-| Plan/coordinator redaction | 8/8 combined |
-| Plan/coordinator conformance | 8/8 combined |
-| Fault-feature conformance execution | 20/20, single-threaded |
-| T074 process-kill/fault-injection matrix | 123 unique boundaries / 167 controlled cases passed in the exact release driver on 2026-07-12; 16.18 seconds test time |
-| T075/T085 restore public boundary | Option B recorded; internal limit/error 1/1, negative public surface 3/3, redaction 4/4, portability 8/8, targeted all-feature check and strict Clippy passed on 2026-07-12 |
-| Portability/removal | coordinator 8/8, replay 9/9, eligibility 6/6 |
-| Corpus runner | 335 cases; canonical summary SHA-256 `e0dac29c01276a7f6168a83bff51accefc86a129f1046065ebea5f136bbddd87` |
-| Workspace regression | default workspace and final `--all-features` workspace runs completed with zero failures; intentionally ignored release/child workloads remained explicitly labeled |
-| Formatting and lint | final workspace formatting, all-target/all-feature check and all-target/all-feature clippy passed with `-D warnings` |
+| §1 Preconditions | Rust and Cargo `1.96.1`; locked metadata resolved both PLAN-004 packages without changing `Cargo.lock`. |
+| §2 Frozen prerequisite baseline | `helix-contracts`: 56 passed, 1 ignored; `helix-plan-eligibility`: 55 passed, 2 ignored; `helix-replay-sqlite`: 103 passed, 9 ignored. |
+| §3 Fast quality gate | Exact package formatting passed. Workspace check, strict Clippy and tests passed; Cargo targets reported 830 passed and 18 intentionally ignored, or 832 passed when the two worker sub-harness tests are included. Fault-feature check and strict Clippy passed. |
+| §4 Contract and type boundary | Preparation claims 5/5, portable preparation contract 10/10, coordinator contract 22/22. |
+| §5 Fresh comparison and replay verification | Freshness 22/22; replay preparation verification 6/6. |
+| §6 Budget exactness and reconciliation | Budget 4/4; property suite 2/2, including 100,000 deterministic vectors; cancellation 13/13. |
+| §7 Recovery provider protocol | Portable recovery 17/17; coordinator recovery integration 62 passed, 0 failed, 1 private/release child ignored. |
+| §8 Thread and process contention | Normal suite 18 passed, 4 release tests ignored; explicit release suite 4/4 in 189.31 s. |
+| §9 Deadline, revocation and no detached work | Deadline 18 passed, 1 release gate ignored; revocation 19/19; explicit held-writer release gate 1/1 in 346.14 s. |
+| §10 Deterministic crash and ambiguity matrix | Exact release driver 5/5 in 16.71 s, 77 non-selected tests filtered; 123 unique real fault boundaries and 167 expanded controlled cases. |
+| §11 Schema, corruption and no-pruning checks | Schema corruption 53/53; retention 27/27. |
+| §12 Quiescent backup and clean restore | Backup/restore 22/22. |
+| §13 Versioned conformance and portability | Plan conformance 4/4; coordinator conformance 4/4; fault-feature conformance 25/25. Corpus runner: 335 cases — 3 prepared, 299 denied, 21 failed and 12 ambiguous — with 123 fault boundaries. |
+| §14 Redaction, dependency and removal proof | Plan redaction 4/4; coordinator redaction 4/4; restore maintenance API 3/3; portability 8/8; both locked dependency-tree commands exited 0. |
+| §15 Physical M4 release benchmark | Clean `f7b021d...` source; 500 warmups, 10,000 measured samples, 10,500 committed operations; p95 and p99 limits passed; separate 16 MiB recovery transfer verified. |
 
-The GitHub workflow YAML parsed locally. Its immutable action tags resolved to the
-reviewed commits for checkout v6.0.2, upload-artifact v7.0.1 and attest-build-provenance
-v4.1.1. The catalog retained PLAN-001/002/003 as `pending-evidence`, registered exactly
-PLAN-001 through PLAN-004 and referenced only existing repository paths.
+Across sections 8–14, all 19 commands exited 0 and the test suites contributed 219
+passes with zero failures. The five ordinary ignored release gates were each executed
+by their explicit release command.
 
-## Open and failing gates
+The frozen corpus and schema identities retained by the benchmark are:
 
-### T074 exhaustive process-kill matrix — PASS (local synthetic evidence)
+| Artifact | SHA-256 or count |
+|---|---|
+| Cases | `086ec8c5b7395d494b6140a7f24411e788beb6978598a28fc81588b75f29411d` |
+| Expected outcomes | `87bd23eeed048fe47ca4f785d17cdca80364454bae30c81dc4b3e9e7ecf3ac2b` |
+| Canonical corpus summary | `e0dac29c01276a7f6168a83bff51accefc86a129f1046065ebea5f136bbddd87` |
+| Coordinator schema | `e7b7c6c70f356afe4e45b3e2c7210b38c4ccc0f69a012cbdaddd103a8827880e` |
+| Backup manifest schema | `163cfd72f54983f993b2d5f6ad3fcd00df84a1b8cbc7eb971fcc8c1d0019199e` |
+| Provenance attestation schema | `6b752fc1a8f0c92fd69a03ce418d07087e615eaf55f3b2e1959668e15237728f` |
+| Recovery root schema | `0fb080c12df1b1e99ef7d0a19ca53ded97d8d170e0c2825e93fd3d57c53bf25f` |
+| Recovery snapshot schema | `371e94fbf5c52d462e8363c9b3237a57288c4b0ae1c766e12c2c904d5f6cf646` |
 
-Command:
+## First physical run: retained dead end
 
-```sh
-cargo test --locked --release -p helix-coordinator-sqlite \
-  --features test-fault-injection \
-  --test process_crash -- --ignored --nocapture
-```
+The first clean attempt at `32c6e27...` stopped after 239 committed operations with
+`CONTROLLED_BENCHMARK_PREPARATION_REFUSED`. No evidence artifact was created. The last
+successful operation had consumed 199,728 ms of a 200,000 ms local capability age,
+leaving only 272 ms before the next operation. The coordinator database remained
+healthy (`quick_check` passed, foreign keys were clean), so the stop was a fail-closed
+benchmark refusal rather than corruption.
 
-The 2026-07-12 rerun passed all five ignored harness tests, including the exhaustive
-parent. The frozen inventory remained exact at 123 unique boundaries and 167 expanded
-controlled cases. For every case, the caller-owned probe reached the selected real
-portable or coordinator action before process termination. Phase-specific reopen checks
-accepted only absence, one invariant-valid `PREPARING` operation, one atomic `FAILED`
-transition, or explicit quarantine. Registry enumeration and manual checkpoint loops
-were not counted as process-kill evidence. This closes T074 as local
-process-kill/fault-injection evidence, not as power-loss or immutable release evidence.
+The cause was twofold:
 
-### T075/T085 restore public boundary — PASS (Option B)
+- the signed benchmark capability used a 200 s maximum age even though merely
+  pre-provisioning 10,500 scopes at 25 ms each can exceed 262.5 s; and
+- the normal preparation path performed four historical `verify_full` global scans
+  per operation. Those signature, canonicalization, digest, history and aggregate
+  scans made the workload quadratic even though the production contract requires a
+  bounded active-operation proof on the hot path.
 
-The accepted 2026-07-12 clarification keeps the sovereign host and activation facade in
-a later feature. The default crate surface now exports exactly the non-constructible,
-payload-free `VerifiedPreparationRestoreV1` and
-`RestoredPreparationMaintenanceEvidenceV1` projections, with private fields and no
-public producer. Restore acceptance/validation, old-authority reconciliation,
-quarantine, limits/errors/inputs and every PAUSE/fencing/recovery/trust/no-dispatch
-authority remain crate-internal. The hidden non-default conformance entrypoints return
-only static payload-free test results and are not production maintenance APIs. Internal
-limit/error tests passed 1/1, the negative public-surface suite passed 3/3, redaction
-passed 4/4, portability/removal passed 8/8, and targeted all-feature check plus strict
-Clippy passed. This closes T075 and T085 without claiming a production host or
-activation authority.
+The correction binds capability age to the signed plan expiry and adds a persistent
+query-only observer using SQLite `PRAGMA data_version`. If another connection commits,
+the next preparation performs the full historical verification before proceeding.
+Without an external commit, the hot path verifies the embedded schema identity,
+application/user identity, schema cookie, bound root identity/lifecycle, generation
+vector and the exact eight-member staged preparation postcondition. Full verification
+remains mandatory on open/reopen, external change, uncertain readback and
+maintenance/backup/restore paths. A regression test mutates an older comparison row
+from a second connection and proves that the next preparation fails closed after the
+observer forces full verification.
 
-### T077 benchmark implementation — PASS; immutable physical run pending
+## Successful clean physical-M4 run
 
-The non-default `controlled-benchmark` path passed 6/6 example tests, strict clippy and
-a two-operation smoke test. Each smoke operation used a unique signed/authenticated
-plan, real eligibility, `prepare_plan_v1`, the production coordinator commit adapter and
-a full close/reopen with the retained root identity and historical resolver. L2
-irreversible fixtures proved zero recovery-provider calls, so the separate recovery
-transfer is not hidden inside the coordinator samples. A release invocation on this
-dirty worktree refused before creating either root or either evidence file.
+The corrected benchmark ran alone from a clean detached worktree at
+`f7b021db52503aaedcc59b9c9c8d95d357555352`, with new coordinator and recovery roots.
+It exercised `prepare_plan_v1` through the production coordinator commit and returned
+outcome boundary at concurrency 1. Eligibility and budget-scope provisioning occurred
+outside measured samples, and the recovery transfer remained outside coordinator
+percentiles.
 
-A retained physical-M4 result still requires an exact clean source commit, new
-dedicated roots and the two create-new artifacts. The benchmark now also detects an
-Apple M4 macOS arm64 host rather than accepting the caller hardware label alone. This
-dirty recovered worktree cannot produce an accepted latency artifact.
+| Measurement | Result |
+|---|---:|
+| Warmup operations | 500 |
+| Measured sorted samples | 10,000 |
+| Total committed operations | 10,500 |
+| p50 | 11,218,708 ns |
+| p95 | 24,096,375 ns |
+| p99 | 25,443,666 ns |
+| maximum | 26,528,459 ns |
+| p95 limit | 25,000,000 ns — pass |
+| p99 limit | 100,000,000 ns — pass |
+| Final store / operation / budget / event generations | 21,000 / 10,500 / 21,000 / 10,500 |
+| Close/reopen, `quick_check`, foreign keys | pass / pass / pass |
 
-### Supply chain and external evidence — pending
+Retained artifacts:
 
-`cargo-audit` was not installed. This is recorded as **no advisory scan**, not a passing
-scan. SBOM, license archive, immutable three-platform CI artifacts, attestations,
-production recovery qualification, power-loss/sector-loss evidence, full-machine
-restore and activation evidence remain pending exactly as declared in the catalog.
+| Artifact | SHA-256 | Notes |
+|---|---|---|
+| `benchmark-mac-mini-m4-f7b021db52503aaedcc59b9c9c8d95d357555352.json` | `ed90faf0645589deb98d454466854771569eb53d69616584c092a25ae3bd1c12` | 10,000 raw sorted coordinator samples; exact clean commit recorded |
+| `benchmark-mac-mini-m4-f7b021db52503aaedcc59b9c9c8d95d357555352.recovery-transfer.json` | `da442c396f280cf21f4125498676fa52b17e68cfc97bbff0aeb1afbc1cb60e1e` | separate 16 MiB transfer; 66,358,167 ns total; excluded from coordinator percentiles |
+
+The recovery transfer wrote, synchronized, closed, reopened and rehashed 16,777,216
+bytes. Its source and reopened material digest both equal
+`55c7e25571a69216de25162f191bb2847201a09ee7efe46b5bada034acc695d5`.
+This public synthetic transfer is not production compensability evidence.
+
+## Local process-kill result and remaining gates
+
+The T074 explicit-session release driver passed locally: five ignored harness tests
+executed the exhaustive parent, covering 123 real fault boundaries and 167 controlled
+cases. This is a local synthetic process-kill result. It is not power-loss evidence and
+still lacks an immutable CI artifact, preservation URL and attestation.
+
+The following remain pending and prevent a release or Tier 1 claim:
+
+- unchanged immutable Linux x64, macOS arm64 and Windows x64 CI artifacts;
+- SBOM and license archive for the exact lockfile and bundled SQLite source;
+- RustSec scan with scanner/database identity and complete retained output;
+- artifact and build-provenance attestations, immutable preservation URLs and
+  uploaded-artifact digest bindings for the physical benchmark and process-kill matrix;
+- approved at-rest qualification; local FileVault was only observed;
+- production recovery-provider qualification, power-loss/sector-loss and
+  directory-`fsync`/secure-erasure evidence; and
+- full-machine restore, activation/dispatch authority and Tier 1 approval.
 
 ## Interpretation
 
-The green local suites support the named synthetic contracts and show no known
-PLAN-001/002/003 regression. Release acceptance is withheld because clean physical-M4
-evidence and external supply-chain/durability evidence are incomplete. No result in this
-file grants preparation, dispatch, recovery, activation or Tier 1 authority.
+The clean physical-M4 benchmark satisfies the local synthetic p95/p99 performance
+thresholds for the exact source commit and the local suites support the named
+PLAN-004 contracts. These files do not make the artifacts immutable, approve the
+observed FileVault configuration, establish production compensability or durability
+under power loss, or grant preparation, dispatch, recovery, activation or Tier 1
+authority. The catalog must therefore remain `pending-evidence` until the external and
+immutable gates above are completed.

@@ -1,0 +1,20 @@
+{
+  "schema": "helixos.durable-preparation-recovery-transfer/1",
+  "acceptance_id": "PLAN-004",
+  "immutable_commit": "f7b021db52503aaedcc59b9c9c8d95d357555352",
+  "hardware": "Mac mini M4 10-core CPU 16GB internal SSD",
+  "filesystem_assurance": "validated-local-APFS-internal-SSD-lock-create-sync-primitives",
+  "at_rest_profile": "FileVault-on-internal-APFS-observed-local",
+  "material_bytes": 16777216,
+  "chunk_bytes": 1048576,
+  "write_sync_close_ns": 37531167,
+  "reopen_verify_ns": 28827000,
+  "total_ns": 66358167,
+  "throughput_bytes_per_second": 447020898,
+  "material_sha256": "55c7e25571a69216de25162f191bb2847201a09ee7efe46b5bada034acc695d5",
+  "reopened_sha256": "55c7e25571a69216de25162f191bb2847201a09ee7efe46b5bada034acc695d5",
+  "root_created_new": true,
+  "native_root_recorded": false,
+  "included_in_coordinator_percentiles": false,
+  "evidence_class": "public-synthetic-recovery-transfer-not-production-compensability"
+}

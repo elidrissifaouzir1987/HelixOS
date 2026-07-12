@@ -9,15 +9,15 @@ window.HELIXOS_ROADMAP_DATA = {
     }
   ],
   "currentFocus": {
-    "description": "Execute every command and interpretation gate in specs/004-durable-preparation/quickstart.md and retain exact local results/digests without private values in specs/004-durable-preparation/evidence/local-validation.md",
+    "description": "Capture a successful unchanged Linux/macOS-arm64/Windows PLAN-002 matrix and record exact commit, run URL, artifact SHA-256/attestation and preserved retention location in conformance/catalog.yaml",
     "done": false,
-    "id": "T082",
+    "id": "T035",
     "kind": "evidence",
-    "phase": "Polish and Cross-Cutting Release Evidence",
-    "phaseNumber": 7,
-    "planId": "PLAN-004",
-    "planTitle": "Durable preparation before dispatch",
-    "source": "specs/004-durable-preparation/tasks.md#L232",
+    "phase": "Polish and Cross-Cutting Evidence",
+    "phaseNumber": 6,
+    "planId": "PLAN-002",
+    "planTitle": "Current plan eligibility before durable preparation",
+    "source": "specs/002-plan-eligibility/tasks.md#L127",
     "tags": []
   },
   "definitionOfDone": [
@@ -1767,14 +1767,14 @@ window.HELIXOS_ROADMAP_DATA = {
       "total": 68
     },
     {
-      "completed": 83,
+      "completed": 85,
       "conformance": {
         "ciWorkflow": ".github/workflows/durable-preparation.yml",
         "claimStatus": "pending-evidence",
         "evidence": {
           "immutable": "pending",
-          "local": "pending",
-          "macMiniM4": "pending-device-evidence"
+          "local": "passing-local-not-immutable",
+          "macMiniM4": "passing-controlled-local-not-immutable"
         },
         "feature": "specs/004-durable-preparation",
         "id": "PLAN-004",
@@ -1820,7 +1820,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 15
         },
         {
-          "done": 7,
+          "done": 9,
           "number": 7,
           "title": "Polish and Cross-Cutting Release Evidence",
           "total": 9
@@ -1832,8 +1832,8 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 1
         }
       ],
-      "remaining": 2,
-      "taskPercent": 97.6,
+      "remaining": 0,
+      "taskPercent": 100.0,
       "taskSource": "specs/004-durable-preparation/tasks.md",
       "taskTitle": "Durable Preparation Before Dispatch",
       "tasks": [
@@ -2795,7 +2795,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Execute every command and interpretation gate in specs/004-durable-preparation/quickstart.md and retain exact local results/digests without private values in specs/004-durable-preparation/evidence/local-validation.md",
-          "done": false,
+          "done": true,
           "id": "T082",
           "kind": "evidence",
           "phase": "Polish and Cross-Cutting Release Evidence",
@@ -2805,7 +2805,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Revalidate the planning-passed 42-item authority/durability requirements-writing gate against completed implementation and evidence before release acceptance in specs/004-durable-preparation/checklists/durability.md",
-          "done": false,
+          "done": true,
           "id": "T083",
           "kind": "evidence",
           "phase": "Polish and Cross-Cutting Release Evidence",
@@ -2862,35 +2862,11 @@ window.HELIXOS_ROADMAP_DATA = {
       "planTitle": "Current plan eligibility before durable preparation",
       "source": "specs/002-plan-eligibility/tasks.md#L127",
       "tags": []
-    },
-    {
-      "description": "Execute every command and interpretation gate in specs/004-durable-preparation/quickstart.md and retain exact local results/digests without private values in specs/004-durable-preparation/evidence/local-validation.md",
-      "done": false,
-      "id": "T082",
-      "kind": "evidence",
-      "phase": "Polish and Cross-Cutting Release Evidence",
-      "phaseNumber": 7,
-      "planId": "PLAN-004",
-      "planTitle": "Durable preparation before dispatch",
-      "source": "specs/004-durable-preparation/tasks.md#L232",
-      "tags": []
-    },
-    {
-      "description": "Revalidate the planning-passed 42-item authority/durability requirements-writing gate against completed implementation and evidence before release acceptance in specs/004-durable-preparation/checklists/durability.md",
-      "done": false,
-      "id": "T083",
-      "kind": "evidence",
-      "phase": "Polish and Cross-Cutting Release Evidence",
-      "phaseNumber": 7,
-      "planId": "PLAN-004",
-      "planTitle": "Durable preparation before dispatch",
-      "source": "specs/004-durable-preparation/tasks.md#L233",
-      "tags": []
     }
   ],
   "roadmapDate": "2026-07-10",
   "schema": "helixos.roadmap-data/1",
-  "sourceFingerprint": "8d2a13da3413c00c5a68ef7592007797b1722549294e89b39cde0d55bf28511d",
+  "sourceFingerprint": "c089b89f75b7b208c065ab50cfe4c41aa58ad47faa337f9fe3c31a7793156eb3",
   "sources": [
     {
       "path": "ROADMAP-SPECS.md",
@@ -2898,7 +2874,7 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "conformance/catalog.yaml",
-      "sha256": "d099d220e9ab4bc9f1707584188986187a478c8a5c907d2d92f0739f41d5086f"
+      "sha256": "36b0685d4d1ebf8f3282a2453ea713ae3f93718cae2a555ddd36599900fe0b81"
     },
     {
       "path": "specs/001-portable-signed-contracts/tasks.md",
@@ -2914,7 +2890,7 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "specs/004-durable-preparation/tasks.md",
-      "sha256": "7a577a74571973be9b1e13472529155c124d34997cccfcb7843d40e9ac630512"
+      "sha256": "0c5791ba976bdbdab6dac2ba71b464e943179ec9af764f2ec2a2066bc999e81f"
     }
   ],
   "strategicStages": [
@@ -2933,7 +2909,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "id": "R1",
       "status": "active",
       "title": "Fondation portable et coordinateur durable",
-      "trackedTaskCompleted": 212,
+      "trackedTaskCompleted": 214,
       "trackedTaskTotal": 216
     },
     {
@@ -2995,12 +2971,12 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "summary": {
     "acceptedClaims": 0,
-    "completedTasks": 212,
-    "focusPlan": "PLAN-004",
-    "remainingTasks": 4,
+    "completedTasks": 214,
+    "focusPlan": "PLAN-002",
+    "remainingTasks": 2,
     "strategicStage": "R1",
     "totalClaims": 4,
-    "trackedTaskPercent": 98.1,
+    "trackedTaskPercent": 99.1,
     "trackedTasks": 216
   }
 };

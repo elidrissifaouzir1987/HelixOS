@@ -452,19 +452,21 @@ entries:
     claim_status: pending-evidence
     evidence:
       local:
-        status: pending
-        platform: pending
-        commit: pending
-        validation_artifact: pending
-        validation_digest_sha256: pending
-        benchmark_artifact: pending
-        benchmark_digest_sha256: pending
-        recovery_transfer_artifact: pending
-        recovery_transfer_digest_sha256: pending
-        process_kill_artifact: pending
-        process_kill_digest_sha256: pending
-        backup_restore_artifact: pending
-        backup_restore_digest_sha256: pending
+        status: passing-local-not-immutable
+        platform: macos-arm64
+        commit: f7b021db52503aaedcc59b9c9c8d95d357555352
+        validation_artifact: specs/004-durable-preparation/evidence/local-validation.md
+        validation_digest_sha256: 3ff94a261fb7f1a2bd6cd3cefc5d9bf0f3126437974bf03033c9c056c65f33b9
+        benchmark_artifact: specs/004-durable-preparation/evidence/benchmark-mac-mini-m4-f7b021db52503aaedcc59b9c9c8d95d357555352.json
+        benchmark_digest_sha256: ed90faf0645589deb98d454466854771569eb53d69616584c092a25ae3bd1c12
+        recovery_transfer_artifact: specs/004-durable-preparation/evidence/benchmark-mac-mini-m4-f7b021db52503aaedcc59b9c9c8d95d357555352.recovery-transfer.json
+        recovery_transfer_digest_sha256: da442c396f280cf21f4125498676fa52b17e68cfc97bbff0aeb1afbc1cb60e1e
+        process_kill_status: passing-local-synthetic-not-power-loss
+        process_kill_artifact: specs/004-durable-preparation/evidence/local-validation.md
+        process_kill_digest_sha256: 3ff94a261fb7f1a2bd6cd3cefc5d9bf0f3126437974bf03033c9c056c65f33b9
+        backup_restore_status: passing-local-synthetic-not-production-qualified
+        backup_restore_artifact: specs/004-durable-preparation/evidence/local-validation.md
+        backup_restore_digest_sha256: 3ff94a261fb7f1a2bd6cd3cefc5d9bf0f3126437974bf03033c9c056c65f33b9
         supply_chain_artifact: pending
         removal_artifact: pending
       immutable:
@@ -493,14 +495,24 @@ entries:
           attestation: pending
           preservation_location: pending
       mac_mini_m4:
-        status: pending-device-evidence
-        commit: pending
-        benchmark_artifact: pending
-        benchmark_digest_sha256: pending
-        recovery_transfer_artifact: pending
-        recovery_transfer_digest_sha256: pending
-        hardware: pending
-        filesystem_assurance: pending
-        at_rest_profile: pending
+        status: passing-controlled-local-not-immutable
+        commit: f7b021db52503aaedcc59b9c9c8d95d357555352
+        benchmark_artifact: specs/004-durable-preparation/evidence/benchmark-mac-mini-m4-f7b021db52503aaedcc59b9c9c8d95d357555352.json
+        benchmark_digest_sha256: ed90faf0645589deb98d454466854771569eb53d69616584c092a25ae3bd1c12
+        recovery_transfer_artifact: specs/004-durable-preparation/evidence/benchmark-mac-mini-m4-f7b021db52503aaedcc59b9c9c8d95d357555352.recovery-transfer.json
+        recovery_transfer_digest_sha256: da442c396f280cf21f4125498676fa52b17e68cfc97bbff0aeb1afbc1cb60e1e
+        hardware: Mac mini M4 10-core CPU 16GB internal SSD
+        filesystem_assurance: validated-local-APFS-internal-SSD-lock-create-sync-primitives
+        at_rest_profile: FileVault-on-internal-APFS-observed-local
+        at_rest_profile_approval: pending
+        warmup_operations: 500
+        measured_operations: 10000
+        committed_operations: 10500
+        p50_ns: 11218708
+        p95_ns: 24096375
+        p99_ns: 25443666
+        max_ns: 26528459
+        meets_p95_limit: true
+        meets_p99_limit: true
         fullfsync_spike: pending
         power_loss_evidence: pending

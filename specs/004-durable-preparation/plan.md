@@ -1,6 +1,6 @@
 # Implementation Plan: Durable Preparation Before Dispatch
 
-**Branch**: `master` (Spec Kit feature `004-durable-preparation`) | **Date**:
+**Branch**: `codex/plan-004-local-evidence` (Spec Kit feature `004-durable-preparation`) | **Date**:
 2026-07-12 | **Spec**: [spec.md](spec.md)
 
 **Input**: Feature specification from `specs/004-durable-preparation/spec.md`

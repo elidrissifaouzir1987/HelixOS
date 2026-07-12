@@ -229,8 +229,8 @@ evidence, performance evidence and project memory without promoting synthetic re
 - [X] T079 Register `PLAN-004` fields without changing PLAN-001/002/003 claim status in `conformance/catalog.yaml`
 - [X] T080 Complete cross-crate dependency/source/removal gates so only reviewed consumers see Feature 004 contracts in `kernel/helix-plan-eligibility/tests/portability.rs`, `kernel/helix-replay-sqlite/tests/portability.rs`, and `kernel/helix-coordinator-sqlite/tests/portability.rs`
 - [X] T081 Document pinned licenses, advisories, bundled SQLite source, SBOM/provenance expectations, clean-root boundary and pending external evidence in `specs/004-durable-preparation/evidence/README.md`
-- [ ] T082 Execute every command and interpretation gate in `specs/004-durable-preparation/quickstart.md` and retain exact local results/digests without private values in `specs/004-durable-preparation/evidence/local-validation.md`
-- [ ] T083 Revalidate the planning-passed 42-item authority/durability requirements-writing gate against completed implementation and evidence before release acceptance in `specs/004-durable-preparation/checklists/durability.md`
+- [X] T082 Execute every command and interpretation gate in `specs/004-durable-preparation/quickstart.md` and retain exact local results/digests without private values in `specs/004-durable-preparation/evidence/local-validation.md`
+- [X] T083 Revalidate the planning-passed 42-item authority/durability requirements-writing gate against completed implementation and evidence before release acceptance in `specs/004-durable-preparation/checklists/durability.md`
 - [X] T084 Refresh secret-free Graphify code graph, useful outcome memory and reflections after all code/evidence changes in `graphify-out/graph.json`, `graphify-out/memory/`, and `graphify-out/reflections/LESSONS.md`
 
 ---

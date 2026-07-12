@@ -181,10 +181,11 @@ clearly enough for independent implementation and review.
 
 ## Implementation Revalidation
 
-- 2026-07-11 local revalidation confirms that the 42 checked items still describe a
-  complete and internally consistent requirements gate. Passing source, contract,
-  budget, recovery, backup/restore, redaction and portability tests do not by
-  themselves convert those planning checks into release evidence.
+- 2026-07-12 implementation revalidation confirms that all 42/42 checked items still
+  describe a complete, precise and internally consistent requirements gate. Passing
+  source, contract, budget, recovery, backup/restore, redaction and portability tests
+  do not by themselves convert those planning checks into release evidence. This
+  completes T083 without changing the release decision.
 - CHK023 is now locally backed by implementation evidence: the frozen registry expands
   exactly to 123 boundaries and 167 controlled cases, and the exact release process-kill
   driver completed all 167 after carrying caller-owned probe custody through each real
@@ -197,12 +198,23 @@ clearly enough for independent implementation and review.
   limits/errors and all sovereign custody remain crate-internal. The negative surface,
   internal bounds, redaction and portability tests pass, closing T075 and T085 without
   claiming a production host or activation authority.
-- CHK024 remains pending retained evidence until the controlled benchmark traverses the
-  real final-comparison/coordinator-commit path, a clean immutable worktree is used and
-  the physical Mac mini M4 plus separate recovery-transfer artifacts are preserved.
-- The release decision is therefore **withheld**. The planning result remains 42/42;
-  this section records implementation/evidence gaps rather than weakening or silently
-  unchecking the requirements that detected them.
+- CHK024 is now backed by retained controlled local evidence from clean source commit
+  `f7b021db52503aaedcc59b9c9c8d95d357555352`. The physical Mac mini M4 run traversed
+  the real final-comparison/coordinator-commit path for 500 warmups and 10,000 measured
+  samples (10,500 acknowledged commits total): p50 11,218,708 ns, p95 24,096,375 ns,
+  p99 25,443,666 ns and max 26,528,459 ns. The p95 <= 25 ms and p99 <= 100 ms gates
+  passed. The coordinator artifact SHA-256 is
+  `ed90faf0645589deb98d454466854771569eb53d69616584c092a25ae3bd1c12`; recovery
+  transfer remains separate with SHA-256
+  `da442c396f280cf21f4125498676fa52b17e68cfc97bbff0aeb1afbc1cb60e1e`.
+- CHK023 retains a local synthetic process-kill pass only. It is not power-loss,
+  sector-loss, `F_FULLFSYNC`, immutable CI or production durability evidence.
+- The release decision remains **withheld** and `claim_status` remains
+  `pending-evidence`. Immutable three-platform CI/artifacts/attestations, supply-chain
+  evidence, `F_FULLFSYNC` spike evidence, power-loss evidence, approval of the observed
+  FileVault-at-rest profile, the full clean-machine restore/activation gate and Tier 1
+  acceptance all remain pending. The 42/42 result is the requirements-writing gate,
+  not completion of those release gates or of the full R0-R8 project.
 
 ## Notes
 
