@@ -13,6 +13,16 @@ entries:
       negative_manifest: contracts/fixtures/plan-envelope-v1/negative-cases.json
       fixture_instructions: contracts/fixtures/plan-envelope-v1/README.md
     ci_workflow: .github/workflows/contracts.yml
+    ci_evidence_policy:
+      artifact_subject: actions-upload-artifact-output-digest
+      artifact_digest: actions-upload-artifact-artifact-digest-output
+      retention_days: 90
+      attestation_action: actions/attest@a1948c3f048ba23858d222213b7c278aabede763
+      attestation_events:
+        - push
+        - workflow_dispatch
+      pull_request_evidence: validation-only-no-attestation
+      catalog_update_required_before_claim: true
     required_platforms:
       - id: linux-x86_64
         runner: ubuntu-24.04
@@ -46,9 +56,70 @@ entries:
     claim_status: pending-evidence
     evidence:
       local_windows_benchmark: specs/001-portable-signed-contracts/evidence/benchmark-windows-x86_64-2026-07-10.json
-      immutable_commit: pending
-      immutable_ci_run: pending
       linux_arm64_run: pending
+      immutable:
+        status: passing-immutable
+        commit: b3132586245acea415104381b337d3fea3303444
+        ci_run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192812460
+        validation_artifact: specs/001-portable-signed-contracts/evidence/ci-immutable-b3132586245acea415104381b337d3fea3303444.md
+        validation_digest_sha256: d26f0f68c62320ffec16189426031306dd426960c8fbfd5ebfc21803d9c88783
+        descriptor_schema: helixos.portable-signed-contracts-ci-evidence/1
+        reviewed_input_digests: per-platform-below
+        artifact: per-platform-below
+        uploaded_artifact_digest_sha256: per-platform-below
+        artifact_retention_days: 90
+        artifact_expires_at: "2026-10-10T12:32:53Z"
+        attestation_status: published-all-platforms
+        attestation_url: per-platform-below
+        preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192812460
+        linux_x86_64:
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192812460/job/86650374234
+          runner_label: ubuntu-24.04
+          runner_image_os: ubuntu24
+          runner_image_version: 20260705.232.1
+          runner_os_description: Ubuntu 24.04.4 LTS
+          runner_arch: X64
+          rustc_host: x86_64-unknown-linux-gnu
+          plan_envelope_schema_sha256: 95d4b762715e0cbcb53045744fd330589f09ac870e18bce9f6d991a5e7377269
+          negative_corpus_schema_sha256: 6fff2356bf1b1a8b4c7b38f27046340e3bbb85fdf0d678cfd7744c47dde1270f
+          fixture_corpus_manifest_sha256: 2a49ff3e56b44245fe5926e489d33cf02b9528062317e08779e6688987c168b6
+          artifact: plan-001-linux-x86_64-b3132586245acea415104381b337d3fea3303444
+          uploaded_artifact_digest_sha256: 836aff9901c11c4f8dd827bc42039353b796fc0a2cf3fd5a56e3348e7e1da983
+          attestation_url: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34947654
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192812460/artifacts/8260078290
+        macos_arm64:
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192812460/job/86650374252
+          runner_label: macos-26
+          runner_image_os: macos26
+          runner_image_version: 20260630.0213.1
+          runner_os_description: macOS 26.4 build 25E246
+          runner_arch: ARM64
+          rustc_host: aarch64-apple-darwin
+          plan_envelope_schema_sha256: 95d4b762715e0cbcb53045744fd330589f09ac870e18bce9f6d991a5e7377269
+          negative_corpus_schema_sha256: 6fff2356bf1b1a8b4c7b38f27046340e3bbb85fdf0d678cfd7744c47dde1270f
+          fixture_corpus_manifest_sha256: 2a49ff3e56b44245fe5926e489d33cf02b9528062317e08779e6688987c168b6
+          artifact: plan-001-macos-arm64-b3132586245acea415104381b337d3fea3303444
+          uploaded_artifact_digest_sha256: 6fb1f881af512378fafcbe2b02ad9ddb76e4eeea9371d3764f7a7fb1992952de
+          attestation_url: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34947657
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192812460/artifacts/8260075745
+        windows_x64:
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192812460/job/86650374240
+          runner_label: windows-2022
+          runner_image_os: win22
+          runner_image_version: 20260706.237.1
+          runner_os_description: Windows Server 2022 10.0.20348 Datacenter
+          runner_arch: X64
+          rustc_host: x86_64-pc-windows-msvc
+          plan_envelope_schema_sha256: 0a86626fa511c4a7e553e8482f20f4d581e4e116ad85a7aeb5d1c49c07f09f26
+          negative_corpus_schema_sha256: 7932798fd63d0ebade2f77a0c17294d75d494295a1c4646d741db0394092795e
+          fixture_corpus_manifest_sha256: 50036c22931149cb8768a049e581e137f84be8887f20b1c7e23ae7835c8e8dc9
+          artifact: plan-001-windows-x64-b3132586245acea415104381b337d3fea3303444
+          uploaded_artifact_digest_sha256: 5c00bc271c593c566cff5a45da7b14ebb602e8dc3d225412ce213d78a15ae7d3
+          attestation_url: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34947656
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192812460/artifacts/8260109131
   - acceptance_id: PLAN-002
     title: Current plan eligibility before durable preparation
     feature: specs/002-plan-eligibility

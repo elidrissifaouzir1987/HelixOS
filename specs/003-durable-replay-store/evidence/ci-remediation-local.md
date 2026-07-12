@@ -146,5 +146,10 @@ Every poll still checks the injected boot-monotonic deadline; the configured bus
 SQLite busy timeout, root lease, claim deadlines and the separate SC-004 latency oracle
 remain unchanged. Both concurrent initializers must still succeed, verify the exact
 schema and reopen one healthy empty store. The corpus now preserves the payload-free
-public error code if a later failure recurs. Cross-host confirmation remains pending in
-T069; none of the failed runs above is represented as new immutable success evidence.
+public error code if a later failure recurs. The unchanged PLAN-003 pull-request matrix
+at `https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192809998` and the
+unchanged PLAN-001 workspace/attestation run
+`https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29192812460` then passed on
+Linux x86_64, macOS arm64 and Windows x64 at commit
+`b3132586245acea415104381b337d3fea3303444`, closing T069. None of the failed runs above
+is represented as new immutable success evidence.

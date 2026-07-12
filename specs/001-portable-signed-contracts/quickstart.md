@@ -76,9 +76,13 @@ AuthenticAMD`, 32 available logical CPUs, with `rustc 1.96.1 (31fca3adb
   golden envelope, and the 23-case negative manifest passed with
   `check-jsonschema 0.37.4`.
 
-This is reproducible local evidence only. The Linux, macOS arm64, and Windows CI matrix
-and its immutable run link remain required before `PLAN-001` or Tier 1 portability is
-claimed.
+This remains reproducible local evidence only. T028's separate unchanged hosted Linux
+x86_64, macOS arm64 and Windows x64 matrix, retained artifacts and attestations are
+recorded in
+[`evidence/ci-immutable-b3132586245acea415104381b337d3fea3303444.md`](evidence/ci-immutable-b3132586245acea415104381b337d3fea3303444.md).
+That closes only the hosted matrix task. Linux arm64, physical Mac mini M4, CI execution
+of the ignored 100,000-envelope soak, Tier 1 and production readiness remain unproven;
+`PLAN-001` remains `pending-evidence`.
 
 ## Mandatory next trust transition
 

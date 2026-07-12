@@ -231,7 +231,7 @@ Windows-only false fixture drift without changing any contract bytes.
 remediation still allowed the process-local setup gate to return before its configured
 correctness window under scheduler pressure.
 
-- [ ] T069 Raise only the deadline-checked process-local setup-gate polling cap from 1,000 to 5,000 attempts, preserve the caller busy/deadline clamp plus all SQLite/root-lease/SC-004 limits, keep every concurrent initializer and healthy reopen mandatory, and confirm the unchanged three-host workspace matrices in `kernel/helix-replay-sqlite/src/connection.rs`, `kernel/helix-replay-sqlite/tests/schema_corruption.rs`, `kernel/helix-replay-sqlite/tests/conformance_execution.rs`, and `specs/003-durable-replay-store/evidence/ci-remediation-local.md`
+- [x] T069 Raise only the deadline-checked process-local setup-gate polling cap from 1,000 to 5,000 attempts, preserve the caller busy/deadline clamp plus all SQLite/root-lease/SC-004 limits, keep every concurrent initializer and healthy reopen mandatory, and confirm the unchanged three-host workspace matrices in `kernel/helix-replay-sqlite/src/connection.rs`, `kernel/helix-replay-sqlite/tests/schema_corruption.rs`, `kernel/helix-replay-sqlite/tests/conformance_execution.rs`, and `specs/003-durable-replay-store/evidence/ci-remediation-local.md`
 
 ---
 

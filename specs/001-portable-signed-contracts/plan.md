@@ -32,7 +32,8 @@ table-driven negative/tamper cases; property tests; an ignored 100,000-envelope 
 release-mode p50/p95/p99 benchmark; GitHub Actions matrix for Linux, macOS, and Windows.
 
 **Target Platform**: Common library for macOS arm64, Linux arm64/x86_64, and Windows
-x64. The current local proof runs on Windows x64; Mac arm64 remains the Tier 1 target.
+x64. Hosted CI evidence covers Linux x86_64, macOS arm64 and Windows x64. Linux arm64
+and physical Mac mini M4/Tier 1 proof remain pending.
 
 **Project Type**: Library plus language-neutral schemas/fixtures and conformance
 catalogue entry.

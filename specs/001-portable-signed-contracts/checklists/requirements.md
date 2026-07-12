@@ -32,6 +32,8 @@
 ## Notes
 
 - Validation pass 1/3: all items passed on 2026-07-10.
-- Specification quality is complete and local implementation is verified. SC-001/T028
-  remains pending immutable Linux/macOS-arm64/Windows CI evidence; this is an execution
-  gate, not an unresolved specification question.
+- Specification quality and local implementation are verified. SC-001/T028's unchanged
+  hosted Linux x86_64/macOS arm64/Windows x64 matrix is retained at commit
+  `b3132586245acea415104381b337d3fea3303444`. Linux arm64, physical Mac mini M4, the
+  ignored 100,000-envelope soak in CI, Tier 1 and production readiness remain outside
+  that evidence boundary.
