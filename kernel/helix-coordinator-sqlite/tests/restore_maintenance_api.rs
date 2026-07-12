@@ -9,6 +9,10 @@ const MAINTENANCE_SOURCE: &str = include_str!("../src/maintenance.rs");
 const FAILURE_SOURCE: &str = include_str!("../src/failure.rs");
 const QUARANTINE_SOURCE: &str = include_str!("../src/quarantine.rs");
 
+fn source_with_lf_newlines(source: &str) -> String {
+    source.replace("\r\n", "\n")
+}
+
 #[test]
 fn public_restore_surface_is_evidence_only_and_has_no_producer() {
     fn assert_public_type<T>() {}
@@ -59,16 +63,17 @@ fn public_restore_surface_is_evidence_only_and_has_no_producer() {
 
 #[test]
 fn windows_refusal_precedes_package_handle_trust_and_every_mutation() {
-    let accept_start = MAINTENANCE_SOURCE
+    let maintenance_source = source_with_lf_newlines(MAINTENANCE_SOURCE);
+    let accept_start = maintenance_source
         .find(
             "#[cfg(all(not(test), windows))]\npub(crate) fn accept_preparation_restore_package_v1",
         )
         .expect("Windows acceptance gate exists");
-    let supported_start = MAINTENANCE_SOURCE[accept_start..]
+    let supported_start = maintenance_source[accept_start..]
         .find("#[cfg(all(not(test), not(windows)))]\npub(crate) fn accept_preparation_restore_package_v1")
         .map(|offset| accept_start + offset)
         .expect("non-Windows acceptance implementation follows");
-    let windows_accept = &MAINTENANCE_SOURCE[accept_start..supported_start];
+    let windows_accept = &maintenance_source[accept_start..supported_start];
     assert!(windows_accept.contains("PreparationRestoreErrorV1::PlatformUnsupported"));
     for forbidden in [
         "attested_directory_binding_sha256_v1",
@@ -83,14 +88,14 @@ fn windows_refusal_precedes_package_handle_trust_and_every_mutation() {
         );
     }
 
-    let restore_start = MAINTENANCE_SOURCE
+    let restore_start = maintenance_source
         .find("#[cfg(all(not(test), windows))]\n#[allow(clippy::too_many_arguments)]\npub(crate) fn restore_preparation_to_pending_v1")
         .expect("Windows defensive restore gate exists");
-    let restore_supported = MAINTENANCE_SOURCE[restore_start..]
+    let restore_supported = maintenance_source[restore_start..]
         .find("#[cfg(all(not(test), not(windows)))]")
         .map(|offset| restore_start + offset)
         .expect("non-Windows restore implementation follows");
-    let windows_restore = &MAINTENANCE_SOURCE[restore_start..restore_supported];
+    let windows_restore = &maintenance_source[restore_start..restore_supported];
     assert!(windows_restore.contains("PreparationRestoreErrorV1::PlatformUnsupported"));
     for forbidden in [
         "persist_pause_and_rotate_for_restore_v1",
@@ -104,10 +109,11 @@ fn windows_refusal_precedes_package_handle_trust_and_every_mutation() {
 
 #[test]
 fn t073_rotation_is_typed_from_live_pause_and_maintenance_has_no_activation_path() {
-    assert!(MAINTENANCE_SOURCE.contains(
+    let maintenance_source = source_with_lf_newlines(MAINTENANCE_SOURCE);
+    assert!(maintenance_source.contains(
         "pub(crate) const fn old_authority_rotation_v1(self) -> RestoredAuthorityRotationV1"
     ));
-    assert!(MAINTENANCE_SOURCE.contains(
+    assert!(maintenance_source.contains(
         "serialize both\n    /// provisioner-owned physical destination-binding namespaces"
     ));
     for (source, start, end) in [
@@ -135,14 +141,14 @@ fn t073_rotation_is_typed_from_live_pause_and_maintenance_has_no_activation_path
         assert!(!input.contains("rotated_fencing_epoch:"));
     }
 
-    let reconcile_start = MAINTENANCE_SOURCE
+    let reconcile_start = maintenance_source
         .find("pub(crate) fn reconcile_restored_old_authority_v1")
         .expect("bounded reconciliation exists");
-    let reconcile_end = MAINTENANCE_SOURCE[reconcile_start..]
+    let reconcile_end = maintenance_source[reconcile_start..]
         .find("fn verify_recovery_pending_metadata_for_maintenance_v1")
         .map(|offset| reconcile_start + offset)
         .expect("bounded reconciliation has a closed helper boundary");
-    let reconcile = &MAINTENANCE_SOURCE[reconcile_start..reconcile_end];
+    let reconcile = &maintenance_source[reconcile_start..reconcile_end];
     for required in [
         "inspect_existing_restore_attempt_v1",
         "reopen_restore_pending_root_custody_v1",
