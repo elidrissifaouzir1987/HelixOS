@@ -2909,17 +2909,25 @@ mod tests {
             .expect_err("a different provisioner reservation must refuse"),
             InternalCoordinatorError::RootIdentityMismatch
         );
+        let wrong_marker_identity = inspect_existing_restore_root_custody_v1(
+            &attested,
+            binding,
+            expected_identity,
+            1,
+            &FixedClock,
+            DEADLINE_MS,
+        )
+        .expect_err("a marker for another ticket root must refuse");
+        #[cfg(unix)]
         assert_eq!(
-            inspect_existing_restore_root_custody_v1(
-                &attested,
-                binding,
-                expected_identity,
-                1,
-                &FixedClock,
-                DEADLINE_MS,
-            )
-            .expect_err("a marker for another ticket root must refuse"),
+            wrong_marker_identity,
             InternalCoordinatorError::RootIdentityMismatch
+        );
+        #[cfg(not(unix))]
+        assert_eq!(
+            wrong_marker_identity,
+            InternalCoordinatorError::RootUnavailable,
+            "non-Unix inspection remains unavailable without native directory-handle custody"
         );
     }
 
@@ -3014,9 +3022,9 @@ mod tests {
         assert_eq!(debug, "CoordinatorRestoreRootCustodyV1 { .. }");
         assert!(!debug.contains(PRIVATE_LABEL));
         assert!(!debug.contains(&"a5".repeat(32)));
-        assert!(fs::read(root.path().join(ROOT_LOCK_FILENAME))
-            .expect("initializing marker reads")
-            .ends_with(b"STATE=INITIALIZING\n"));
+        let marker = super::read_exact_file(&mut custody.root_lease.file)
+            .expect("initializing marker reads through retained custody");
+        assert!(marker.ends_with(b"STATE=INITIALIZING\n"));
 
         custody
             .reserve_database_import_create_new_v1()

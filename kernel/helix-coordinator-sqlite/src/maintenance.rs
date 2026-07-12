@@ -11339,6 +11339,7 @@ mod tests {
             .staging
             .join(BackupJsonMemberV1::TopLevelManifest.file_name())
             .is_file());
+        drop(destination);
         fs::remove_dir_all(root).expect("synthetic package cleans up");
     }
 

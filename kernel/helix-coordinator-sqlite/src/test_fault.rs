@@ -876,7 +876,7 @@ mod tests {
 
     #[test]
     fn one_store_owned_probe_reaches_all_three_transactional_phases() {
-        let lib = include_str!("lib.rs");
+        let lib = include_str!("lib.rs").replace("\r\n", "\n");
         assert!(lib.contains("fault_probe: CoordinatorFaultProbeV1"));
         assert!(lib.contains("fault_probe: CoordinatorFaultProbeV1::disabled_v1()"));
         assert!(lib.contains("&self.fault_probe,\n            || self.clock"));

@@ -171,7 +171,9 @@ jobs:
 
       - name: Test workspace
         working-directory: kernel
-        run: cargo test --locked --workspace --all-targets --all-features
+        run: >-
+          cargo test --locked --workspace --all-targets --all-features --
+          --test-threads=1
 
       - name: Reproduce exact fixture corpus
         shell: pwsh

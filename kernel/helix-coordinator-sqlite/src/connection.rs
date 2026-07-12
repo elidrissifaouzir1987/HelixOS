@@ -1360,6 +1360,12 @@ mod tests {
         configure_connection(&connection, 10, true).expect("SQLite profile establishes");
         verify_reserved_database_fingerprint(&config, &mut reservation)
             .expect("opened file identity initially matches");
+
+        // Windows SQLite handles do not permit unlinking the open database path. Closing only
+        // that handle keeps the reservation handle and its original file identity in custody,
+        // so the byte-identical replacement still exercises the fail-closed identity check.
+        #[cfg(windows)]
+        drop(connection);
         let identical_bytes = read_exact_file(&mut reservation.file).expect("database bytes read");
 
         fs::remove_file(config.database_path()).expect("opened path unlinks");
@@ -1374,6 +1380,7 @@ mod tests {
         assert!(role_marker.ends_with(b"STATE=EMPTY\n"));
 
         drop(replacement);
+        #[cfg(not(windows))]
         drop(connection);
         drop(reservation);
         let _ = fs::remove_dir_all(root);
