@@ -152,7 +152,7 @@ jobs:
           --package helix-replay-sqlite
           --package helix-plan-preparation
 
-      - name: Test coordinator default and fault surfaces
+      - name: Test hosted coordinator surfaces outside the controlled timing oracle
         working-directory: kernel
         run: >-
           cargo test --locked
@@ -160,6 +160,7 @@ jobs:
           --all-targets
           --all-features
           -- --test-threads=1
+          --skip held_writer_returns_by_absolute_injected_deadline_and_never_mutates_later
 
       - name: Verify frozen corpus and stable runner summary
         shell: pwsh
@@ -266,6 +267,13 @@ jobs:
             run_id = '${{ github.run_id }}'
             run_attempt = '${{ github.run_attempt }}'
             artifact_name = 'plan-004-${{ matrix.platform }}-${{ github.sha }}'
+            test_scope = [ordered]@{
+              coordinator = 'all-targets-all-features'
+              test_threads = 1
+              excluded_runtime_oracle = 'held_writer_returns_by_absolute_injected_deadline_and_never_mutates_later'
+              exclusion_owner = 'PLAN-004-T043-SC-010-controlled-target'
+              physical_performance_evidence = $false
+            }
             reviewed_artifacts = $digests
           }
           $descriptor | ConvertTo-Json -Depth 5 -Compress | Set-Content `
@@ -318,6 +326,11 @@ jobs:
             'claim_status=pending-until-conformance-catalog-is-updated',
             'platform=${{ matrix.platform }}',
             'commit=${{ github.sha }}',
+            'coordinator_test_scope=all-targets-all-features',
+            'coordinator_test_threads=1',
+            'excluded_runtime_oracle=held_writer_returns_by_absolute_injected_deadline_and_never_mutates_later',
+            'exclusion_owner=PLAN-004-T043-SC-010-controlled-target',
+            'physical_performance_evidence=false',
             "artifact_id=$($env:ARTIFACT_ID)",
             "artifact_url=$($env:ARTIFACT_URL)",
             "uploaded_artifact_sha256=$($env:ARTIFACT_DIGEST.ToLowerInvariant())",
