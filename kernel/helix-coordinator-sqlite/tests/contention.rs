@@ -48,8 +48,10 @@ use std::time::Instant;
 const OPEN_NOW_MS: u64 = 100;
 const OPEN_DEADLINE_MS: u64 = 10_000;
 const CONTENTION_CLOCK_BASE_MS: u64 = 1_000;
-const CONTENTION_DEADLINE_DELTA_MS: u64 = 15_000;
-const CONTENTION_BUSY_WAIT_MS: u64 = 5_000;
+// Test-only correctness window for heavily oversubscribed hosted runners. The strict
+// controlled wall-clock oracle is owned by deadline.rs and keeps its 40 ms + 50 ms bound.
+const CONTENTION_DEADLINE_DELTA_MS: u64 = 60_000;
+const CONTENTION_BUSY_WAIT_MS: u64 = 30_000;
 const THREAD_CONTENDERS: usize = 64;
 const PROCESS_CONTENDERS: usize = 8;
 const RELEASE_THREAD_ROUNDS: usize = 100;
@@ -217,64 +219,88 @@ fn count_v1(connection: &Connection, table: &str, predicate: &str) -> i64 {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum CommitClassV1 {
     Committed,
+    Unclassified,
     Conflict,
     Exhausted,
     Busy,
+    Deadline,
+    Unavailable,
+    Unhealthy,
     Other,
 }
 
 fn classify_v1(outcome: PreparationCommitOutcomeV1) -> CommitClassV1 {
     match outcome {
         PreparationCommitOutcomeV1::Committed(_) => CommitClassV1::Committed,
+        PreparationCommitOutcomeV1::Unclassified => CommitClassV1::Unclassified,
         PreparationCommitOutcomeV1::Conflict => CommitClassV1::Conflict,
         PreparationCommitOutcomeV1::BudgetExhausted => CommitClassV1::Exhausted,
         PreparationCommitOutcomeV1::Busy => CommitClassV1::Busy,
+        PreparationCommitOutcomeV1::PermitDeadlineReached => CommitClassV1::Deadline,
+        PreparationCommitOutcomeV1::Unavailable => CommitClassV1::Unavailable,
+        PreparationCommitOutcomeV1::Unhealthy => CommitClassV1::Unhealthy,
         _ => CommitClassV1::Other,
     }
 }
 
-fn assert_same_operation_classes_v1(classes: &[CommitClassV1], contender_count: usize) {
+fn assert_same_operation_classes_v1(
+    classes: &[CommitClassV1],
+    contender_count: usize,
+    observation: DurableContentionObservationV1,
+) {
     assert_eq!(classes.len(), contender_count);
+    let committed = classes
+        .iter()
+        .filter(|class| **class == CommitClassV1::Committed)
+        .count();
+    let conflicts = classes
+        .iter()
+        .filter(|class| **class == CommitClassV1::Conflict)
+        .count();
     assert_eq!(
-        classes
-            .iter()
-            .filter(|class| **class == CommitClassV1::Committed)
-            .count(),
+        committed,
         1,
-        "only one exact attempt may commit",
+        "exactly one contender must acknowledge commit; classes={classes:?}; observation={observation:?}",
     );
     assert_eq!(
-        classes
-            .iter()
-            .filter(|class| **class == CommitClassV1::Conflict)
-            .count(),
+        conflicts,
         contender_count - 1,
-        "serialized same-operation losers must classify as conflicts, not busy",
+        "serialized same-operation losers must classify as conflicts; classes={classes:?}; observation={observation:?}",
     );
-    assert!(!classes.contains(&CommitClassV1::Busy));
-    assert!(!classes.contains(&CommitClassV1::Other));
+    assert_eq!(
+        committed + conflicts,
+        contender_count,
+        "busy, deadline, unavailable, unhealthy, unclassified and other outcomes remain failures; classes={classes:?}; observation={observation:?}",
+    );
+    // This offline observation is independent SC-003 state evidence. It never upgrades an
+    // unclassified commit into an acknowledged result or substitutes for production readback.
+    observation.assert_exact_same_operation_winner_v1();
 }
 
 fn assert_shared_allowance_classes_v1(classes: &[CommitClassV1]) {
     assert_eq!(classes.len(), SHARED_CONTENDERS);
+    let committed = classes
+        .iter()
+        .filter(|class| **class == CommitClassV1::Committed)
+        .count();
+    let exhausted = classes
+        .iter()
+        .filter(|class| **class == CommitClassV1::Exhausted)
+        .count();
     assert_eq!(
-        classes
-            .iter()
-            .filter(|class| **class == CommitClassV1::Committed)
-            .count(),
-        SHARED_WINNERS,
-        "the exact aggregate allowance must admit four contenders",
+        committed, SHARED_WINNERS,
+        "the exact aggregate allowance must admit four contenders; classes={classes:?}",
     );
     assert_eq!(
-        classes
-            .iter()
-            .filter(|class| **class == CommitClassV1::Exhausted)
-            .count(),
+        exhausted,
         SHARED_CONTENDERS - SHARED_WINNERS,
-        "every serialized over-capacity contender must be exhausted",
+        "every serialized over-capacity contender must be exhausted; classes={classes:?}",
     );
-    assert!(!classes.contains(&CommitClassV1::Busy));
-    assert!(!classes.contains(&CommitClassV1::Other));
+    assert_eq!(
+        committed + exhausted,
+        SHARED_CONTENDERS,
+        "no other outcome class is accepted; classes={classes:?}",
+    );
 }
 
 fn run_same_operation_thread_round_v1() {
@@ -307,8 +333,11 @@ fn run_same_operation_thread_round_v1() {
         .into_iter()
         .map(|worker| worker.join().expect("thread contender did not panic"))
         .collect::<Vec<_>>();
-    assert_same_operation_classes_v1(&classes, THREAD_CONTENDERS);
-    DurableContentionObservationV1::read(&fixture.database).assert_exact_same_operation_winner_v1();
+    assert_same_operation_classes_v1(
+        &classes,
+        THREAD_CONTENDERS,
+        DurableContentionObservationV1::read(&fixture.database),
+    );
     fixture.reopen_and_verify(1);
 }
 
@@ -383,16 +412,22 @@ fn run_process_round_v1(mode: &str) {
         .into_iter()
         .map(|bytes| match bytes.as_slice() {
             b"committed" => CommitClassV1::Committed,
+            b"unclassified" => CommitClassV1::Unclassified,
             b"conflict" => CommitClassV1::Conflict,
             b"exhausted" => CommitClassV1::Exhausted,
             b"busy" => CommitClassV1::Busy,
+            b"deadline" => CommitClassV1::Deadline,
+            b"unavailable" => CommitClassV1::Unavailable,
+            b"unhealthy" => CommitClassV1::Unhealthy,
             _ => CommitClassV1::Other,
         })
         .collect::<Vec<_>>();
     if mode == PROBE_SAME_OPERATION {
-        assert_same_operation_classes_v1(&classes, PROCESS_CONTENDERS);
-        DurableContentionObservationV1::read(&fixture.database)
-            .assert_exact_same_operation_winner_v1();
+        assert_same_operation_classes_v1(
+            &classes,
+            PROCESS_CONTENDERS,
+            DurableContentionObservationV1::read(&fixture.database),
+        );
         fixture.reopen_and_verify(1);
     } else {
         assert_shared_allowance_classes_v1(&classes);
@@ -440,9 +475,13 @@ fn process_probe_child_v1() {
     ));
     let result = match outcome {
         CommitClassV1::Committed => b"committed".as_slice(),
+        CommitClassV1::Unclassified => b"unclassified".as_slice(),
         CommitClassV1::Conflict => b"conflict".as_slice(),
         CommitClassV1::Exhausted => b"exhausted".as_slice(),
         CommitClassV1::Busy => b"busy".as_slice(),
+        CommitClassV1::Deadline => b"deadline".as_slice(),
+        CommitClassV1::Unavailable => b"unavailable".as_slice(),
+        CommitClassV1::Unhealthy => b"unhealthy".as_slice(),
         CommitClassV1::Other => b"other".as_slice(),
     };
     child

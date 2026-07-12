@@ -178,7 +178,8 @@ fn platform_cfg_is_confined_to_legitimate_filesystem_identity_modules() {
             // The sole semantic exception is a fail-closed Windows restore refusal:
             // acceptance and the defensive restore entry each split before any custody,
             // trust or mutation. This does not authorize an alternate implementation.
-            let semantic_source = source
+            let normalized_source = source.replace("\r\n", "\n");
+            let semantic_source = normalized_source
                 .split_once(
                     "#[cfg(all(feature = \"test-fault-injection\", not(test)))]\nmod t071_production_conformance",
                 )
