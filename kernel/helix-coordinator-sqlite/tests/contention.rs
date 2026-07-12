@@ -37,7 +37,7 @@ use prepare::{
     provision_synthetic_budget_scope_with_total_v1, SyntheticCommitModeV1,
     SyntheticPreparationCaseV1, SyntheticRecoveryModeV1,
 };
-use rusqlite::Connection;
+use rusqlite::{Connection, OpenFlags};
 use std::ffi::OsString;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -95,6 +95,10 @@ impl CoordinatorMonotonicClockV1 for ElapsedCoordinatorClockV1 {
 }
 
 struct ContentionRootV1 {
+    // A sequential table read maps the WAL index before synchronized workers touch it.
+    // Keep this idle/autocommit handle first so panic cleanup closes it before the
+    // synthetic root attempts to remove the directory on Windows.
+    _wal_anchor: Connection,
     root: SyntheticCoordinatorRootV1,
     identity: helix_coordinator_sqlite::CoordinatorRootIdentityEvidenceV1,
     database: PathBuf,
@@ -115,18 +119,44 @@ impl ContentionRootV1 {
         let database = fs::canonicalize(root.path())
             .expect("synthetic coordinator root canonicalizes")
             .join("coordinator.sqlite3");
+        let flags = OpenFlags::SQLITE_OPEN_READ_WRITE
+            | OpenFlags::SQLITE_OPEN_NO_MUTEX
+            | OpenFlags::SQLITE_OPEN_NOFOLLOW;
+        let wal_anchor = Connection::open_with_flags(&database, flags)
+            .expect("contention WAL anchor opens sequentially");
+        let journal_mode: String = wal_anchor
+            .pragma_query_value(None, "journal_mode", |row| row.get(0))
+            .expect("contention WAL anchor reads the persistent journal mode");
+        assert!(journal_mode.eq_ignore_ascii_case("wal"));
+        let singleton: i64 = wal_anchor
+            .query_row(
+                "SELECT COUNT(*) FROM coordinator_store_meta WHERE singleton = 1",
+                [],
+                |row| row.get(0),
+            )
+            .expect("contention WAL anchor maps and reads the WAL index");
+        assert_eq!(singleton, 1);
+        assert!(wal_anchor.is_autocommit());
         Self {
+            _wal_anchor: wal_anchor,
             root,
             identity,
             database,
         }
     }
 
-    fn reopen_and_verify(&self, expected_operations: u64) {
-        let reopened = self
-            .root
+    fn reopen_and_verify(self, expected_operations: u64) {
+        let Self {
+            _wal_anchor,
+            root,
+            identity,
+            database: _,
+        } = self;
+        // Exercise a genuine last-close/reopen after the contention assertions.
+        drop(_wal_anchor);
+        let reopened = root
             .open_existing_v1(
-                self.identity,
+                identity,
                 SyntheticCoordinatorClockV1::new(OPEN_NOW_MS + 1),
                 SyntheticHistoricalPlanKeyResolverV1::default(),
                 OPEN_DEADLINE_MS,
