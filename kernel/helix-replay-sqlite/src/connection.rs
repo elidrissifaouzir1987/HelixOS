@@ -18,7 +18,7 @@ use std::time::Duration;
 
 const MAX_SQLITE_BUSY_TIMEOUT_MS: u64 = i32::MAX as u64;
 const MAX_CONNECTION_ATTEMPTS: u64 = 8;
-const MAX_SETUP_GATE_ATTEMPTS: u64 = 1_000;
+const MAX_SETUP_GATE_ATTEMPTS: u64 = 5_000;
 
 #[cfg(feature = "test-fault-injection")]
 const INITIALIZATION_FAULT_ENV: &str = "HELIX_REPLAY_TEST_INITIALIZATION_FAULT";

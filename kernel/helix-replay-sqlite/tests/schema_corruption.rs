@@ -93,7 +93,7 @@ fn concurrent_empty_root_initializers_converge_on_one_complete_schema() {
     const INITIALIZERS: usize = 8;
     // This is an initialization-convergence correctness fixture, not SC-004 latency
     // evidence. Give hosted providers five seconds while the production setup gate
-    // retains its independent cap of 1,000 one-millisecond attempts.
+    // retains its independent, deadline-checked cap of 5,000 one-millisecond attempts.
     const INITIALIZATION_CORRECTNESS_BUSY_WAIT_MS: u64 = 5_000;
     let root = SyntheticTempRoot::new("concurrent-init");
     let path = Arc::new(root.path().to_path_buf());

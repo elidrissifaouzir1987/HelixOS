@@ -1157,7 +1157,7 @@ fn run_initialization_case(case_id: &str) -> Actual {
                     let trusted = TrustedLocalStoreRootV1::try_from_provisioned((*path).clone())
                         .unwrap_or_else(|_| panic!("concurrent root rejected"));
                     // This proves convergence, not a 250 ms scheduling oracle. Production
-                    // retains its independent 1,000-attempt setup-gate cap.
+                    // retains its independent, deadline-checked 5,000-attempt setup-gate cap.
                     let config = ReplayStoreConfigV1::try_new(
                         trusted,
                         INITIALIZATION_CORRECTNESS_BUSY_WAIT_MS,
