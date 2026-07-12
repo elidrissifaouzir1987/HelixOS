@@ -106,6 +106,22 @@ const T074_TRANSACTION_BOUNDARY_IDS_V1: &[&str] = &[
     "known_failure_commit_classified",
     "known_failure_no_dispatch_guard_released",
 ];
+const WINDOWS_PRODUCTION_UNREACHABLE_RESTORE_BOUNDARY_IDS_V1: &[&str] = &[
+    "restore_package_and_pinned_provenance_accepted",
+    "restore_empty_coordinator_root_reserved",
+    "restore_empty_recovery_root_reserved",
+    "restore_coordinator_database_imported",
+    "restore_wal_full_profile_established",
+    "restore_recovery_package_imported",
+    "restore_coordinator_restore_pending_committed",
+    "restore_coordinator_pending_root_marker_published",
+    "restore_recovery_restore_pending_metadata_published",
+    "restore_both_roots_closed",
+    "restore_both_roots_reopened",
+    "restore_both_roots_agreement_classified",
+    "restore_verified_preparation_restore_returned",
+    "restore_quarantine_persisted",
+];
 static PROBE_SEQUENCE: AtomicU64 = AtomicU64::new(1);
 
 #[derive(Debug, Deserialize)]
@@ -443,6 +459,17 @@ fn process_router_supports_v1(row: &FaultBoundaryRowV1) -> bool {
         || t074_transactions::supports_boundary_v1(&row.boundary_id)
 }
 
+fn release_process_kill_case_is_reachable_v1(case: &CrashCaseV1) -> bool {
+    // The public Windows v1 restore contract refuses before package capture, PAUSE or
+    // destination mutation, so none of the frozen restore boundaries is a production-
+    // reachable process-kill point on that host. The full registry remains unchanged,
+    // and production_restore_conformance plus restore_maintenance_api prove the exact
+    // fail-closed refusal independently.
+    !cfg!(windows)
+        || !WINDOWS_PRODUCTION_UNREACHABLE_RESTORE_BOUNDARY_IDS_V1
+            .contains(&case.boundary_id.as_str())
+}
+
 #[test]
 fn frozen_registry_expands_to_the_exact_controlled_release_matrix() {
     let boundaries = decode_boundaries_v1();
@@ -559,6 +586,57 @@ fn t074_process_router_partition_is_explicit_v1() {
     assert_eq!(supported_boundary_count, 123);
     assert_eq!(supported_case_count, 167);
     assert!(unsupported_boundary_ids.is_empty());
+}
+
+#[test]
+fn t086_release_process_kill_partition_matches_production_platform_contract_v1() {
+    let boundaries = decode_boundaries_v1();
+    let matrix = crash_matrix_v1();
+    let restore_boundary_ids = boundaries
+        .iter()
+        .filter(|row| row.phase == "restore")
+        .map(|row| row.boundary_id.as_str())
+        .collect::<Vec<_>>();
+    assert_eq!(
+        restore_boundary_ids,
+        WINDOWS_PRODUCTION_UNREACHABLE_RESTORE_BOUNDARY_IDS_V1
+    );
+
+    let reachable = matrix
+        .iter()
+        .filter(|case| release_process_kill_case_is_reachable_v1(case))
+        .collect::<Vec<_>>();
+    let unreachable = matrix
+        .iter()
+        .filter(|case| !release_process_kill_case_is_reachable_v1(case))
+        .collect::<Vec<_>>();
+
+    if cfg!(windows) {
+        assert_eq!(reachable.len(), 150);
+        assert_eq!(unreachable.len(), 17);
+        assert!(unreachable.iter().all(|case| case.phase == "restore"));
+        assert_eq!(
+            unreachable
+                .iter()
+                .map(|case| case.boundary_id.as_str())
+                .collect::<BTreeSet<_>>(),
+            WINDOWS_PRODUCTION_UNREACHABLE_RESTORE_BOUNDARY_IDS_V1
+                .iter()
+                .copied()
+                .collect::<BTreeSet<_>>()
+        );
+        assert_eq!(
+            unreachable
+                .iter()
+                .filter(|case| case.boundary_id == "restore_recovery_package_imported")
+                .map(|case| case.occurrence)
+                .collect::<Vec<_>>(),
+            (1..=CONTROLLED_RESTORE_PACKAGES).collect::<Vec<_>>()
+        );
+    } else {
+        assert_eq!(reachable.len(), EXPECTED_MATRIX_CASES);
+        assert!(unreachable.is_empty());
+    }
 }
 
 struct ProbeRootV1 {
@@ -866,7 +944,22 @@ fn release_process_kill_matrix_reopens_to_one_closed_state() {
 
     let matrix = crash_matrix_v1();
     assert_eq!(matrix.len(), EXPECTED_MATRIX_CASES);
-    for case in &matrix {
+    let reachable_case_count = matrix
+        .iter()
+        .filter(|case| release_process_kill_case_is_reachable_v1(case))
+        .count();
+    assert_eq!(
+        reachable_case_count,
+        if cfg!(windows) {
+            150
+        } else {
+            EXPECTED_MATRIX_CASES
+        }
+    );
+    for case in matrix
+        .iter()
+        .filter(|case| release_process_kill_case_is_reachable_v1(case))
+    {
         run_kill_and_reopen_case_v1(case);
     }
 }

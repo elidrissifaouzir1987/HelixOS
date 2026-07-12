@@ -228,6 +228,11 @@ The held-writer test keeps `BEGIN IMMEDIATE` while preparation waits. Expected:
 Fault hooks must be absent from default builds. Enable them only in the dedicated test:
 
 ```sh
+cargo test --locked -p helix-coordinator-sqlite \
+  --features test-fault-injection \
+  --test production_restore_conformance -- --nocapture
+cargo test --locked -p helix-coordinator-sqlite \
+  --test restore_maintenance_api -- --nocapture
 cargo test --locked --release -p helix-coordinator-sqlite \
   --features test-fault-injection \
   --test process_crash -- --ignored --nocapture
@@ -237,7 +242,21 @@ The release matrix MUST match the closed exhaustive inventory in
 [Durable Preparation Contract section 14](contracts/durable-preparation-v1.md#14-closed-v1-fault-boundary-inventory)
 exactly. Every slash-separated action is an independent fault point, including both
 operation/budget preflights, final recovery revalidation, separate final UTC/monotonic
-samples and the backup generation recheck. No unlisted subset satisfies this gate.
+samples and the backup generation recheck. The frozen registry and derived matrix remain
+exactly 123 boundaries and 167 controlled cases on every host; no registry subset
+satisfies this gate.
+
+Execution is then partitioned only by the reviewed production platform contract:
+
+- macOS and Linux execute all 167 process-kill cases;
+- Windows v1 first proves the exact public `RESTORE_PLATFORM_UNSUPPORTED` refusal before
+  package capture, PAUSE or destination mutation, then executes the remaining 150
+  production-reachable cases; and
+- the Windows exclusion is exactly the 14 frozen `restore` boundary IDs, expanding to
+  17 controlled cases because `restore_recovery_package_imported` has four occurrences.
+
+Excluding any non-restore case, changing the frozen 123/167 inventory, accepting a
+weaker Windows restore fallback or omitting the separate refusal oracle fails the gate.
 
 Expected: reopen proves no coordinator operation, one complete invariant-valid
 `PREPARING`, one atomic `FAILED` transition, or explicit quarantine. No boundary yields

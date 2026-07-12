@@ -32,6 +32,18 @@ local synthetic process-kill pass, not an immutable CI result and not power-loss
 evidence. Both the benchmark and process-kill result still need immutable preservation,
 uploaded-artifact digest binding and attestations.
 
+The hosted run at source commit `b3132586245acea415104381b337d3fea3303444`
+identified one Windows harness mismatch after every earlier Windows gate, including the
+production restore-refusal oracle and release contention, had passed. The release
+process-kill parent attempted a `restore` mutation boundary even though the reviewed
+Windows v1 public contract had already returned `RESTORE_PLATFORM_UNSUPPORTED` before
+package capture, PAUSE or destination mutation. The frozen 123-boundary/167-case
+registry remains unchanged. The correction keeps all 167 cases on macOS/Linux and
+partitions Windows to the exact 150 production-reachable cases after separately proving
+the fail-closed refusal. The failed run, local correction evidence and hosted rerun
+status are retained in `ci-remediation-local.md`; none is promoted to immutable release
+evidence.
+
 The recorded at-rest label says only that FileVault was observed enabled on the local
 internal APFS volume. It does not approve an at-rest profile or establish a
 cryptographic qualification.

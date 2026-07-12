@@ -9,15 +9,15 @@ window.HELIXOS_ROADMAP_DATA = {
     }
   ],
   "currentFocus": {
-    "description": "Raise only the deadline-checked process-local setup-gate polling cap from 1,000 to 5,000 attempts, preserve the caller busy/deadline clamp plus all SQLite/root-lease/SC-004 limits, keep every concurrent initializer and healthy reopen mandatory, and confirm the unchanged three-host workspace matrices in kernel/helix-replay-sqlite/src/connection.rs, kernel/helix-replay-sqlite/tests/schema_corruption.rs, kernel/helix-replay-sqlite/tests/conformance_execution.rs, and specs/003-durable-replay-store/evidence/ci-remediation-local.md",
+    "description": "Partition the release-only process-kill executor by the existing production platform contract: retain the frozen 123-boundary/167-case registry; on Windows prove the exact pre-capture RESTORE_PLATFORM_UNSUPPORTED refusal, exclude exactly the 17 unreachable restore cases, and execute the remaining 150 cases; on non-Windows execute all 167 cases; retain the hosted remediation evidence in kernel/helix-coordinator-sqlite/tests/process_crash.rs, kernel/helix-coordinator-sqlite/tests/production_restore_conformance.rs, specs/004-durable-preparation/quickstart.md, and specs/004-durable-preparation/evidence/ci-remediation-local.md per FR-036, SC-006, and Constitution VI (partial)",
     "done": false,
-    "id": "T069",
+    "id": "T086",
     "kind": "implementation",
-    "phase": "Hosted Setup-Gate Starvation Correction (append-only finding)",
-    "phaseNumber": 12,
-    "planId": "PLAN-003",
-    "planTitle": "Durable atomic replay claim store",
-    "source": "specs/003-durable-replay-store/tasks.md#L234",
+    "phase": "Convergence",
+    "phaseNumber": 9,
+    "planId": "PLAN-004",
+    "planTitle": "Durable preparation before dispatch",
+    "source": "specs/004-durable-preparation/tasks.md#L358",
     "tags": []
   },
   "definitionOfDone": [
@@ -38,12 +38,12 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "features": [
     {
-      "completed": 27,
+      "completed": 28,
       "conformance": {
         "ciWorkflow": ".github/workflows/contracts.yml",
         "claimStatus": "pending-evidence",
         "evidence": {
-          "immutable": "not-recorded",
+          "immutable": "passing-immutable",
           "local": "not-recorded",
           "macMiniM4": "not-recorded"
         },
@@ -85,14 +85,14 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 5
         },
         {
-          "done": 3,
+          "done": 4,
           "number": 6,
           "title": "Polish & Cross-Cutting Evidence",
           "total": 4
         }
       ],
-      "remaining": 1,
-      "taskPercent": 96.4,
+      "remaining": 0,
+      "taskPercent": 100.0,
       "taskSource": "specs/001-portable-signed-contracts/tasks.md",
       "taskTitle": "Portable Signed Contracts",
       "tasks": [
@@ -416,7 +416,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Capture a successful unchanged Linux/macOS-arm64/Windows CI matrix and link its immutable run artifact from conformance/catalog.yaml",
-          "done": false,
+          "done": true,
           "id": "T028",
           "kind": "evidence",
           "phase": "Polish & Cross-Cutting Evidence",
@@ -906,7 +906,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "total": 35
     },
     {
-      "completed": 68,
+      "completed": 69,
       "conformance": {
         "ciWorkflow": ".github/workflows/durable-replay-store.yml",
         "claimStatus": "pending-evidence",
@@ -989,14 +989,14 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 2
         },
         {
-          "done": 0,
+          "done": 1,
           "number": 12,
           "title": "Hosted Setup-Gate Starvation Correction (append-only finding)",
           "total": 1
         }
       ],
-      "remaining": 1,
-      "taskPercent": 98.6,
+      "remaining": 0,
+      "taskPercent": 100.0,
       "taskSource": "specs/003-durable-replay-store/tasks.md",
       "taskTitle": "Durable Replay Claim Store",
       "tasks": [
@@ -1770,7 +1770,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Raise only the deadline-checked process-local setup-gate polling cap from 1,000 to 5,000 attempts, preserve the caller busy/deadline clamp plus all SQLite/root-lease/SC-004 limits, keep every concurrent initializer and healthy reopen mandatory, and confirm the unchanged three-host workspace matrices in kernel/helix-replay-sqlite/src/connection.rs, kernel/helix-replay-sqlite/tests/schema_corruption.rs, kernel/helix-replay-sqlite/tests/conformance_execution.rs, and specs/003-durable-replay-store/evidence/ci-remediation-local.md",
-          "done": false,
+          "done": true,
           "id": "T069",
           "kind": "implementation",
           "phase": "Hosted Setup-Gate Starvation Correction (append-only finding)",
@@ -1846,10 +1846,16 @@ window.HELIXOS_ROADMAP_DATA = {
           "number": 8,
           "title": "Convergence",
           "total": 1
+        },
+        {
+          "done": 0,
+          "number": 9,
+          "title": "Convergence",
+          "total": 1
         }
       ],
-      "remaining": 0,
-      "taskPercent": 100.0,
+      "remaining": 1,
+      "taskPercent": 98.8,
       "taskSource": "specs/004-durable-preparation/tasks.md",
       "taskTitle": "Durable Preparation Before Dispatch",
       "tasks": [
@@ -2848,41 +2854,39 @@ window.HELIXOS_ROADMAP_DATA = {
           "phaseNumber": 8,
           "source": "specs/004-durable-preparation/tasks.md#L354",
           "tags": []
+        },
+        {
+          "description": "Partition the release-only process-kill executor by the existing production platform contract: retain the frozen 123-boundary/167-case registry; on Windows prove the exact pre-capture RESTORE_PLATFORM_UNSUPPORTED refusal, exclude exactly the 17 unreachable restore cases, and execute the remaining 150 cases; on non-Windows execute all 167 cases; retain the hosted remediation evidence in kernel/helix-coordinator-sqlite/tests/process_crash.rs, kernel/helix-coordinator-sqlite/tests/production_restore_conformance.rs, specs/004-durable-preparation/quickstart.md, and specs/004-durable-preparation/evidence/ci-remediation-local.md per FR-036, SC-006, and Constitution VI (partial)",
+          "done": false,
+          "id": "T086",
+          "kind": "implementation",
+          "phase": "Convergence",
+          "phaseNumber": 9,
+          "source": "specs/004-durable-preparation/tasks.md#L358",
+          "tags": []
         }
       ],
       "title": "Durable preparation before dispatch",
-      "total": 85
+      "total": 86
     }
   ],
   "openTasks": [
     {
-      "description": "Capture a successful unchanged Linux/macOS-arm64/Windows CI matrix and link its immutable run artifact from conformance/catalog.yaml",
+      "description": "Partition the release-only process-kill executor by the existing production platform contract: retain the frozen 123-boundary/167-case registry; on Windows prove the exact pre-capture RESTORE_PLATFORM_UNSUPPORTED refusal, exclude exactly the 17 unreachable restore cases, and execute the remaining 150 cases; on non-Windows execute all 167 cases; retain the hosted remediation evidence in kernel/helix-coordinator-sqlite/tests/process_crash.rs, kernel/helix-coordinator-sqlite/tests/production_restore_conformance.rs, specs/004-durable-preparation/quickstart.md, and specs/004-durable-preparation/evidence/ci-remediation-local.md per FR-036, SC-006, and Constitution VI (partial)",
       "done": false,
-      "id": "T028",
-      "kind": "evidence",
-      "phase": "Polish & Cross-Cutting Evidence",
-      "phaseNumber": 6,
-      "planId": "PLAN-001",
-      "planTitle": "Portable canonical and signed plan identity",
-      "source": "specs/001-portable-signed-contracts/tasks.md#L115",
-      "tags": []
-    },
-    {
-      "description": "Raise only the deadline-checked process-local setup-gate polling cap from 1,000 to 5,000 attempts, preserve the caller busy/deadline clamp plus all SQLite/root-lease/SC-004 limits, keep every concurrent initializer and healthy reopen mandatory, and confirm the unchanged three-host workspace matrices in kernel/helix-replay-sqlite/src/connection.rs, kernel/helix-replay-sqlite/tests/schema_corruption.rs, kernel/helix-replay-sqlite/tests/conformance_execution.rs, and specs/003-durable-replay-store/evidence/ci-remediation-local.md",
-      "done": false,
-      "id": "T069",
+      "id": "T086",
       "kind": "implementation",
-      "phase": "Hosted Setup-Gate Starvation Correction (append-only finding)",
-      "phaseNumber": 12,
-      "planId": "PLAN-003",
-      "planTitle": "Durable atomic replay claim store",
-      "source": "specs/003-durable-replay-store/tasks.md#L234",
+      "phase": "Convergence",
+      "phaseNumber": 9,
+      "planId": "PLAN-004",
+      "planTitle": "Durable preparation before dispatch",
+      "source": "specs/004-durable-preparation/tasks.md#L358",
       "tags": []
     }
   ],
   "roadmapDate": "2026-07-10",
   "schema": "helixos.roadmap-data/1",
-  "sourceFingerprint": "e5e4a75572dc90221daeff6d560a1d98eb1a7af115c2f76bf25a23eb58c021af",
+  "sourceFingerprint": "bbfb559e76e32d5d18250c393ddc93313211ffdf3caa8072bdee005345962e5f",
   "sources": [
     {
       "path": "ROADMAP-SPECS.md",
@@ -2890,11 +2894,11 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "conformance/catalog.yaml",
-      "sha256": "5cd6e743ad0c80525434fa674d9c08aee24f514bc3161d9bd3299e94094c98e0"
+      "sha256": "39e7e519bd60b64b79bcb9724e59fadc753bea4bedb98947bc997af80c8eedc0"
     },
     {
       "path": "specs/001-portable-signed-contracts/tasks.md",
-      "sha256": "2662492a6b4025a809b91c45dfd785cc5fafb525ba32ea85191ec717eba1f0c1"
+      "sha256": "c6b1dd167693bac1387cd0db354f5cb9cf3211632b1d0682cd6343f358a3d9ca"
     },
     {
       "path": "specs/002-plan-eligibility/tasks.md",
@@ -2902,11 +2906,11 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "specs/003-durable-replay-store/tasks.md",
-      "sha256": "3e5f8e83f77694092465496c97dbb482b736e07639c1021ddea99826da7e80d3"
+      "sha256": "d28b36e30977eb42b207d62b745698dab36e89f90d7288fae7e87c0abcce71be"
     },
     {
       "path": "specs/004-durable-preparation/tasks.md",
-      "sha256": "0c5791ba976bdbdab6dac2ba71b464e943179ec9af764f2ec2a2066bc999e81f"
+      "sha256": "f5abb7f7cb1674de8b8e21b92f3dec28bf13268d8d8fd0eaaa94531c03535526"
     }
   ],
   "strategicStages": [
@@ -2925,8 +2929,8 @@ window.HELIXOS_ROADMAP_DATA = {
       "id": "R1",
       "status": "active",
       "title": "Fondation portable et coordinateur durable",
-      "trackedTaskCompleted": 215,
-      "trackedTaskTotal": 217
+      "trackedTaskCompleted": 217,
+      "trackedTaskTotal": 218
     },
     {
       "effort": "4\u20136 semaines, plus le soak.",
@@ -2987,12 +2991,12 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "summary": {
     "acceptedClaims": 0,
-    "completedTasks": 215,
-    "focusPlan": "PLAN-003",
-    "remainingTasks": 2,
+    "completedTasks": 217,
+    "focusPlan": "PLAN-004",
+    "remainingTasks": 1,
     "strategicStage": "R1",
     "totalClaims": 4,
-    "trackedTaskPercent": 99.1,
-    "trackedTasks": 217
+    "trackedTaskPercent": 99.5,
+    "trackedTasks": 218
   }
 };

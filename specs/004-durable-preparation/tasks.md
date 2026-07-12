@@ -352,3 +352,7 @@ Serialize package/restore integration: T071 -> T072 -> T073 -> T074 -> T075
 ## Phase 8: Convergence
 
 - [X] T085 Record Option B: Feature 004 exposes only two bounded non-constructible redacted read-only evidence projections with no public producer, keeps all authority-bearing restore maintenance crate-internal, and defers the sovereign host and activation facade to a later feature; align `specs/004-durable-preparation/spec.md`, `specs/004-durable-preparation/research.md`, `specs/004-durable-preparation/plan.md`, `specs/004-durable-preparation/contracts/durable-preparation-v1.md`, and `specs/004-durable-preparation/tasks.md` without renumbering completed work
+
+## Phase 9: Convergence
+
+- [ ] T086 Partition the release-only process-kill executor by the existing production platform contract: retain the frozen 123-boundary/167-case registry; on Windows prove the exact pre-capture `RESTORE_PLATFORM_UNSUPPORTED` refusal, exclude exactly the 17 unreachable restore cases, and execute the remaining 150 cases; on non-Windows execute all 167 cases; retain the hosted remediation evidence in `kernel/helix-coordinator-sqlite/tests/process_crash.rs`, `kernel/helix-coordinator-sqlite/tests/production_restore_conformance.rs`, `specs/004-durable-preparation/quickstart.md`, and `specs/004-durable-preparation/evidence/ci-remediation-local.md` per FR-036, SC-006, and Constitution VI (partial)
