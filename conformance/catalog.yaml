@@ -63,6 +63,16 @@ entries:
       instructions: contracts/fixtures/plan-eligibility-v1/README.md
       summary_schema: helixos.plan-eligibility-summary/1
     ci_workflow: .github/workflows/plan-eligibility.yml
+    ci_evidence_policy:
+      artifact_subject: actions-upload-artifact-output-digest
+      artifact_digest: actions-upload-artifact-artifact-digest-output
+      retention_days: 90
+      attestation_action: actions/attest@a1948c3f048ba23858d222213b7c278aabede763
+      attestation_events:
+        - push
+        - workflow_dispatch
+      pull_request_evidence: validation-only-no-attestation
+      catalog_update_required_before_claim: true
     toolchain:
       manifest: kernel/rust-toolchain.toml
       rust: 1.96.1
@@ -118,32 +128,58 @@ entries:
         redaction_artifact: pending
         removal_artifact: pending
       immutable:
-        status: pending
-        commit: pending
-        ci_run: pending
-        expected_outcomes_digest_sha256: pending
-        artifact: pending
-        artifact_digest_sha256: pending
-        attestation: pending
-        preservation_location: pending
+        status: passing-immutable
+        commit: ef6a8ddf904542fa699bd43cf113fd83de581f8d
+        ci_run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29188649589
+        validation_artifact: specs/002-plan-eligibility/evidence/ci-immutable-ef6a8ddf904542fa699bd43cf113fd83de581f8d.md
+        validation_digest_sha256: aeecf88140ef26aebbaf077c337f24e60a1127c0d63e177498a5ef1b16c9fca3
+        expected_outcomes_digest_sha256: 258fcd002c335a1f25070e593ae97eb7472b2fe55342134058e2e4e470af7bbb
+        artifact: per-platform-below
+        uploaded_artifact_digest_sha256: per-platform-below
+        artifact_retention_days: 90
+        artifact_expires_at: "2026-10-10T10:09:07Z"
+        attestation_status: published-all-platforms
+        attestation_url: per-platform-below
+        preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29188649589
         linux_x86_64:
-          run: pending
-          artifact: pending
-          digest_sha256: pending
-          attestation: pending
-          preservation_location: pending
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29188649589/job/86639323398
+          runner_label: ubuntu-24.04
+          runner_image_os: ubuntu24
+          runner_image_version: 20260705.232.1
+          runner_os_description: Ubuntu 24.04.4 LTS
+          runner_arch: X64
+          rustc_host: x86_64-unknown-linux-gnu
+          artifact: plan-002-linux-x86_64-ef6a8ddf904542fa699bd43cf113fd83de581f8d
+          uploaded_artifact_digest_sha256: 54e94789b97ca9799b7854a0f4ba95881bc3f9afa202aa908ae7db72be60bfdf
+          attestation_url: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34941187
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29188649589/artifacts/8258816762
         macos_arm64:
-          run: pending
-          artifact: pending
-          digest_sha256: pending
-          attestation: pending
-          preservation_location: pending
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29188649589/job/86639323420
+          runner_label: macos-26
+          runner_image_os: macos26
+          runner_image_version: 20260630.0213.1
+          runner_os_description: macOS 26.4.0
+          runner_arch: ARM64
+          rustc_host: aarch64-apple-darwin
+          artifact: plan-002-macos-arm64-ef6a8ddf904542fa699bd43cf113fd83de581f8d
+          uploaded_artifact_digest_sha256: 9e9d76dd9f8023601c53c7b4d7fc0019658831bf95d6ed4c52256b754e85dec4
+          attestation_url: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34941186
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29188649589/artifacts/8258821832
         windows_x64:
-          run: pending
-          artifact: pending
-          digest_sha256: pending
-          attestation: pending
-          preservation_location: pending
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29188649589/job/86639323395
+          runner_label: windows-2022
+          runner_image_os: win22
+          runner_image_version: 20260706.237.1
+          runner_os_description: Microsoft Windows 10.0.20348
+          runner_arch: X64
+          rustc_host: x86_64-pc-windows-msvc
+          artifact: plan-002-windows-x64-ef6a8ddf904542fa699bd43cf113fd83de581f8d
+          uploaded_artifact_digest_sha256: 5499b9c142f149e257f5c55146ca08a5421e1e0708fcbc782d905c9c92289495
+          attestation_url: https://github.com/elidrissifaouzir1987/HelixOS/attestations/34941188
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29188649589/artifacts/8258822450
   - acceptance_id: PLAN-003
     title: Durable atomic replay claim store
     feature: specs/003-durable-replay-store

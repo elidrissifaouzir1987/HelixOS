@@ -9,15 +9,15 @@ window.HELIXOS_ROADMAP_DATA = {
     }
   ],
   "currentFocus": {
-    "description": "Capture a successful unchanged Linux/macOS-arm64/Windows PLAN-002 matrix and record exact commit, run URL, artifact SHA-256/attestation and preserved retention location in conformance/catalog.yaml",
+    "description": "Capture a successful unchanged Linux/macOS-arm64/Windows CI matrix and link its immutable run artifact from conformance/catalog.yaml",
     "done": false,
-    "id": "T035",
+    "id": "T028",
     "kind": "evidence",
-    "phase": "Polish and Cross-Cutting Evidence",
+    "phase": "Polish & Cross-Cutting Evidence",
     "phaseNumber": 6,
-    "planId": "PLAN-002",
-    "planTitle": "Current plan eligibility before durable preparation",
-    "source": "specs/002-plan-eligibility/tasks.md#L127",
+    "planId": "PLAN-001",
+    "planTitle": "Portable canonical and signed plan identity",
+    "source": "specs/001-portable-signed-contracts/tasks.md#L115",
     "tags": []
   },
   "definitionOfDone": [
@@ -429,12 +429,12 @@ window.HELIXOS_ROADMAP_DATA = {
       "total": 28
     },
     {
-      "completed": 34,
+      "completed": 35,
       "conformance": {
         "ciWorkflow": ".github/workflows/plan-eligibility.yml",
         "claimStatus": "pending-evidence",
         "evidence": {
-          "immutable": "pending",
+          "immutable": "passing-immutable",
           "local": "pending",
           "macMiniM4": "not-recorded"
         },
@@ -476,14 +476,14 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 8
         },
         {
-          "done": 5,
+          "done": 6,
           "number": 6,
           "title": "Polish and Cross-Cutting Evidence",
           "total": 6
         }
       ],
-      "remaining": 1,
-      "taskPercent": 97.1,
+      "remaining": 0,
+      "taskPercent": 100.0,
       "taskSource": "specs/002-plan-eligibility/tasks.md",
       "taskTitle": "Current Plan Eligibility",
       "tasks": [
@@ -893,7 +893,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Capture a successful unchanged Linux/macOS-arm64/Windows PLAN-002 matrix and record exact commit, run URL, artifact SHA-256/attestation and preserved retention location in conformance/catalog.yaml",
-          "done": false,
+          "done": true,
           "id": "T035",
           "kind": "evidence",
           "phase": "Polish and Cross-Cutting Evidence",
@@ -2850,23 +2850,11 @@ window.HELIXOS_ROADMAP_DATA = {
       "planTitle": "Portable canonical and signed plan identity",
       "source": "specs/001-portable-signed-contracts/tasks.md#L115",
       "tags": []
-    },
-    {
-      "description": "Capture a successful unchanged Linux/macOS-arm64/Windows PLAN-002 matrix and record exact commit, run URL, artifact SHA-256/attestation and preserved retention location in conformance/catalog.yaml",
-      "done": false,
-      "id": "T035",
-      "kind": "evidence",
-      "phase": "Polish and Cross-Cutting Evidence",
-      "phaseNumber": 6,
-      "planId": "PLAN-002",
-      "planTitle": "Current plan eligibility before durable preparation",
-      "source": "specs/002-plan-eligibility/tasks.md#L127",
-      "tags": []
     }
   ],
   "roadmapDate": "2026-07-10",
   "schema": "helixos.roadmap-data/1",
-  "sourceFingerprint": "c089b89f75b7b208c065ab50cfe4c41aa58ad47faa337f9fe3c31a7793156eb3",
+  "sourceFingerprint": "cca7caee11248011c036cbc499289e68a47804fd9927306f7f51dc596c670a51",
   "sources": [
     {
       "path": "ROADMAP-SPECS.md",
@@ -2874,7 +2862,7 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "conformance/catalog.yaml",
-      "sha256": "36b0685d4d1ebf8f3282a2453ea713ae3f93718cae2a555ddd36599900fe0b81"
+      "sha256": "5cd6e743ad0c80525434fa674d9c08aee24f514bc3161d9bd3299e94094c98e0"
     },
     {
       "path": "specs/001-portable-signed-contracts/tasks.md",
@@ -2882,7 +2870,7 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "specs/002-plan-eligibility/tasks.md",
-      "sha256": "ac168a3904af8a346daef7f57c69e1a540cf6faad61b275c8629f871036cd483"
+      "sha256": "18db2a5919ebc3a43b878e6a835a66816e75674f9a00f43d3ad7724e70841a16"
     },
     {
       "path": "specs/003-durable-replay-store/tasks.md",
@@ -2909,7 +2897,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "id": "R1",
       "status": "active",
       "title": "Fondation portable et coordinateur durable",
-      "trackedTaskCompleted": 214,
+      "trackedTaskCompleted": 215,
       "trackedTaskTotal": 216
     },
     {
@@ -2971,12 +2959,12 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "summary": {
     "acceptedClaims": 0,
-    "completedTasks": 214,
-    "focusPlan": "PLAN-002",
-    "remainingTasks": 2,
+    "completedTasks": 215,
+    "focusPlan": "PLAN-001",
+    "remainingTasks": 1,
     "strategicStage": "R1",
     "totalClaims": 4,
-    "trackedTaskPercent": 99.1,
+    "trackedTaskPercent": 99.5,
     "trackedTasks": 216
   }
 };
