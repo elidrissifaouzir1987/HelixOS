@@ -41,8 +41,10 @@ package capture, PAUSE or destination mutation. The frozen 123-boundary/167-case
 registry remains unchanged. The correction keeps all 167 cases on macOS/Linux and
 partitions Windows to the exact 150 production-reachable cases after separately proving
 the fail-closed refusal. The failed run, local correction evidence and hosted rerun
-status are retained in `ci-remediation-local.md`; none is promoted to immutable release
-evidence.
+status are retained in `ci-remediation-local.md`. The corrected pull-request run
+`29198018266` passed on macOS arm64, Linux x86_64 and Windows x64 at exact source
+`2720fbe1042095d74db65f3d3fe71244cf38c810`; because it is validation-only and has no
+artifact attestation, it is not promoted to immutable release evidence.
 
 The recorded at-rest label says only that FileVault was observed enabled on the local
 internal APFS volume. It does not approve an at-rest profile or establish a

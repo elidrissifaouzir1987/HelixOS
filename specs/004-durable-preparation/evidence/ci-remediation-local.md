@@ -1,6 +1,7 @@
 # PLAN-004 hosted Windows process-kill reachability remediation
 
-**Status**: local correction validated; hosted rerun pending
+**Status**: local correction and hosted three-platform rerun passed
+
 **Date**: 2026-07-12
 
 This record is diagnostic and remediation evidence only. It is not an immutable
@@ -65,17 +66,30 @@ From `kernel/` with the pinned Rust/Cargo 1.96.1 toolchain and committed lockfil
 - exact partition test: 1 passed;
 - ordinary `process_crash` target with all features: 78 passed, 5 ignored;
 - exact ignored release process-kill parent on macOS arm64: 1 passed in 16.86 seconds,
-  retaining all 167 cases; and
+  retaining all 167 cases;
 - production restore platform-contract oracle: 1 passed;
 - source-order no-capture/no-mutation and public-surface oracle: 3 passed;
-- package formatting check and strict all-target/all-feature Clippy: passed; and
-- hosted Windows rerun: pending a committed source revision.
+- package formatting check and strict all-target/all-feature Clippy: passed.
+
+## Hosted corrected validation
+
+- Workflow run: [29198018266](https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29198018266)
+- Exact source: `2720fbe1042095d74db65f3d3fe71244cf38c810`
+- Event: pull request validation
+- Path/LF job [86664378199](https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29198018266/job/86664378199): passed
+- macOS arm64 job [86664398186](https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29198018266/job/86664398186): passed, including all 167 process-kill cases
+- Linux x86_64 job [86664398199](https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29198018266/job/86664398199): passed, including all 167 process-kill cases
+- Windows x64 job [86664398189](https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29198018266/job/86664398189): passed, including the public restore-refusal oracle, release contention and the exact 150-case process-kill partition
+
+The Windows release process-kill executable reported 5 passed, 0 failed and 78 filtered
+tests; the parent completed in 26.28 seconds. The complete workflow finished successfully
+at `2026-07-12T15:37:48Z`.
 
 ## Evidence boundary
 
-The correction establishes only that the release harness follows the already reviewed
-platform contract while preserving the full frozen inventory and exhaustive
-non-Windows execution. It does not add Windows clean-root restore support, qualify the
-synthetic provider for production, prove power-loss behavior, replace the physical-M4
-artifact, close pending SBOM/advisory/attestation fields or change the PLAN-004
-`pending-evidence` claim status.
+The successful pull-request run establishes only that the release harness follows the
+already reviewed platform contract while preserving the full frozen inventory and
+exhaustive non-Windows execution. It does not add Windows clean-root restore support,
+qualify the synthetic provider for production, prove power-loss behavior, replace the
+physical-M4 artifact, close pending SBOM/advisory/attestation fields or change the
+PLAN-004 `pending-evidence` claim status.

@@ -8,18 +8,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "title": "R0 n'est pas formellement ferm\u00e9"
     }
   ],
-  "currentFocus": {
-    "description": "Partition the release-only process-kill executor by the existing production platform contract: retain the frozen 123-boundary/167-case registry; on Windows prove the exact pre-capture RESTORE_PLATFORM_UNSUPPORTED refusal, exclude exactly the 17 unreachable restore cases, and execute the remaining 150 cases; on non-Windows execute all 167 cases; retain the hosted remediation evidence in kernel/helix-coordinator-sqlite/tests/process_crash.rs, kernel/helix-coordinator-sqlite/tests/production_restore_conformance.rs, specs/004-durable-preparation/quickstart.md, and specs/004-durable-preparation/evidence/ci-remediation-local.md per FR-036, SC-006, and Constitution VI (partial)",
-    "done": false,
-    "id": "T086",
-    "kind": "implementation",
-    "phase": "Convergence",
-    "phaseNumber": 9,
-    "planId": "PLAN-004",
-    "planTitle": "Durable preparation before dispatch",
-    "source": "specs/004-durable-preparation/tasks.md#L358",
-    "tags": []
-  },
+  "currentFocus": null,
   "definitionOfDone": [
     "architecture/threat model et Constitution Check sont \u00e0 jour",
     "contrats et migrations sont versionn\u00e9s",
@@ -1783,7 +1772,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "total": 69
     },
     {
-      "completed": 85,
+      "completed": 86,
       "conformance": {
         "ciWorkflow": ".github/workflows/durable-preparation.yml",
         "claimStatus": "pending-evidence",
@@ -1848,14 +1837,14 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 1
         },
         {
-          "done": 0,
+          "done": 1,
           "number": 9,
           "title": "Convergence",
           "total": 1
         }
       ],
-      "remaining": 1,
-      "taskPercent": 98.8,
+      "remaining": 0,
+      "taskPercent": 100.0,
       "taskSource": "specs/004-durable-preparation/tasks.md",
       "taskTitle": "Durable Preparation Before Dispatch",
       "tasks": [
@@ -2857,7 +2846,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Partition the release-only process-kill executor by the existing production platform contract: retain the frozen 123-boundary/167-case registry; on Windows prove the exact pre-capture RESTORE_PLATFORM_UNSUPPORTED refusal, exclude exactly the 17 unreachable restore cases, and execute the remaining 150 cases; on non-Windows execute all 167 cases; retain the hosted remediation evidence in kernel/helix-coordinator-sqlite/tests/process_crash.rs, kernel/helix-coordinator-sqlite/tests/production_restore_conformance.rs, specs/004-durable-preparation/quickstart.md, and specs/004-durable-preparation/evidence/ci-remediation-local.md per FR-036, SC-006, and Constitution VI (partial)",
-          "done": false,
+          "done": true,
           "id": "T086",
           "kind": "implementation",
           "phase": "Convergence",
@@ -2870,23 +2859,10 @@ window.HELIXOS_ROADMAP_DATA = {
       "total": 86
     }
   ],
-  "openTasks": [
-    {
-      "description": "Partition the release-only process-kill executor by the existing production platform contract: retain the frozen 123-boundary/167-case registry; on Windows prove the exact pre-capture RESTORE_PLATFORM_UNSUPPORTED refusal, exclude exactly the 17 unreachable restore cases, and execute the remaining 150 cases; on non-Windows execute all 167 cases; retain the hosted remediation evidence in kernel/helix-coordinator-sqlite/tests/process_crash.rs, kernel/helix-coordinator-sqlite/tests/production_restore_conformance.rs, specs/004-durable-preparation/quickstart.md, and specs/004-durable-preparation/evidence/ci-remediation-local.md per FR-036, SC-006, and Constitution VI (partial)",
-      "done": false,
-      "id": "T086",
-      "kind": "implementation",
-      "phase": "Convergence",
-      "phaseNumber": 9,
-      "planId": "PLAN-004",
-      "planTitle": "Durable preparation before dispatch",
-      "source": "specs/004-durable-preparation/tasks.md#L358",
-      "tags": []
-    }
-  ],
+  "openTasks": [],
   "roadmapDate": "2026-07-10",
   "schema": "helixos.roadmap-data/1",
-  "sourceFingerprint": "bbfb559e76e32d5d18250c393ddc93313211ffdf3caa8072bdee005345962e5f",
+  "sourceFingerprint": "e2b7b969e067f5e7d0501c59c7c374efc88c9b89eed8216c37becd6c3795c04a",
   "sources": [
     {
       "path": "ROADMAP-SPECS.md",
@@ -2910,7 +2886,7 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "specs/004-durable-preparation/tasks.md",
-      "sha256": "f5abb7f7cb1674de8b8e21b92f3dec28bf13268d8d8fd0eaaa94531c03535526"
+      "sha256": "a8fc4b78ff217d1a22d5aee485dec62234b44cfa12db73acb20015a445a2cae3"
     }
   ],
   "strategicStages": [
@@ -2929,7 +2905,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "id": "R1",
       "status": "active",
       "title": "Fondation portable et coordinateur durable",
-      "trackedTaskCompleted": 217,
+      "trackedTaskCompleted": 218,
       "trackedTaskTotal": 218
     },
     {
@@ -2991,12 +2967,12 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "summary": {
     "acceptedClaims": 0,
-    "completedTasks": 217,
+    "completedTasks": 218,
     "focusPlan": "PLAN-004",
-    "remainingTasks": 1,
+    "remainingTasks": 0,
     "strategicStage": "R1",
     "totalClaims": 4,
-    "trackedTaskPercent": 99.5,
+    "trackedTaskPercent": 100.0,
     "trackedTasks": 218
   }
 };
