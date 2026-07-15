@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Set, Tuple
@@ -72,6 +73,10 @@ REMOVAL_BASELINE_COMMIT = "01a9181ef83539c0516139f8285551a9dfabc3b5"
 REMOVAL_BASELINE_LOCK_SHA256 = (
     "f3b6c0cb07f9e9ddec2f6b64cb3b00f7df99fd93066315e92f1a5dfa4b3498f8"
 )
+REMOVAL_BASELINE_WORKSPACE_MANIFEST_SHA256 = (
+    "070602901680b8921d89084db4af31d98e2a23346447fbc6a4eba511295c21eb"
+)
+REMOVAL_PLAN004_MEMBERS = {"helix-plan-preparation", "helix-coordinator-sqlite"}
 REMOVAL_PROTECTED_PATHS = (
     "kernel/helix-contracts",
     "contracts/fixtures/plan-envelope-v1",
@@ -136,6 +141,63 @@ def run_checked(argv: List[str], cwd: Path) -> str:
         message = (completed.stderr or completed.stdout).strip()
         raise EvidenceError("command failed ({}): {}".format(" ".join(argv), message))
     return completed.stdout.strip()
+
+
+def _workspace_package_names(
+    metadata: dict,
+    repository: Optional[Path] = None,
+    required_paths: Iterable[str] = (),
+) -> Set[str]:
+    packages = metadata.get("packages")
+    members = metadata.get("workspace_members")
+    if not isinstance(packages, list) or not isinstance(members, list) or not members:
+        raise EvidenceError("cargo metadata lacks workspace packages")
+    by_id: Dict[str, dict] = {}
+    for package in packages:
+        package_id = package.get("id") if isinstance(package, dict) else None
+        if not isinstance(package_id, str) or not package_id or package_id in by_id:
+            raise EvidenceError("cargo metadata package identity is invalid")
+        by_id[package_id] = package
+    if any(not isinstance(member, str) for member in members) or len(members) != len(
+        set(members)
+    ):
+        raise EvidenceError("cargo metadata workspace member identities are invalid")
+    try:
+        selected = [by_id[member] for member in members]
+    except KeyError as error:
+        raise EvidenceError(
+            "cargo metadata workspace member is absent from packages: {}".format(error)
+        )
+    names = [package.get("name") for package in selected]
+    if any(not isinstance(name, str) or not name for name in names) or len(names) != len(
+        set(names)
+    ):
+        raise EvidenceError("cargo metadata workspace package names are invalid")
+    by_name = {package["name"]: package for package in selected}
+    required = set(required_paths)
+    if required:
+        if repository is None:
+            raise EvidenceError("workspace package path validation lacks repository")
+        missing = required - set(by_name)
+        if missing:
+            raise EvidenceError(
+                "cargo metadata lacks required workspace packages: {}".format(
+                    ", ".join(sorted(missing))
+                )
+            )
+        root = repository.resolve()
+        for name in sorted(required):
+            manifest = by_name[name].get("manifest_path")
+            expected = root / "kernel" / name / "Cargo.toml"
+            if (
+                not isinstance(manifest, str)
+                or Path(manifest).resolve() != expected
+                or not expected.is_file()
+            ):
+                raise EvidenceError(
+                    "cargo metadata workspace package path is invalid: {}".format(name)
+                )
+    return set(by_name)
 
 
 def git_revision(repository: Path, revision: str = "HEAD") -> str:
@@ -1531,6 +1593,84 @@ def _git_file_sha256(repository: Path, commit: str, relative: str) -> str:
     return hashlib.sha256(completed.stdout).hexdigest()
 
 
+def _validate_restored_workspace_binding(report: dict, source_members: Set[str]) -> None:
+    if not REMOVAL_PLAN004_MEMBERS.issubset(source_members):
+        raise EvidenceError("removal source lacks a PLAN-004 workspace member")
+    remaining = source_members - REMOVAL_PLAN004_MEMBERS
+    if not EXPECTED_REMOVAL_PACKAGES.issubset(remaining):
+        raise EvidenceError("removal source lacks a frozen baseline workspace member")
+    expected_detached = sorted(remaining - EXPECTED_REMOVAL_PACKAGES)
+    restored_digest = report.get("restored_baseline_workspace_manifest_sha256")
+    detached = report.get("detached_downstream_workspace_members")
+
+    # Historical schema-v1 bundles predate downstream workspace members and this
+    # additive binding. They remain verifiable only when selective PLAN-004 removal
+    # already produced the exact six-package baseline.
+    if restored_digest is None and detached is None and not expected_detached:
+        return
+    if (
+        restored_digest != REMOVAL_BASELINE_WORKSPACE_MANIFEST_SHA256
+        or detached != expected_detached
+    ):
+        raise EvidenceError("retained removal workspace restoration binding is invalid")
+
+
+def _git_workspace_package_names(repository: Path, commit: str) -> Set[str]:
+    temporary = tempfile.mkdtemp(prefix="helixos-plan004-source-metadata-")
+    worktree = Path(temporary) / "source"
+    worktree_added = False
+    try:
+        run_checked(
+            ["git", "worktree", "add", "--detach", "--force", str(worktree), commit],
+            repository,
+        )
+        worktree_added = True
+        raw = run_checked(
+            [
+                "cargo",
+                "metadata",
+                "--locked",
+                "--offline",
+                "--no-deps",
+                "--format-version",
+                "1",
+                "--manifest-path",
+                "kernel/Cargo.toml",
+            ],
+            worktree,
+        )
+        try:
+            metadata = json.loads(raw)
+        except json.JSONDecodeError as error:
+            raise EvidenceError(
+                "exact-commit cargo metadata is invalid: {}".format(error)
+            )
+        if not isinstance(metadata, dict):
+            raise EvidenceError("exact-commit cargo metadata is not an object")
+        return _workspace_package_names(
+            metadata,
+            worktree,
+            EXPECTED_REMOVAL_PACKAGES | REMOVAL_PLAN004_MEMBERS,
+        )
+    finally:
+        if worktree_added:
+            subprocess.run(
+                ["git", "worktree", "remove", "--force", str(worktree)],
+                cwd=str(repository),
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            subprocess.run(
+                ["git", "worktree", "prune"],
+                cwd=str(repository),
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        shutil.rmtree(temporary, ignore_errors=True)
+
+
 def _validate_removal_evidence(root: Path, repository: Path, commit: str) -> None:
     report = load_json(_bundle_file(root, "removal/report.json"))
     before = load_json(_bundle_file(root, "removal/protected-files-before.json"))
@@ -1538,6 +1678,9 @@ def _validate_removal_evidence(root: Path, repository: Path, commit: str) -> Non
     normalized = load_json(_bundle_file(root, "removal/metadata-after-removal.json"))
     if not all(isinstance(value, dict) for value in (report, before, after, normalized)):
         raise EvidenceError("retained removal evidence is malformed")
+    _validate_restored_workspace_binding(
+        report, _git_workspace_package_names(repository, commit)
+    )
     if (
         report.get("schema") != "helixos.plan-004-removal-drill/1"
         or report.get("result") != "passing-isolated-clean-copy-removal"

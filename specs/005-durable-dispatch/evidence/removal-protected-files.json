@@ -3570,6 +3570,10 @@
       "kernel/helix-coordinator-sqlite/tests/contract.rs",
       "kernel/helix-coordinator-sqlite/tests/portability.rs",
       "kernel/helix-coordinator-sqlite/tests/schema_corruption.rs",
+      "specs/004-durable-preparation/evidence/README.md",
+      "specs/004-durable-preparation/quickstart.md",
+      "tools/plan004_removal_drill.py",
+      "tools/plan004_supply_chain.py",
       "tools/tests/test_plan004_evidence.py"
     ],
     "policy": "Every source delta must match exactly one class. Baseline modifications are restored from frozen Git blobs; executable or derived PLAN-005 additions are deleted; specifications, retained evidence, and verification tools remain non-executable audit history."

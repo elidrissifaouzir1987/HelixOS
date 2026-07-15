@@ -425,9 +425,18 @@ python3 tools/plan004_removal_drill.py \
   --cargo-target-dir /dedicated/temporary/cargo-target
 ```
 
-Expected: the drill uses a detached clean worktree, restores the exact pre-Feature-004
-`Cargo.lock`, exposes exactly the six baseline packages, proves protected bytes
-unchanged, and passes PLAN-001, PLAN-002 semantics, PLAN-003 and legacy MVP-0. It must
+Expected: the drill uses a detached clean worktree, first proves that both PLAN-004
+workspace members exist through locked/offline semantic Cargo metadata, then restores
+the exact pre-Feature-004 `Cargo.toml` and `Cargo.lock`. Member discovery follows
+Cargo's resolved `workspace_members` identities and binds each required package to its
+exact `kernel/<name>/Cargo.toml` path rather than TOML text patterns. The
+workspace-manifest digest is
+`070602901680b8921d89084db4af31d98e2a23346447fbc6a4eba511295c21eb`; this frozen
+projection keeps the proof at exactly the six baseline packages even when later
+features added dependent workspace members. Any such later members are named as
+detached in the report for the isolated copy; their source is neither relabelled as
+PLAN-004-owned nor counted as baseline behavior. The drill proves protected bytes
+unchanged and passes PLAN-001, PLAN-002 semantics, PLAN-003 and legacy MVP-0. It must
 record the sole structural PLAN-002 skip by exact test name; it must not patch or
 silently filter any other test. Generated reports contain placeholders such as
 `<removal-root>`, `<repo>` and `<home>`, never machine paths or credentials.

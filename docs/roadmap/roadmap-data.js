@@ -2895,7 +2895,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "total": 89
     },
     {
-      "completed": 97,
+      "completed": 98,
       "conformance": {
         "ciWorkflow": ".github/workflows/durable-dispatch.yml",
         "claimStatus": "pending-evidence",
@@ -2958,6 +2958,12 @@ window.HELIXOS_ROADMAP_DATA = {
           "number": 8,
           "title": "Convergence",
           "total": 3
+        },
+        {
+          "done": 1,
+          "number": 9,
+          "title": "Convergence",
+          "total": 1
         }
       ],
       "remaining": 0,
@@ -4103,16 +4109,26 @@ window.HELIXOS_ROADMAP_DATA = {
           "phaseNumber": 8,
           "source": "specs/005-durable-dispatch/tasks.md#L332",
           "tags": []
+        },
+        {
+          "description": "Restore and fail-closed verify the frozen pre-PLAN-004 workspace manifest during the PLAN-004 exact-commit removal drill so downstream PLAN-005 workspace members cannot alter the authoritative six-package baseline; retain historical bundle verification, add current-workspace regression coverage, document the post-PLAN-005 integration behavior, refresh PLAN-005 removal classification and roadmap evidence, and require a passing clean-copy drill in tools/plan004_removal_drill.py, tools/plan004_supply_chain.py, tools/tests/test_plan004_evidence.py, specs/004-durable-preparation/quickstart.md, specs/004-durable-preparation/evidence/README.md, specs/005-durable-dispatch/evidence/removal-protected-files.json, specs/005-durable-dispatch/evidence/us4-restore-removal.md and docs/roadmap/roadmap-data.js per FR-038, SC-008, SC-009 and plan: PLAN-005-SUPPLY (partial)",
+          "done": true,
+          "id": "T098",
+          "kind": "implementation",
+          "phase": "Convergence",
+          "phaseNumber": 9,
+          "source": "specs/005-durable-dispatch/tasks.md#L336",
+          "tags": []
         }
       ],
       "title": "Durable one-shot dispatch",
-      "total": 97
+      "total": 98
     }
   ],
   "openTasks": [],
   "roadmapDate": "2026-07-13",
   "schema": "helixos.roadmap-data/1",
-  "sourceFingerprint": "fac8dc92a38ea6082506e170eebe5bb18227271e7ebda5436f1e1d9828ac04ac",
+  "sourceFingerprint": "246c823188c4bedca8786cee656c5e7bb513607bc8a352e81c554cc056333293",
   "sources": [
     {
       "path": "ROADMAP-SPECS.md",
@@ -4140,7 +4156,7 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "specs/005-durable-dispatch/tasks.md",
-      "sha256": "cfa47208360fde4bff6be7ab7fc8ab99d39199c9236cda8867016ab3c8d09680"
+      "sha256": "344533dff0403c4ce38507861c74d1a77629c8982b63dde62b8e4e872f756776"
     }
   ],
   "strategicStages": [
@@ -4159,8 +4175,8 @@ window.HELIXOS_ROADMAP_DATA = {
       "id": "R1",
       "status": "active",
       "title": "Fondation portable et coordinateur durable",
-      "trackedTaskCompleted": 318,
-      "trackedTaskTotal": 318
+      "trackedTaskCompleted": 319,
+      "trackedTaskTotal": 319
     },
     {
       "effort": "4\u20136 semaines, plus le soak.",
@@ -4221,12 +4237,12 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "summary": {
     "acceptedClaims": 0,
-    "completedTasks": 318,
+    "completedTasks": 319,
     "focusPlan": "PLAN-005",
     "remainingTasks": 0,
     "strategicStage": "R1",
     "totalClaims": 5,
     "trackedTaskPercent": 100.0,
-    "trackedTasks": 318
+    "trackedTasks": 319
   }
 };

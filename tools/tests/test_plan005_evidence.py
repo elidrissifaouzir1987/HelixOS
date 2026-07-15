@@ -175,7 +175,7 @@ class Plan005RemovalManifestTests(unittest.TestCase):
         )
         self.assertEqual(
             removal.PROTECTED_MANIFEST_SHA256,
-            "eb2c7133de8c321939d40810efa79150beb344564868dae78dad2b0504fd9df0",
+            "66569b2d563beca2d4d35c6fb15e456d8d190d7341e20790e92af109006776e0",
         )
         self.assertEqual(
             supply.REMOVAL_MANIFEST_SHA256,
@@ -260,7 +260,7 @@ class Plan005RemovalManifestTests(unittest.TestCase):
     def test_removal_policy_is_closed_sorted_and_non_overlapping(self):
         policy = self.manifest["removal_policy"]
         expected_counts = {
-            "baseline_paths_restored": 26,
+            "baseline_paths_restored": 30,
             "added_paths_removed": 29,
             "added_prefixes_removed": 5,
             "added_paths_retained_for_audit": 3,

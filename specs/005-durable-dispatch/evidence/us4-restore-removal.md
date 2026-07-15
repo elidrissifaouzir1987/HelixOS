@@ -3,11 +3,12 @@
 **Captured**: 2026-07-13
 
 **Updated**: 2026-07-15 after T094 immutable software evidence completed and the
-post-evidence historical-workflow scoping remediation passed local validation
+post-evidence historical-workflow scoping plus T098 removal-workspace remediations
+passed local validation
 
 **Branch**: `codex/plan-005-durable-dispatch`
 
-**Claim status**: `immutable software evidence passing at bf6f178; current post-evidence CI scoping locally validated; aggregate claim pending physical and external evidence`
+**Claim status**: `immutable software evidence passing at bf6f178; current post-evidence CI scoping and removal-workspace remediations locally validated; aggregate claim pending physical and external evidence`
 
 This record closes the local evidence requested by T082 and T097. It combines focused
 current PLAN-005 restore/corruption/retention suites with the historical complete
@@ -191,8 +192,8 @@ tracked leaf blob in baseline commit
 | Modes | 490 × `100644`; 5 × `100755` |
 | Full NUL inventory SHA-256 | `3495ead55ab40e469940c5a6a585064d75137eaba9af9b5adeaf51b553fba7b9` |
 | NUL path inventory SHA-256 | `0a7a3e4cda89f78a7ccda8184c9c78f7bc52073b92003d7db669e4817ac0ec11` |
-| Manifest file SHA-256 | `eb2c7133de8c321939d40810efa79150beb344564868dae78dad2b0504fd9df0` |
-| Driver SHA-256 | `0b3c589352abab939017665aecbe75f0c83b3bc72941d8aa7ae2405104b3a118` |
+| Manifest file SHA-256 | `66569b2d563beca2d4d35c6fb15e456d8d190d7341e20790e92af109006776e0` |
+| Driver SHA-256 | `a798ebfe2c5d4ae7c158cb7b0aa9552ae56302f3ccf7ef1ebdc163892ffc6e62` |
 
 Each entry contains path, Git mode, object type, blob OID and content SHA-256. The driver
 reconstructs both canonical NUL streams, resolves all 495 Git blobs and recomputes their
@@ -201,7 +202,8 @@ own baseline inventory and is itself pinned by the driver. PLAN-005 evidence, wo
 and tool paths are forced to LF by `.gitattributes` so exact bytes remain portable on
 Windows checkouts. The repinned removal class contains both the
 `dispatch_maintenance_faults.rs` target and the coordinator base-quarantine integration
-explicitly. The full PLAN-005 evidence module passes 38/38 after this synchronization.
+explicitly. The full PLAN-005 evidence module passes 38/38 after this synchronization;
+the prerequisite PLAN-004 evidence module passes 24/24, for 62/62 evidence-tool tests.
 
 The 27 user-owned dirty Rust paths remain protected through their committed baseline
 blobs but their local bytes are never copied into the removal source, edited, formatted,
@@ -238,11 +240,22 @@ smudge filters or EOL conversion, overlaid only classified working-tree deltas a
 | Source delta SHA-256 | `cab1ff43789cce3f7312d065741d8347837716648d9b82aa18b187c26226ed04` |
 
 Those counts and digests remain historical T070 observations. The current post-evidence
-policy names 26 possible baseline restoration paths: 23 cover the T097 coordinator
-base-quarantine integration, while the three additional paths restore the PLAN-001 and
-PLAN-004 workflow scoping remediation and its PLAN-004 policy test. The current bytes
-pass the filtered-source classifier, 58 evidence tests and a diagnostic isolated
-removal drill, but they postdate source `bf6f178ff605b0541b5b5dabe9c4609af0218da9`.
+policy names 30 possible baseline restoration paths: 23 cover the T097 coordinator
+base-quarantine integration, three restore the PLAN-001/PLAN-004 workflow scoping
+remediation and its PLAN-004 policy test, and four restore the T098 PLAN-004
+workspace-manifest integration in both tools and their two living documentation files.
+The implementation and policy bytes pass the filtered-source classifier and 62 evidence
+tests. The 24 PLAN-004 tests include a real Cargo workspace whose multiline-string fake
+`[workspace]` block and quoted real `"members"` key previously bypassed textual parsing;
+semantic Cargo metadata now exposes the hidden downstream member and rejects the legacy
+empty-downstream binding; a decoy manifest path is rejected as well. A complete
+diagnostic isolated removal run, executed
+immediately before this result was saved to Graphify, restored 30 baseline paths,
+removed 172 added paths, retained 36 non-executable audit paths, recovered all 495
+protected files and the exact eight-package PLAN-001-through-PLAN-004 workspace, and
+returned six zero exit codes with `tests_skipped=false`; its source-delta SHA-256 was
+`06bd0acd859dbc62d3492eccd2f511b4262f015783da4b34122d12d0f30702c7`.
+These bytes postdate source `bf6f178ff605b0541b5b5dabe9c4609af0218da9`.
 They therefore do not replace the immutable T094 record or change the catalogued
 historical counts; binding these newer bytes would require a separate exact-commit
 immutable run, which is not claimed here.
