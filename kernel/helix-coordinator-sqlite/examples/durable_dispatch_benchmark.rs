@@ -2095,6 +2095,7 @@ mod benchmark {
         Err("T084 filesystem assurance probe is not implemented on Windows".into())
     }
 
+    #[cfg(target_os = "macos")]
     fn required_labeled_value_v1(output: &str, label: &str) -> Result<String, Box<dyn Error>> {
         output
             .lines()

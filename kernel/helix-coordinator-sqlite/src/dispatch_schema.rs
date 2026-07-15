@@ -69,6 +69,7 @@ use std::sync::Mutex;
 pub(crate) mod dispatch_preflight;
 
 pub(crate) const COORDINATOR_DISPATCH_SCHEMA_VERSION_V2: i64 = 2;
+pub(crate) const ACTIVE_HANDOFF_RECORD_STATE_V1: &str = "DISPATCHING";
 pub(crate) const COORDINATOR_DISPATCH_SCHEMA_V2_SQL: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../../specs/005-durable-dispatch/contracts/coordinator-dispatch-schema-v2.sql"

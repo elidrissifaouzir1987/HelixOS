@@ -600,15 +600,15 @@ class Plan005SupplyChainTests(unittest.TestCase):
         graph = supply.build_production_graph(metadata, lock_text)
 
         supply.validate_production_graph(graph, metadata, lock_text)
-        self.assertEqual(graph["package_count"], 80)
-        self.assertEqual(graph["dependency_edge_count"], 137)
+        self.assertEqual(graph["package_count"], 84)
+        self.assertEqual(graph["dependency_edge_count"], 143)
         self.assertEqual(
             _sha256(supply.canonical_json_bytes(graph)),
             supply.EXPECTED_RELEASE_ARTIFACT_SHA256[
                 "graph/production-closure.json"
             ],
         )
-        self.assertEqual(graph["cargo_lock"]["selected_registry_package_count"], 73)
+        self.assertEqual(graph["cargo_lock"]["selected_registry_package_count"], 77)
         self.assertEqual(
             sum(package["source"] == "workspace-path" for package in graph["packages"]),
             7,
@@ -894,12 +894,12 @@ class Plan005SupplyChainTests(unittest.TestCase):
 
     def test_release_oracle_and_license_expression_are_exact(self):
         graph = {
-            "package_count": 80,
-            "dependency_edge_count": 137,
+            "package_count": 84,
+            "dependency_edge_count": 143,
         }
         inventory = {
-            "package_count": 80,
-            "external_package_count": 73,
+            "package_count": 84,
+            "external_package_count": 77,
             "workspace_package_count": 7,
             "spdx_texts": [
                 {"identifier": identifier, "kind": kind, "sha256": digest}
@@ -1313,6 +1313,15 @@ class Plan005PortabilityAndBoundaryTests(unittest.TestCase):
                 forbidden,
                 set(_toml_table(REPOSITORY / "kernel" / "helix-plan-dispatch" / "Cargo.toml", "dependencies")),
             )
+        windows_dependencies = _toml_table(
+            REPOSITORY / "kernel" / "helix-dispatch-inbox-sqlite" / "Cargo.toml",
+            "target.'cfg(windows)'.dependencies",
+        )
+        self.assertEqual(set(windows_dependencies), {"fs-id"})
+        self.assertRegex(
+            windows_dependencies["fs-id"],
+            r'^\{\s*version\s*=\s*"=0\.2\.0",\s*default-features\s*=\s*false\s*\}$',
+        )
 
     def test_production_sources_expose_no_direct_egress_ambient_secret_or_execution_token(self):
         roots = [REPOSITORY / "kernel" / crate / "src" for crate in self.CRATES]

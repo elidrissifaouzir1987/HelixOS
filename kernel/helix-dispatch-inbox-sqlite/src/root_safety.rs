@@ -55,9 +55,15 @@ struct FilesystemIdentityV1 {
     #[cfg(unix)]
     inode: u64,
     #[cfg(windows)]
-    volume_serial_number: u32,
+    volume_serial_number: u64,
     #[cfg(windows)]
-    file_index: u64,
+    file_id: u128,
+}
+
+#[derive(Clone, Copy)]
+enum FilesystemObjectKindV1 {
+    Directory,
+    RegularFile,
 }
 
 /// Provisioner-attested dedicated root that is empty or recovering initialization.
@@ -397,7 +403,7 @@ fn validate_provisioned_directory(
     if metadata.file_type().is_symlink() || !metadata.is_dir() {
         return Err(AdapterRootSafetyErrorV1::RootInvalid);
     }
-    let identity = filesystem_identity(&metadata)?;
+    let identity = filesystem_identity(&canonical, &metadata, FilesystemObjectKindV1::Directory)?;
     Ok((canonical, identity))
 }
 
@@ -410,7 +416,7 @@ fn revalidate_directory_identity(
     if metadata.file_type().is_symlink() || !metadata.is_dir() {
         return Err(AdapterRootSafetyErrorV1::RootNotDedicated);
     }
-    if &filesystem_identity(&metadata)? != expected {
+    if &filesystem_identity(path, &metadata, FilesystemObjectKindV1::Directory)? != expected {
         return Err(AdapterRootSafetyErrorV1::RootRoleMismatch);
     }
     Ok(())
@@ -606,7 +612,7 @@ fn regular_file_identity(path: &Path) -> Result<FilesystemIdentityV1, AdapterRoo
     if metadata.file_type().is_symlink() || !metadata.is_file() {
         return Err(AdapterRootSafetyErrorV1::RootNotDedicated);
     }
-    filesystem_identity(&metadata)
+    filesystem_identity(path, &metadata, FilesystemObjectKindV1::RegularFile)
 }
 
 pub(crate) fn regular_files_share_identity_v1(
@@ -618,7 +624,9 @@ pub(crate) fn regular_files_share_identity_v1(
 
 #[cfg(unix)]
 fn filesystem_identity(
+    _path: &Path,
     metadata: &fs::Metadata,
+    _expected_kind: FilesystemObjectKindV1,
 ) -> Result<FilesystemIdentityV1, AdapterRootSafetyErrorV1> {
     use std::os::unix::fs::MetadataExt as _;
     Ok(FilesystemIdentityV1 {
@@ -629,16 +637,41 @@ fn filesystem_identity(
 
 #[cfg(windows)]
 fn filesystem_identity(
-    metadata: &fs::Metadata,
+    path: &Path,
+    _metadata: &fs::Metadata,
+    expected_kind: FilesystemObjectKindV1,
 ) -> Result<FilesystemIdentityV1, AdapterRootSafetyErrorV1> {
-    use std::os::windows::fs::MetadataExt as _;
+    use std::fs::OpenOptions;
+    use std::os::windows::fs::{MetadataExt as _, OpenOptionsExt as _};
+
+    // Fixed Win32 API values. BACKUP_SEMANTICS permits directory handles and
+    // OPEN_REPARSE_POINT prevents a late path substitution from being followed.
+    const FILE_FLAG_BACKUP_SEMANTICS_V1: u32 = 0x0200_0000;
+    const FILE_FLAG_OPEN_REPARSE_POINT_V1: u32 = 0x0020_0000;
+    const FILE_ATTRIBUTE_REPARSE_POINT_V1: u32 = 0x0000_0400;
+
+    let file = OpenOptions::new()
+        .access_mode(0)
+        .custom_flags(FILE_FLAG_BACKUP_SEMANTICS_V1 | FILE_FLAG_OPEN_REPARSE_POINT_V1)
+        .open(path)
+        .map_err(|_| AdapterRootSafetyErrorV1::RootUnavailable)?;
+    let bound_metadata = file
+        .metadata()
+        .map_err(|_| AdapterRootSafetyErrorV1::RootUnavailable)?;
+    let expected_type = match expected_kind {
+        FilesystemObjectKindV1::Directory => bound_metadata.is_dir(),
+        FilesystemObjectKindV1::RegularFile => bound_metadata.is_file(),
+    };
+    if !expected_type || bound_metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT_V1 != 0 {
+        return Err(AdapterRootSafetyErrorV1::RootNotDedicated);
+    }
+    // Type, reparse status, and high-resolution identity are all read from this
+    // one still-live handle; no second path lookup can select a different object.
+    let identity =
+        fs_id::FileID::new(&file).map_err(|_| AdapterRootSafetyErrorV1::RootUnavailable)?;
     Ok(FilesystemIdentityV1 {
-        volume_serial_number: metadata
-            .volume_serial_number()
-            .ok_or(AdapterRootSafetyErrorV1::RootUnavailable)?,
-        file_index: metadata
-            .file_index()
-            .ok_or(AdapterRootSafetyErrorV1::RootUnavailable)?,
+        volume_serial_number: identity.storage_id(),
+        file_id: identity.internal_file_id(),
     })
 }
 

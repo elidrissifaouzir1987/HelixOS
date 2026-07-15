@@ -204,6 +204,10 @@ fn dependency_boundary_is_exact_pinned_bundled_and_non_ambient() {
         dependencies_in(CARGO_TOML, "dev-dependencies"),
         BTreeSet::from(["ed25519-dalek"])
     );
+    assert_eq!(
+        dependencies_in(CARGO_TOML, "target.'cfg(windows)'.dependencies"),
+        BTreeSet::from(["fs-id"])
+    );
     for exact in [
         "helix-dispatch-contracts = { path = \"../helix-dispatch-contracts\" }",
         "helix-plan-dispatch = { path = \"../helix-plan-dispatch\" }",
@@ -213,6 +217,7 @@ fn dependency_boundary_is_exact_pinned_bundled_and_non_ambient() {
         "serde_json_canonicalizer = \"=0.3.2\"",
         "sha2 = { version = \"=0.10.9\", default-features = false }",
         "ed25519-dalek = { version = \"=2.2.0\", default-features = false, features = [\"std\"] }",
+        "fs-id = { version = \"=0.2.0\", default-features = false }",
         "default = []",
         "test-fault-injection = [\"helix-plan-dispatch/test-fault-injection\"]",
     ] {
@@ -239,6 +244,23 @@ fn dependency_boundary_is_exact_pinned_bundled_and_non_ambient() {
             "forbidden dependency/feature {forbidden}"
         );
     }
+}
+
+#[test]
+fn windows_identity_binds_type_reparse_guard_and_high_resolution_id_to_one_handle() {
+    assert!(ROOT_SAFETY_SOURCE.contains("FILE_FLAG_OPEN_REPARSE_POINT_V1"));
+    assert!(ROOT_SAFETY_SOURCE.contains("FILE_ATTRIBUTE_REPARSE_POINT_V1"));
+    assert!(ROOT_SAFETY_SOURCE.contains(
+        ".custom_flags(FILE_FLAG_BACKUP_SEMANTICS_V1 | FILE_FLAG_OPEN_REPARSE_POINT_V1)"
+    ));
+    assert!(ROOT_SAFETY_SOURCE.contains("let bound_metadata = file"));
+    assert!(ROOT_SAFETY_SOURCE.contains("fs_id::FileID::new(&file)"));
+    assert!(ROOT_SAFETY_SOURCE.contains("identity.storage_id()"));
+    assert!(ROOT_SAFETY_SOURCE.contains("identity.internal_file_id()"));
+    assert!(!ROOT_SAFETY_SOURCE.contains("file_id::get_high_res_file_id(path)"));
+    assert!(ROOT_SAFETY_SOURCE.contains("MetadataExt as _"));
+    assert!(!ROOT_SAFETY_SOURCE.contains(".volume_serial_number()"));
+    assert!(!ROOT_SAFETY_SOURCE.contains(".file_index()"));
 }
 
 #[test]

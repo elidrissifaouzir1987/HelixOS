@@ -14,6 +14,9 @@ serde_json = { version = "=1.0.150", default-features = false, features = ["std"
 serde_json_canonicalizer = "=0.3.2"
 sha2 = { version = "=0.10.9", default-features = false }
 
+[target.'cfg(windows)'.dependencies]
+fs-id = { version = "=0.2.0", default-features = false }
+
 [features]
 default = []
 test-fault-injection = ["helix-plan-dispatch/test-fault-injection"]

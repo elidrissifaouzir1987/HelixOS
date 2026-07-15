@@ -18427,7 +18427,7 @@ mod t071_production_conformance {
         let expected_coordinator_state = match lifecycle {
             T096RestoreLifecycleV1::Prepared => None,
             T096RestoreLifecycleV1::Dispatching | T096RestoreLifecycleV1::AdapterReceived => {
-                Some("DISPATCHING")
+                Some(crate::dispatch_schema::ACTIVE_HANDOFF_RECORD_STATE_V1)
             }
             T096RestoreLifecycleV1::Consumed => Some("EXECUTING"),
             T096RestoreLifecycleV1::Ambiguous => Some("RECONCILIATION_REQUIRED"),

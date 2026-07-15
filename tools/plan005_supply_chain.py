@@ -59,20 +59,20 @@ EXPECTED_RUSQLITE_VERSION = plan004.EXPECTED_RUSQLITE_VERSION
 EXPECTED_FILE_ID_VERSION = plan004.EXPECTED_FILE_ID_VERSION
 
 EXPECTED_RELEASE_ORACLE = {
-    "package_count": 80,
-    "dependency_edge_count": 137,
-    "external_package_count": 73,
+    "package_count": 84,
+    "dependency_edge_count": 143,
+    "external_package_count": 77,
     "workspace_package_count": 7,
     "spdx_text_count": 10,
 }
 EXPECTED_RUSTSEC_REPORT_SHA256 = (
-    "7c3cd44a3d3e340c0ba56f9215e99a059a3eb3a7ce7faa5e6b128d239af24990"
+    "95b6445f8828c8e9a79d5ef32e225a1ff6cdbcc39d2ec1fcf24b74da2180f396"
 )
 EXPECTED_RUSTSEC_DATABASE_TIMESTAMP = "2026-07-12T09:10:54+02:00"
 EXPECTED_RELEASE_ARTIFACT_SHA256 = {
-    "graph/production-closure.json": "a607c713fdaae2df3ccc0e44184bc20ac54390a158ce87764163f457f34fe284",
-    "licenses/inventory.json": "a6e268cb73db0a54bbc7f5f8b53731d08446ba44603780f6c0c3011156ed25f4",
-    "sbom/plan-005-sbom.cdx.json": "ac678b9fabbbce711d21b98fbc979bad135f532e5091f619efca32a707c5ecf4",
+    "graph/production-closure.json": "c5b84e89350646b19773af58f5e508c646805d28bbea28fe059d98af7d512154",
+    "licenses/inventory.json": "cb648b830b004c0aafcff84b2aad852f4d4093cd3a288dcad489c6ebca275d89",
+    "sbom/plan-005-sbom.cdx.json": "feedaabe86ed6f33dba025ef85edf72fd445a2925fc25ae5df1c72d867035be9",
 }
 EXPECTED_SPDX_TEXTS = {
     "Apache-2.0": ("text", "074e6e32c86a4c0ef8b3ed25b721ca23aca83df277cd88106ef7177c354615ff"),
