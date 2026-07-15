@@ -192,8 +192,8 @@ tracked leaf blob in baseline commit
 | Modes | 490 × `100644`; 5 × `100755` |
 | Full NUL inventory SHA-256 | `3495ead55ab40e469940c5a6a585064d75137eaba9af9b5adeaf51b553fba7b9` |
 | NUL path inventory SHA-256 | `0a7a3e4cda89f78a7ccda8184c9c78f7bc52073b92003d7db669e4817ac0ec11` |
-| Manifest file SHA-256 | `66569b2d563beca2d4d35c6fb15e456d8d190d7341e20790e92af109006776e0` |
-| Driver SHA-256 | `a798ebfe2c5d4ae7c158cb7b0aa9552ae56302f3ccf7ef1ebdc163892ffc6e62` |
+| Manifest file SHA-256 | `754d0c993c744061293178a094080a4aa5e50ae06a762e492ec7cf65cb08f9c6` |
+| Driver SHA-256 | `be5f28c0f544280c4af2124a57853e988c3d58ec9e6152df7717ffe39cf6a79e` |
 
 Each entry contains path, Git mode, object type, blob OID and content SHA-256. The driver
 reconstructs both canonical NUL streams, resolves all 495 Git blobs and recomputes their
@@ -202,7 +202,8 @@ own baseline inventory and is itself pinned by the driver. PLAN-005 evidence, wo
 and tool paths are forced to LF by `.gitattributes` so exact bytes remain portable on
 Windows checkouts. The repinned removal class contains both the
 `dispatch_maintenance_faults.rs` target and the coordinator base-quarantine integration
-explicitly. The full PLAN-005 evidence module passes 38/38 after this synchronization;
+explicitly, while the non-executable PLAN-006 specification tree is retained as audit
+history. The full PLAN-005 evidence module passes 38/38 after this synchronization;
 the prerequisite PLAN-004 evidence module passes 24/24, for 62/62 evidence-tool tests.
 
 The 27 user-owned dirty Rust paths remain protected through their committed baseline

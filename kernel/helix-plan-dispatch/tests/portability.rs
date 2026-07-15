@@ -38,7 +38,7 @@ const REMOVAL_MANIFEST_BYTES: &[u8] =
 const FAULT_REGISTRY_SHA256: &str =
     "afef6e0b580a8ea62906227e25c59e7b067c7aa5dc55d5458d9ccf92f0b1ff26";
 const REMOVAL_MANIFEST_SHA256: &str =
-    "66569b2d563beca2d4d35c6fb15e456d8d190d7341e20790e92af109006776e0";
+    "754d0c993c744061293178a094080a4aa5e50ae06a762e492ec7cf65cb08f9c6";
 
 fn section_keys<'manifest>(manifest: &'manifest str, section: &str) -> BTreeSet<&'manifest str> {
     let header = format!("[{section}]");
@@ -378,7 +378,13 @@ fn removal_boundary_owns_the_portable_crate_and_all_direct_consumers() {
     assert!(removed_prefixes.contains(&"kernel/helix-plan-dispatch/"));
     assert!(removed_prefixes.contains(&"kernel/helix-dispatch-contracts/"));
     assert!(removed_prefixes.contains(&"kernel/helix-dispatch-inbox-sqlite/"));
-    assert_eq!(retained_prefixes, vec!["specs/005-durable-dispatch/"]);
+    assert_eq!(
+        retained_prefixes,
+        vec![
+            "specs/005-durable-dispatch/",
+            "specs/006-durable-signed-task-authority/"
+        ]
+    );
     assert!(retained_prefixes
         .iter()
         .all(|prefix| !"kernel/helix-plan-dispatch/".starts_with(prefix)));

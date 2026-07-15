@@ -3542,7 +3542,8 @@
       "kernel/helix-plan-dispatch/"
     ],
     "added_prefixes_retained_for_audit": [
-      "specs/005-durable-dispatch/"
+      "specs/005-durable-dispatch/",
+      "specs/006-durable-signed-task-authority/"
     ],
     "baseline_paths_restored": [
       ".gitattributes",

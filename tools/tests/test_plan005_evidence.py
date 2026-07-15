@@ -175,7 +175,7 @@ class Plan005RemovalManifestTests(unittest.TestCase):
         )
         self.assertEqual(
             removal.PROTECTED_MANIFEST_SHA256,
-            "66569b2d563beca2d4d35c6fb15e456d8d190d7341e20790e92af109006776e0",
+            "754d0c993c744061293178a094080a4aa5e50ae06a762e492ec7cf65cb08f9c6",
         )
         self.assertEqual(
             supply.REMOVAL_MANIFEST_SHA256,
@@ -264,7 +264,7 @@ class Plan005RemovalManifestTests(unittest.TestCase):
             "added_paths_removed": 29,
             "added_prefixes_removed": 5,
             "added_paths_retained_for_audit": 3,
-            "added_prefixes_retained_for_audit": 1,
+            "added_prefixes_retained_for_audit": 2,
         }
         for name, count in expected_counts.items():
             self.assertEqual(len(policy[name]), count)
@@ -283,7 +283,10 @@ class Plan005RemovalManifestTests(unittest.TestCase):
         )
         self.assertEqual(
             policy["added_prefixes_retained_for_audit"],
-            ["specs/005-durable-dispatch/"],
+            [
+                "specs/005-durable-dispatch/",
+                "specs/006-durable-signed-task-authority/",
+            ],
         )
         self.assertEqual(
             policy["added_paths_retained_for_audit"],
