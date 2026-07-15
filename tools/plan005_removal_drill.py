@@ -1188,7 +1188,6 @@ def execute_drill(args: argparse.Namespace) -> dict:
             for status_code, path in overlays:
                 _copy_overlay(repository, worktree, status_code, path)
         _assert_filesystem_inventory(worktree, source_entries, "source snapshot")
-        protected_before = _protected_snapshot(worktree, manifest)
 
         for path in actions["restored_baseline_paths"]:
             _restore_baseline_path(repository, worktree, baseline_entries[path])
@@ -1206,8 +1205,8 @@ def execute_drill(args: argparse.Namespace) -> dict:
         observed_after = _assert_filesystem_inventory(
             worktree, expected_after, "post-removal source"
         )
-        protected_after = _protected_snapshot(worktree, manifest)
-        if not all(item.get("matches_baseline") for item in protected_after.values()):
+        protected_before = _protected_snapshot(worktree, manifest)
+        if not all(item.get("matches_baseline") for item in protected_before.values()):
             raise EvidenceError("protected baseline bytes or modes differ after removal")
         for path in actions["removed_added_paths"]:
             if _safe_target(worktree, path).exists():

@@ -484,6 +484,26 @@ class Plan005RemovalSafetyTests(unittest.TestCase):
         ):
             self.assertNotIn(forbidden, source)
         self.assertIn("status_after != status_before", source)
+        execute_source = source[
+            source.index("def execute_drill(") : source.index("\ndef build_parser(")
+        ]
+        restore_position = execute_source.index(
+            'for path in actions["restored_baseline_paths"]:'
+        )
+        protected_before_position = execute_source.index(
+            "protected_before = _protected_snapshot(worktree, manifest)"
+        )
+        test_position = execute_source.index("if not args.skip_tests:")
+        protected_after_position = execute_source.index(
+            "protected_after = _protected_snapshot(worktree, manifest)"
+        )
+        self.assertLess(
+            restore_position,
+            protected_before_position,
+            "the before snapshot must observe the restored baseline",
+        )
+        self.assertLess(protected_before_position, test_position)
+        self.assertLess(test_position, protected_after_position)
 
         with tempfile.TemporaryDirectory() as directory:
             isolated = Path(directory) / "isolated"
@@ -1518,7 +1538,7 @@ class Plan005WorkflowTests(unittest.TestCase):
     def test_workflow_is_lf_only_and_all_actions_are_immutable_exact_pins(self):
         self.assertEqual(
             _sha256(self.raw),
-            "ae48c4f443745d9a63436668402ec87491150236436b23d438a7a187d9db8b5a",
+            "95fc217796caf929697651ee534b7ff40e1ca7a5c7b64959db7f32cac18b5dc4",
         )
         self.assertNotIn(b"\r", self.raw)
         self.assertNotIn(b"\t", self.raw)

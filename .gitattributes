@@ -9,6 +9,7 @@
 /specs/003-durable-replay-store/evidence/* text eol=lf whitespace=-blank-at-eof
 
 # PLAN-004 SQL, canonical JSON, fixtures and retained evidence are digest-sensitive.
+/kernel/helix-plan-preparation/src/test_fault.rs text eol=lf
 /specs/004-durable-preparation/contracts/*.json text eol=lf
 /specs/004-durable-preparation/contracts/*.sql text eol=lf
 /specs/004-durable-preparation/evidence/* text eol=lf whitespace=-blank-at-eof
