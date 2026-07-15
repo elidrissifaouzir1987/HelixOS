@@ -1508,7 +1508,7 @@ class Plan005WorkflowTests(unittest.TestCase):
     def test_workflow_is_lf_only_and_all_actions_are_immutable_exact_pins(self):
         self.assertEqual(
             _sha256(self.raw),
-            "1db21d3e5b10325e59912b54ffee91e78c5b40992773338c612e810af5e697d0",
+            "18aa4c38260aebb676a9f84710906158cdaab46fb88561430223e1e1d49423a9",
         )
         self.assertNotIn(b"\r", self.raw)
         self.assertNotIn(b"\t", self.raw)
@@ -1530,6 +1530,12 @@ class Plan005WorkflowTests(unittest.TestCase):
         for action, revision in uses:
             self.assertEqual(revision, expected[action])
             self.assertRegex(revision, r"^[0-9a-f]{40}$")
+
+    def test_path_policy_checkout_contains_the_frozen_baseline_history(self):
+        path_policy = self.job("path-policy")
+        checkout = self.step(path_policy, "Check out repository")
+        self.assertIn("fetch-depth: 0", checkout)
+        self.assertIn("persist-credentials: false", checkout)
 
     def test_matrix_has_exact_three_hosts_and_fails_closed_on_actual_identity(self):
         conformance = self.job("conformance")
