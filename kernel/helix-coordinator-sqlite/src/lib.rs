@@ -12,6 +12,21 @@ mod clock;
 mod comparison_digest;
 mod config;
 mod connection;
+mod dispatch;
+#[cfg(all(feature = "test-fault-injection", not(test)))]
+mod dispatch_corpus;
+mod dispatch_events;
+#[cfg(feature = "test-fault-injection")]
+mod dispatch_fault;
+#[allow(dead_code)] // T075 codecs are consumed by the T076-T078 backup/restore path.
+mod dispatch_manifest;
+mod dispatch_outbox;
+mod dispatch_quarantine;
+mod dispatch_queue;
+mod dispatch_readback;
+mod dispatch_receipt;
+mod dispatch_reconciliation;
+mod dispatch_schema;
 mod error;
 mod failure;
 mod maintenance;
@@ -112,8 +127,47 @@ pub use config::{
     CoordinatorRootIdentityEvidenceV1, CoordinatorStoreConfigErrorV1, CoordinatorStoreConfigV1,
 };
 pub use connection::CoordinatorStoreOpenErrorV1;
+pub use dispatch::{
+    CoordinatorDispatchCommitReceiptV1, CoordinatorDispatchUncertainCommitCustodyV1,
+};
+pub use dispatch_outbox::CoordinatorDispatchHandoffOutcomeV1;
+#[cfg(all(feature = "test-fault-injection", not(test)))]
+#[doc(hidden)]
+pub use dispatch_quarantine::{
+    classify_and_retain_t097_coordinator_history_for_test_v1,
+    clear_t097_after_projection_barrier_for_test_v1,
+    install_t097_after_projection_barrier_for_test_v1, T097CoordinatorLifecycleForTestV1,
+    T097CoordinatorObservationEvidenceV1,
+};
+pub use dispatch_queue::{
+    measure_coordinator_dispatch_queue_profile_v1, CoordinatorDispatchQueueMetricsSnapshotV1,
+    CoordinatorDispatchQueueProfileErrorV1, CoordinatorDispatchQueueV1,
+    COORDINATOR_DISPATCH_BACKPRESSURE_LIMIT_MS_V1, COORDINATOR_DISPATCH_CONTROLLED_TRIALS_V1,
+    COORDINATOR_DISPATCH_CONTROL_CAPACITY_V1, COORDINATOR_DISPATCH_CONTROL_P99_LIMIT_MS_V1,
+    COORDINATOR_DISPATCH_DUPLICATE_FLOOD_V1, COORDINATOR_DISPATCH_ORDINARY_CAPACITY_V1,
+};
+pub use dispatch_receipt::{
+    CoordinatorReceiptCommitEvidenceV1, CoordinatorReceiptCommitOutcomeV1,
+    CoordinatorReceiptEffectiveStateV1, CoordinatorReceiptLookupErrorV1,
+    CoordinatorReceiptLookupV1, CoordinatorReceiptUncertainCustodyV1,
+};
+pub use dispatch_reconciliation::{
+    CoordinatorAutomaticReadbackPermitV1, CoordinatorDefiniteRefusalEvidenceV1,
+    CoordinatorDefiniteRefusalOutcomeV1, CoordinatorDefiniteRefusalUncertainCustodyV1,
+    CoordinatorReadbackExhaustionErrorV1, CoordinatorReadbackExhaustionV1,
+    CoordinatorReadbackSequenceClaimErrorV1, CoordinatorReadbackSequenceClaimEvidenceV1,
+    CoordinatorReadbackSequenceClaimOutcomeV1, CoordinatorReadbackSequenceClaimV1,
+    CoordinatorReconciliationEvidenceV1, CoordinatorReconciliationLookupErrorV1,
+    CoordinatorReconciliationLookupV1, CoordinatorReconciliationOutcomeV1,
+    CoordinatorReconciliationStateV1,
+};
+pub use dispatch_schema::{SqliteCoordinatorStoreV2, SqliteDispatchReloadedV1};
 pub use error::CoordinatorClockUnavailableV1;
-pub use maintenance::{RestoredPreparationMaintenanceEvidenceV1, VerifiedPreparationRestoreV1};
+pub use maintenance::{
+    CleanDispatchRestoreRootsV1, IrrevocablyExpiredRestoredGrantV1,
+    RestoredPossibleConsumptionQuarantineV1, RestoredPreparationMaintenanceEvidenceV1,
+    VerifiedDispatchRestoreV1, VerifiedPreparationRestoreV1,
+};
 pub use schema::{
     embedded_schema_v1_sha256, COORDINATOR_STORE_APPLICATION_ID_V1,
     COORDINATOR_STORE_FORMAT_VERSION_V1, COORDINATOR_STORE_SCHEMA_V1_SQL,
@@ -139,6 +193,270 @@ pub fn run_t071_production_conformance_for_test_v1() -> Result<(), &'static str>
 #[cfg(all(feature = "test-fault-injection", not(test)))]
 pub fn run_t072_production_conformance_for_test_v1() -> Result<(), &'static str> {
     maintenance::run_t072_production_conformance_v1()
+}
+
+/// Runs the exact production T076 sequential dispatch-backup path for the external gate.
+///
+/// The facade is non-default, returns only static phase labels, and exposes no path,
+/// component bytes, signature material, or maintenance authority.
+#[doc(hidden)]
+#[cfg(all(feature = "test-fault-injection", not(test)))]
+pub fn run_t076_production_conformance_for_test_v1() -> Result<(), &'static str> {
+    maintenance::run_t076_production_conformance_v1()
+}
+
+/// Runs the exact production T077 clean dispatch restore and exact-retry path.
+///
+/// This hidden feature-only facade returns no path, identity, package material or
+/// maintenance authority.
+#[doc(hidden)]
+#[cfg(all(feature = "test-fault-injection", not(test)))]
+pub fn run_t077_production_conformance_for_test_v1() -> Result<(), &'static str> {
+    maintenance::run_t077_production_conformance_v1()
+}
+
+/// Runs the five-case T096 production backup and clean-restore lifecycle matrix.
+///
+/// This hidden feature-only facade accepts no caller data and returns no path, identity,
+/// grant, receipt, package material, restore binding or maintenance authority.
+#[doc(hidden)]
+#[cfg(all(feature = "test-fault-injection", not(test)))]
+pub fn run_t096_production_restore_matrix_for_test_v1() -> Result<(), &'static str> {
+    maintenance::run_t096_production_restore_matrix_v1()
+}
+
+/// Creates one pair of closed, strict production lifecycle roots for T097 fault injection.
+///
+/// This non-default helper is create-only and returns no identifier, canonical wire,
+/// signing material or execution authority.
+#[doc(hidden)]
+#[cfg(all(feature = "test-fault-injection", not(test)))]
+pub fn materialize_t097_production_lifecycle_for_test_v1(
+    lifecycle: T097CoordinatorLifecycleForTestV1,
+    coordinator_destination: &std::path::Path,
+    adapter_destination: &std::path::Path,
+) -> Result<(), &'static str> {
+    dispatch_corpus::materialize_t097_lifecycle_source_v1(
+        lifecycle,
+        coordinator_destination,
+        adapter_destination,
+    )
+}
+
+/// Runs one frozen PLAN-005 migration fault through the real verified-backup cut.
+///
+/// This non-default facade accepts only FB072-FB076. The first callback lets a
+/// synchronized driver publish READY after the writer cut and all custodies exist;
+/// the second callback is owned by the selected production checkpoint.
+#[doc(hidden)]
+#[cfg(all(feature = "test-fault-injection", not(test)))]
+pub fn run_t070_migration_fault_probe_for_test_v1<F, G>(
+    boundary_id: &str,
+    occurrence: u64,
+    mode: helix_plan_dispatch::FaultInjectionModeV1,
+    probe_root: std::path::PathBuf,
+    workflow_ready: F,
+    process_barrier: G,
+) -> Result<(), &'static str>
+where
+    F: FnOnce() -> Result<(), &'static str>,
+    G: FnMut() + Send + 'static,
+{
+    maintenance::run_t070_migration_fault_probe_v1(
+        boundary_id,
+        occurrence,
+        mode,
+        probe_root,
+        workflow_ready,
+        process_barrier,
+    )
+}
+
+/// Strictly reopens one caller-owned FB072-FB076 case and verifies exact V1 rollback
+/// or exact committed V2, without rerunning migration SQL.
+#[doc(hidden)]
+#[cfg(all(feature = "test-fault-injection", not(test)))]
+pub fn verify_t070_migration_fault_readback_for_test_v1(
+    boundary_id: &str,
+    probe_root: std::path::PathBuf,
+) -> Result<(), &'static str> {
+    maintenance::verify_t070_migration_fault_readback_v1(boundary_id, probe_root)
+}
+
+/// Runs one frozen PLAN-005 backup or restore fault through the real SQLite lifecycle.
+///
+/// This non-default facade accepts only FB077-FB090. READY is caller-owned and runs
+/// after the complete fixture exists; the process callback is invoked only by the
+/// selected production checkpoint.
+#[doc(hidden)]
+#[cfg(all(feature = "test-fault-injection", not(test)))]
+pub fn run_t070_dispatch_lifecycle_fault_probe_for_test_v1<F, G>(
+    boundary_id: &str,
+    occurrence: u64,
+    mode: helix_plan_dispatch::FaultInjectionModeV1,
+    probe_root: std::path::PathBuf,
+    workflow_ready: F,
+    process_barrier: G,
+) -> Result<(), &'static str>
+where
+    F: FnOnce() -> Result<(), &'static str>,
+    G: FnMut() + Send + 'static,
+{
+    maintenance::run_t070_dispatch_lifecycle_fault_probe_v1(
+        boundary_id,
+        occurrence,
+        mode,
+        probe_root,
+        workflow_ready,
+        process_barrier,
+    )
+}
+
+/// Strictly reopens one caller-owned FB077-FB090 case and verifies that no partial
+/// backup became consumable and no restored root gained activation or redelivery.
+#[doc(hidden)]
+#[cfg(all(feature = "test-fault-injection", not(test)))]
+pub fn verify_t070_dispatch_lifecycle_fault_readback_for_test_v1(
+    boundary_id: &str,
+    probe_root: std::path::PathBuf,
+) -> Result<(), &'static str> {
+    maintenance::verify_t070_dispatch_lifecycle_fault_readback_v1(boundary_id, probe_root)
+}
+
+/// Explicitly resumes one already-verified FB084-FB090 restore and proves exact retry.
+///
+/// This mutating phase is deliberately separate from the strict durable-readback facade
+/// above, so a process-kill result is classified before any recovery write occurs.
+#[doc(hidden)]
+#[cfg(all(feature = "test-fault-injection", not(test)))]
+pub fn resume_t070_dispatch_lifecycle_fault_recovery_for_test_v1(
+    boundary_id: &str,
+    probe_root: std::path::PathBuf,
+) -> Result<(), &'static str> {
+    maintenance::resume_t070_dispatch_lifecycle_fault_recovery_v1(boundary_id, probe_root)
+}
+
+/// Measured, payload-free SQLite projection returned by the T080 production corpus gate.
+#[doc(hidden)]
+#[cfg(all(feature = "test-fault-injection", not(test)))]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct T080ProductionCorpusEvidenceV1 {
+    migration_count: u64,
+    coordinator_grant_count: u64,
+    coordinator_executing_count: u64,
+    coordinator_reconciliation_required_count: u64,
+    coordinator_receipt_count: u64,
+    adapter_grant_count: u64,
+    adapter_consumed_count: u64,
+    adapter_receipt_count: u64,
+    adapter_transition_count: u64,
+    replacement_grant_count: u64,
+    automatic_redelivery_count: u64,
+    execution_authority_object_count: u64,
+    clean_restore_verified: bool,
+}
+
+#[cfg(all(feature = "test-fault-injection", not(test)))]
+impl T080ProductionCorpusEvidenceV1 {
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) const fn new_v1(
+        migration_count: u64,
+        coordinator_grant_count: u64,
+        coordinator_executing_count: u64,
+        coordinator_reconciliation_required_count: u64,
+        coordinator_receipt_count: u64,
+        adapter_grant_count: u64,
+        adapter_consumed_count: u64,
+        adapter_receipt_count: u64,
+        adapter_transition_count: u64,
+        replacement_grant_count: u64,
+        automatic_redelivery_count: u64,
+        execution_authority_object_count: u64,
+    ) -> Self {
+        Self {
+            migration_count,
+            coordinator_grant_count,
+            coordinator_executing_count,
+            coordinator_reconciliation_required_count,
+            coordinator_receipt_count,
+            adapter_grant_count,
+            adapter_consumed_count,
+            adapter_receipt_count,
+            adapter_transition_count,
+            replacement_grant_count,
+            automatic_redelivery_count,
+            execution_authority_object_count,
+            clean_restore_verified: false,
+        }
+    }
+
+    pub(crate) const fn with_clean_restore_verified_v1(mut self) -> Self {
+        self.clean_restore_verified = true;
+        self
+    }
+
+    pub const fn migration_count(self) -> u64 {
+        self.migration_count
+    }
+
+    pub const fn coordinator_grant_count(self) -> u64 {
+        self.coordinator_grant_count
+    }
+
+    pub const fn coordinator_executing_count(self) -> u64 {
+        self.coordinator_executing_count
+    }
+
+    pub const fn coordinator_reconciliation_required_count(self) -> u64 {
+        self.coordinator_reconciliation_required_count
+    }
+
+    pub const fn coordinator_receipt_count(self) -> u64 {
+        self.coordinator_receipt_count
+    }
+
+    pub const fn adapter_grant_count(self) -> u64 {
+        self.adapter_grant_count
+    }
+
+    pub const fn adapter_consumed_count(self) -> u64 {
+        self.adapter_consumed_count
+    }
+
+    pub const fn adapter_receipt_count(self) -> u64 {
+        self.adapter_receipt_count
+    }
+
+    pub const fn adapter_transition_count(self) -> u64 {
+        self.adapter_transition_count
+    }
+
+    pub const fn replacement_grant_count(self) -> u64 {
+        self.replacement_grant_count
+    }
+
+    pub const fn automatic_redelivery_count(self) -> u64 {
+        self.automatic_redelivery_count
+    }
+
+    pub const fn execution_authority_object_count(self) -> u64 {
+        self.execution_authority_object_count
+    }
+
+    pub const fn clean_restore_verified(self) -> bool {
+        self.clean_restore_verified
+    }
+}
+
+/// Runs the unchanged T080 no-effect corpus through both strict SQLite authority roots.
+///
+/// This feature-only facade accepts no caller data and returns no path, identity, grant,
+/// receipt, signing material, restore binding, or activation authority.
+#[doc(hidden)]
+#[cfg(all(feature = "test-fault-injection", not(test)))]
+pub fn run_t080_production_corpus_for_test_v1(
+) -> Result<T080ProductionCorpusEvidenceV1, &'static str> {
+    dispatch_corpus::run_v1()
 }
 
 /// Runs one explicitly selected process barrier through a production workflow.

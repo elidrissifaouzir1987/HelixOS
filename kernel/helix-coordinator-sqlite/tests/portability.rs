@@ -254,6 +254,9 @@ fn direct_dependencies_are_closed_pinned_and_bundled() {
             "ed25519-dalek",
             "getrandom",
             "helix-contracts",
+            "helix-dispatch-contracts",
+            "helix-dispatch-inbox-sqlite",
+            "helix-plan-dispatch",
             "helix-plan-preparation",
             "rusqlite",
             "serde",
@@ -392,17 +395,43 @@ fn durability_and_supply_chain_have_no_weaker_semantic_fallback() {
         .0;
     for required in [
         "PRAGMA journal_mode = WAL",
-        "pragma_update(None, \"synchronous\", \"FULL\")",
-        "pragma_update(None, \"foreign_keys\", \"ON\")",
-        "pragma_update(None, \"trusted_schema\", \"OFF\")",
-        "pragma_update(None, \"cell_size_check\", \"ON\")",
-        "pragma_update(None, \"recursive_triggers\", \"ON\")",
-        "pragma_update(None, \"wal_autocheckpoint\", 0_i64)",
+        "PRAGMA synchronous = FULL;",
+        "PRAGMA foreign_keys = ON;",
+        "PRAGMA trusted_schema = OFF;",
+        "PRAGMA cell_size_check = ON;",
+        "PRAGMA recursive_triggers = ON;",
+        "PRAGMA wal_autocheckpoint = 0;",
         "verify_profile(connection)",
     ] {
         assert!(
             configure.contains(required),
             "missing strict durability step {required}"
+        );
+    }
+    let verify = CONNECTION_SOURCE
+        .split_once("fn verify_profile(")
+        .expect("connection profile verifier must exist")
+        .1
+        .split_once("fn profile_pragma_i64(")
+        .expect("connection profile verifier must remain bounded")
+        .0;
+    for required in [
+        "(SELECT journal_mode FROM temp.pragma_journal_mode())",
+        "(SELECT synchronous FROM temp.pragma_synchronous())",
+        "(SELECT foreign_keys FROM temp.pragma_foreign_keys())",
+        "(SELECT trusted_schema FROM temp.pragma_trusted_schema())",
+        "(SELECT cell_size_check FROM temp.pragma_cell_size_check())",
+        "(SELECT recursive_triggers FROM temp.pragma_recursive_triggers())",
+        "profile.1 != 2",
+        "profile.2 != 1",
+        "profile.3 != 0",
+        "profile.4 != 1",
+        "profile.5 != 1",
+        "profile_pragma_i64(connection, \"wal_autocheckpoint\")? != 0",
+    ] {
+        assert!(
+            verify.contains(required),
+            "missing strict durability verification {required}"
         );
     }
     assert_absent(

@@ -259,6 +259,37 @@ impl RestorePackageCustodyV1 {
         Ok((digest, length))
     }
 
+    /// Clones the retained read-only handle for a provider-neutral restore port.
+    ///
+    /// The clone carries no path and is returned only after the exact inode, length and
+    /// captured digest are revalidated. The package custody remains authoritative and must
+    /// be rechecked again after the provider finishes with the clone.
+    pub(crate) fn clone_member_file_v1(
+        &self,
+        relative_name: &str,
+        maximum_length: u64,
+    ) -> Result<(File, u64, Sha256Digest), InternalCoordinatorError> {
+        validate_normalized_restore_member_name_v1(relative_name)?;
+        let index = self.file_index_v1(relative_name)?;
+        let binding = &self.files[index];
+        if binding.length > maximum_length {
+            return Err(InternalCoordinatorError::RootInvalid);
+        }
+        self.revalidate_member_content_v1(index)?;
+        let file = binding
+            .file
+            .try_clone()
+            .map_err(|_| InternalCoordinatorError::RootUnavailable)?;
+        let metadata = file
+            .metadata()
+            .map_err(|_| InternalCoordinatorError::RootUnavailable)?;
+        if !metadata.is_file() || metadata.len() != binding.length {
+            return Err(InternalCoordinatorError::RootRoleMismatch);
+        }
+        self.revalidate_member_content_v1(index)?;
+        Ok((file, binding.length, binding.sha256))
+    }
+
     /// Copies one captured member into an already-created empty regular file.
     ///
     /// Source bytes are read only through the retained package handle. The destination is
@@ -479,6 +510,24 @@ impl ProvisionedEmptyCoordinatorRootV1 {
         revalidate_directory_identity(&self.path, self.directory_identity)?;
         validate_initialization_attestation_members(&self.path)?;
         Ok(lock_path_identity_if_present(&self.path)?.is_some())
+    }
+
+    /// Counts the exact attested destination members before any restore mutation.
+    pub(crate) fn destination_entry_count_v1(&self) -> Result<u64, InternalCoordinatorError> {
+        revalidate_directory_identity(&self.path, self.directory_identity)?;
+        validate_initialization_attestation_members(&self.path)?;
+        let count = fs::read_dir(&self.path)
+            .map_err(|_| InternalCoordinatorError::RootUnavailable)?
+            .try_fold(0_u64, |count, entry| {
+                entry.map_err(|_| InternalCoordinatorError::RootUnavailable)?;
+                count
+                    .checked_add(1)
+                    .filter(|value| *value <= 4)
+                    .ok_or(InternalCoordinatorError::RootNotDedicated)
+            })?;
+        revalidate_directory_identity(&self.path, self.directory_identity)?;
+        validate_initialization_attestation_members(&self.path)?;
+        Ok(count)
     }
 
     pub(crate) fn attested_directory_binding_sha256_v1(&self) -> Sha256Digest {
@@ -807,6 +856,39 @@ impl CoordinatorRestoreRootCustodyV1 {
         self.revalidate_imported_database_v1()
     }
 
+    /// Installs one immutable package member into the create-only destination inode.
+    pub(crate) fn import_package_database_member_v1(
+        &mut self,
+        package: &RestorePackageCustodyV1,
+        relative_name: &str,
+        maximum_length: u64,
+    ) -> Result<(Sha256Digest, u64), InternalCoordinatorError> {
+        if self.database_import_already_present {
+            return Err(InternalCoordinatorError::RootRoleMismatch);
+        }
+        if self.database_binding.is_none() {
+            self.reserve_database_import_create_new_v1()?;
+        }
+        self.revalidate_imported_database_v1()?;
+        let binding = self
+            .database_binding
+            .as_mut()
+            .ok_or(InternalCoordinatorError::RootRoleMismatch)?;
+        if binding
+            .file
+            .metadata()
+            .map_err(|_| InternalCoordinatorError::RootUnavailable)?
+            .len()
+            != 0
+        {
+            return Err(InternalCoordinatorError::RootRoleMismatch);
+        }
+        let copied = package.copy_member_to_v1(relative_name, &mut binding.file, maximum_length)?;
+        sync_directory_entry(&self.root)?;
+        self.revalidate_imported_database_v1()?;
+        Ok(copied)
+    }
+
     /// Returns the create-only reserved path to the crate-private SQLite restore pipeline.
     pub(crate) fn database_path_v1(&mut self) -> Result<PathBuf, InternalCoordinatorError> {
         self.revalidate_imported_database_v1()?;
@@ -855,6 +937,43 @@ impl CoordinatorRestoreRootCustodyV1 {
         remaining_monotonic_ms(clock, deadline_monotonic_ms)?;
         self.revalidate_imported_database_v1()?;
         if pending_proof.summary().root_identity != self.new_root_identity {
+            return Err(InternalCoordinatorError::RootIdentityMismatch);
+        }
+        drop(connection);
+        self.revalidate_imported_database_v1()?;
+        remaining_monotonic_ms(clock, deadline_monotonic_ms)?;
+        self.finalize_verified_restore_pending_v1()
+    }
+
+    /// Dispatch-V2 counterpart of the base finalizer; it proves both metadata projections.
+    #[cfg(not(test))]
+    pub(crate) fn finalize_dispatch_restore_pending_publication_v1<C, R>(
+        mut self,
+        pending_bindings: crate::dispatch_schema::DispatchRestorePendingBindingsV1,
+        historical_plan_keys: &R,
+        maximum_busy_wait_ms: u64,
+        clock: &C,
+        deadline_monotonic_ms: u64,
+    ) -> Result<CoordinatorPendingRootCustodyV1, InternalCoordinatorError>
+    where
+        C: CoordinatorMonotonicClockV1 + ?Sized,
+        R: Ed25519KeyResolver,
+    {
+        self.revalidate_imported_database_v1()?;
+        let connection = open_restore_pending_verification_connection_v1(
+            &self.root,
+            maximum_busy_wait_ms,
+            clock,
+            deadline_monotonic_ms,
+        )?;
+        let pending_proof = crate::dispatch_schema::verify_dispatch_restore_pending_v1(
+            &connection,
+            pending_bindings,
+            historical_plan_keys,
+        )?;
+        remaining_monotonic_ms(clock, deadline_monotonic_ms)?;
+        self.revalidate_imported_database_v1()?;
+        if pending_proof.root_identity() != self.new_root_identity {
             return Err(InternalCoordinatorError::RootIdentityMismatch);
         }
         drop(connection);
@@ -2396,14 +2515,14 @@ fn filesystem_identity(
 }
 
 #[cfg(unix)]
-fn sync_directory_entry(root: &Path) -> Result<(), InternalCoordinatorError> {
+pub(crate) fn sync_directory_entry(root: &Path) -> Result<(), InternalCoordinatorError> {
     File::open(root)
         .and_then(|directory| directory.sync_all())
         .map_err(|_| InternalCoordinatorError::RootUnavailable)
 }
 
 #[cfg(windows)]
-fn sync_directory_entry(_root: &Path) -> Result<(), InternalCoordinatorError> {
+pub(crate) fn sync_directory_entry(_root: &Path) -> Result<(), InternalCoordinatorError> {
     // Stable std cannot open a directory with FILE_FLAG_BACKUP_SEMANTICS without unsafe
     // platform bindings. The newly-created lock file itself is flushed above; all later
     // admission boundaries still revalidate its high-resolution volume/file identity.

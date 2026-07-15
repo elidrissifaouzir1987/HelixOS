@@ -621,7 +621,7 @@
           <div class="dial" id="task-dial" role="progressbar" aria-label="Tâches terminées dans les spécifications suivies" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <div class="dial-value"><strong id="dial-percent">—</strong><span>tâches suivies</span></div>
           </div>
-          <p class="dial-note"><strong id="dial-count">—</strong> tâches terminées dans PLAN-001 à PLAN-004. Ce ratio ne mesure pas R0–R8 en entier.</p>
+          <p class="dial-note"><strong id="dial-count">—</strong> tâches terminées dans les plans suivis. Ce ratio ne mesure pas R0–R8 en entier.</p>
         </aside>
       </div>
     </div>
@@ -661,7 +661,7 @@
 
     <section id="plans" aria-labelledby="plans-title">
       <div class="section-head">
-        <div><p class="eyebrow">Zoom sur R1</p><h2 id="plans-title">Quatre plans, deux axes de vérité.</h2></div>
+        <div><p class="eyebrow">Zoom sur R1</p><h2 id="plans-title">Plans suivis, deux axes de vérité.</h2></div>
         <p>La barre mesure uniquement les tâches cochées. Le badge de claim et les états local, immuable et M4 indiquent séparément le niveau de preuve.</p>
       </div>
       <div class="plan-grid" id="plan-grid"></div>
@@ -670,7 +670,7 @@
     <section id="reste" aria-labelledby="reste-title">
       <div class="section-head">
         <div><p class="eyebrow">File de clôture</p><h2 id="reste-title">Ce qui reste réellement à faire.</h2></div>
-        <p>Le focus technique T074 est distingué de la décision d’architecture T085, des tâches bloquées et des preuves externes encore manquantes.</p>
+        <p>Le focus actif est dérivé des tâches ouvertes et reste distingué des décisions, des blocages et des preuves externes encore manquantes.</p>
       </div>
       <div class="controls" aria-label="Filtrer les tâches ouvertes">
         <button class="filter-button" type="button" data-task-filter="all" aria-pressed="true">Tout</button>
@@ -773,10 +773,21 @@
         return element("span", `status-badge status-${className}`, label);
       }
 
+      function effectiveFocus(data) {
+        const convergence = data.openTasks.find((task) =>
+          task.planId === data.summary.focusPlan
+          && task.kind === "implementation"
+          && !task.blockedBy
+          && String(task.phase).toLocaleLowerCase("fr-FR") === "convergence"
+        );
+        return convergence || data.currentFocus;
+      }
+
       function renderHero(data) {
         const summary = data.summary;
         const decision = data.openTasks.find((task) => task.kind === "decision");
-        const focusId = data.currentFocus ? data.currentFocus.id : "le prochain gate";
+        const focus = effectiveFocus(data);
+        const focusId = focus ? focus.id : "le prochain gate";
         $("hero-lede").textContent = `HelixOS est au cœur de ${summary.strategicStage}, sur la clôture de ${summary.focusPlan}. Le prochain jalon technique est ${focusId}${decision ? ` ; le prochain choix architectural bloquant est ${decision.id}` : ""}.`;
         $("hero-stage").textContent = summary.strategicStage;
         $("hero-plan").textContent = summary.focusPlan;
@@ -807,7 +818,7 @@
       }
 
       function renderFocus(data) {
-        const focus = data.currentFocus;
+        const focus = effectiveFocus(data);
         const card = $("focus-card");
         card.replaceChildren();
         if (focus) {
@@ -941,7 +952,8 @@
       }
 
       function taskLabel(task, data) {
-        if (data.currentFocus && task.planId === data.currentFocus.planId && task.id === data.currentFocus.id) return ["Focus", "current"];
+        const focus = effectiveFocus(data);
+        if (focus && task.planId === focus.planId && task.id === focus.id) return ["Focus", "current"];
         if (task.kind === "decision") return ["Décision", "decision"];
         if (task.blockedBy) return [`Bloqué par ${task.blockedBy}`, "blocked"];
         if (task.kind === "evidence") return ["Preuve", "evidence"];
@@ -949,7 +961,8 @@
       }
 
       function orderedOpenTasks(data) {
-        const focusKey = data.currentFocus ? `${data.currentFocus.planId}:${data.currentFocus.id}` : "";
+        const focus = effectiveFocus(data);
+        const focusKey = focus ? `${focus.planId}:${focus.id}` : "";
         return [...data.openTasks].sort((left, right) => {
           const rank = (task) => {
             const key = `${task.planId}:${task.id}`;

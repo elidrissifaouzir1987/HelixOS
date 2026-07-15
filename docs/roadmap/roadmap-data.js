@@ -8,7 +8,18 @@ window.HELIXOS_ROADMAP_DATA = {
       "title": "R0 n'est pas formellement ferm\u00e9"
     }
   ],
-  "currentFocus": null,
+  "currentFocus": {
+    "description": "Commit only PLAN-005-owned files, push codex/plan-005-durable-dispatch, dispatch one exact successful immutable workflow run, verify all artifact digests/attestations/release bundle/removal semantics, catalog the evidence without promoting physical claims, update the roadmap and open a ready-for-review PR while recording exact links/digests in specs/005-durable-dispatch/evidence/README.md",
+    "done": false,
+    "id": "T094",
+    "kind": "implementation",
+    "phase": "Polish, Performance, Supply Chain and Immutable Evidence",
+    "phaseNumber": 7,
+    "planId": "PLAN-005",
+    "planTitle": "Durable one-shot dispatch",
+    "source": "specs/005-durable-dispatch/tasks.md#L225",
+    "tags": []
+  },
   "definitionOfDone": [
     "architecture/threat model et Constitution Check sont \u00e0 jour",
     "contrats et migrations sont versionn\u00e9s",
@@ -2893,20 +2904,1247 @@ window.HELIXOS_ROADMAP_DATA = {
       ],
       "title": "Durable preparation before dispatch",
       "total": 89
+    },
+    {
+      "completed": 96,
+      "conformance": {
+        "ciWorkflow": ".github/workflows/durable-dispatch.yml",
+        "claimStatus": "pending-evidence",
+        "evidence": {
+          "immutable": "pending-workflow-evidence",
+          "local": "passing-local-working-tree-not-immutable",
+          "macMiniM4": "passing-controlled-physical-local-working-tree-not-immutable"
+        },
+        "feature": "specs/005-durable-dispatch",
+        "id": "PLAN-005",
+        "spec": "specs/005-durable-dispatch/spec.md",
+        "title": "Durable one-shot dispatch"
+      },
+      "id": "PLAN-005",
+      "phases": [
+        {
+          "done": 6,
+          "number": 1,
+          "title": "Setup and Frozen Baseline",
+          "total": 6
+        },
+        {
+          "done": 14,
+          "number": 2,
+          "title": "Foundational Contracts, Types and Store Versions (Blocking)",
+          "total": 14
+        },
+        {
+          "done": 18,
+          "number": 3,
+          "title": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "total": 18
+        },
+        {
+          "done": 17,
+          "number": 4,
+          "title": "User Story 2 \u2014 Consume a Grant Once and Recover Its Receipt (Priority: P1)",
+          "total": 17
+        },
+        {
+          "done": 15,
+          "number": 5,
+          "title": "User Story 3 \u2014 Fail Closed Across Crashes and Ambiguous Transport (Priority: P2)",
+          "total": 15
+        },
+        {
+          "done": 12,
+          "number": 6,
+          "title": "User Story 4 \u2014 Restore and Remove Dispatch Safely (Priority: P3)",
+          "total": 12
+        },
+        {
+          "done": 11,
+          "number": 7,
+          "title": "Polish, Performance, Supply Chain and Immutable Evidence",
+          "total": 12
+        },
+        {
+          "done": 3,
+          "number": 8,
+          "title": "Convergence",
+          "total": 3
+        }
+      ],
+      "remaining": 1,
+      "taskPercent": 99.0,
+      "taskSource": "specs/005-durable-dispatch/tasks.md",
+      "taskTitle": "Durable One-Shot Dispatch",
+      "tasks": [
+        {
+          "description": "Record Graphify reflection, merged PLAN-004 source/removal baseline 6f8dfdd5194792e8592cd10ebaaf8828833effbe, exact protected-file inventory and the 27 excluded user Rust paths in specs/005-durable-dispatch/evidence/README.md",
+          "done": true,
+          "id": "T001",
+          "kind": "implementation",
+          "phase": "Setup and Frozen Baseline",
+          "phaseNumber": 1,
+          "source": "specs/005-durable-dispatch/tasks.md#L28",
+          "tags": []
+        },
+        {
+          "description": "Add helix-dispatch-contracts, helix-plan-dispatch and helix-dispatch-inbox-sqlite as edition-2021 unsafe-forbidden workspace members with exact dependency pins in kernel/Cargo.toml, kernel/Cargo.lock, kernel/helix-dispatch-contracts/Cargo.toml, kernel/helix-plan-dispatch/Cargo.toml and kernel/helix-dispatch-inbox-sqlite/Cargo.toml",
+          "done": true,
+          "id": "T002",
+          "kind": "implementation",
+          "phase": "Setup and Frozen Baseline",
+          "phaseNumber": 1,
+          "source": "specs/005-durable-dispatch/tasks.md#L29",
+          "tags": []
+        },
+        {
+          "description": "Create minimal crate roots with redacted public surfaces and no token/legacy dependency in kernel/helix-dispatch-contracts/src/lib.rs, kernel/helix-plan-dispatch/src/lib.rs and kernel/helix-dispatch-inbox-sqlite/src/lib.rs",
+          "done": true,
+          "id": "T003",
+          "kind": "implementation",
+          "phase": "Setup and Frozen Baseline",
+          "phaseNumber": 1,
+          "source": "specs/005-durable-dispatch/tasks.md#L30",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Create exhaustive grant/receipt JSON schemas plus the versioned fixture inventory and expected outcomes in specs/005-durable-dispatch/contracts/execution-grant-v1.schema.json, specs/005-durable-dispatch/contracts/execution-receipt-v1.schema.json, contracts/fixtures/durable-dispatch-v1/README.md, contracts/fixtures/durable-dispatch-v1/cases.json and contracts/fixtures/durable-dispatch-v1/expected-outcomes.json",
+          "done": true,
+          "id": "T004",
+          "kind": "implementation",
+          "phase": "Setup and Frozen Baseline",
+          "phaseNumber": 1,
+          "source": "specs/005-durable-dispatch/tasks.md#L31",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Pin all PLAN-005 JSON/SQL/fixture files to LF and exclude only generated evidence outputs in .gitattributes and .gitignore",
+          "done": true,
+          "id": "T005",
+          "kind": "implementation",
+          "phase": "Setup and Frozen Baseline",
+          "phaseNumber": 1,
+          "source": "specs/005-durable-dispatch/tasks.md#L32",
+          "tags": []
+        },
+        {
+          "description": "Run the locked baseline and record exact prerequisite/test/toolchain/schema/fault-registry digests without altering frozen inputs in specs/005-durable-dispatch/evidence/baseline.md",
+          "done": true,
+          "id": "T006",
+          "kind": "implementation",
+          "phase": "Setup and Frozen Baseline",
+          "phaseNumber": 1,
+          "source": "specs/005-durable-dispatch/tasks.md#L33",
+          "tags": []
+        },
+        {
+          "description": "Write failing exhaustive-schema plus grant canonicalization/signature/domain/key-purpose/version/size/tamper tests from the frozen corpus in kernel/helix-dispatch-contracts/tests/grant_contract.rs",
+          "done": true,
+          "id": "T007",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Types and Store Versions (Blocking)",
+          "phaseNumber": 2,
+          "source": "specs/005-durable-dispatch/tasks.md#L44",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Write failing exhaustive-schema plus receipt decision/signature/domain/key-purpose/cross-grant/cross-adapter tests, including the exact post-RECEIVED REFUSED_DEFINITE reason set and proof that all four pre-RECEIVED refusals cannot serialize as receipts, in kernel/helix-dispatch-contracts/tests/receipt_contract.rs",
+          "done": true,
+          "id": "T008",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Types and Store Versions (Blocking)",
+          "phaseNumber": 2,
+          "source": "specs/005-durable-dispatch/tasks.md#L45",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Write failing redacted-Debug/error/public-surface and no-private-path/secret tests in kernel/helix-dispatch-contracts/tests/redaction.rs",
+          "done": true,
+          "id": "T009",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Types and Store Versions (Blocking)",
+          "phaseNumber": 2,
+          "source": "specs/005-durable-dispatch/tasks.md#L46",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Implement bounded identifiers, safe integers, canonical JSON, digest/error helpers and distinct signer/resolver trust-purpose traits in kernel/helix-dispatch-contracts/src/validation.rs, kernel/helix-dispatch-contracts/src/canonical.rs, kernel/helix-dispatch-contracts/src/digest.rs, kernel/helix-dispatch-contracts/src/crypto.rs and kernel/helix-dispatch-contracts/src/error.rs",
+          "done": true,
+          "id": "T010",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Types and Store Versions (Blocking)",
+          "phaseNumber": 2,
+          "source": "specs/005-durable-dispatch/tasks.md#L47",
+          "tags": []
+        },
+        {
+          "description": "Implement strict protected/signed/authentic ExecutionGrantV1 with exact 5,000 ms lifetime and complete binding validation in kernel/helix-dispatch-contracts/src/grant.rs",
+          "done": true,
+          "id": "T011",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Types and Store Versions (Blocking)",
+          "phaseNumber": 2,
+          "source": "specs/005-durable-dispatch/tasks.md#L48",
+          "tags": []
+        },
+        {
+          "description": "Implement protected/signed/authentic ExecutionReceiptV1 with closed CONSUMED and post-RECEIVED REFUSED_DEFINITE reasons exactly GRANT_EXPIRED, SUPERVISOR_EPOCH_MISMATCH and ADAPTER_PAUSED, plus historical public-key verification that treats a retained post-expiry receipt only as evidence of its prior decision, in kernel/helix-dispatch-contracts/src/receipt.rs",
+          "done": true,
+          "id": "T012",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Types and Store Versions (Blocking)",
+          "phaseNumber": 2,
+          "source": "specs/005-durable-dispatch/tasks.md#L49",
+          "tags": []
+        },
+        {
+          "description": "Make T007\u2013T012 pass against byte-exact fixtures and export only reviewed contract types/functions in kernel/helix-dispatch-contracts/src/lib.rs",
+          "done": true,
+          "id": "T013",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Types and Store Versions (Blocking)",
+          "phaseNumber": 2,
+          "source": "specs/005-durable-dispatch/tasks.md#L50",
+          "tags": []
+        },
+        {
+          "description": "Write compile/source contract failures proving no Serde/Clone/public constructor for positive dispatch candidates/permits and no execution-token API in kernel/helix-plan-dispatch/tests/contract.rs",
+          "done": true,
+          "id": "T014",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Types and Store Versions (Blocking)",
+          "phaseNumber": 2,
+          "source": "specs/005-durable-dispatch/tasks.md#L51",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Write closed outcome/reason/version and redaction tests in kernel/helix-plan-dispatch/tests/outcome.rs and kernel/helix-plan-dispatch/tests/redaction.rs",
+          "done": true,
+          "id": "T015",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Types and Store Versions (Blocking)",
+          "phaseNumber": 2,
+          "source": "specs/005-durable-dispatch/tasks.md#L52",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Define untrusted lookup input, private ready context, attempt identity, authority-view/provider traits and fixed guard classes in kernel/helix-plan-dispatch/src/request.rs, kernel/helix-plan-dispatch/src/authority.rs, kernel/helix-plan-dispatch/src/attempt.rs and kernel/helix-plan-dispatch/src/guard.rs",
+          "done": true,
+          "id": "T016",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Types and Store Versions (Blocking)",
+          "phaseNumber": 2,
+          "source": "specs/005-durable-dispatch/tasks.md#L53",
+          "tags": []
+        },
+        {
+          "description": "Define coordinator-store, transport/handoff, inbox/readback, clock/entropy/signer and PAUSE/control traits without SQLite, OS, network or legacy dependencies in kernel/helix-plan-dispatch/src/store.rs, kernel/helix-plan-dispatch/src/transport.rs, kernel/helix-plan-dispatch/src/inbox.rs and kernel/helix-plan-dispatch/src/control.rs",
+          "done": true,
+          "id": "T017",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Types and Store Versions (Blocking)",
+          "phaseNumber": 2,
+          "source": "specs/005-durable-dispatch/tasks.md#L54",
+          "tags": []
+        },
+        {
+          "description": "Define closed request/delivery/reconciliation outcomes and typed payload-free reason codes in kernel/helix-plan-dispatch/src/outcome.rs",
+          "done": true,
+          "id": "T018",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Types and Store Versions (Blocking)",
+          "phaseNumber": 2,
+          "source": "specs/005-durable-dispatch/tasks.md#L55",
+          "tags": []
+        },
+        {
+          "description": "Write failing strict V1/V2/open/migration/old-binary/no-auto-upgrade contract tests in kernel/helix-coordinator-sqlite/tests/dispatch_migration.rs",
+          "done": true,
+          "id": "T019",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Types and Store Versions (Blocking)",
+          "phaseNumber": 2,
+          "source": "specs/005-durable-dispatch/tasks.md#L56",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Preserve SqliteCoordinatorStoreV1 and PLAN-004 DDL/digest/allowlists byte-semantically, add the additive reviewed overlay digest, composite graph invariants, append-only guards, RESTORE_PENDING authority blocks and a private explicit V2 type seam in kernel/helix-coordinator-sqlite/src/dispatch_schema.rs, kernel/helix-coordinator-sqlite/src/schema.rs and kernel/helix-coordinator-sqlite/src/lib.rs",
+          "done": true,
+          "id": "T020",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Types and Store Versions (Blocking)",
+          "phaseNumber": 2,
+          "source": "specs/005-durable-dispatch/tasks.md#L57",
+          "tags": []
+        },
+        {
+          "description": "Write failing lookup-only input and durable reload tests covering missing/torn/restored/failed/quarantined/already-overlaid records in kernel/helix-coordinator-sqlite/tests/dispatch.rs",
+          "done": true,
+          "id": "T021",
+          "kind": "implementation",
+          "phase": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/005-durable-dispatch/tasks.md#L76",
+          "tags": [
+            "P",
+            "US1"
+          ]
+        },
+        {
+          "description": "Write failing single-field authority-generation/digest/epoch/deadline/destination/signing-profile mutation tests in kernel/helix-plan-dispatch/tests/authority.rs",
+          "done": true,
+          "id": "T022",
+          "kind": "implementation",
+          "phase": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/005-durable-dispatch/tasks.md#L77",
+          "tags": [
+            "P",
+            "US1"
+          ]
+        },
+        {
+          "description": "Write failing exact-capacity, over-by-one, deadline-equality and 5,000 ms ceiling tests in kernel/helix-plan-dispatch/tests/bounds.rs",
+          "done": true,
+          "id": "T023",
+          "kind": "implementation",
+          "phase": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/005-durable-dispatch/tasks.md#L78",
+          "tags": [
+            "P",
+            "US1"
+          ]
+        },
+        {
+          "description": "Write failing ordered-guard/PAUSE/HALT/revocation/owner-loss/permit-deadline tests in kernel/helix-plan-dispatch/tests/guard.rs",
+          "done": true,
+          "id": "T024",
+          "kind": "implementation",
+          "phase": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/005-durable-dispatch/tasks.md#L79",
+          "tags": [
+            "P",
+            "US1"
+          ]
+        },
+        {
+          "description": "Write failing 10,000 duplicate, 100 x 64-thread and 20 x 8-process contention tests proving one grant/operation/nonce in kernel/helix-coordinator-sqlite/tests/dispatch_contention.rs",
+          "done": true,
+          "id": "T025",
+          "kind": "implementation",
+          "phase": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/005-durable-dispatch/tasks.md#L80",
+          "tags": [
+            "P",
+            "US1"
+          ]
+        },
+        {
+          "description": "Write failing partial-member/uncertain-commit/exact-attempt-readback tests for the canonical dispatch transaction in kernel/helix-coordinator-sqlite/tests/dispatch_commit.rs",
+          "done": true,
+          "id": "T026",
+          "kind": "implementation",
+          "phase": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/005-durable-dispatch/tasks.md#L81",
+          "tags": [
+            "P",
+            "US1"
+          ]
+        },
+        {
+          "description": "Implement explicit paused/quiescent V1-to-V2 migration, migration receipt, exact uncertain readback, V1 rejection of V2 and downgrade refusal in kernel/helix-coordinator-sqlite/src/dispatch_schema.rs and kernel/helix-coordinator-sqlite/src/maintenance.rs",
+          "done": true,
+          "id": "T027",
+          "kind": "implementation",
+          "phase": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/005-durable-dispatch/tasks.md#L85",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Implement full V2 durable reload and invariant classification from lookup key/expected bindings without accepting PLAN-004 markers or direct rows in kernel/helix-coordinator-sqlite/src/dispatch_preflight.rs",
+          "done": true,
+          "id": "T028",
+          "kind": "implementation",
+          "phase": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/005-durable-dispatch/tasks.md#L86",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Implement injected trusted authority captures, preliminary/final context digesting and exact comparison in kernel/helix-plan-dispatch/src/authority.rs and kernel/helix-plan-dispatch/src/compare.rs",
+          "done": true,
+          "id": "T029",
+          "kind": "implementation",
+          "phase": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/005-durable-dispatch/tasks.md#L87",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Implement the PLAN-004-compatible global guard order and non-cloneable linearizable dispatch permit with PAUSE/HALT/deadman behavior in kernel/helix-plan-dispatch/src/guard.rs and kernel/helix-plan-dispatch/src/commit_gate.rs",
+          "done": true,
+          "id": "T030",
+          "kind": "implementation",
+          "phase": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/005-durable-dispatch/tasks.md#L88",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Implement coordinator-owned attempt/grant/nonce creation, effect-descriptor projection and exact grant signing under the dedicated purpose/domain in kernel/helix-plan-dispatch/src/coordinator.rs",
+          "done": true,
+          "id": "T031",
+          "kind": "implementation",
+          "phase": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/005-durable-dispatch/tasks.md#L89",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Implement V2 overlay tables/invariants for comparison, exact grant bytes, current records, transitions, outbox and events in kernel/helix-coordinator-sqlite/src/dispatch_schema.rs and kernel/helix-coordinator-sqlite/src/dispatch.rs",
+          "done": true,
+          "id": "T032",
+          "kind": "implementation",
+          "phase": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/005-durable-dispatch/tasks.md#L90",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Implement the canonical all-or-none PREPARING -> DISPATCHING transaction under the retained permit with no transport call in kernel/helix-coordinator-sqlite/src/dispatch.rs and kernel/helix-coordinator-sqlite/src/dispatch_outbox.rs",
+          "done": true,
+          "id": "T033",
+          "kind": "implementation",
+          "phase": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/005-durable-dispatch/tasks.md#L91",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Implement confirmed-rollback versus uncertain-commit custody and exact attempt readback without resign/retry in kernel/helix-coordinator-sqlite/src/dispatch_readback.rs",
+          "done": true,
+          "id": "T034",
+          "kind": "implementation",
+          "phase": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/005-durable-dispatch/tasks.md#L92",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Block PLAN-004 known-failure release after any dispatch overlay and retain held reservation/recovery custody in kernel/helix-coordinator-sqlite/src/failure.rs and kernel/helix-coordinator-sqlite/src/dispatch.rs",
+          "done": true,
+          "id": "T035",
+          "kind": "implementation",
+          "phase": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/005-durable-dispatch/tasks.md#L93",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Implement permanent redacted dispatch event projections and bounded metrics with no canonical/internal value leakage in kernel/helix-coordinator-sqlite/src/dispatch_events.rs",
+          "done": true,
+          "id": "T036",
+          "kind": "implementation",
+          "phase": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/005-durable-dispatch/tasks.md#L94",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Integrate the portable dispatch coordinator with SqliteCoordinatorStoreV2 while keeping V1/public restore authority unchanged in kernel/helix-coordinator-sqlite/src/lib.rs and kernel/helix-plan-dispatch/src/lib.rs",
+          "done": true,
+          "id": "T037",
+          "kind": "implementation",
+          "phase": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/005-durable-dispatch/tasks.md#L95",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Make T021\u2013T037 and all PLAN-001 through PLAN-004 prerequisite tests pass, then record the MVP boundary/evidence/nonclaims in specs/005-durable-dispatch/evidence/us1-dispatch.md",
+          "done": true,
+          "id": "T038",
+          "kind": "implementation",
+          "phase": "User Story 1 \u2014 Dispatch One Prepared Operation Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/005-durable-dispatch/tasks.md#L96",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Write failing adapter application/schema/root/PRAGMA/invariant and unsupported-version tests in kernel/helix-dispatch-inbox-sqlite/tests/contract.rs",
+          "done": true,
+          "id": "T039",
+          "kind": "implementation",
+          "phase": "User Story 2 \u2014 Consume a Grant Once and Recover Its Receipt (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/005-durable-dispatch/tasks.md#L115",
+          "tags": [
+            "P",
+            "US2"
+          ]
+        },
+        {
+          "description": "Write failing receive-before-acknowledge and consume/post-RECEIVED definite-refusal-plus-receipt atomicity tests, including the exact three signed refusal reasons and durable no-receipt behavior for the four pre-RECEIVED refusals, in kernel/helix-dispatch-inbox-sqlite/tests/consume_once.rs",
+          "done": true,
+          "id": "T040",
+          "kind": "implementation",
+          "phase": "User Story 2 \u2014 Consume a Grant Once and Recover Its Receipt (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/005-durable-dispatch/tasks.md#L116",
+          "tags": [
+            "P",
+            "US2"
+          ]
+        },
+        {
+          "description": "Write failing exact duplicate and grant/operation/nonce/digest/key-rotation conflict tests, then drive exactly the SC-001 matrix of 10,000 repeated requests, 100 x 64-thread rounds and 20 x 8-process rounds through the adapter boundary to prove one consumption and zero duplicate consumptions, in kernel/helix-dispatch-inbox-sqlite/tests/contention.rs",
+          "done": true,
+          "id": "T041",
+          "kind": "implementation",
+          "phase": "User Story 2 \u2014 Consume a Grant Once and Recover Its Receipt (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/005-durable-dispatch/tasks.md#L117",
+          "tags": [
+            "P",
+            "US2"
+          ]
+        },
+        {
+          "description": "Write failing independent epoch observer unavailable/stale/mismatch/change-before-consume tests in kernel/helix-dispatch-inbox-sqlite/tests/stale_epoch.rs",
+          "done": true,
+          "id": "T042",
+          "kind": "implementation",
+          "phase": "User Story 2 \u2014 Consume a Grant Once and Recover Its Receipt (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/005-durable-dispatch/tasks.md#L118",
+          "tags": [
+            "P",
+            "US2"
+          ]
+        },
+        {
+          "description": "Write failing receipt signer purpose/domain/revocation/history and cross-binding tests in kernel/helix-dispatch-inbox-sqlite/tests/receipt.rs",
+          "done": true,
+          "id": "T043",
+          "kind": "implementation",
+          "phase": "User Story 2 \u2014 Consume a Grant Once and Recover Its Receipt (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/005-durable-dispatch/tasks.md#L119",
+          "tags": [
+            "P",
+            "US2"
+          ]
+        },
+        {
+          "description": "Write failing coordinator receipt verification, exact timely DISPATCHING -> EXECUTING, late-receipt reconciliation custody and no-effect/no-success tests in kernel/helix-coordinator-sqlite/tests/dispatch_receipt.rs",
+          "done": true,
+          "id": "T044",
+          "kind": "implementation",
+          "phase": "User Story 2 \u2014 Consume a Grant Once and Recover Its Receipt (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/005-durable-dispatch/tasks.md#L120",
+          "tags": [
+            "P",
+            "US2"
+          ]
+        },
+        {
+          "description": "Implement provisioner-bound inbox config, root identity, strict connection profile and exact schema verifier in kernel/helix-dispatch-inbox-sqlite/src/config.rs, kernel/helix-dispatch-inbox-sqlite/src/root_safety.rs, kernel/helix-dispatch-inbox-sqlite/src/connection.rs and kernel/helix-dispatch-inbox-sqlite/src/schema.rs",
+          "done": true,
+          "id": "T045",
+          "kind": "implementation",
+          "phase": "User Story 2 \u2014 Consume a Grant Once and Recover Its Receipt (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/005-durable-dispatch/tasks.md#L124",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Implement injected independent supervisor epoch observer and bounded clock/deadline handling in kernel/helix-dispatch-inbox-sqlite/src/epoch.rs and kernel/helix-dispatch-inbox-sqlite/src/clock.rs",
+          "done": true,
+          "id": "T046",
+          "kind": "implementation",
+          "phase": "User Story 2 \u2014 Consume a Grant Once and Recover Its Receipt (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/005-durable-dispatch/tasks.md#L125",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Implement strict canonical grant decode/trust/destination/protocol/capability/capacity validation and first ABSENT -> RECEIVED transaction before acknowledgement; DESTINATION_MISMATCH, PROTOCOL_UNSUPPORTED, CAPABILITY_MISMATCH and INBOX_CAPACITY_EXHAUSTED must stop before RECEIVED, retain durable redacted diagnostics/quarantine and produce no receipt or release proof, in kernel/helix-dispatch-inbox-sqlite/src/inbox.rs",
+          "done": true,
+          "id": "T047",
+          "kind": "implementation",
+          "phase": "User Story 2 \u2014 Consume a Grant Once and Recover Its Receipt (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/005-durable-dispatch/tasks.md#L126",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Implement create-only grant/operation/nonce uniqueness, exact duplicate readback and permanent conflict/quarantine evidence in kernel/helix-dispatch-inbox-sqlite/src/inbox.rs and kernel/helix-dispatch-inbox-sqlite/src/quarantine.rs",
+          "done": true,
+          "id": "T048",
+          "kind": "implementation",
+          "phase": "User Story 2 \u2014 Consume a Grant Once and Recover Its Receipt (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/005-durable-dispatch/tasks.md#L127",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Implement second epoch/deadline/pause revalidation and atomic RECEIVED -> CONSUMED/REFUSED plus closed signed receipt/event, limiting REFUSED_DEFINITE exactly to GRANT_EXPIRED, SUPERVISOR_EPOCH_MISMATCH and ADAPTER_PAUSED, in kernel/helix-dispatch-inbox-sqlite/src/receipt.rs and kernel/helix-dispatch-inbox-sqlite/src/events.rs",
+          "done": true,
+          "id": "T049",
+          "kind": "implementation",
+          "phase": "User Story 2 \u2014 Consume a Grant Once and Recover Its Receipt (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/005-durable-dispatch/tasks.md#L128",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Implement exact retained inbox/receipt readback after restart with no re-consumption/resigning in kernel/helix-dispatch-inbox-sqlite/src/readback.rs",
+          "done": true,
+          "id": "T050",
+          "kind": "implementation",
+          "phase": "User Story 2 \u2014 Consume a Grant Once and Recover Its Receipt (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/005-durable-dispatch/tasks.md#L129",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Prove and enforce absence of public/Serde/Clone execution-token or effect-handoff surfaces in kernel/helix-dispatch-inbox-sqlite/src/lib.rs and kernel/helix-dispatch-inbox-sqlite/tests/contract.rs",
+          "done": true,
+          "id": "T051",
+          "kind": "implementation",
+          "phase": "User Story 2 \u2014 Consume a Grant Once and Recover Its Receipt (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/005-durable-dispatch/tasks.md#L130",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Implement coordinator strict receipt verification, permanent receipt row and all-or-none timely DISPATCHING -> EXECUTING transition/event while routing any post-unknown receipt only to reconciliation custody in kernel/helix-coordinator-sqlite/src/dispatch_receipt.rs",
+          "done": true,
+          "id": "T052",
+          "kind": "implementation",
+          "phase": "User Story 2 \u2014 Consume a Grant Once and Recover Its Receipt (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/005-durable-dispatch/tasks.md#L131",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Integrate the deterministic no-effect inbox adapter through portable traits without sharing coordinator storage or signing authority in kernel/helix-plan-dispatch/src/inbox.rs and kernel/helix-plan-dispatch/src/coordinator.rs",
+          "done": true,
+          "id": "T053",
+          "kind": "implementation",
+          "phase": "User Story 2 \u2014 Consume a Grant Once and Recover Its Receipt (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/005-durable-dispatch/tasks.md#L132",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Add seeded redaction/public-event/metrics tests for both domains in kernel/helix-dispatch-inbox-sqlite/tests/redaction.rs and kernel/helix-coordinator-sqlite/tests/dispatch_redaction.rs",
+          "done": true,
+          "id": "T054",
+          "kind": "implementation",
+          "phase": "User Story 2 \u2014 Consume a Grant Once and Recover Its Receipt (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/005-durable-dispatch/tasks.md#L133",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Make T039\u2013T054 pass across restarts, run the same complete SC-001 matrix end to end from coordinator dispatch through exactly one adapter consumption in kernel/helix-coordinator-sqlite/tests/dispatch_end_to_end_contention.rs, and record exact one-shot/no-effect counts and evidence in specs/005-durable-dispatch/evidence/us2-inbox-receipt.md",
+          "done": true,
+          "id": "T055",
+          "kind": "implementation",
+          "phase": "User Story 2 \u2014 Consume a Grant Once and Recover Its Receipt (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/005-durable-dispatch/tasks.md#L134",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Consume the closed ordered PLAN-005 registry of exactly 90 boundaries and 180 declared in-process/process-kill cases from specs/005-durable-dispatch/contracts/fault-boundaries-v1.json and write failing cardinality/order/reachability/one-fault expectations without changing PLAN-004's registry in kernel/helix-plan-dispatch/src/test_fault.rs and contracts/fixtures/durable-dispatch-v1/fault-boundaries.json",
+          "done": true,
+          "id": "T056",
+          "kind": "implementation",
+          "phase": "User Story 3 \u2014 Fail Closed Across Crashes and Ambiguous Transport (Priority: P2)",
+          "phaseNumber": 5,
+          "source": "specs/005-durable-dispatch/tasks.md#L153",
+          "tags": [
+            "P",
+            "US3"
+          ]
+        },
+        {
+          "description": "Write failing lost receive/consume acknowledgement, exact redelivery, post-expiry verification of a previously retained receipt without authority renewal, and retained receipt recovery tests in kernel/helix-plan-dispatch/tests/ambiguity.rs",
+          "done": true,
+          "id": "T057",
+          "kind": "implementation",
+          "phase": "User Story 3 \u2014 Fail Closed Across Crashes and Ambiguous Transport (Priority: P2)",
+          "phaseNumber": 5,
+          "source": "specs/005-durable-dispatch/tasks.md#L154",
+          "tags": [
+            "P",
+            "US3"
+          ]
+        },
+        {
+          "description": "Write failing confirmed-no-send versus possible-handoff and empty-inbox-not-absence tests; prove exactly one automatic sequence per possible-handoff attempt, at most four observations after 0/25/75/175 ms backoffs (offsets 0/25/100/275 ms), a hard 500 ms budget from the first observation truncated by earlier caller/grant deadlines, and exhaustion/unavailability custody without absence or an automatic loop, in kernel/helix-coordinator-sqlite/tests/dispatch_readback.rs",
+          "done": true,
+          "id": "T058",
+          "kind": "implementation",
+          "phase": "User Story 3 \u2014 Fail Closed Across Crashes and Ambiguous Transport (Priority: P2)",
+          "phaseNumber": 5,
+          "source": "specs/005-durable-dispatch/tasks.md#L155",
+          "tags": [
+            "P",
+            "US3"
+          ]
+        },
+        {
+          "description": "Write failing fenced/quiesced transport, matching root/epoch/generation and deadline-closure definite-absence tests in kernel/helix-plan-dispatch/tests/reconciliation.rs",
+          "done": true,
+          "id": "T059",
+          "kind": "implementation",
+          "phase": "User Story 3 \u2014 Fail Closed Across Crashes and Ambiguous Transport (Priority: P2)",
+          "phaseNumber": 5,
+          "source": "specs/005-durable-dispatch/tasks.md#L156",
+          "tags": [
+            "P",
+            "US3"
+          ]
+        },
+        {
+          "description": "Write failing transaction/process-kill cases for coordinator, handoff, adapter receive/consume/receipt and coordinator readback in kernel/helix-coordinator-sqlite/tests/dispatch_faults.rs and kernel/helix-dispatch-inbox-sqlite/tests/process_crash.rs",
+          "done": true,
+          "id": "T060",
+          "kind": "implementation",
+          "phase": "User Story 3 \u2014 Fail Closed Across Crashes and Ambiguous Transport (Priority: P2)",
+          "phaseNumber": 5,
+          "source": "specs/005-durable-dispatch/tasks.md#L157",
+          "tags": [
+            "P",
+            "US3"
+          ]
+        },
+        {
+          "description": "Write failing cancellation/PAUSE/audit-before-versus-after-handoff tests in kernel/helix-plan-dispatch/tests/control.rs",
+          "done": true,
+          "id": "T061",
+          "kind": "implementation",
+          "phase": "User Story 3 \u2014 Fail Closed Across Crashes and Ambiguous Transport (Priority: P2)",
+          "phaseNumber": 5,
+          "source": "specs/005-durable-dispatch/tasks.md#L158",
+          "tags": [
+            "P",
+            "US3"
+          ]
+        },
+        {
+          "description": "Write failing 1,024 ordinary/32 control capacity, 10,000 duplicate flood, 50 ms backpressure and 100 ms control p99 tests in kernel/helix-dispatch-inbox-sqlite/tests/queue_control.rs and kernel/helix-coordinator-sqlite/tests/dispatch_queue_control.rs",
+          "done": true,
+          "id": "T062",
+          "kind": "implementation",
+          "phase": "User Story 3 \u2014 Fail Closed Across Crashes and Ambiguous Transport (Priority: P2)",
+          "phaseNumber": 5,
+          "source": "specs/005-durable-dispatch/tasks.md#L159",
+          "tags": [
+            "P",
+            "US3"
+          ]
+        },
+        {
+          "description": "Implement the closed fault enum/registry, private non-default probes and one identical in-process/process-driver selection path in kernel/helix-plan-dispatch/src/test_fault.rs, kernel/helix-coordinator-sqlite/src/dispatch_fault.rs and kernel/helix-dispatch-inbox-sqlite/src/test_fault.rs",
+          "done": true,
+          "id": "T063",
+          "kind": "implementation",
+          "phase": "User Story 3 \u2014 Fail Closed Across Crashes and Ambiguous Transport (Priority: P2)",
+          "phaseNumber": 5,
+          "source": "specs/005-durable-dispatch/tasks.md#L163",
+          "tags": [
+            "US3"
+          ]
+        },
+        {
+          "description": "Implement exact outbox loading, pause/deadline precheck and linearizable per-grant handoff/attempt evidence in kernel/helix-plan-dispatch/src/transport.rs and kernel/helix-coordinator-sqlite/src/dispatch_outbox.rs",
+          "done": true,
+          "id": "T064",
+          "kind": "implementation",
+          "phase": "User Story 3 \u2014 Fail Closed Across Crashes and Ambiguous Transport (Priority: P2)",
+          "phaseNumber": 5,
+          "source": "specs/005-durable-dispatch/tasks.md#L164",
+          "tags": [
+            "US3"
+          ]
+        },
+        {
+          "description": "Implement byte-identical bounded redelivery and exact adapter inbox/receipt readback without renewal/resigning/re-consumption: exactly one automatic sequence per possible-handoff attempt, at most four observations after 0/25/75/175 ms backoffs (offsets 0/25/100/275 ms), hard-stopped at 500 ms from the first observation or an earlier caller/grant deadline, with retained post-expiry receipts accepted only as evidence of their prior decision and exhaustion/unavailability routed once to unknown/reconciliation custody in kernel/helix-plan-dispatch/src/coordinator.rs",
+          "done": true,
+          "id": "T065",
+          "kind": "implementation",
+          "phase": "User Story 3 \u2014 Fail Closed Across Crashes and Ambiguous Transport (Priority: P2)",
+          "phaseNumber": 5,
+          "source": "specs/005-durable-dispatch/tasks.md#L165",
+          "tags": [
+            "US3"
+          ]
+        },
+        {
+          "description": "Implement fenced definite-absence classification and no-consumption tombstone custody for signed permanent post-RECEIVED REFUSED_DEFINITE receipts limited exactly to GRANT_EXPIRED, SUPERVISOR_EPOCH_MISMATCH and ADAPTER_PAUSED, while pre-RECEIVED destination/protocol/capability/capacity refusals remain no-receipt diagnostics that cannot release the hold, in kernel/helix-plan-dispatch/src/reconciliation.rs and kernel/helix-dispatch-inbox-sqlite/src/receipt.rs",
+          "done": true,
+          "id": "T066",
+          "kind": "implementation",
+          "phase": "User Story 3 \u2014 Fail Closed Across Crashes and Ambiguous Transport (Priority: P2)",
+          "phaseNumber": 5,
+          "source": "specs/005-durable-dispatch/tasks.md#L166",
+          "tags": [
+            "US3"
+          ]
+        },
+        {
+          "description": "Implement DISPATCHING -> OUTCOME_UNKNOWN -> RECONCILIATION_REQUIRED, keep late consumed evidence in reconciliation custody, and for exact no-consumption only append final overlay/base FAILED, release the exact reservation once and retain receipt/reconciliation/both event chains atomically in kernel/helix-coordinator-sqlite/src/dispatch_reconciliation.rs",
+          "done": true,
+          "id": "T067",
+          "kind": "implementation",
+          "phase": "User Story 3 \u2014 Fail Closed Across Crashes and Ambiguous Transport (Priority: P2)",
+          "phaseNumber": 5,
+          "source": "specs/005-durable-dispatch/tasks.md#L167",
+          "tags": [
+            "US3"
+          ]
+        },
+        {
+          "description": "Implement cancellation/PAUSE/HALT/audit-pending behavior before and after possible handoff with no deletion or false pre-dispatch failure in kernel/helix-plan-dispatch/src/control.rs and kernel/helix-coordinator-sqlite/src/dispatch.rs",
+          "done": true,
+          "id": "T068",
+          "kind": "implementation",
+          "phase": "User Story 3 \u2014 Fail Closed Across Crashes and Ambiguous Transport (Priority: P2)",
+          "phaseNumber": 5,
+          "source": "specs/005-durable-dispatch/tasks.md#L168",
+          "tags": [
+            "US3"
+          ]
+        },
+        {
+          "description": "Implement bounded ordinary and reserved control-lane accounting/backpressure/payload-free metrics and the exact 100-trial measurement surface in kernel/helix-plan-dispatch/src/queue.rs, kernel/helix-coordinator-sqlite/src/dispatch_queue.rs and kernel/helix-dispatch-inbox-sqlite/src/queue.rs",
+          "done": true,
+          "id": "T069",
+          "kind": "implementation",
+          "phase": "User Story 3 \u2014 Fail Closed Across Crashes and Ambiguous Transport (Priority: P2)",
+          "phaseNumber": 5,
+          "source": "specs/005-durable-dispatch/tasks.md#L169",
+          "tags": [
+            "US3"
+          ]
+        },
+        {
+          "description": "Run the complete closed 90-boundary/180-declared-case fault/lost-ack/flood matrix, prove every ID and case is reached and record process-kill versus power-loss limits in specs/005-durable-dispatch/evidence/us3-fault-ambiguity.md",
+          "done": true,
+          "id": "T070",
+          "kind": "implementation",
+          "phase": "User Story 3 \u2014 Fail Closed Across Crashes and Ambiguous Transport (Priority: P2)",
+          "phaseNumber": 5,
+          "source": "specs/005-durable-dispatch/tasks.md#L170",
+          "tags": [
+            "US3"
+          ]
+        },
+        {
+          "description": "Write failing strict coordinator-v2/adapter-v1 manifest constants, detailed generations/counts/backup order, unique required key purposes, signature-domain, substitution/private-key-exclusion and sequential-cut tests in kernel/helix-coordinator-sqlite/tests/dispatch_restore.rs and kernel/helix-dispatch-inbox-sqlite/tests/backup_restore.rs",
+          "done": true,
+          "id": "T071",
+          "kind": "implementation",
+          "phase": "User Story 4 \u2014 Restore and Remove Dispatch Safely (Priority: P3)",
+          "phaseNumber": 6,
+          "source": "specs/005-durable-dispatch/tasks.md#L188",
+          "tags": [
+            "P",
+            "US4"
+          ]
+        },
+        {
+          "description": "Write failing new-root/new-epoch/RESTORE_PENDING/PAUSED/zero-redelivery and possible-consumption-quarantine tests in kernel/helix-coordinator-sqlite/tests/dispatch_restore.rs",
+          "done": true,
+          "id": "T072",
+          "kind": "implementation",
+          "phase": "User Story 4 \u2014 Restore and Remove Dispatch Safely (Priority: P3)",
+          "phaseNumber": 6,
+          "source": "specs/005-durable-dispatch/tasks.md#L189",
+          "tags": [
+            "P",
+            "US4"
+          ]
+        },
+        {
+          "description": "Write failing orphan grant/inbox/receipt, rollback/truncation, generation reuse and cross-store disagreement tests in kernel/helix-coordinator-sqlite/tests/dispatch_corruption.rs and kernel/helix-dispatch-inbox-sqlite/tests/corruption.rs",
+          "done": true,
+          "id": "T073",
+          "kind": "implementation",
+          "phase": "User Story 4 \u2014 Restore and Remove Dispatch Safely (Priority: P3)",
+          "phaseNumber": 6,
+          "source": "specs/005-durable-dispatch/tasks.md#L190",
+          "tags": [
+            "P",
+            "US4"
+          ]
+        },
+        {
+          "description": "Write failing compatible-open/public-key-history, old-binary refusal, no-in-place-downgrade and no-pruning tests in kernel/helix-coordinator-sqlite/tests/dispatch_migration.rs and kernel/helix-dispatch-inbox-sqlite/tests/retention.rs",
+          "done": true,
+          "id": "T074",
+          "kind": "implementation",
+          "phase": "User Story 4 \u2014 Restore and Remove Dispatch Safely (Priority: P3)",
+          "phaseNumber": 6,
+          "source": "specs/005-durable-dispatch/tasks.md#L191",
+          "tags": [
+            "P",
+            "US4"
+          ]
+        },
+        {
+          "description": "Implement coordinator V2 and adapter inbox canonical manifests/inventories plus public-key trust/revocation history codecs in kernel/helix-coordinator-sqlite/src/dispatch_manifest.rs and kernel/helix-dispatch-inbox-sqlite/src/manifest.rs",
+          "done": true,
+          "id": "T075",
+          "kind": "implementation",
+          "phase": "User Story 4 \u2014 Restore and Remove Dispatch Safely (Priority: P3)",
+          "phaseNumber": 6,
+          "source": "specs/005-durable-dispatch/tasks.md#L195",
+          "tags": [
+            "US4"
+          ]
+        },
+        {
+          "description": "Implement PAUSE/quiescence fencing and independent online backups with signed manifest-last cross-store index and no private-key custody in kernel/helix-coordinator-sqlite/src/maintenance.rs and kernel/helix-dispatch-inbox-sqlite/src/maintenance.rs",
+          "done": true,
+          "id": "T076",
+          "kind": "implementation",
+          "phase": "User Story 4 \u2014 Restore and Remove Dispatch Safely (Priority: P3)",
+          "phaseNumber": 6,
+          "source": "specs/005-durable-dispatch/tasks.md#L196",
+          "tags": [
+            "US4"
+          ]
+        },
+        {
+          "description": "Implement empty-root restore verification, new identities/epochs, RESTORE_PENDING/PAUSED and zero-redelivery/quarantine behavior in kernel/helix-coordinator-sqlite/src/maintenance.rs and kernel/helix-dispatch-inbox-sqlite/src/maintenance.rs",
+          "done": true,
+          "id": "T077",
+          "kind": "implementation",
+          "phase": "User Story 4 \u2014 Restore and Remove Dispatch Safely (Priority: P3)",
+          "phaseNumber": 6,
+          "source": "specs/005-durable-dispatch/tasks.md#L197",
+          "tags": [
+            "US4"
+          ]
+        },
+        {
+          "description": "Implement cross-store orphan/conflict/rollback/truncation/generation-reuse detection with no activation authority in kernel/helix-coordinator-sqlite/src/dispatch_quarantine.rs and kernel/helix-dispatch-inbox-sqlite/src/quarantine.rs",
+          "done": true,
+          "id": "T078",
+          "kind": "implementation",
+          "phase": "User Story 4 \u2014 Restore and Remove Dispatch Safely (Priority: P3)",
+          "phaseNumber": 6,
+          "source": "specs/005-durable-dispatch/tasks.md#L198",
+          "tags": [
+            "US4"
+          ]
+        },
+        {
+          "description": "Enforce permanent v1 retention/no-delete/no-reuse and explicit at-rest/secure-erasure nonclaims in kernel/helix-coordinator-sqlite/src/dispatch_schema.rs and kernel/helix-dispatch-inbox-sqlite/src/schema.rs",
+          "done": true,
+          "id": "T079",
+          "kind": "implementation",
+          "phase": "User Story 4 \u2014 Restore and Remove Dispatch Safely (Priority: P3)",
+          "phaseNumber": 6,
+          "source": "specs/005-durable-dispatch/tasks.md#L199",
+          "tags": [
+            "US4"
+          ]
+        },
+        {
+          "description": "Add one unchanged end-to-end no-effect conformance corpus covering migration, dispatch, consume, lost-ack, unknown and clean restore in kernel/helix-plan-dispatch/tests/conformance.rs and kernel/helix-coordinator-sqlite/examples/durable_dispatch_corpus.rs",
+          "done": true,
+          "id": "T080",
+          "kind": "implementation",
+          "phase": "User Story 4 \u2014 Restore and Remove Dispatch Safely (Priority: P3)",
+          "phaseNumber": 6,
+          "source": "specs/005-durable-dispatch/tasks.md#L200",
+          "tags": [
+            "US4"
+          ]
+        },
+        {
+          "description": "Implement the isolated PLAN-005 removal driver and protected baseline manifest in tools/plan005_removal_drill.py and specs/005-durable-dispatch/evidence/removal-protected-files.json",
+          "done": true,
+          "id": "T081",
+          "kind": "implementation",
+          "phase": "User Story 4 \u2014 Restore and Remove Dispatch Safely (Priority: P3)",
+          "phaseNumber": 6,
+          "source": "specs/005-durable-dispatch/tasks.md#L201",
+          "tags": [
+            "US4"
+          ]
+        },
+        {
+          "description": "Run restore/corruption/retention/removal evidence, prove all PLAN-001 through PLAN-004 protected bytes/tests remain intact and document subsystem-only limits in specs/005-durable-dispatch/evidence/us4-restore-removal.md",
+          "done": true,
+          "id": "T082",
+          "kind": "evidence",
+          "phase": "User Story 4 \u2014 Restore and Remove Dispatch Safely (Priority: P3)",
+          "phaseNumber": 6,
+          "source": "specs/005-durable-dispatch/tasks.md#L202",
+          "tags": [
+            "US4"
+          ]
+        },
+        {
+          "description": "Run at least 100,000 generated grant/receipt mutation cases and retain the deterministic seed/summary in kernel/helix-dispatch-contracts/tests/property.rs and specs/005-durable-dispatch/evidence/property-summary.md",
+          "done": true,
+          "id": "T083",
+          "kind": "evidence",
+          "phase": "Polish, Performance, Supply Chain and Immutable Evidence",
+          "phaseNumber": 7,
+          "source": "specs/005-durable-dispatch/tasks.md#L214",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Add the controlled 500-warmup/10,000-sample guard-to-consumed-receipt benchmark with exact profile metadata and raw JSON output in kernel/helix-coordinator-sqlite/examples/durable_dispatch_benchmark.rs",
+          "done": true,
+          "id": "T084",
+          "kind": "implementation",
+          "phase": "Polish, Performance, Supply Chain and Immutable Evidence",
+          "phaseNumber": 7,
+          "source": "specs/005-durable-dispatch/tasks.md#L215",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Add source/dependency/egress/secret/private-path/frozen-registry/removal-allowlist contract tests in kernel/helix-plan-dispatch/tests/portability.rs, kernel/helix-dispatch-inbox-sqlite/tests/portability.rs and tools/tests/test_plan005_evidence.py",
+          "done": true,
+          "id": "T085",
+          "kind": "implementation",
+          "phase": "Polish, Performance, Supply Chain and Immutable Evidence",
+          "phaseNumber": 7,
+          "source": "specs/005-durable-dispatch/tasks.md#L216",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Add PLAN-005 acceptance IDs, owners, fixtures, thresholds, external physical gates and claim_status: pending-evidence to conformance/catalog.yaml",
+          "done": true,
+          "id": "T086",
+          "kind": "implementation",
+          "phase": "Polish, Performance, Supply Chain and Immutable Evidence",
+          "phaseNumber": 7,
+          "source": "specs/005-durable-dispatch/tasks.md#L217",
+          "tags": []
+        },
+        {
+          "description": "Generate the roadmap from tasks.md and the catalogue, verify PLAN-005 counts/phase/status and never hand-edit generated data in docs/roadmap/roadmap-data.js via tools/update_roadmap.py",
+          "done": true,
+          "id": "T087",
+          "kind": "implementation",
+          "phase": "Polish, Performance, Supply Chain and Immutable Evidence",
+          "phaseNumber": 7,
+          "source": "specs/005-durable-dispatch/tasks.md#L218",
+          "tags": []
+        },
+        {
+          "description": "Implement the PLAN-005 supply-chain builder/verifier with union closure/full adjacency, exact lock/bundled SQLite source/features, licenses, pinned RustSec/SPDX, SBOM/provenance, semantic tamper and secret/path scans in tools/plan005_supply_chain.py and tools/tests/test_plan005_evidence.py",
+          "done": true,
+          "id": "T088",
+          "kind": "implementation",
+          "phase": "Polish, Performance, Supply Chain and Immutable Evidence",
+          "phaseNumber": 7,
+          "source": "specs/005-durable-dispatch/tasks.md#L219",
+          "tags": []
+        },
+        {
+          "description": "Create the unchanged Linux x86_64/macOS arm64/Windows x64 workflow with exact host checks, prerequisite chain, contract/fault/migration/restore/overload gates, release bundle and four attestations in .github/workflows/durable-dispatch.yml",
+          "done": true,
+          "id": "T089",
+          "kind": "implementation",
+          "phase": "Polish, Performance, Supply Chain and Immutable Evidence",
+          "phaseNumber": 7,
+          "source": "specs/005-durable-dispatch/tasks.md#L220",
+          "tags": []
+        },
+        {
+          "description": "Run format, locked check/Clippy/workspace tests, all PLAN-005 focused suites, JSON/SQL/actionlint/roadmap/tool tests and git diff --check, then retain exact command/result/nonclaim evidence in specs/005-durable-dispatch/evidence/local-validation.md",
+          "done": true,
+          "id": "T090",
+          "kind": "implementation",
+          "phase": "Polish, Performance, Supply Chain and Immutable Evidence",
+          "phaseNumber": 7,
+          "source": "specs/005-durable-dispatch/tasks.md#L221",
+          "tags": []
+        },
+        {
+          "description": "Run the physical Mac mini M4 benchmark only when exact hardware/OS/store metadata is available; otherwise retain a clearly diagnostic result and keep PERF-002 pending in specs/005-durable-dispatch/evidence/m4-benchmark.md",
+          "done": true,
+          "id": "T091",
+          "kind": "implementation",
+          "phase": "Polish, Performance, Supply Chain and Immutable Evidence",
+          "phaseNumber": 7,
+          "source": "specs/005-durable-dispatch/tasks.md#L222",
+          "tags": []
+        },
+        {
+          "description": "Run SpecKit Converge and Analyze, require 100% FR/SC-to-task coverage and zero critical/high consistency findings, then append any new build-scope tasks to specs/005-durable-dispatch/tasks.md",
+          "done": true,
+          "id": "T092",
+          "kind": "implementation",
+          "phase": "Polish, Performance, Supply Chain and Immutable Evidence",
+          "phaseNumber": 7,
+          "source": "specs/005-durable-dispatch/tasks.md#L223",
+          "tags": []
+        },
+        {
+          "description": "Refresh Graphify after code changes, save secret-free design/test/removal results and regenerate reflections in graphify-out/graph.json, graphify-out/memory/ and graphify-out/reflections/LESSONS.md",
+          "done": true,
+          "id": "T093",
+          "kind": "implementation",
+          "phase": "Polish, Performance, Supply Chain and Immutable Evidence",
+          "phaseNumber": 7,
+          "source": "specs/005-durable-dispatch/tasks.md#L224",
+          "tags": []
+        },
+        {
+          "description": "Commit only PLAN-005-owned files, push codex/plan-005-durable-dispatch, dispatch one exact successful immutable workflow run, verify all artifact digests/attestations/release bundle/removal semantics, catalog the evidence without promoting physical claims, update the roadmap and open a ready-for-review PR while recording exact links/digests in specs/005-durable-dispatch/evidence/README.md",
+          "done": false,
+          "id": "T094",
+          "kind": "implementation",
+          "phase": "Polish, Performance, Supply Chain and Immutable Evidence",
+          "phaseNumber": 7,
+          "source": "specs/005-durable-dispatch/tasks.md#L225",
+          "tags": []
+        },
+        {
+          "description": "Profile and remediate the physical Mac mini M4 final-guard-to-consumed-receipt p95 regression without weakening fixed guard order, WAL/FULL durability, independent coordinator/adapter stores, signed receipt verification, or no-effect boundaries; add deterministic performance characterization, retain the original failed artifacts unchanged, rerun the exact 500-warmup/10,000-sample profile into new create-only evidence, and keep PERF-002 pending unless p95 is at most 50 ms and p99 at most 100 ms in kernel/helix-coordinator-sqlite/examples/durable_dispatch_benchmark.rs, the measured production paths, specs/005-durable-dispatch/evidence/m4-benchmark-remediation.md, specs/005-durable-dispatch/evidence/m4-remediation-raw.json and conformance/catalog.yaml per SC-005",
+          "done": true,
+          "id": "T095",
+          "kind": "implementation",
+          "phase": "Convergence",
+          "phaseNumber": 8,
+          "source": "specs/005-durable-dispatch/tasks.md#L330",
+          "tags": []
+        },
+        {
+          "description": "Exercise the production backup and clean-restore path dynamically for prepared, dispatching, adapter-received, consumed and ambiguous lifecycle fixtures, proving fresh roots/epochs, RESTORE_PENDING, PAUSED, zero old redelivery or consumption, and exact quarantine/reconciliation custody in kernel/helix-coordinator-sqlite/tests/dispatch_restore.rs, kernel/helix-dispatch-inbox-sqlite/tests/backup_restore.rs, the corresponding maintenance.rs implementations and specs/005-durable-dispatch/evidence/us4-restore-removal.md per FR-031, SC-007 and US4/AC1",
+          "done": true,
+          "id": "T096",
+          "kind": "implementation",
+          "phase": "Convergence",
+          "phaseNumber": 8,
+          "source": "specs/005-durable-dispatch/tasks.md#L331",
+          "tags": []
+        },
+        {
+          "description": "Inject and reopen every remaining coordinator/adapter corruption class through the real stores, including conflicting histories, cross-store or digest disagreement, rollback, truncation and generation reuse, and prove fail-closed post-audit ordinary open/handoff/receive/consume plus permanent redacted custody in kernel/helix-coordinator-sqlite/tests/dispatch_corruption.rs, kernel/helix-dispatch-inbox-sqlite/tests/corruption.rs, kernel/helix-coordinator-sqlite/src/dispatch_quarantine.rs, kernel/helix-dispatch-inbox-sqlite/src/quarantine.rs and specs/005-durable-dispatch/evidence/us4-restore-removal.md per FR-032 and SC-007",
+          "done": true,
+          "id": "T097",
+          "kind": "implementation",
+          "phase": "Convergence",
+          "phaseNumber": 8,
+          "source": "specs/005-durable-dispatch/tasks.md#L332",
+          "tags": []
+        }
+      ],
+      "title": "Durable one-shot dispatch",
+      "total": 97
     }
   ],
-  "openTasks": [],
-  "roadmapDate": "2026-07-10",
+  "openTasks": [
+    {
+      "description": "Commit only PLAN-005-owned files, push codex/plan-005-durable-dispatch, dispatch one exact successful immutable workflow run, verify all artifact digests/attestations/release bundle/removal semantics, catalog the evidence without promoting physical claims, update the roadmap and open a ready-for-review PR while recording exact links/digests in specs/005-durable-dispatch/evidence/README.md",
+      "done": false,
+      "id": "T094",
+      "kind": "implementation",
+      "phase": "Polish, Performance, Supply Chain and Immutable Evidence",
+      "phaseNumber": 7,
+      "planId": "PLAN-005",
+      "planTitle": "Durable one-shot dispatch",
+      "source": "specs/005-durable-dispatch/tasks.md#L225",
+      "tags": []
+    }
+  ],
+  "roadmapDate": "2026-07-13",
   "schema": "helixos.roadmap-data/1",
-  "sourceFingerprint": "12447bd3c615bef8dacbcd47c30912048c9630932c06e09ec693d70041c79e45",
+  "sourceFingerprint": "24d918526297d099d0c32fec2440620afb6990a57e36e836d2afdd3fc217e49b",
   "sources": [
     {
       "path": "ROADMAP-SPECS.md",
-      "sha256": "820d3952ceb142280b6ba311dfff1c29f51d3d22bff6f621064ab8d79b77aa6b"
+      "sha256": "2f9e64ac9172e8dde7f224a9d7ad2b202f5d0f54a36e64d548294cdfc9cd72cc"
     },
     {
       "path": "conformance/catalog.yaml",
-      "sha256": "2f6e7e6a32f3a2af99e055ff3a860ca96429253e65944913a2a5a3769d1fcf5a"
+      "sha256": "6febe751d87738bb668ee75fd3a184986b4018224aeec6648a0d624e5e73099e"
     },
     {
       "path": "specs/001-portable-signed-contracts/tasks.md",
@@ -2923,6 +4161,10 @@ window.HELIXOS_ROADMAP_DATA = {
     {
       "path": "specs/004-durable-preparation/tasks.md",
       "sha256": "16a86cc2669c17799c588ddf43d1bb6a2d0c91ecc60acd5d4f93886b9c5556c9"
+    },
+    {
+      "path": "specs/005-durable-dispatch/tasks.md",
+      "sha256": "86698bdc690ceb102c523fc425fdadf482f0ed785444a90d763413c4fa3eefaa"
     }
   ],
   "strategicStages": [
@@ -2941,8 +4183,8 @@ window.HELIXOS_ROADMAP_DATA = {
       "id": "R1",
       "status": "active",
       "title": "Fondation portable et coordinateur durable",
-      "trackedTaskCompleted": 221,
-      "trackedTaskTotal": 221
+      "trackedTaskCompleted": 317,
+      "trackedTaskTotal": 318
     },
     {
       "effort": "4\u20136 semaines, plus le soak.",
@@ -3003,12 +4245,12 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "summary": {
     "acceptedClaims": 0,
-    "completedTasks": 221,
-    "focusPlan": "PLAN-004",
-    "remainingTasks": 0,
+    "completedTasks": 317,
+    "focusPlan": "PLAN-005",
+    "remainingTasks": 1,
     "strategicStage": "R1",
-    "totalClaims": 4,
-    "trackedTaskPercent": 100.0,
-    "trackedTasks": 221
+    "totalClaims": 5,
+    "trackedTaskPercent": 99.7,
+    "trackedTasks": 318
   }
 };

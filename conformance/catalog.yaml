@@ -705,3 +705,258 @@ entries:
         meets_p99_limit: true
         fullfsync_spike: pending
         power_loss_evidence: pending
+  - acceptance_id: PLAN-005
+    title: Durable one-shot dispatch
+    feature: specs/005-durable-dispatch
+    spec: specs/005-durable-dispatch/spec.md
+    research: specs/005-durable-dispatch/research.md
+    data_model: specs/005-durable-dispatch/data-model.md
+    protocol_contract: specs/005-durable-dispatch/contracts/durable-dispatch-v1.md
+    execution_contract: specs/005-durable-dispatch/contracts/execution-grant-receipt-v1.md
+    execution_grant_schema: specs/005-durable-dispatch/contracts/execution-grant-v1.schema.json
+    execution_receipt_schema: specs/005-durable-dispatch/contracts/execution-receipt-v1.schema.json
+    coordinator_store_schema: specs/005-durable-dispatch/contracts/coordinator-dispatch-schema-v2.sql
+    adapter_store_schema: specs/005-durable-dispatch/contracts/adapter-inbox-schema-v1.sql
+    backup_manifest_schema: specs/005-durable-dispatch/contracts/dispatch-backup-manifest-v1.schema.json
+    fault_registry: specs/005-durable-dispatch/contracts/fault-boundaries-v1.json
+    mapped_acceptance_ids:
+      - id: GRANT-001
+        owner: helix-dispatch-contracts
+        evidence_gate: PLAN-005-CONTRACT
+        status: pending-evidence
+      - id: DUR-001
+        owner: helix-coordinator-sqlite
+        evidence_gate: PLAN-005-AUTHORITY
+        status: pending-evidence
+      - id: DUR-002
+        owner: helix-dispatch-inbox-sqlite
+        evidence_gate: PLAN-005-INBOX
+        status: pending-evidence
+      - id: OPS-002
+        owner: helix-plan-dispatch
+        evidence_gate: PLAN-005-AMBIGUITY
+        status: pending-evidence
+      - id: OPS-003
+        owner: helix-coordinator-sqlite
+        evidence_gate: PLAN-005-RESTORE
+        status: pending-evidence
+      - id: SUPPLY-001
+        owner: helixos-maintainers
+        evidence_gate: PLAN-005-SUPPLY
+        status: pending-evidence
+      - id: PERF-002
+        owner: helixos-maintainers
+        evidence_gate: PLAN-005-PERFORMANCE
+        status: passing-controlled-physical-local-working-tree-not-immutable
+    corpus:
+      root: contracts/fixtures/durable-dispatch-v1
+      instructions: contracts/fixtures/durable-dispatch-v1/README.md
+      instructions_sha256: 094b3cc4fdd7dcc0eab792e9273e86fd1225b61ec6eba00920ddad664ebc20d5
+      manifest: contracts/fixtures/durable-dispatch-v1/cases.json
+      manifest_sha256: 70d91b274d70c974ecd198dc1d70698346fbaa8c9785cd824f0aa2a84427601a
+      manifest_schema: helixos.durable-dispatch-fixtures/1
+      manifest_case_count: 143
+      expected_outcomes: contracts/fixtures/durable-dispatch-v1/expected-outcomes.json
+      expected_outcomes_sha256: 8a34adce4a2d4c20cdc033eb1586d37c7d1281cde3c7645f82b4cc4e401198a4
+      end_to_end_cases: contracts/fixtures/durable-dispatch-v1/end-to-end-cases.json
+      end_to_end_cases_sha256: d075223c2bbf58f0e434796f5aa44058c73f826de7ecec895330f690377bb44c
+      end_to_end_schema: helixos.durable-dispatch-end-to-end-cases/1
+      end_to_end_case_count: 6
+      fault_cases: contracts/fixtures/durable-dispatch-v1/fault-boundaries.json
+      fault_cases_sha256: 041c2eca7dfdc5b3c3a0a7b5a3d1399c26133f9fe63e8a26e23c9bc9bab7ef3b
+      fault_cases_schema: helixos.durable-dispatch-fault-cases/1
+      fault_boundary_count: 90
+      fault_case_count: 180
+      authoritative_fault_registry_sha256: afef6e0b580a8ea62906227e25c59e7b067c7aa5dc55d5458d9ccf92f0b1ff26
+      status: present-local-not-immutable
+    ci_workflow: .github/workflows/durable-dispatch.yml
+    owners:
+      contract: helix-dispatch-contracts
+      authority: helix-plan-dispatch
+      coordinator_store: helix-coordinator-sqlite
+      adapter_store: helix-dispatch-inbox-sqlite
+      release_evidence: helixos-maintainers
+      physical_benchmark: helixos-maintainers
+      supply_and_removal: helixos-maintainers
+    acceptance_thresholds:
+      generated_contract_mutation_cases_min: 100000
+      grant_protected_fields: 69
+      receipt_protected_fields: 25
+      post_received_receipt_refusal_codes: 3
+      pre_received_nonserializable_refusal_codes: 4
+      grant_lifetime_ms_max: 5000
+      repeated_end_to_end_requests: 10000
+      threaded_rounds: 100
+      threads_per_round: 64
+      process_rounds: 20
+      processes_per_round: 8
+      fault_boundaries: 90
+      declared_fault_cases: 180
+      automatic_readback_observations_max: 4
+      automatic_readback_offsets_ms:
+        - 0
+        - 25
+        - 100
+        - 275
+      automatic_readback_budget_ms: 500
+      automatic_readback_stops_at_earlier_deadline: true
+      ordinary_pending_entries_max: 1024
+      control_lane_capacity: 32
+      duplicate_flood_requests: 10000
+      overload_trials: 100
+      ordinary_backpressure_ms_max: 50
+      control_lane_p99_ms_max: 100
+      restored_old_grants_reactivated_max: 0
+      seeded_orphan_conflict_detection_percent: 100
+      coordinator_corruption_classes: 11
+      adapter_corruption_classes: 11
+      clean_lifecycle_controls: 5
+      checkpoint_mismatch_mutations_max: 0
+      physical_benchmark_warmups: 500
+      physical_benchmark_samples: 10000
+      physical_benchmark_p95_ms_max: 50
+      physical_benchmark_p99_ms_max: 100
+    required_platforms:
+      - id: linux-x86_64
+        runner: ubuntu-24.04
+        rust_host: x86_64-unknown-linux-gnu
+        automation: required
+      - id: macos-arm64
+        runner: macos-26
+        rust_host: aarch64-apple-darwin
+        automation: required
+      - id: windows-x64
+        runner: windows-2022
+        rust_host: x86_64-pc-windows-msvc
+        automation: required
+      - id: mac-mini-m4
+        runner: physical-target
+        rust_host: aarch64-apple-darwin
+        automation: pending-device
+    external_gates:
+      immutable_exact_commit:
+        status: pending-evidence
+        scope: hosted-linux-macos-windows-plus-release-bundle
+        required_attestations: 4
+        requires_artifact_digests_expiries_and_rekor: true
+      physical_m4_perf_002:
+        status: passing-controlled-physical-local-working-tree-not-immutable
+        profile: physical-mac-mini-m4
+        hosted_results_eligible: false
+      physical_power_loss_and_fullfsync:
+        status: pending-external-evidence
+        hosted_or_process_kill_eligible: false
+      production_root_encrypted_at_rest_profile:
+        status: pending-external-approval
+      production_supervisor_ipc_provider_and_physical_isolation:
+        status: out-of-scope
+      full_machine_restore_and_activation:
+        status: out-of-scope
+      tier_1_support:
+        status: pending-external-evidence
+    evidence_requirements:
+      - id: PLAN-005-CONTRACT
+        requirement: Exhaustive closed grant and receipt schemas, canonical signatures, three reachable post-RECEIVED refusal codes, tamper corpus and byte-identical output must pass unchanged on all hosted targets.
+      - id: PLAN-005-AUTHORITY
+        requirement: Coordinator-only durable reload, ordered retained guards, one linearizable permit and one atomic signed outbox commit must produce exactly one grant and no replacement authority.
+      - id: PLAN-005-INBOX
+        requirement: The independent adapter root must prove durable receive-before-acknowledgement, create-only grant/operation/nonce identity, one consumption, retained receipt recovery and no execution-token API.
+      - id: PLAN-005-AMBIGUITY
+        requirement: All 90 ordered fault boundaries and 180 declared cases must preserve exact redelivery, bounded readback, unknown/reconciliation custody and the normative definite-refusal closure without false absence.
+      - id: PLAN-005-RESTORE
+        requirement: Reviewed migration, paused quiescent cross-store backup, clean subsystem restore and exact-checkpoint corruption audits must rotate authority, block RESTORE_PENDING dispatch/consumption, revive zero old grants, and refuse every seeded orphan, conflicting history, rollback, truncation or generation-reuse case without activation authority.
+      - id: PLAN-005-PORTABILITY
+        requirement: One unchanged protocol, schema, migration, restore and fault corpus must pass on Linux x64, macOS arm64 and Windows x64 with explicit capability refusals and no weaker fallback.
+      - id: PLAN-005-PERFORMANCE
+        requirement: Physical Mac mini M4 evidence must retain 500 warmups and at least 10000 samples with p95 at most 50 ms and p99 at most 100 ms; hosted results remain diagnostic only.
+      - id: PLAN-005-SUPPLY
+        requirement: Exact-lock dependency closure, bundled SQLite provenance, licenses, advisories, SBOM, attestations, isolated removal and semantic evidence verification must bind one exact commit.
+    claim_status: pending-evidence
+    evidence:
+      local:
+        status: passing-local-working-tree-not-immutable
+        baseline_head: 6f8dfdd5194792e8592cd10ebaaf8828833effbe
+        validation_artifact: specs/005-durable-dispatch/evidence/local-validation.md
+        validation_digest_sha256: 9feec9a18b9a915f29a27be93fb72fad2afef699319be1a083bd8c2dc4584435
+        property_summary: specs/005-durable-dispatch/evidence/property-summary.md
+        dispatch_summary: specs/005-durable-dispatch/evidence/us1-dispatch.md
+        inbox_receipt_summary: specs/005-durable-dispatch/evidence/us2-inbox-receipt.md
+        fault_ambiguity_summary: specs/005-durable-dispatch/evidence/us3-fault-ambiguity.md
+        restore_removal_summary: specs/005-durable-dispatch/evidence/us4-restore-removal.md
+        removal_manifest: specs/005-durable-dispatch/evidence/removal-protected-files.json
+      immutable:
+        status: pending-workflow-evidence
+        workflow: .github/workflows/durable-dispatch.yml
+        exact_commit_required: true
+      mac_mini_m4:
+        status: passing-controlled-physical-local-working-tree-not-immutable
+        baseline_head: 6f8dfdd5194792e8592cd10ebaaf8828833effbe
+        source_state: local-working-tree-not-exact-commit-not-immutable
+        validation_artifact: specs/005-durable-dispatch/evidence/m4-benchmark-remediation.md
+        validation_digest_sha256: 38412e714f8601f2b529ea172177d390a19958d4bd2cfae2425c7631a3783ddf
+        benchmark_artifact: specs/005-durable-dispatch/evidence/m4-remediation-4-raw.json
+        benchmark_digest_sha256: c37c2d3dde82bcb7da86b0400e4abccf64a0358a4a056f0aad8a8e9396af343f
+        benchmark_size_bytes: 2976416
+        original_validation_artifact: specs/005-durable-dispatch/evidence/m4-benchmark.md
+        original_validation_digest_sha256: 0958f36572af22402ea48636e87a5b8e140dd2701e1ab742304affe7541809ea
+        original_benchmark_artifact: specs/005-durable-dispatch/evidence/m4-raw.json
+        original_benchmark_digest_sha256: fcf86188a41c49a4ef2def0116e614cde8125e5164be95f2a5916bfc94738983
+        original_benchmark_size_bytes: 165212
+        remediation_1_artifact: specs/005-durable-dispatch/evidence/m4-remediation-raw.json
+        remediation_1_digest_sha256: b67941730e07abbe76629e3510c3ff203e418e2a7e5e92d405c276e635b54870
+        remediation_1_size_bytes: 2985161
+        remediation_2_artifact: specs/005-durable-dispatch/evidence/m4-remediation-2-raw.json
+        remediation_2_digest_sha256: 0382871d78260bd321d0a6f7d707a2da556e9addeef80af0abd33b10676c7454
+        remediation_2_size_bytes: 2985674
+        remediation_3_artifact: specs/005-durable-dispatch/evidence/m4-remediation-3-raw.json
+        remediation_3_digest_sha256: 07daefe5621f8843690108f51188151a04052c5a53e168192b76399eba742104
+        remediation_3_size_bytes: 2976408
+        evidence_class: controlled-physical-local-working-tree-not-immutable
+        hardware: Mac mini Mac16,10 Apple M4 10-core CPU 16 GiB
+        memory_bytes: 17179869184
+        os: macOS 26.5.2 build 25F84
+        architecture: arm64
+        rust_host: aarch64-apple-darwin
+        filesystem_type: APFS
+        filesystem_assurance: internal-solid-state-filevault-yes-smart-verified-diagnostic-no-power-loss-claim
+        at_rest_profile: FileVault-on-internal-APFS-observed-local
+        at_rest_profile_approval: pending
+        rustc: 1.96.1
+        cargo_profile: release
+        cargo_features: controlled-benchmark
+        sqlite_version: 3.53.2
+        sqlite_source_id: "2026-06-03 19:12:13 d6e03d8c777cfa2d35e3b60d8ec3e0187f3e9f99d8e2ee9cac695fd6fcdf1a24"
+        coordinator_application_id: 1212962883
+        coordinator_schema_version: 2
+        adapter_application_id: 1212962889
+        adapter_schema_version: 1
+        warmup_operations: 500
+        measured_operations: 10000
+        committed_executing_receipts: 10500
+        concurrency: 1
+        p50_ns: 45431542
+        p95_ns: 49416541
+        p99_ns: 51917875
+        max_ns: 76199000
+        final_guard_to_dispatch_commit_p95_ns: 18540667
+        dispatch_commit_to_handoff_ack_p95_ns: 15851000
+        handoff_ack_to_adapter_consumed_p95_ns: 837000
+        adapter_consumed_to_coordinator_receipt_commit_p95_ns: 14269125
+        meets_p95_limit: true
+        meets_p99_limit: true
+        perf_002_status: passing-controlled-physical-local-working-tree-not-immutable
+        fullfsync_evidence: pending
+        power_loss_evidence: pending
+    nonclaims:
+      real_host_effect: out-of-scope
+      execution_success: out-of-scope
+      hosted_and_process_kill: synthetic-no-effect-only
+      power_loss: pending-external-evidence
+      fullfsync_and_physical_durability: pending-external-evidence
+      production_supervisor_ipc_provider: out-of-scope
+      physical_isolation: out-of-scope
+      production_root_encrypted_at_rest_approval: pending-external-approval
+      full_machine_restore: out-of-scope
+      activation: out-of-scope
+      secure_erasure: not-claimed
+      tier_1_support: pending-evidence

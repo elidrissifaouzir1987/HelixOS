@@ -236,6 +236,54 @@ where
     Ok((config, summary, observer))
 }
 
+/// Opens an already-published store through the unchanged root/file/profile custody
+/// while delegating only the exact logical schema verifier.
+///
+/// This is used by the explicit V2 type after migration. It never initializes a root,
+/// applies an overlay, repairs a schema, or changes `user_version`.
+pub(crate) fn open_and_verify_existing_store_v2<C, T, F>(
+    config: CoordinatorStoreConfigV1,
+    clock: &C,
+    deadline_monotonic_ms: u64,
+    verify: F,
+) -> Result<
+    (
+        CoordinatorStoreConfigV1,
+        CoordinatorRootIdentityV1,
+        T,
+        VerifiedStoreObserverV1,
+    ),
+    InternalCoordinatorError,
+>
+where
+    C: CoordinatorMonotonicClockV1,
+    F: FnOnce(&Connection, CoordinatorRootIdentityV1) -> Result<T, InternalCoordinatorError>,
+{
+    let existing_root = config
+        .existing_root()
+        .ok_or(InternalCoordinatorError::RootRoleMismatch)?;
+    let mut root_lease = acquire_existing_root_lease(
+        existing_root,
+        config.maximum_busy_wait_ms(),
+        clock,
+        deadline_monotonic_ms,
+    )?;
+    root_lease.verify_role(CoordinatorRootRoleV1::Existing)?;
+    let busy_timeout_ms = bounded_busy_timeout_ms(&config, clock, deadline_monotonic_ms)?;
+    preflight_database_file(&config, false)?;
+    let mut binding = bind_existing_database_file(&config)?;
+    let connection = open_database(&config)?;
+    configure_connection(&connection, busy_timeout_ms, false)?;
+    verify_existing_database_binding(&config, &mut binding)?;
+    let expected_identity = existing_root.expected_identity();
+    let verified = verify(&connection, expected_identity)?;
+    verify_existing_database_binding(&config, &mut binding)?;
+    root_lease.verify_role(CoordinatorRootRoleV1::Existing)?;
+    remaining_monotonic_ms(clock, deadline_monotonic_ms)?;
+    let observer = VerifiedStoreObserverV1::from_fully_verified(connection)?;
+    Ok((config, expected_identity, verified, observer))
+}
+
 /// Persistent observer for commits made outside one opened store instance.
 ///
 /// SQLite's `data_version` changes on this connection only when another connection
@@ -888,36 +936,29 @@ fn configure_connection(
 ) -> Result<(), InternalCoordinatorError> {
     configure_busy_timeout(connection, busy_timeout_ms)?;
 
-    let journal_mode: String = if establish_persistent_profile {
-        connection
+    if establish_persistent_profile {
+        let journal_mode: String = connection
             .query_row("PRAGMA journal_mode = WAL", [], |row| row.get(0))
             .map_err(|error| {
                 map_sqlite_error(
                     &error,
                     InternalCoordinatorError::DurabilityProfileUnavailable,
                 )
-            })?
-    } else {
-        connection
-            .pragma_query_value(None, "journal_mode", |row| row.get(0))
-            .map_err(|error| {
-                map_sqlite_error(
-                    &error,
-                    InternalCoordinatorError::DurabilityProfileUnavailable,
-                )
-            })?
-    };
-    if !journal_mode.eq_ignore_ascii_case("wal") {
-        return Err(InternalCoordinatorError::DurabilityProfileUnavailable);
+            })?;
+        if !journal_mode.eq_ignore_ascii_case("wal") {
+            return Err(InternalCoordinatorError::DurabilityProfileUnavailable);
+        }
     }
 
     connection
-        .pragma_update(None, "synchronous", "FULL")
-        .and_then(|()| connection.pragma_update(None, "foreign_keys", "ON"))
-        .and_then(|()| connection.pragma_update(None, "trusted_schema", "OFF"))
-        .and_then(|()| connection.pragma_update(None, "cell_size_check", "ON"))
-        .and_then(|()| connection.pragma_update(None, "recursive_triggers", "ON"))
-        .and_then(|()| connection.pragma_update(None, "wal_autocheckpoint", 0_i64))
+        .execute_batch(
+            "PRAGMA synchronous = FULL; \
+             PRAGMA foreign_keys = ON; \
+             PRAGMA trusted_schema = OFF; \
+             PRAGMA cell_size_check = ON; \
+             PRAGMA recursive_triggers = ON; \
+             PRAGMA wal_autocheckpoint = 0;",
+        )
         .map_err(|error| {
             map_sqlite_error(
                 &error,
@@ -942,20 +983,39 @@ fn configure_busy_timeout(
 }
 
 fn verify_profile(connection: &Connection) -> Result<(), InternalCoordinatorError> {
-    let journal_mode: String = connection
-        .pragma_query_value(None, "journal_mode", |row| row.get(0))
+    let profile: (String, i64, i64, i64, i64, i64) = connection
+        .query_row(
+            "SELECT \
+                 (SELECT journal_mode FROM temp.pragma_journal_mode()), \
+                 (SELECT synchronous FROM temp.pragma_synchronous()), \
+                 (SELECT foreign_keys FROM temp.pragma_foreign_keys()), \
+                 (SELECT trusted_schema FROM temp.pragma_trusted_schema()), \
+                 (SELECT cell_size_check FROM temp.pragma_cell_size_check()), \
+                 (SELECT recursive_triggers FROM temp.pragma_recursive_triggers())",
+            [],
+            |row| {
+                Ok((
+                    row.get(0)?,
+                    row.get(1)?,
+                    row.get(2)?,
+                    row.get(3)?,
+                    row.get(4)?,
+                    row.get(5)?,
+                ))
+            },
+        )
         .map_err(|error| {
             map_sqlite_error(
                 &error,
                 InternalCoordinatorError::DurabilityProfileUnavailable,
             )
         })?;
-    if !journal_mode.eq_ignore_ascii_case("wal")
-        || profile_pragma_i64(connection, "synchronous")? != 2
-        || profile_pragma_i64(connection, "foreign_keys")? != 1
-        || profile_pragma_i64(connection, "trusted_schema")? != 0
-        || profile_pragma_i64(connection, "cell_size_check")? != 1
-        || profile_pragma_i64(connection, "recursive_triggers")? != 1
+    if !profile.0.eq_ignore_ascii_case("wal")
+        || profile.1 != 2
+        || profile.2 != 1
+        || profile.3 != 0
+        || profile.4 != 1
+        || profile.5 != 1
         || profile_pragma_i64(connection, "wal_autocheckpoint")? != 0
     {
         return Err(InternalCoordinatorError::DurabilityProfileUnavailable);
@@ -1424,6 +1484,49 @@ mod tests {
         configure_connection(&second, 10, false).expect("second profile establishes");
         assert_exact(&second);
         drop(second);
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn persistent_pragma_virtual_table_shadow_cannot_authorize_a_non_wal_store() {
+        static NEXT: AtomicU64 = AtomicU64::new(0);
+        let sequence = NEXT.fetch_add(1, Ordering::Relaxed);
+        let root = std::env::temp_dir().join(format!(
+            "helixos-coordinator-profile-shadow-{}-{sequence}",
+            std::process::id()
+        ));
+        fs::create_dir(&root).expect("test root creates");
+        let database = root.join("profile-shadow.sqlite3");
+        let connection = rusqlite::Connection::open(&database).expect("connection opens");
+        connection
+            .execute_batch(
+                "CREATE VIRTUAL TABLE pragma_journal_mode USING fts5(journal_mode); \
+                 INSERT INTO pragma_journal_mode(journal_mode) VALUES ('wal');",
+            )
+            .expect("persistent virtual-table shadow installs");
+
+        let real_journal: String = connection
+            .pragma_query_value(None, "journal_mode", |row| row.get(0))
+            .expect("real journal mode reads");
+        assert_eq!(real_journal.to_ascii_lowercase(), "delete");
+        let shadowed_journal: String = connection
+            .query_row(
+                "SELECT journal_mode FROM pragma_journal_mode()",
+                [],
+                |row| row.get(0),
+            )
+            .expect("unqualified table-valued PRAGMA is demonstrably shadowed");
+        assert_eq!(shadowed_journal, "wal");
+
+        assert_eq!(
+            configure_connection(&connection, 10, false),
+            Err(InternalCoordinatorError::DurabilityProfileUnavailable)
+        );
+        let journal_after_refusal: String = connection
+            .pragma_query_value(None, "journal_mode", |row| row.get(0))
+            .expect("refusal leaves the persistent journal mode readable");
+        assert_eq!(journal_after_refusal.to_ascii_lowercase(), "delete");
+        drop(connection);
         let _ = fs::remove_dir_all(root);
     }
 }

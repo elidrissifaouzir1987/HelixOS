@@ -145,6 +145,32 @@ impl SynchronizedProcessProbeV1 {
             .collect()
     }
 
+    /// Runs until every child publishes its selected production-boundary result, then
+    /// terminates and reaps the blocked children. A separate probe may subsequently
+    /// reopen the durable case root supplied through the caller's private environment.
+    pub(crate) fn execute_until_result_and_terminate_v1(
+        &mut self,
+    ) -> Result<Vec<Vec<u8>>, ProcessProbeErrorV1> {
+        let result = (|| {
+            self.wait_for_markers_v1("ready")?;
+            fs::write(self.root.join("go"), b"go")
+                .map_err(|_| ProcessProbeErrorV1::ProtocolFailed)?;
+            self.wait_for_markers_v1("result")?;
+            (0..self.contender_count)
+                .map(|index| {
+                    let value = fs::read(marker_path_v1(&self.root, "result", index))
+                        .map_err(|_| ProcessProbeErrorV1::ProtocolFailed)?;
+                    if value.is_empty() || value.len() > MAX_RESULT_BYTES {
+                        return Err(ProcessProbeErrorV1::ResultInvalid);
+                    }
+                    Ok(value)
+                })
+                .collect()
+        })();
+        self.terminate_and_wait_v1();
+        result
+    }
+
     fn wait_for_markers_v1(&mut self, kind: &str) -> Result<(), ProcessProbeErrorV1> {
         let deadline = Instant::now() + PROTOCOL_TIMEOUT;
         loop {
@@ -220,6 +246,7 @@ impl Drop for SynchronizedProcessProbeV1 {
     }
 }
 
+#[derive(Clone)]
 pub(crate) struct ProcessProbeChildV1 {
     root: PathBuf,
     index: usize,
@@ -260,11 +287,35 @@ impl ProcessProbeChildV1 {
     }
 
     pub(crate) fn publish_result_v1(&self, value: &[u8]) -> Result<(), ProcessProbeErrorV1> {
+        use std::io::Write as _;
+
         if value.is_empty() || value.len() > MAX_RESULT_BYTES {
             return Err(ProcessProbeErrorV1::ResultInvalid);
         }
-        fs::write(marker_path_v1(&self.root, "result", self.index), value)
-            .map_err(|_| ProcessProbeErrorV1::ProtocolFailed)
+        // Publishing by `fs::write(final_path, ..)` exposes the newly-created file before
+        // its bytes are complete. The polling parent can then observe a zero-length result
+        // and kill an otherwise-correct boundary child. Write and sync a private marker,
+        // then atomically hard-link it into the create-only protocol namespace.
+        let pending = marker_path_v1(&self.root, "result-pending", self.index);
+        let published = marker_path_v1(&self.root, "result", self.index);
+        let result = (|| {
+            let mut file = fs::OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .open(&pending)
+                .map_err(|_| ProcessProbeErrorV1::ProtocolFailed)?;
+            file.write_all(value)
+                .and_then(|()| file.sync_all())
+                .map_err(|_| ProcessProbeErrorV1::ProtocolFailed)?;
+            drop(file);
+            fs::hard_link(&pending, &published).map_err(|_| ProcessProbeErrorV1::ProtocolFailed)?;
+            let _ = fs::remove_file(&pending);
+            Ok(())
+        })();
+        if result.is_err() {
+            let _ = fs::remove_file(&pending);
+        }
+        result
     }
 }
 
@@ -1114,6 +1165,35 @@ pub(crate) mod tests {
             format!("{:?}", ProcessProbeErrorV1::TimedOut),
             "PROCESS_PROBE_TIMED_OUT"
         );
+    }
+
+    #[test]
+    fn result_marker_is_complete_create_only_and_leaves_no_pending_file() {
+        let root = create_probe_root_v1().expect("private result-marker root creates");
+        let child = ProcessProbeChildV1 {
+            root: root.clone(),
+            index: 0,
+        };
+        let payload = b"boundary-reached";
+
+        child
+            .publish_result_v1(payload)
+            .expect("first complete result marker publishes");
+        assert_eq!(
+            fs::read(marker_path_v1(&root, "result", 0)).expect("published marker reads"),
+            payload
+        );
+        assert!(!marker_path_v1(&root, "result-pending", 0).exists());
+        assert_eq!(
+            child.publish_result_v1(b"replacement").unwrap_err(),
+            ProcessProbeErrorV1::ProtocolFailed
+        );
+        assert_eq!(
+            fs::read(marker_path_v1(&root, "result", 0)).expect("original marker remains"),
+            payload
+        );
+        assert!(!marker_path_v1(&root, "result-pending", 0).exists());
+        fs::remove_dir_all(root).expect("private result-marker root removes");
     }
 
     #[cfg(feature = "test-fault-injection")]

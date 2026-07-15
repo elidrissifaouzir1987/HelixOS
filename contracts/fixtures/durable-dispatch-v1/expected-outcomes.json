@@ -1,0 +1,1019 @@
+{
+  "schema": "helixos.durable-dispatch-expected-outcomes/1",
+  "contract_version": 1,
+  "case_count": 143,
+  "result_vocabulary": [
+    "ACCEPT_GRANT",
+    "ACCEPT_RECEIPT",
+    "DENY"
+  ],
+  "authority_vocabulary": [
+    "NONE",
+    "GRANT_ONLY",
+    "CONSUMED_EVIDENCE",
+    "DEFINITE_REFUSAL_EVIDENCE"
+  ],
+  "outcomes": [
+    {
+      "id": "GRANT-VALID",
+      "result": "ACCEPT_GRANT",
+      "stage": "complete",
+      "reason": "VALID",
+      "authority": "GRANT_ONLY"
+    },
+    {
+      "id": "RECEIPT-CONSUMED-VALID",
+      "result": "ACCEPT_RECEIPT",
+      "stage": "complete",
+      "reason": "CONSUMED",
+      "authority": "CONSUMED_EVIDENCE"
+    },
+    {
+      "id": "RECEIPT-REFUSED-GRANT-EXPIRED-VALID",
+      "result": "ACCEPT_RECEIPT",
+      "stage": "complete",
+      "reason": "GRANT_EXPIRED",
+      "authority": "DEFINITE_REFUSAL_EVIDENCE"
+    },
+    {
+      "id": "RECEIPT-REFUSED-SUPERVISOR-EPOCH-MISMATCH-VALID",
+      "result": "ACCEPT_RECEIPT",
+      "stage": "complete",
+      "reason": "SUPERVISOR_EPOCH_MISMATCH",
+      "authority": "DEFINITE_REFUSAL_EVIDENCE"
+    },
+    {
+      "id": "RECEIPT-REFUSED-ADAPTER-PAUSED-VALID",
+      "result": "ACCEPT_RECEIPT",
+      "stage": "complete",
+      "reason": "ADAPTER_PAUSED",
+      "authority": "DEFINITE_REFUSAL_EVIDENCE"
+    },
+    {
+      "id": "GRANT-MISSING-SCHEMA",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-DIGEST-ALGORITHM",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-SIGNATURE-ALGORITHM",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-KEY-PURPOSE",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-KEY-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-GRANT-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-DISPATCH-ATTEMPT-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-ONE-SHOT-NONCE",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-OPERATION-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-OPERATION-STATE-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-PREPARATION-ATTEMPT-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-PREPARATION-TRANSITION-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-PLAN-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-TASK-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-WORKLOAD-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-INTENT",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-TARGET",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-PRECONDITION-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-CONTENT-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-CONTENT-BYTE-LENGTH",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-CONTENT-MEDIA-TYPE",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-TRUST-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-VERIFIED-KEY-FINGERPRINT",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-WORKLOAD-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-WORKLOAD-EVIDENCE-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-LEASE-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-LEASE-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-LEASE-DECISION-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-AUTHORIZATION-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-AUTHORIZATION-EVIDENCE-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-POLICY-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-POLICY-DECISION-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-POLICY-CONTENT-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-POLICY-DECISION-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-CATALOGUE-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-CATALOGUE-DECISION-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-CATALOGUE-CONTENT-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-CATALOGUE-DECISION-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-CAPABILITY-REPORT-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-CAPABILITY-REPORT-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-HOST-DRIVER-CONTEXT-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-CAPABILITY-OBSERVED-AT-UTC-MS",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-CAPABILITY-MAX-AGE-MS",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-ADAPTER-CAPABILITY-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-REPLAY-CLAIM-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-REPLAY-CLAIMANT-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-REPLAY-BINDING-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-BUDGET-SCOPE-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-BUDGET-SCOPE-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-BUDGET-SCOPE-BINDING-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-RESERVATION-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-RESERVATION-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-RESERVATION-BINDING-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-RESERVATION-VECTOR-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-RECOVERY-REFERENCE-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-RECOVERY-MODE",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-RECOVERY-PROFILE-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-RECOVERY-BINDING-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-RECOVERY-RECEIPT-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-DESTINATION-ADAPTER-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-PROTOCOL-VERSION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-BOOT-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-INSTANCE-EPOCH",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-SUPERVISOR-EPOCH",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-SUPERVISOR-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-CLOCK-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-ISSUED-AT-UTC-MS",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-ISSUED-AT-MONOTONIC-MS",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-DEADLINE-MONOTONIC-MS",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-SCHEMA",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-DIGEST-ALGORITHM",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-SIGNATURE-ALGORITHM",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-KEY-PURPOSE",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-KEY-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-RECEIPT-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-GRANT-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-GRANT-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-OPERATION-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-DESTINATION-ADAPTER-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-PROTOCOL-VERSION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-ADAPTER-ROOT-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-INBOX-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-CONSUMPTION-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-REFUSAL-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-RECEIPT-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-OBSERVED-BOOT-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-OBSERVED-SUPERVISOR-EPOCH",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-EPOCH-OBSERVER-GENERATION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-DECISION",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-REFUSAL-CODE",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-NO-CONSUMPTION-TOMBSTONE-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-DECIDED-AT-UTC-MS",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-DECIDED-AT-MONOTONIC-MS",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-TRACE-ID",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_REQUIRED_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-OUTER-PROTECTED",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_OUTER_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-OUTER-GRANT-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_OUTER_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-MISSING-OUTER-SIGNATURE",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_OUTER_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-UNKNOWN-OUTER-FIELD",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "UNKNOWN_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-TAMPERED-DIGEST",
+      "result": "DENY",
+      "stage": "digest",
+      "reason": "DIGEST_MISMATCH",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-TAMPERED-SIGNATURE",
+      "result": "DENY",
+      "stage": "signature",
+      "reason": "SIGNATURE_INVALID",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-RAW-DUPLICATE-MEMBER",
+      "result": "DENY",
+      "stage": "decode",
+      "reason": "DUPLICATE_MEMBER",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-RAW-LEADING-WHITESPACE",
+      "result": "DENY",
+      "stage": "decode",
+      "reason": "NON_CANONICAL_WIRE",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-RAW-TRAILING-NEWLINE",
+      "result": "DENY",
+      "stage": "decode",
+      "reason": "NON_CANONICAL_WIRE",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-RAW-UTF8-BOM",
+      "result": "DENY",
+      "stage": "decode",
+      "reason": "NON_CANONICAL_WIRE",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-RAW-NONCANONICAL-KEY-ORDER",
+      "result": "DENY",
+      "stage": "decode",
+      "reason": "NON_CANONICAL_WIRE",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-RAW-OVERSIZE",
+      "result": "DENY",
+      "stage": "decode",
+      "reason": "WIRE_TOO_LARGE",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-OUTER-PROTECTED",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_OUTER_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-OUTER-RECEIPT-DIGEST",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_OUTER_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-MISSING-OUTER-SIGNATURE",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "MISSING_OUTER_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-UNKNOWN-OUTER-FIELD",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "UNKNOWN_FIELD",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-TAMPERED-DIGEST",
+      "result": "DENY",
+      "stage": "digest",
+      "reason": "DIGEST_MISMATCH",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-TAMPERED-SIGNATURE",
+      "result": "DENY",
+      "stage": "signature",
+      "reason": "SIGNATURE_INVALID",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-RAW-DUPLICATE-MEMBER",
+      "result": "DENY",
+      "stage": "decode",
+      "reason": "DUPLICATE_MEMBER",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-RAW-LEADING-WHITESPACE",
+      "result": "DENY",
+      "stage": "decode",
+      "reason": "NON_CANONICAL_WIRE",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-RAW-TRAILING-NEWLINE",
+      "result": "DENY",
+      "stage": "decode",
+      "reason": "NON_CANONICAL_WIRE",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-RAW-UTF8-BOM",
+      "result": "DENY",
+      "stage": "decode",
+      "reason": "NON_CANONICAL_WIRE",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-RAW-NONCANONICAL-KEY-ORDER",
+      "result": "DENY",
+      "stage": "decode",
+      "reason": "NON_CANONICAL_WIRE",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-RAW-OVERSIZE",
+      "result": "DENY",
+      "stage": "decode",
+      "reason": "WIRE_TOO_LARGE",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-UNSUPPORTED-SCHEMA",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "UNSUPPORTED_SCHEMA",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-UNSUPPORTED-DIGEST-ALGORITHM",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "UNSUPPORTED_DIGEST_ALGORITHM",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-UNSUPPORTED-SIGNATURE-ALGORITHM",
+      "result": "DENY",
+      "stage": "schema",
+      "reason": "UNSUPPORTED_SIGNATURE_ALGORITHM",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-WRONG-KEY-PURPOSE",
+      "result": "DENY",
+      "stage": "signature",
+      "reason": "WRONG_KEY_PURPOSE",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-GRANT-LIFETIME-EXCEEDED",
+      "result": "DENY",
+      "stage": "deadline",
+      "reason": "GRANT_LIFETIME_EXCEEDED",
+      "authority": "NONE"
+    },
+    {
+      "id": "GRANT-UNSUPPORTED-PROTOCOL",
+      "result": "DENY",
+      "stage": "binding",
+      "reason": "UNSUPPORTED_PROTOCOL",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-PRE-RECEIVED-CODE-DESTINATION-MISMATCH",
+      "result": "DENY",
+      "stage": "decision",
+      "reason": "PRE_RECEIVED_CODE_NOT_RECEIPT",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-PRE-RECEIVED-CODE-PROTOCOL-UNSUPPORTED",
+      "result": "DENY",
+      "stage": "decision",
+      "reason": "PRE_RECEIVED_CODE_NOT_RECEIPT",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-PRE-RECEIVED-CODE-CAPABILITY-MISMATCH",
+      "result": "DENY",
+      "stage": "decision",
+      "reason": "PRE_RECEIVED_CODE_NOT_RECEIPT",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-PRE-RECEIVED-CODE-INBOX-CAPACITY-EXHAUSTED",
+      "result": "DENY",
+      "stage": "decision",
+      "reason": "PRE_RECEIVED_CODE_NOT_RECEIPT",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-UNKNOWN-DECISION",
+      "result": "DENY",
+      "stage": "decision",
+      "reason": "UNKNOWN_DECISION",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-WRONG-KEY-PURPOSE",
+      "result": "DENY",
+      "stage": "signature",
+      "reason": "WRONG_KEY_PURPOSE",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-UNSUPPORTED-PROTOCOL",
+      "result": "DENY",
+      "stage": "binding",
+      "reason": "UNSUPPORTED_PROTOCOL",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-GRANT-BINDING-MISMATCH",
+      "result": "DENY",
+      "stage": "binding",
+      "reason": "GRANT_BINDING_MISMATCH",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-OPERATION-BINDING-MISMATCH",
+      "result": "DENY",
+      "stage": "binding",
+      "reason": "OPERATION_BINDING_MISMATCH",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-DESTINATION-BINDING-MISMATCH",
+      "result": "DENY",
+      "stage": "binding",
+      "reason": "DESTINATION_BINDING_MISMATCH",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-ADAPTER-ROOT-BINDING-MISMATCH",
+      "result": "DENY",
+      "stage": "binding",
+      "reason": "ADAPTER_ROOT_BINDING_MISMATCH",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-SUPERVISOR-EPOCH-BINDING-MISMATCH",
+      "result": "DENY",
+      "stage": "binding",
+      "reason": "SUPERVISOR_EPOCH_BINDING_MISMATCH",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-CONSUMED-WITH-REFUSAL-CODE",
+      "result": "DENY",
+      "stage": "decision",
+      "reason": "INVALID_DECISION_SHAPE",
+      "authority": "NONE"
+    },
+    {
+      "id": "RECEIPT-REFUSED-WITH-CONSUMPTION-GENERATION",
+      "result": "DENY",
+      "stage": "decision",
+      "reason": "INVALID_DECISION_SHAPE",
+      "authority": "NONE"
+    }
+  ]
+}

@@ -615,6 +615,9 @@ dependencies = [
  "file-id",
  "getrandom 0.4.3",
  "helix-contracts",
+ "helix-dispatch-contracts",
+ "helix-dispatch-inbox-sqlite",
+ "helix-plan-dispatch",
  "helix-plan-preparation",
  "helix-replay-sqlite",
  "proptest",
@@ -623,6 +626,44 @@ dependencies = [
  "serde_json",
  "serde_json_canonicalizer",
  "sha2",
+]
+
+[[package]]
+name = "helix-dispatch-contracts"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "ed25519-dalek",
+ "proptest",
+ "serde",
+ "serde_json",
+ "serde_json_canonicalizer",
+ "sha2",
+ "unicode-normalization",
+]
+
+[[package]]
+name = "helix-dispatch-inbox-sqlite"
+version = "0.1.0"
+dependencies = [
+ "ed25519-dalek",
+ "helix-dispatch-contracts",
+ "helix-plan-dispatch",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "serde_json_canonicalizer",
+ "sha2",
+]
+
+[[package]]
+name = "helix-plan-dispatch"
+version = "0.1.0"
+dependencies = [
+ "getrandom 0.4.3",
+ "helix-dispatch-contracts",
+ "serde_json",
+ "serde_json_canonicalizer",
 ]
 
 [[package]]

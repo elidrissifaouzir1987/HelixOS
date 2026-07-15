@@ -2030,6 +2030,15 @@ mod synthetic {
             Self::from_plan_input_v1(plan_input_v1(mode), None)
         }
 
+        /// Keeps the genuine PLAN-004 preparation graph inside the stricter PLAN-005
+        /// execution-grant media-type intersection (type/subtype, without parameters).
+        pub(crate) fn dispatch_compatible_v1(mode: SyntheticRecoveryModeV1) -> Self {
+            let mut input = plan_input_v1(mode);
+            input.replacement_media_type = "text/markdown".to_owned();
+            assert_eq!(input.replacement_media_type, "text/markdown");
+            Self::from_plan_input_v1(input, None)
+        }
+
         fn from_plan_input_v1(
             input: PlanInputV1,
             shared_scope: Option<(Sha256Digest, Sha256Digest, u64)>,

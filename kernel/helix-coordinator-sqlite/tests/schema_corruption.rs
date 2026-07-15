@@ -1044,8 +1044,9 @@ fn altered_table_index_and_trigger_sql_each_fail_exact_schema_reopen() {
 #[test]
 fn recursive_trigger_profile_and_every_unique_replace_key_are_closed() {
     for required in [
-        ".pragma_update(None, \"recursive_triggers\", \"ON\")",
-        "profile_pragma_i64(connection, \"recursive_triggers\")? != 1",
+        "PRAGMA recursive_triggers = ON;",
+        "(SELECT recursive_triggers FROM temp.pragma_recursive_triggers())",
+        "profile.5 != 1",
     ] {
         assert!(
             CONNECTION_SOURCE.contains(required),

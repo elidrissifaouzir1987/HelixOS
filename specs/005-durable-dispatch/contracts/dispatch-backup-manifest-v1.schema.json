@@ -1,0 +1,861 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://helixos.local/contracts/dispatch-backup-manifest-v1.schema.json",
+  "title": "HelixOS Dispatch Backup Index Envelope v1",
+  "$comment": "The signature is Ed25519 over the raw 32-byte protected_digest prefixed by the exact signature_domain. The protected_digest is SHA-256 of RFC 8785 canonical UTF-8 bytes of protected. Implementations additionally require signature_profile.key_id to match exactly one active or historically valid member of backup_provisioner_history; JSON Schema cannot express that cross-field equality.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protected",
+    "protected_digest",
+    "signature"
+  ],
+  "properties": {
+    "protected": {
+      "$ref": "#/$defs/protectedIndex"
+    },
+    "protected_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "signature": {
+      "$ref": "#/$defs/ed25519Signature"
+    }
+  },
+  "$defs": {
+    "safeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "positiveSafeInteger": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[-A-Za-z0-9._:]+$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "ed25519Signature": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{86}$"
+    },
+    "protectedIndex": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "backup_id",
+        "restore_identity_digest",
+        "created_at_utc_ms",
+        "source",
+        "supervisor_epoch",
+        "pause_evidence_digest",
+        "quiescence_evidence_digest",
+        "backup_order",
+        "coordinator",
+        "adapter_inbox",
+        "cross_store_inventory",
+        "verification_keys",
+        "signature_profile"
+      ],
+      "properties": {
+        "schema": {
+          "const": "helixos.dispatch-backup-index/1"
+        },
+        "backup_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "restore_identity_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "created_at_utc_ms": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "source": {
+          "$ref": "#/$defs/sourceIdentity"
+        },
+        "supervisor_epoch": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "pause_evidence_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "quiescence_evidence_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "backup_order": {
+          "$ref": "#/$defs/backupOrder"
+        },
+        "coordinator": {
+          "$ref": "#/$defs/coordinatorPackage"
+        },
+        "adapter_inbox": {
+          "$ref": "#/$defs/adapterPackage"
+        },
+        "cross_store_inventory": {
+          "$ref": "#/$defs/crossStoreInventory"
+        },
+        "verification_keys": {
+          "$ref": "#/$defs/verificationKeySets"
+        },
+        "signature_profile": {
+          "$ref": "#/$defs/indexSignatureProfile"
+        }
+      }
+    },
+    "sourceIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_commit",
+        "tool_identity",
+        "tool_digest",
+        "artifact_set_digest"
+      ],
+      "properties": {
+        "source_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "tool_identity": {
+          "$ref": "#/$defs/identifier"
+        },
+        "tool_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "artifact_set_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "backupOrder": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "uniqueItems": true,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/coordinatorBackupStep"
+        },
+        {
+          "$ref": "#/$defs/adapterBackupStep"
+        },
+        {
+          "$ref": "#/$defs/indexPublishStep"
+        }
+      ],
+      "items": false
+    },
+    "coordinatorBackupStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ordinal",
+        "component",
+        "completed_at_utc_ms",
+        "database_digest",
+        "manifest_digest"
+      ],
+      "properties": {
+        "ordinal": {
+          "const": 1
+        },
+        "component": {
+          "const": "coordinator-v2"
+        },
+        "completed_at_utc_ms": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "database_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "manifest_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "adapterBackupStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ordinal",
+        "component",
+        "completed_at_utc_ms",
+        "database_digest",
+        "manifest_digest"
+      ],
+      "properties": {
+        "ordinal": {
+          "const": 2
+        },
+        "component": {
+          "const": "adapter-inbox-v1"
+        },
+        "completed_at_utc_ms": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "database_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "manifest_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "indexPublishStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ordinal",
+        "component",
+        "published_at_utc_ms"
+      ],
+      "properties": {
+        "ordinal": {
+          "const": 3
+        },
+        "component": {
+          "const": "signed-dispatch-backup-index-v1"
+        },
+        "published_at_utc_ms": {
+          "$ref": "#/$defs/safeInteger"
+        }
+      }
+    },
+    "coordinatorPackage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "root_identity_digest",
+        "application_id",
+        "user_version",
+        "base_schema_digest",
+        "overlay_schema_digest",
+        "database_digest",
+        "manifest_digest",
+        "migration_receipt_digest",
+        "root_lifecycle_state",
+        "generations",
+        "counts",
+        "inventory_digests"
+      ],
+      "properties": {
+        "root_identity_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "application_id": {
+          "const": 1212962883
+        },
+        "user_version": {
+          "const": 2
+        },
+        "base_schema_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "overlay_schema_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "database_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "manifest_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "migration_receipt_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "root_lifecycle_state": {
+          "enum": [
+            "ACTIVE",
+            "RESTORE_PENDING"
+          ]
+        },
+        "generations": {
+          "$ref": "#/$defs/coordinatorGenerations"
+        },
+        "counts": {
+          "$ref": "#/$defs/coordinatorCounts"
+        },
+        "inventory_digests": {
+          "$ref": "#/$defs/coordinatorInventories"
+        }
+      }
+    },
+    "coordinatorGenerations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dispatch_store",
+        "dispatch",
+        "delivery",
+        "receipt",
+        "reconciliation",
+        "event",
+        "migration",
+        "restore_state"
+      ],
+      "properties": {
+        "dispatch_store": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "dispatch": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "delivery": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "receipt": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "reconciliation": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "event": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "migration": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "restore_state": {
+          "$ref": "#/$defs/safeInteger"
+        }
+      }
+    },
+    "coordinatorCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "migrations",
+        "comparisons",
+        "grants",
+        "dispatch_records",
+        "transitions",
+        "outbox_members",
+        "delivery_attempts",
+        "receipts",
+        "reconciliations",
+        "events"
+      ],
+      "properties": {
+        "migrations": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "comparisons": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "grants": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "dispatch_records": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "transitions": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "outbox_members": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "delivery_attempts": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "receipts": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "reconciliations": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "events": {
+          "$ref": "#/$defs/safeInteger"
+        }
+      }
+    },
+    "coordinatorInventories": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "migrations",
+        "comparisons",
+        "grants",
+        "dispatch_records",
+        "transitions",
+        "outbox_members",
+        "delivery_attempts",
+        "receipts",
+        "reconciliations",
+        "events",
+        "complete_store"
+      ],
+      "properties": {
+        "migrations": {
+          "$ref": "#/$defs/digest"
+        },
+        "comparisons": {
+          "$ref": "#/$defs/digest"
+        },
+        "grants": {
+          "$ref": "#/$defs/digest"
+        },
+        "dispatch_records": {
+          "$ref": "#/$defs/digest"
+        },
+        "transitions": {
+          "$ref": "#/$defs/digest"
+        },
+        "outbox_members": {
+          "$ref": "#/$defs/digest"
+        },
+        "delivery_attempts": {
+          "$ref": "#/$defs/digest"
+        },
+        "receipts": {
+          "$ref": "#/$defs/digest"
+        },
+        "reconciliations": {
+          "$ref": "#/$defs/digest"
+        },
+        "events": {
+          "$ref": "#/$defs/digest"
+        },
+        "complete_store": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "adapterPackage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "root_identity_digest",
+        "application_id",
+        "user_version",
+        "format_version",
+        "schema_digest",
+        "database_digest",
+        "manifest_digest",
+        "root_lifecycle_state",
+        "supervisor_epoch",
+        "generations",
+        "counts",
+        "inventory_digests"
+      ],
+      "properties": {
+        "root_identity_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "application_id": {
+          "const": 1212962889
+        },
+        "user_version": {
+          "const": 1
+        },
+        "format_version": {
+          "const": 1
+        },
+        "schema_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "database_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "manifest_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "root_lifecycle_state": {
+          "enum": [
+            "ACTIVE",
+            "RESTORE_PENDING"
+          ]
+        },
+        "supervisor_epoch": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "generations": {
+          "$ref": "#/$defs/adapterGenerations"
+        },
+        "counts": {
+          "$ref": "#/$defs/adapterCounts"
+        },
+        "inventory_digests": {
+          "$ref": "#/$defs/adapterInventories"
+        }
+      }
+    },
+    "adapterGenerations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "store",
+        "inbox",
+        "consumption",
+        "receipt",
+        "conflict",
+        "quarantine",
+        "event",
+        "epoch_observer",
+        "restore_state"
+      ],
+      "properties": {
+        "store": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "inbox": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "consumption": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "receipt": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "conflict": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "quarantine": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "event": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "epoch_observer": {
+          "$ref": "#/$defs/positiveSafeInteger"
+        },
+        "restore_state": {
+          "$ref": "#/$defs/safeInteger"
+        }
+      }
+    },
+    "adapterCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inbox_entries",
+        "transitions",
+        "receipts",
+        "conflicts",
+        "quarantines",
+        "events"
+      ],
+      "properties": {
+        "inbox_entries": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "transitions": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "receipts": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "conflicts": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "quarantines": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "events": {
+          "$ref": "#/$defs/safeInteger"
+        }
+      }
+    },
+    "adapterInventories": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inbox_entries",
+        "transitions",
+        "receipts",
+        "conflicts",
+        "quarantines",
+        "events",
+        "complete_store"
+      ],
+      "properties": {
+        "inbox_entries": {
+          "$ref": "#/$defs/digest"
+        },
+        "transitions": {
+          "$ref": "#/$defs/digest"
+        },
+        "receipts": {
+          "$ref": "#/$defs/digest"
+        },
+        "conflicts": {
+          "$ref": "#/$defs/digest"
+        },
+        "quarantines": {
+          "$ref": "#/$defs/digest"
+        },
+        "events": {
+          "$ref": "#/$defs/digest"
+        },
+        "complete_store": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "crossStoreInventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonicalization_profile",
+        "coordinator_grant_count",
+        "adapter_grant_count",
+        "coordinator_receipt_count",
+        "adapter_receipt_count",
+        "matched_grant_count",
+        "matched_receipt_count",
+        "orphan_coordinator_grant_count",
+        "orphan_adapter_grant_count",
+        "orphan_coordinator_receipt_count",
+        "orphan_adapter_receipt_count",
+        "coordinator_grants_digest",
+        "adapter_grants_digest",
+        "coordinator_receipts_digest",
+        "adapter_receipts_digest",
+        "grant_relationships_digest",
+        "receipt_relationships_digest",
+        "complete_inventory_digest"
+      ],
+      "properties": {
+        "canonicalization_profile": {
+          "const": "helixos.dispatch-backup-inventory/rfc8785-sorted-v1"
+        },
+        "coordinator_grant_count": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "adapter_grant_count": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "coordinator_receipt_count": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "adapter_receipt_count": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "matched_grant_count": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "matched_receipt_count": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "orphan_coordinator_grant_count": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "orphan_adapter_grant_count": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "orphan_coordinator_receipt_count": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "orphan_adapter_receipt_count": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "coordinator_grants_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "adapter_grants_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "coordinator_receipts_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "adapter_receipts_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "grant_relationships_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "receipt_relationships_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "complete_inventory_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "verificationKeySets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "grant_signing_history",
+        "receipt_signing_history",
+        "backup_provisioner_history"
+      ],
+      "properties": {
+        "grant_signing_history": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/grantVerificationKey"
+          }
+        },
+        "receipt_signing_history": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/receiptVerificationKey"
+          }
+        },
+        "backup_provisioner_history": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/backupVerificationKey"
+          }
+        }
+      }
+    },
+    "verificationKeyBase": {
+      "type": "object",
+      "required": [
+        "key_id",
+        "key_purpose",
+        "algorithm",
+        "signature_domain",
+        "public_key_fingerprint",
+        "trust_profile_digest",
+        "introduced_generation",
+        "revocation_generation",
+        "status"
+      ],
+      "properties": {
+        "key_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "key_purpose": {
+          "type": "string"
+        },
+        "algorithm": {
+          "const": "ed25519"
+        },
+        "signature_domain": {
+          "type": "string"
+        },
+        "public_key_fingerprint": {
+          "$ref": "#/$defs/digest"
+        },
+        "trust_profile_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "introduced_generation": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "revocation_generation": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "status": {
+          "enum": [
+            "ACTIVE",
+            "RETIRED",
+            "REVOKED"
+          ]
+        }
+      }
+    },
+    "grantVerificationKey": {
+      "unevaluatedProperties": false,
+      "allOf": [
+        {
+          "$ref": "#/$defs/verificationKeyBase"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "key_purpose": {
+              "const": "coordinator-dispatch-signing"
+            },
+            "signature_domain": {
+              "const": "HELIXOS\u0000EXECUTION-GRANT\u0000V1\u0000"
+            }
+          }
+        }
+      ]
+    },
+    "receiptVerificationKey": {
+      "unevaluatedProperties": false,
+      "allOf": [
+        {
+          "$ref": "#/$defs/verificationKeyBase"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "key_purpose": {
+              "const": "adapter-receipt-signing"
+            },
+            "signature_domain": {
+              "const": "HELIXOS\u0000EXECUTION-RECEIPT\u0000V1\u0000"
+            }
+          }
+        }
+      ]
+    },
+    "backupVerificationKey": {
+      "unevaluatedProperties": false,
+      "allOf": [
+        {
+          "$ref": "#/$defs/verificationKeyBase"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "key_purpose": {
+              "const": "dispatch-backup-provisioner"
+            },
+            "signature_domain": {
+              "const": "HELIXOS\u0000DISPATCH-BACKUP-INDEX\u0000V1\u0000"
+            }
+          }
+        }
+      ]
+    },
+    "indexSignatureProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonicalization",
+        "protected_digest_algorithm",
+        "signature_algorithm",
+        "signature_domain",
+        "signature_input_profile",
+        "key_purpose",
+        "key_id"
+      ],
+      "properties": {
+        "canonicalization": {
+          "const": "rfc8785-jcs"
+        },
+        "protected_digest_algorithm": {
+          "const": "sha-256"
+        },
+        "signature_algorithm": {
+          "const": "ed25519"
+        },
+        "signature_domain": {
+          "const": "HELIXOS\u0000DISPATCH-BACKUP-INDEX\u0000V1\u0000"
+        },
+        "signature_input_profile": {
+          "const": "signature-domain || protected-digest-raw-32"
+        },
+        "key_purpose": {
+          "const": "dispatch-backup-provisioner"
+        },
+        "key_id": {
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    }
+  }
+}
