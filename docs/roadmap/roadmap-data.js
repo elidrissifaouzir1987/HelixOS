@@ -8,18 +8,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "title": "R0 n'est pas formellement ferm\u00e9"
     }
   ],
-  "currentFocus": {
-    "description": "Commit only PLAN-005-owned files, push codex/plan-005-durable-dispatch, dispatch one exact successful immutable workflow run, verify all artifact digests/attestations/release bundle/removal semantics, catalog the evidence without promoting physical claims, update the roadmap and open a ready-for-review PR while recording exact links/digests in specs/005-durable-dispatch/evidence/README.md",
-    "done": false,
-    "id": "T094",
-    "kind": "implementation",
-    "phase": "Polish, Performance, Supply Chain and Immutable Evidence",
-    "phaseNumber": 7,
-    "planId": "PLAN-005",
-    "planTitle": "Durable one-shot dispatch",
-    "source": "specs/005-durable-dispatch/tasks.md#L225",
-    "tags": []
-  },
+  "currentFocus": null,
   "definitionOfDone": [
     "architecture/threat model et Constitution Check sont \u00e0 jour",
     "contrats et migrations sont versionn\u00e9s",
@@ -2906,12 +2895,12 @@ window.HELIXOS_ROADMAP_DATA = {
       "total": 89
     },
     {
-      "completed": 96,
+      "completed": 97,
       "conformance": {
         "ciWorkflow": ".github/workflows/durable-dispatch.yml",
         "claimStatus": "pending-evidence",
         "evidence": {
-          "immutable": "pending-workflow-evidence",
+          "immutable": "passing-immutable-software-evidence-overall-claim-pending",
           "local": "passing-local-working-tree-not-immutable",
           "macMiniM4": "passing-controlled-physical-local-working-tree-not-immutable"
         },
@@ -2959,7 +2948,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 12
         },
         {
-          "done": 11,
+          "done": 12,
           "number": 7,
           "title": "Polish, Performance, Supply Chain and Immutable Evidence",
           "total": 12
@@ -2971,8 +2960,8 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 3
         }
       ],
-      "remaining": 1,
-      "taskPercent": 99.0,
+      "remaining": 0,
+      "taskPercent": 100.0,
       "taskSource": "specs/005-durable-dispatch/tasks.md",
       "taskTitle": "Durable One-Shot Dispatch",
       "tasks": [
@@ -4077,7 +4066,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Commit only PLAN-005-owned files, push codex/plan-005-durable-dispatch, dispatch one exact successful immutable workflow run, verify all artifact digests/attestations/release bundle/removal semantics, catalog the evidence without promoting physical claims, update the roadmap and open a ready-for-review PR while recording exact links/digests in specs/005-durable-dispatch/evidence/README.md",
-          "done": false,
+          "done": true,
           "id": "T094",
           "kind": "implementation",
           "phase": "Polish, Performance, Supply Chain and Immutable Evidence",
@@ -4120,23 +4109,10 @@ window.HELIXOS_ROADMAP_DATA = {
       "total": 97
     }
   ],
-  "openTasks": [
-    {
-      "description": "Commit only PLAN-005-owned files, push codex/plan-005-durable-dispatch, dispatch one exact successful immutable workflow run, verify all artifact digests/attestations/release bundle/removal semantics, catalog the evidence without promoting physical claims, update the roadmap and open a ready-for-review PR while recording exact links/digests in specs/005-durable-dispatch/evidence/README.md",
-      "done": false,
-      "id": "T094",
-      "kind": "implementation",
-      "phase": "Polish, Performance, Supply Chain and Immutable Evidence",
-      "phaseNumber": 7,
-      "planId": "PLAN-005",
-      "planTitle": "Durable one-shot dispatch",
-      "source": "specs/005-durable-dispatch/tasks.md#L225",
-      "tags": []
-    }
-  ],
+  "openTasks": [],
   "roadmapDate": "2026-07-13",
   "schema": "helixos.roadmap-data/1",
-  "sourceFingerprint": "24d918526297d099d0c32fec2440620afb6990a57e36e836d2afdd3fc217e49b",
+  "sourceFingerprint": "fac8dc92a38ea6082506e170eebe5bb18227271e7ebda5436f1e1d9828ac04ac",
   "sources": [
     {
       "path": "ROADMAP-SPECS.md",
@@ -4144,7 +4120,7 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "conformance/catalog.yaml",
-      "sha256": "6febe751d87738bb668ee75fd3a184986b4018224aeec6648a0d624e5e73099e"
+      "sha256": "8f16bbcf4875abb727cd80ab35bdffec49284703d6bb7b2d98e0bc025d8507d2"
     },
     {
       "path": "specs/001-portable-signed-contracts/tasks.md",
@@ -4164,7 +4140,7 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "specs/005-durable-dispatch/tasks.md",
-      "sha256": "86698bdc690ceb102c523fc425fdadf482f0ed785444a90d763413c4fa3eefaa"
+      "sha256": "cfa47208360fde4bff6be7ab7fc8ab99d39199c9236cda8867016ab3c8d09680"
     }
   ],
   "strategicStages": [
@@ -4183,7 +4159,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "id": "R1",
       "status": "active",
       "title": "Fondation portable et coordinateur durable",
-      "trackedTaskCompleted": 317,
+      "trackedTaskCompleted": 318,
       "trackedTaskTotal": 318
     },
     {
@@ -4245,12 +4221,12 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "summary": {
     "acceptedClaims": 0,
-    "completedTasks": 317,
+    "completedTasks": 318,
     "focusPlan": "PLAN-005",
-    "remainingTasks": 1,
+    "remainingTasks": 0,
     "strategicStage": "R1",
     "totalClaims": 5,
-    "trackedTaskPercent": 99.7,
+    "trackedTaskPercent": 100.0,
     "trackedTasks": 318
   }
 };

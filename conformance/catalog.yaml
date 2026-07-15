@@ -723,27 +723,27 @@ entries:
       - id: GRANT-001
         owner: helix-dispatch-contracts
         evidence_gate: PLAN-005-CONTRACT
-        status: pending-evidence
+        status: passing-immutable
       - id: DUR-001
         owner: helix-coordinator-sqlite
         evidence_gate: PLAN-005-AUTHORITY
-        status: pending-evidence
+        status: passing-immutable
       - id: DUR-002
         owner: helix-dispatch-inbox-sqlite
         evidence_gate: PLAN-005-INBOX
-        status: pending-evidence
+        status: passing-immutable
       - id: OPS-002
         owner: helix-plan-dispatch
         evidence_gate: PLAN-005-AMBIGUITY
-        status: pending-evidence
+        status: passing-immutable
       - id: OPS-003
         owner: helix-coordinator-sqlite
         evidence_gate: PLAN-005-RESTORE
-        status: pending-evidence
+        status: passing-immutable
       - id: SUPPLY-001
         owner: helixos-maintainers
         evidence_gate: PLAN-005-SUPPLY
-        status: pending-evidence
+        status: passing-immutable
       - id: PERF-002
         owner: helixos-maintainers
         evidence_gate: PLAN-005-PERFORMANCE
@@ -768,7 +768,7 @@ entries:
       fault_boundary_count: 90
       fault_case_count: 180
       authoritative_fault_registry_sha256: afef6e0b580a8ea62906227e25c59e7b067c7aa5dc55d5458d9ccf92f0b1ff26
-      status: present-local-not-immutable
+      status: passing-immutable
     ci_workflow: .github/workflows/durable-dispatch.yml
     owners:
       contract: helix-dispatch-contracts
@@ -835,7 +835,7 @@ entries:
         automation: pending-device
     external_gates:
       immutable_exact_commit:
-        status: pending-evidence
+        status: passing-immutable-exact-commit
         scope: hosted-linux-macos-windows-plus-release-bundle
         required_attestations: 4
         requires_artifact_digests_expiries_and_rekor: true
@@ -885,9 +885,135 @@ entries:
         restore_removal_summary: specs/005-durable-dispatch/evidence/us4-restore-removal.md
         removal_manifest: specs/005-durable-dispatch/evidence/removal-protected-files.json
       immutable:
-        status: pending-workflow-evidence
+        status: passing-immutable-software-evidence-overall-claim-pending
         workflow: .github/workflows/durable-dispatch.yml
         exact_commit_required: true
+        commit: bf6f178ff605b0541b5b5dabe9c4609af0218da9
+        event: push
+        run_id: 29387761127
+        run_attempt: 1
+        ci_run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127
+        validation_artifact: specs/005-durable-dispatch/evidence/ci-immutable-bf6f178ff605b0541b5b5dabe9c4609af0218da9.md
+        validation_digest_sha256: a2a0e26a12822e0711f933ff98ef36a50f2f4e371fc4688bf30d1b71fd3cc5c1
+        uploaded_artifact_digest_sha256: per-artifact-below
+        attestation_url: per-artifact-below
+        preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127
+        retention_days: 90
+        expires_at: "2026-10-13T03:57:01Z"
+        linux_x86_64:
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127/job/87264515794
+          attestation_run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127/job/87270349532
+          runner_label: ubuntu-24.04
+          runner_image_os: ubuntu24
+          runner_image_version: 20260705.232.1
+          runner_os: Linux
+          runner_arch: X64
+          runner_name: GitHub Actions 1000000429
+          rust_host: x86_64-unknown-linux-gnu
+          artifact: plan-005-linux-x86_64-bf6f178ff605b0541b5b5dabe9c4609af0218da9
+          artifact_id: 8332458950
+          artifact_size_bytes: 47799
+          digest_sha256: 58ac45f2f2e4b3fdd90c62e52b2fa621d4ca9e3ac37d5383ae7ff7425479d747
+          attestation: https://github.com/elidrissifaouzir1987/HelixOS/attestations/35386312
+          attestation_id: 35386312
+          rekor_log_index: 2171568656
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127/artifacts/8332458950
+          expires_at: "2026-10-13T03:57:01Z"
+        release_bundle:
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127/job/87269406541
+          attestation_run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127/job/87270349561
+          runner_label: ubuntu-24.04
+          runner_image_os: ubuntu24
+          runner_image_version: 20260705.232.1
+          runner_os: Linux
+          runner_arch: X64
+          runner_name: GitHub Actions 1000000430
+          rust_host: x86_64-unknown-linux-gnu
+          artifact: plan-005-release-bf6f178ff605b0541b5b5dabe9c4609af0218da9
+          artifact_id: 8332754639
+          artifact_size_bytes: 8757559
+          digest_sha256: 10802a33838c2edc53db8c9db64fed9d37c4ad10b1afb125fc6adf89a4e96025
+          attestation: https://github.com/elidrissifaouzir1987/HelixOS/attestations/35386320
+          attestation_id: 35386320
+          rekor_log_index: 2171568748
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127/artifacts/8332754639
+          expires_at: "2026-10-13T03:57:01Z"
+          exact_verifier_status: passing-in-immutable-ubuntu-release-job
+          exact_verifier_require_removal: true
+          exact_verifier_require_exact: true
+          independent_attestation_verification: passing-all-four-downloaded-zip-subjects
+          independent_host_independent_semantic_verification: passing
+          independent_macos_full_verifier: not-claimed-linux-host-bound-live-cargo-toolchain-comparison
+          sbom: CycloneDX-1.5-four-root-union-with-bundled-sqlite-leaf
+          production_package_count: 84
+          dependency_edge_count: 143
+          external_package_count: 77
+          workspace_package_count: 7
+          spdx_text_count: 10
+          cargo_lock_sha256: f18941ac90749f8eb9adffc2e4e9b91e1d9705da8c0cad0c9fe53b451759ff4d
+          rustsec_dependency_count: 220
+          rustsec_vulnerability_count: 0
+          rustsec_warning_count: 1
+          rustsec_warning: RUSTSEC-2025-0134-unmaintained-rustls-pemfile-2.2.0
+          rustsec_database_revision: 6e3286f4efa8c142fb33e5ea4342c8db6693cf34
+          spdx_license_list_revision: c4a7237ec8f4654e867546f9f409749300f1bf4c
+          scan_timestamp: "2026-07-15T04:42:20Z"
+          removal_result: passing-isolated-exact-commit-removal
+          removal_baseline_commit: 6f8dfdd5194792e8592cd10ebaaf8828833effbe
+          removal_baseline_tree: d1f51cc3ba5d0e42ade27fb9aefda01750093971
+          removal_source_commit_tree: 338db095d80b54eedaad3059c214b10aaa71ef01
+          removal_post_removal_tree: d1f51cc3ba5d0e42ade27fb9aefda01750093971
+          removal_protected_file_count: 495
+          removal_restored_baseline_file_count: 23
+          removal_removed_added_file_count: 168
+          removal_retained_audit_file_count: 35
+          removal_post_removal_file_count: 530
+          removal_remaining_package_count: 8
+          removal_tests_skipped: false
+          removal_immutable_release_evidence_eligible: true
+          removal_sc009_exact_commit_eligible: true
+        macos_arm64:
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127/job/87264515793
+          attestation_run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127/job/87270349547
+          runner_label: macos-26
+          runner_image_os: macos26
+          runner_image_version: 20260630.0213.1
+          runner_os: macOS
+          runner_arch: ARM64
+          runner_name: GitHub Actions 1000000428
+          rust_host: aarch64-apple-darwin
+          artifact: plan-005-macos-arm64-bf6f178ff605b0541b5b5dabe9c4609af0218da9
+          artifact_id: 8332319700
+          artifact_size_bytes: 47958
+          digest_sha256: 487d33e301a267b79fe5369c6361f915428d51f75f1c0ab912591525ee9a2bf4
+          attestation: https://github.com/elidrissifaouzir1987/HelixOS/attestations/35386322
+          attestation_id: 35386322
+          rekor_log_index: 2171568759
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127/artifacts/8332319700
+          expires_at: "2026-10-13T03:57:01Z"
+        windows_x64:
+          status: passing-immutable
+          run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127/job/87264515784
+          attestation_run: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127/job/87270349560
+          runner_label: windows-2022
+          runner_image_os: win22
+          runner_image_version: 20260706.237.1
+          runner_os: Windows
+          runner_arch: X64
+          runner_name: GitHub Actions 1000000427
+          rust_host: x86_64-pc-windows-msvc
+          artifact: plan-005-windows-x64-bf6f178ff605b0541b5b5dabe9c4609af0218da9
+          artifact_id: 8332641362
+          artifact_size_bytes: 47859
+          digest_sha256: 899c2e5b8f487e16baa60e69fcf079fa25266164843032fa3f355d08e65868c1
+          attestation: https://github.com/elidrissifaouzir1987/HelixOS/attestations/35386319
+          attestation_id: 35386319
+          rekor_log_index: 2171568736
+          preservation_location: https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127/artifacts/8332641362
+          expires_at: "2026-10-13T03:57:01Z"
       mac_mini_m4:
         status: passing-controlled-physical-local-working-tree-not-immutable
         baseline_head: 6f8dfdd5194792e8592cd10ebaaf8828833effbe

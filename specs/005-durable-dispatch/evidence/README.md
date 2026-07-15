@@ -13,10 +13,10 @@
 This record establishes the clean tracked source boundary before PLAN-005 executable
 changes. The baseline is both the source anchor for implementation and the comparison
 target for the later isolated removal drill. At capture time, the branch `HEAD` exactly
-equalled the baseline commit. PLAN-005 software implementation and bounded local
-subsystem evidence are now complete; T094 exact-commit publication, immutable workflow
-verification and evidence cataloguing are in progress. The aggregate release claim
-remains pending.
+equalled the baseline commit. PLAN-005 software implementation and immutable hosted
+software evidence are complete at exact source commit
+`bf6f178ff605b0541b5b5dabe9c4609af0218da9`. The aggregate release claim remains
+pending because the physical and external gates listed below are still open.
 
 ## Evidence and nonclaims
 
@@ -24,17 +24,39 @@ This file began as baseline bookkeeping and also records the bounded release-evi
 transition. It does not prove a real host effect, physical
 power-loss durability, production supervisor or IPC integration, production recovery,
 full-machine restore, secure erasure, performance on the declared physical profile, or
-Tier 1 readiness. It grants no execution or restoration authority. Until immutable
-artifacts are bound in `conformance/catalog.yaml`, the aggregate PLAN-005 claim remains
-`pending-evidence`.
+Tier 1 readiness. It grants no execution or restoration authority. Binding immutable
+software artifacts in `conformance/catalog.yaml` does not close those gates, so the
+aggregate PLAN-005 claim remains `pending-evidence`.
 
 No credential material, sensitive canonical payload, or machine-local checkout path is
 recorded here.
 
+## Immutable software evidence
+
+GitHub Actions [run `29387761127`](https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127)
+completed successfully from a `push`, attempt 1, with all nine policy, platform,
+supply-chain/removal and attestation jobs passing. The exact evidence record is
+[ci-immutable-bf6f178ff605b0541b5b5dabe9c4609af0218da9.md](ci-immutable-bf6f178ff605b0541b5b5dabe9c4609af0218da9.md),
+SHA-256 `a2a0e26a12822e0711f933ff98ef36a50f2f4e371fc4688bf30d1b71fd3cc5c1`.
+
+| Subject | Preserved artifact | ZIP SHA-256 | Attestation |
+|---|---|---|---|
+| Linux x86_64 | [artifact `8332458950`](https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127/artifacts/8332458950) | `58ac45f2f2e4b3fdd90c62e52b2fa621d4ca9e3ac37d5383ae7ff7425479d747` | [`35386312`](https://github.com/elidrissifaouzir1987/HelixOS/attestations/35386312) |
+| macOS arm64 | [artifact `8332319700`](https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127/artifacts/8332319700) | `487d33e301a267b79fe5369c6361f915428d51f75f1c0ab912591525ee9a2bf4` | [`35386322`](https://github.com/elidrissifaouzir1987/HelixOS/attestations/35386322) |
+| Windows x64 | [artifact `8332641362`](https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127/artifacts/8332641362) | `899c2e5b8f487e16baa60e69fcf079fa25266164843032fa3f355d08e65868c1` | [`35386319`](https://github.com/elidrissifaouzir1987/HelixOS/attestations/35386319) |
+| Release bundle | [artifact `8332754639`](https://github.com/elidrissifaouzir1987/HelixOS/actions/runs/29387761127/artifacts/8332754639) | `10802a33838c2edc53db8c9db64fed9d37c4ad10b1afb125fc6adf89a4e96025` | [`35386320`](https://github.com/elidrissifaouzir1987/HelixOS/attestations/35386320) |
+
+All four artifacts were current and unexpired when catalogued and expire at
+`2026-10-13T03:57:01Z`. The full exact verifier passed in the immutable Ubuntu release
+job before upload and attestation. The evidence record separately documents the
+post-download macOS digest, attestation and host-independent semantic audit, including
+the deliberately host-bound live-toolchain comparison that prevents claiming a second
+full local verifier pass.
+
 ## Graphify reflection snapshot
 
-The current secret-free Graphify reflection contains 178 retained memories: 128 marked
-`useful`, 2 marked `dead_end`, and 48 marked `corrected`. It is a derived retrieval and
+The current secret-free Graphify reflection contains 180 retained memories: 129 marked
+`useful`, 2 marked `dead_end`, and 49 marked `corrected`. It is a derived retrieval and
 work-memory summary, not an authority source. Specifications, ADRs, source code, tests,
 Git history, evidence, and the conformance catalogue remain authoritative whenever a
 derived graph edge, memory, or reflection differs from them.

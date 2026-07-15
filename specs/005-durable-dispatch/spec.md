@@ -4,7 +4,8 @@
 
 **Created**: 2026-07-12
 
-**Status**: Draft
+**Status**: Implementation and immutable software evidence complete; physical and
+external evidence pending
 
 **Input**: User description: "Continue after PLAN-004 by implementing the next bounded architecture slice: move one current prepared operation to durable dispatch with a short signed ExecutionGrant, a durable one-shot adapter inbox, and a recoverable signed receipt, without performing a real host effect."
 

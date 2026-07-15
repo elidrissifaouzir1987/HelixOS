@@ -222,7 +222,7 @@ preserving honest `pending-evidence` status.
 - [x] T091 Run the physical Mac mini M4 benchmark only when exact hardware/OS/store metadata is available; otherwise retain a clearly diagnostic result and keep `PERF-002` pending in `specs/005-durable-dispatch/evidence/m4-benchmark.md`
 - [x] T092 Run SpecKit Converge and Analyze, require 100% FR/SC-to-task coverage and zero critical/high consistency findings, then append any new build-scope tasks to `specs/005-durable-dispatch/tasks.md`
 - [x] T093 Refresh Graphify after code changes, save secret-free design/test/removal results and regenerate reflections in `graphify-out/graph.json`, `graphify-out/memory/` and `graphify-out/reflections/LESSONS.md`
-- [ ] T094 Commit only PLAN-005-owned files, push `codex/plan-005-durable-dispatch`, dispatch one exact successful immutable workflow run, verify all artifact digests/attestations/release bundle/removal semantics, catalog the evidence without promoting physical claims, update the roadmap and open a ready-for-review PR while recording exact links/digests in `specs/005-durable-dispatch/evidence/README.md`
+- [x] T094 Commit only PLAN-005-owned files, push `codex/plan-005-durable-dispatch`, dispatch one exact successful immutable workflow run, verify all artifact digests/attestations/release bundle/removal semantics, catalog the evidence without promoting physical claims, update the roadmap and open a ready-for-review PR while recording exact links/digests in `specs/005-durable-dispatch/evidence/README.md`
 
 ---
 
