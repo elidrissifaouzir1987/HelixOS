@@ -38,7 +38,7 @@ const REMOVAL_MANIFEST_BYTES: &[u8] =
 const FAULT_REGISTRY_SHA256: &str =
     "afef6e0b580a8ea62906227e25c59e7b067c7aa5dc55d5458d9ccf92f0b1ff26";
 const REMOVAL_MANIFEST_SHA256: &str =
-    "090cb94b6cf3c5c3f005931ef22635558a18e689c171b690010955e1125f4cf8";
+    "eb2c7133de8c321939d40810efa79150beb344564868dae78dad2b0504fd9df0";
 
 fn section_keys<'manifest>(manifest: &'manifest str, section: &str) -> BTreeSet<&'manifest str> {
     let header = format!("[{section}]");

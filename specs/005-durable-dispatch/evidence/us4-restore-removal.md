@@ -2,12 +2,12 @@
 
 **Captured**: 2026-07-13
 
-**Updated**: 2026-07-15 after the T097 exact-checkpoint corruption matrices,
-default-compiled adapter caller and focused restore/retention regressions passed
+**Updated**: 2026-07-15 after T094 immutable software evidence completed and the
+post-evidence historical-workflow scoping remediation passed local validation
 
 **Branch**: `codex/plan-005-durable-dispatch`
 
-**Claim status**: `passing local subsystem evidence — lifecycle and exhaustive corruption matrices passing; immutable T094 rerun pending`
+**Claim status**: `immutable software evidence passing at bf6f178; current post-evidence CI scoping locally validated; aggregate claim pending physical and external evidence`
 
 This record closes the local evidence requested by T082 and T097. It combines focused
 current PLAN-005 restore/corruption/retention suites with the historical complete
@@ -20,12 +20,13 @@ T097 real-store matrices that inject, classify, fence, reopen and retain all 11
 coordinator and all 11 adapter corruption classes. For the declared local subsystem
 fixtures, the lifecycle and seeded-corruption clauses of SC-007 are now dynamic.
 
-The removal source is a filtered working-tree snapshot because PLAN-005 is not committed
-yet: `HEAD` still equals the pre-feature baseline. The report therefore says
-`diagnostic-working-tree-removal`, sets both exact-commit eligibility flags to `false`,
-and cannot satisfy SC-009 or the immutable part of SC-010. T094 must rerun the committed
-driver with `--source-commit "$(git rev-parse HEAD)"` after the driver, manifest and all
-PLAN-005-owned bytes exist at that exact `HEAD`.
+The filtered working-tree removal report documented below is the historical T070 local
+diagnostic. At that time it correctly set both exact-commit eligibility flags to
+`false` and did not satisfy SC-009 or the immutable part of SC-010. T094 later ran the
+committed driver for exact source `bf6f178ff605b0541b5b5dabe9c4609af0218da9` in
+immutable run `29387761127`; that closure is recorded separately in
+`ci-immutable-bf6f178ff605b0541b5b5dabe9c4609af0218da9.md` and remains the
+authoritative immutable software record.
 
 ## Current restore, corruption and retention suites
 
@@ -190,8 +191,8 @@ tracked leaf blob in baseline commit
 | Modes | 490 × `100644`; 5 × `100755` |
 | Full NUL inventory SHA-256 | `3495ead55ab40e469940c5a6a585064d75137eaba9af9b5adeaf51b553fba7b9` |
 | NUL path inventory SHA-256 | `0a7a3e4cda89f78a7ccda8184c9c78f7bc52073b92003d7db669e4817ac0ec11` |
-| Manifest file SHA-256 | `090cb94b6cf3c5c3f005931ef22635558a18e689c171b690010955e1125f4cf8` |
-| Driver SHA-256 | `406c553ea80055106026e22721efd20cbffb85247977ab17deab52a095d1cdc2` |
+| Manifest file SHA-256 | `eb2c7133de8c321939d40810efa79150beb344564868dae78dad2b0504fd9df0` |
+| Driver SHA-256 | `0b3c589352abab939017665aecbe75f0c83b3bc72941d8aa7ae2405104b3a118` |
 
 Each entry contains path, Git mode, object type, blob OID and content SHA-256. The driver
 reconstructs both canonical NUL streams, resolves all 495 Git blobs and recomputes their
@@ -200,7 +201,7 @@ own baseline inventory and is itself pinned by the driver. PLAN-005 evidence, wo
 and tool paths are forced to LF by `.gitattributes` so exact bytes remain portable on
 Windows checkouts. The repinned removal class contains both the
 `dispatch_maintenance_faults.rs` target and the coordinator base-quarantine integration
-explicitly. The full PLAN-005 evidence module passes 36/36 after this synchronization.
+explicitly. The full PLAN-005 evidence module passes 38/38 after this synchronization.
 
 The 27 user-owned dirty Rust paths remain protected through their committed baseline
 blobs but their local bytes are never copied into the removal source, edited, formatted,
@@ -236,10 +237,15 @@ smudge filters or EOL conversion, overlaid only classified working-tree deltas a
 | Excluded user-owned working-tree paths observed and ignored | 27/27 |
 | Source delta SHA-256 | `cab1ff43789cce3f7312d065741d8347837716648d9b82aa18b187c26226ed04` |
 
-Those counts and digests remain historical T070 observations. The current repinned
-policy now names 23 possible baseline restoration paths because the T097 coordinator
-base-quarantine integration is also classified. Its current filtered-source classifier
-passes, but only T094 may produce replacement exact-commit removal artifacts.
+Those counts and digests remain historical T070 observations. The current post-evidence
+policy names 26 possible baseline restoration paths: 23 cover the T097 coordinator
+base-quarantine integration, while the three additional paths restore the PLAN-001 and
+PLAN-004 workflow scoping remediation and its PLAN-004 policy test. The current bytes
+pass the filtered-source classifier, 58 evidence tests and a diagnostic isolated
+removal drill, but they postdate source `bf6f178ff605b0541b5b5dabe9c4609af0218da9`.
+They therefore do not replace the immutable T094 record or change the catalogued
+historical counts; binding these newer bytes would require a separate exact-commit
+immutable run, which is not claimed here.
 
 The removal policy classifies every delta exactly once. Baseline changes outside the
 closed restoration list, additions outside the closed removal/retained classes,

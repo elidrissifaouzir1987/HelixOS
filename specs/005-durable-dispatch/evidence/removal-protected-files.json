@@ -3546,6 +3546,8 @@
     ],
     "baseline_paths_restored": [
       ".gitattributes",
+      ".github/workflows/contracts.yml",
+      ".github/workflows/durable-preparation.yml",
       ".gitignore",
       ".specify/feature.json",
       "ROADMAP-SPECS.md",
@@ -3567,7 +3569,8 @@
       "kernel/helix-coordinator-sqlite/tests/common/process_probe.rs",
       "kernel/helix-coordinator-sqlite/tests/contract.rs",
       "kernel/helix-coordinator-sqlite/tests/portability.rs",
-      "kernel/helix-coordinator-sqlite/tests/schema_corruption.rs"
+      "kernel/helix-coordinator-sqlite/tests/schema_corruption.rs",
+      "tools/tests/test_plan004_evidence.py"
     ],
     "policy": "Every source delta must match exactly one class. Baseline modifications are restored from frozen Git blobs; executable or derived PLAN-005 additions are deleted; specifications, retained evidence, and verification tools remain non-executable audit history."
   },

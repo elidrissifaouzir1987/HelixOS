@@ -70,6 +70,46 @@ class SupplyChainEvidenceTests(unittest.TestCase):
         self.assertIsNotNone(block)
         self.assertIn("include-hidden-files: true", block.group(0))
 
+    def test_hosted_scope_excludes_only_plan005_release_contention_oracles(self):
+        workflow = TOOLS.parent / ".github" / "workflows" / "durable-preparation.yml"
+        text = workflow.read_text(encoding="utf-8")
+        block = re.search(
+            r"(?ms)^      - name: Test hosted coordinator surfaces outside the controlled timing oracle\n.*?"
+            r"(?=^      - name: )",
+            text,
+        )
+        self.assertIsNotNone(block)
+        release_oracles = (
+            "exact_10_000_sequential_duplicates_retain_one_dispatch_and_one_consumption",
+            "exact_100_rounds_of_64_threads_retain_one_dispatch_and_consumption_per_round",
+            "exact_20_rounds_of_8_processes_retain_one_dispatch_and_consumption_per_round",
+        )
+        self.assertEqual(
+            tuple(re.findall(r"(?m)^\s+--skip (\S+)\s*$", block.group(0))),
+            (
+                "held_writer_returns_by_absolute_injected_deadline_and_never_mutates_later",
+            )
+            + release_oracles,
+        )
+        descriptor = re.search(
+            r"(?ms)^\s+excluded_downstream_release_oracles = @\(\n(?P<values>.*?)^\s+\)$",
+            text,
+        )
+        self.assertIsNotNone(descriptor)
+        self.assertEqual(
+            tuple(re.findall(r"'([^']+)'", descriptor.group("values"))),
+            release_oracles,
+        )
+        summary = re.search(
+            r"(?m)^\s+'excluded_downstream_release_oracles=([^']+)'", text
+        )
+        self.assertIsNotNone(summary)
+        self.assertEqual(tuple(summary.group(1).split(",")), release_oracles)
+        owner = (
+            ".github/workflows/durable-dispatch.yml#plan005-release-contention-gates"
+        )
+        self.assertEqual(text.count(owner), 2)
+
     def test_sbom_is_extended_with_exact_bundled_sqlite_source(self):
         sqlite = SQLiteSource(
             version="3.53.2",

@@ -175,7 +175,7 @@ class Plan005RemovalManifestTests(unittest.TestCase):
         )
         self.assertEqual(
             removal.PROTECTED_MANIFEST_SHA256,
-            "090cb94b6cf3c5c3f005931ef22635558a18e689c171b690010955e1125f4cf8",
+            "eb2c7133de8c321939d40810efa79150beb344564868dae78dad2b0504fd9df0",
         )
         self.assertEqual(
             supply.REMOVAL_MANIFEST_SHA256,
@@ -260,7 +260,7 @@ class Plan005RemovalManifestTests(unittest.TestCase):
     def test_removal_policy_is_closed_sorted_and_non_overlapping(self):
         policy = self.manifest["removal_policy"]
         expected_counts = {
-            "baseline_paths_restored": 23,
+            "baseline_paths_restored": 26,
             "added_paths_removed": 29,
             "added_prefixes_removed": 5,
             "added_paths_retained_for_audit": 3,
@@ -1538,7 +1538,7 @@ class Plan005WorkflowTests(unittest.TestCase):
     def test_workflow_is_lf_only_and_all_actions_are_immutable_exact_pins(self):
         self.assertEqual(
             _sha256(self.raw),
-            "855a7ee853acb3a9029c9e134b2dfcfa2b3f2752cfb3492b02be33272ba3fe0d",
+            "638b484082d82b9a740675050babc602610580bf908030263b616396c3b66dfa",
         )
         self.assertNotIn(b"\r", self.raw)
         self.assertNotIn(b"\t", self.raw)
@@ -1566,6 +1566,65 @@ class Plan005WorkflowTests(unittest.TestCase):
         checkout = self.step(path_policy, "Check out repository")
         self.assertIn("fetch-depth: 0", checkout)
         self.assertIn("persist-credentials: false", checkout)
+
+    def test_historical_workflows_exclude_plan005_release_contention_oracles(self):
+        release_oracles = (
+            "exact_10_000_sequential_duplicates_retain_one_dispatch_and_one_consumption",
+            "exact_100_rounds_of_64_threads_retain_one_dispatch_and_consumption_per_round",
+            "exact_20_rounds_of_8_processes_retain_one_dispatch_and_consumption_per_round",
+        )
+        owner = (
+            ".github/workflows/durable-dispatch.yml#plan005-release-contention-gates"
+        )
+        self.assertEqual(
+            self.workflow.count("        id: plan005-release-contention-gates"), 1
+        )
+        historical_steps = (
+            (
+                REPOSITORY / ".github" / "workflows" / "contracts.yml",
+                "Test workspace",
+            ),
+            (
+                REPOSITORY / ".github" / "workflows" / "durable-preparation.yml",
+                "Test hosted coordinator surfaces outside the controlled timing oracle",
+            ),
+        )
+        for workflow_path, step_name in historical_steps:
+            text = workflow_path.read_text(encoding="utf-8")
+            match = re.search(
+                r"(?ms)^      - name: {}\s*$.*?(?=^      - name: )".format(
+                    re.escape(step_name)
+                ),
+                text,
+            )
+            self.assertIsNotNone(match, str(workflow_path))
+            self.assertEqual(
+                tuple(re.findall(r"(?m)^\s+--skip (\S+)\s*$", match.group(0))),
+                (
+                    "held_writer_returns_by_absolute_injected_deadline_and_never_mutates_later",
+                )
+                + release_oracles,
+            )
+            descriptor = re.search(
+                r"(?ms)^\s+excluded_downstream_release_oracles = @\(\n(?P<values>.*?)^\s+\)$",
+                text,
+            )
+            self.assertIsNotNone(descriptor, str(workflow_path))
+            self.assertEqual(
+                tuple(re.findall(r"'([^']+)'", descriptor.group("values"))),
+                release_oracles,
+            )
+            summary = re.search(
+                r"(?m)^\s+'excluded_downstream_release_oracles=([^']+)'", text
+            )
+            self.assertIsNotNone(summary, str(workflow_path))
+            self.assertEqual(tuple(summary.group(1).split(",")), release_oracles)
+            self.assertEqual(text.count(owner), 2)
+        for workflow_path in (
+            ".github/workflows/contracts.yml",
+            ".github/workflows/durable-preparation.yml",
+        ):
+            self.assertEqual(self.workflow.count('- "{}"'.format(workflow_path)), 2)
 
     def test_matrix_has_exact_three_hosts_and_fails_closed_on_actual_identity(self):
         conformance = self.job("conformance")

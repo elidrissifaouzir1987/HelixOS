@@ -5,7 +5,9 @@ on:
     paths:
       - ".gitattributes"
       - ".gitignore"
+      - ".github/workflows/contracts.yml"
       - ".github/workflows/durable-dispatch.yml"
+      - ".github/workflows/durable-preparation.yml"
       - "conformance/catalog.yaml"
       - "contracts/fixtures/plan-envelope-v1/**"
       - "contracts/fixtures/plan-eligibility-v1/**"
@@ -42,7 +44,9 @@ on:
     paths:
       - ".gitattributes"
       - ".gitignore"
+      - ".github/workflows/contracts.yml"
       - ".github/workflows/durable-dispatch.yml"
+      - ".github/workflows/durable-preparation.yml"
       - "conformance/catalog.yaml"
       - "contracts/fixtures/plan-envelope-v1/**"
       - "contracts/fixtures/plan-eligibility-v1/**"
@@ -304,6 +308,7 @@ jobs:
           }
 
       - name: Prove exact end-to-end one-shot contention cardinalities
+        id: plan005-release-contention-gates
         shell: pwsh
         run: |
           cargo test --locked --release --manifest-path kernel/Cargo.toml `
