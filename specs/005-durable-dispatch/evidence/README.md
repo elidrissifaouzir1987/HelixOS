@@ -33,8 +33,8 @@ recorded here.
 
 ## Graphify reflection snapshot
 
-The current secret-free Graphify reflection contains 173 retained memories: 128 marked
-`useful`, 2 marked `dead_end`, and 43 marked `corrected`. It is a derived retrieval and
+The current secret-free Graphify reflection contains 174 retained memories: 128 marked
+`useful`, 2 marked `dead_end`, and 44 marked `corrected`. It is a derived retrieval and
 work-memory summary, not an authority source. Specifications, ADRs, source code, tests,
 Git history, evidence, and the conformance catalogue remain authoritative whenever a
 derived graph edge, memory, or reflection differs from them.

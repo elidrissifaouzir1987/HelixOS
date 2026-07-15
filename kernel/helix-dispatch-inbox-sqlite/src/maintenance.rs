@@ -2483,8 +2483,7 @@ fn publish_create_only(
         .parent()
         .ok_or(AdapterDispatchBackupErrorV1::PublicationFailed)?;
     let committed = (|| {
-        File::open(published)
-            .and_then(|file| file.sync_all())
+        sync_adapter_publication_file_v1(published)
             .map_err(|_| AdapterDispatchBackupErrorV1::PublicationFailed)?;
         sync_root_directory(published_root)
             .map_err(|_| AdapterDispatchBackupErrorV1::PublicationFailed)?;
@@ -2498,6 +2497,15 @@ fn publish_create_only(
         return Err(AdapterDispatchBackupErrorV1::PublicationFailed);
     }
     Ok(())
+}
+
+fn sync_adapter_publication_file_v1(path: &Path) -> std::io::Result<()> {
+    // Windows FlushFileBuffers requires GENERIC_WRITE. These create-only component
+    // members are reopened without truncation and the handle is used only to flush.
+    OpenOptions::new()
+        .write(true)
+        .open(path)
+        .and_then(|file| file.sync_all())
 }
 
 fn write_create_only_synced(path: &Path, bytes: &[u8]) -> Result<(), AdapterDispatchBackupErrorV1> {

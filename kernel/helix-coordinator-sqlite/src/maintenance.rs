@@ -6850,8 +6850,7 @@ fn publish_dispatch_member_v1(
     fs::hard_link(staged, published)
         .map_err(|_| DispatchBackupMaintenanceErrorV1::PublicationFailed)?;
     let committed = (|| {
-        File::open(published)
-            .and_then(|file| file.sync_all())
+        sync_dispatch_publication_file_v1(published)
             .map_err(|_| DispatchBackupMaintenanceErrorV1::PublicationFailed)?;
         sync_directory_v1(published_root)?;
         fs::remove_file(staged).map_err(|_| DispatchBackupMaintenanceErrorV1::PublicationFailed)?;
@@ -6882,7 +6881,7 @@ fn publish_dispatch_index_terminal_v1(
         published,
         published_root,
         |staged, published, staging_root, published_root| {
-            let _ = File::open(published).and_then(|file| file.sync_all());
+            let _ = sync_dispatch_publication_file_v1(published);
             let _ = sync_directory_v1(published_root);
             let _ = fs::remove_file(staged);
             let _ = sync_directory_v1(staging_root);
@@ -6907,8 +6906,7 @@ where
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
         Ok(_) | Err(_) => return Err(DispatchBackupMaintenanceErrorV1::PublicationFailed),
     }
-    File::open(staged)
-        .and_then(|file| file.sync_all())
+    sync_dispatch_publication_file_v1(staged)
         .map_err(|_| DispatchBackupMaintenanceErrorV1::PublicationFailed)?;
     sync_directory_v1(staging_root)?;
     sync_directory_v1(published_root)?;
@@ -6970,6 +6968,16 @@ fn hash_dispatch_file_bounded_v1(
 #[cfg(not(test))]
 fn sync_directory_v1(path: &Path) -> Result<(), DispatchBackupMaintenanceErrorV1> {
     sync_directory_entry(path).map_err(|_| DispatchBackupMaintenanceErrorV1::PublicationFailed)
+}
+
+#[cfg(not(test))]
+fn sync_dispatch_publication_file_v1(path: &Path) -> std::io::Result<()> {
+    // Windows FlushFileBuffers requires GENERIC_WRITE. These create-only package
+    // members are reopened without truncation and the handle is used only to flush.
+    OpenOptions::new()
+        .write(true)
+        .open(path)
+        .and_then(|file| file.sync_all())
 }
 
 #[cfg(not(test))]
