@@ -1,27 +1,39 @@
+import hashlib
 import json
+import os
 import re
+import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 TOOLS = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(TOOLS))
 
 from plan004_removal_drill import (  # noqa: E402
+    BASELINE_PACKAGES,
+    BASELINE_WORKSPACE_MANIFEST_SHA256,
     EvidenceError as RemovalEvidenceError,
+    REMOVED_MEMBERS,
     _clean_environment,
+    _metadata_packages,
     _normalized_metadata,
+    _restore_baseline_workspace_manifest,
+    _run_workspace_metadata,
     redact_output,
     remove_catalog_entry,
     remove_plan004_attributes,
-    remove_workspace_members,
 )
 from plan004_supply_chain import (  # noqa: E402
     EvidenceError as SupplyEvidenceError,
+    REMOVAL_BASELINE_WORKSPACE_MANIFEST_SHA256,
     SQLiteSource,
     _require_tool_version,
+    _validate_restored_workspace_binding,
+    _workspace_package_names,
     augment_sbom,
     dependency_closure,
     validate_audit_report,
@@ -69,6 +81,46 @@ class SupplyChainEvidenceTests(unittest.TestCase):
 
         self.assertIsNotNone(block)
         self.assertIn("include-hidden-files: true", block.group(0))
+
+    def test_hosted_scope_excludes_only_plan005_release_contention_oracles(self):
+        workflow = TOOLS.parent / ".github" / "workflows" / "durable-preparation.yml"
+        text = workflow.read_text(encoding="utf-8")
+        block = re.search(
+            r"(?ms)^      - name: Test hosted coordinator surfaces outside the controlled timing oracle\n.*?"
+            r"(?=^      - name: )",
+            text,
+        )
+        self.assertIsNotNone(block)
+        release_oracles = (
+            "exact_10_000_sequential_duplicates_retain_one_dispatch_and_one_consumption",
+            "exact_100_rounds_of_64_threads_retain_one_dispatch_and_consumption_per_round",
+            "exact_20_rounds_of_8_processes_retain_one_dispatch_and_consumption_per_round",
+        )
+        self.assertEqual(
+            tuple(re.findall(r"(?m)^\s+--skip (\S+)\s*$", block.group(0))),
+            (
+                "held_writer_returns_by_absolute_injected_deadline_and_never_mutates_later",
+            )
+            + release_oracles,
+        )
+        descriptor = re.search(
+            r"(?ms)^\s+excluded_downstream_release_oracles = @\(\n(?P<values>.*?)^\s+\)$",
+            text,
+        )
+        self.assertIsNotNone(descriptor)
+        self.assertEqual(
+            tuple(re.findall(r"'([^']+)'", descriptor.group("values"))),
+            release_oracles,
+        )
+        summary = re.search(
+            r"(?m)^\s+'excluded_downstream_release_oracles=([^']+)'", text
+        )
+        self.assertIsNotNone(summary)
+        self.assertEqual(tuple(summary.group(1).split(",")), release_oracles)
+        owner = (
+            ".github/workflows/durable-dispatch.yml#plan005-release-contention-gates"
+        )
+        self.assertEqual(text.count(owner), 2)
 
     def test_sbom_is_extended_with_exact_bundled_sqlite_source(self):
         sqlite = SQLiteSource(
@@ -339,24 +391,207 @@ class RemovalEvidenceTests(unittest.TestCase):
         with self.assertRaisesRegex(RemovalEvidenceError, "exactly one"):
             remove_catalog_entry("conformance:\n", "PLAN-004")
 
-    def test_workspace_removal_is_exact_and_keeps_legacy_members(self):
-        manifest = """[workspace]
-members = [
-    "helix-plan-preparation",
-    "helix-coordinator-sqlite",
-    "helixos-kernel",
-]
-resolver = "2"
-"""
+    def test_current_workspace_semantically_identifies_downstream_members(self):
+        environment = _clean_environment(dict(os.environ))
+        environment["CARGO_NET_OFFLINE"] = "true"
+        raw = _run_workspace_metadata(TOOLS.parent, environment)
+        required = BASELINE_PACKAGES | REMOVED_MEMBERS
+        source_packages = _metadata_packages(raw, TOOLS.parent, required)
 
-        result = remove_workspace_members(
-            manifest,
-            {"helix-plan-preparation", "helix-coordinator-sqlite"},
+        self.assertTrue(required.issubset(source_packages))
+        self.assertEqual(
+            source_packages - BASELINE_PACKAGES - REMOVED_MEMBERS,
+            {
+                "helix-dispatch-contracts",
+                "helix-dispatch-inbox-sqlite",
+                "helix-plan-dispatch",
+            },
         )
 
-        self.assertNotIn("helix-plan-preparation", result)
-        self.assertNotIn("helix-coordinator-sqlite", result)
-        self.assertIn("helixos-kernel", result)
+    def test_metadata_projection_uses_only_semantic_workspace_member_ids(self):
+        metadata = {
+            "packages": [
+                {"id": "workspace-id", "name": "helix-contracts"},
+                {"id": "dependency-id", "name": "external-dependency"},
+            ],
+            "workspace_members": ["workspace-id"],
+        }
+
+        self.assertEqual(_metadata_packages(json.dumps(metadata)), {"helix-contracts"})
+        self.assertEqual(_workspace_package_names(metadata), {"helix-contracts"})
+
+        malformed = {
+            "unknown-member": {
+                **metadata,
+                "workspace_members": ["unknown-id"],
+            },
+            "duplicate-member": {
+                **metadata,
+                "workspace_members": ["workspace-id", "workspace-id"],
+            },
+            "duplicate-package-id": {
+                **metadata,
+                "packages": metadata["packages"]
+                + [{"id": "workspace-id", "name": "duplicate"}],
+            },
+            "empty-name": {
+                **metadata,
+                "packages": [{"id": "workspace-id", "name": ""}],
+            },
+        }
+        for label, value in malformed.items():
+            with self.subTest(label=label, consumer="removal"), self.assertRaises(
+                RemovalEvidenceError
+            ):
+                _metadata_packages(json.dumps(value))
+            with self.subTest(label=label, consumer="supply"), self.assertRaises(
+                SupplyEvidenceError
+            ):
+                _workspace_package_names(value)
+
+    def test_semantic_workspace_binding_resists_multiline_section_spoof(self):
+        fake_members = sorted(BASELINE_PACKAGES | REMOVED_MEMBERS)
+        hidden_downstream = "helix-dispatch-contracts"
+        real_members = fake_members + [hidden_downstream]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            kernel = root / "kernel"
+            kernel.mkdir()
+            for name in real_members:
+                crate = kernel / name
+                (crate / "src").mkdir(parents=True)
+                (crate / "Cargo.toml").write_text(
+                    '[package]\nname = "{}"\nversion = "0.1.0"\nedition = "2024"\n'.format(
+                        name
+                    ),
+                    encoding="utf-8",
+                )
+                (crate / "src" / "lib.rs").write_text("", encoding="utf-8")
+            quoted_fake = "\n".join('    "{}",'.format(name) for name in fake_members)
+            quoted_real = "\n".join('    "{}",'.format(name) for name in real_members)
+            (kernel / "Cargo.toml").write_text(
+                '''[workspace.metadata]
+note = """
+[workspace]
+members = [
+{fake}
+]
+"""
+
+[workspace]
+"members" = [
+{real}
+]
+resolver = "2"
+'''.format(fake=quoted_fake, real=quoted_real),
+                encoding="utf-8",
+            )
+            subprocess.run(
+                [
+                    "cargo",
+                    "generate-lockfile",
+                    "--offline",
+                    "--manifest-path",
+                    "kernel/Cargo.toml",
+                ],
+                cwd=str(root),
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            environment = _clean_environment(dict(os.environ))
+            environment["CARGO_NET_OFFLINE"] = "true"
+            raw = _run_workspace_metadata(root, environment)
+            required = BASELINE_PACKAGES | REMOVED_MEMBERS
+            removal_names = _metadata_packages(raw, root, required)
+            supply_names = _workspace_package_names(
+                json.loads(raw), root, required
+            )
+            decoy = json.loads(raw)
+            preparation = next(
+                package
+                for package in decoy["packages"]
+                if package["name"] == "helix-plan-preparation"
+            )
+            preparation["manifest_path"] = str(
+                kernel / hidden_downstream / "Cargo.toml"
+            )
+            with self.assertRaisesRegex(RemovalEvidenceError, "path is invalid"):
+                _metadata_packages(json.dumps(decoy), root, required)
+            with self.assertRaisesRegex(SupplyEvidenceError, "path is invalid"):
+                _workspace_package_names(decoy, root, required)
+
+        expected = set(real_members)
+        self.assertEqual(removal_names, expected)
+        self.assertEqual(supply_names, expected)
+        with self.assertRaisesRegex(SupplyEvidenceError, "restoration binding"):
+            _validate_restored_workspace_binding({}, expected)
+
+    def test_frozen_workspace_manifest_restore_is_byte_exact_and_fail_closed(self):
+        baseline = (
+            b'[workspace]\n'
+            b'members = ["helix-contracts", "helix-plan-eligibility", '
+            b'"helix-replay-sqlite", "helixos-kernel", "helixos-mcp-shim", '
+            b'"helixos-provision"]\n'
+            b'resolver = "2"\n'
+        )
+        self.assertEqual(
+            hashlib.sha256(baseline).hexdigest(), BASELINE_WORKSPACE_MANIFEST_SHA256
+        )
+        self.assertEqual(
+            BASELINE_WORKSPACE_MANIFEST_SHA256,
+            REMOVAL_BASELINE_WORKSPACE_MANIFEST_SHA256,
+        )
+        completed = mock.Mock(returncode=0, stdout=baseline, stderr=b"")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "kernel").mkdir()
+            with mock.patch(
+                "plan004_removal_drill.subprocess.run", return_value=completed
+            ):
+                digest = _restore_baseline_workspace_manifest(TOOLS.parent, root)
+            self.assertEqual(digest, BASELINE_WORKSPACE_MANIFEST_SHA256)
+            self.assertEqual((root / "kernel" / "Cargo.toml").read_bytes(), baseline)
+
+            with mock.patch(
+                "plan004_removal_drill.subprocess.run", return_value=completed
+            ), mock.patch(
+                "plan004_removal_drill.BASELINE_WORKSPACE_MANIFEST_SHA256", "0" * 64
+            ), self.assertRaisesRegex(RemovalEvidenceError, "digest mismatch"):
+                _restore_baseline_workspace_manifest(TOOLS.parent, root)
+
+    def test_workspace_restoration_binding_preserves_legacy_and_requires_downstream_list(self):
+        historical_members = BASELINE_PACKAGES | REMOVED_MEMBERS
+        _validate_restored_workspace_binding({}, historical_members)
+
+        downstream = {
+            "helix-dispatch-contracts",
+            "helix-dispatch-inbox-sqlite",
+            "helix-plan-dispatch",
+        }
+        current_members = historical_members | downstream
+        with self.assertRaisesRegex(SupplyEvidenceError, "restoration binding"):
+            _validate_restored_workspace_binding({}, current_members)
+
+        report = {
+            "restored_baseline_workspace_manifest_sha256": (
+                REMOVAL_BASELINE_WORKSPACE_MANIFEST_SHA256
+            ),
+            "detached_downstream_workspace_members": sorted(downstream),
+        }
+        _validate_restored_workspace_binding(report, current_members)
+
+        for field, value in (
+            ("restored_baseline_workspace_manifest_sha256", "0" * 64),
+            ("detached_downstream_workspace_members", []),
+        ):
+            tampered = dict(report)
+            tampered[field] = value
+            with self.subTest(field=field), self.assertRaisesRegex(
+                SupplyEvidenceError, "restoration binding"
+            ):
+                _validate_restored_workspace_binding(tampered, current_members)
 
     def test_attributes_removal_drops_the_complete_plan004_block(self):
         attributes = """# previous
@@ -402,11 +637,15 @@ resolver = "2"
             {
                 "packages": [
                     {
+                        "id": "helix-contracts 0.1.0 (path+file:///source)",
                         "name": "helix-contracts",
                         "version": "0.1.0",
                         "source": None,
                         "manifest_path": "C:\\Users\\alice\\source\\Cargo.toml",
                     }
+                ],
+                "workspace_members": [
+                    "helix-contracts 0.1.0 (path+file:///source)"
                 ],
                 "workspace_root": "C:\\Users\\alice\\source\\kernel",
                 "target_directory": "D:\\cargo-target",

@@ -1,7 +1,10 @@
 [workspace]
 members = [
     "helix-contracts",
+    "helix-dispatch-contracts",
+    "helix-dispatch-inbox-sqlite",
     "helix-plan-eligibility",
+    "helix-plan-dispatch",
     "helix-plan-preparation",
     "helix-replay-sqlite",
     "helix-coordinator-sqlite",

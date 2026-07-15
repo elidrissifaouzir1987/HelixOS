@@ -478,6 +478,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "fs-id"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f1648c1b89e98d042d61b5c1ed0fbcd9dbd7815163864d20f8e7976a9b3af938"
+dependencies = [
+ "libc",
+ "wasi",
+ "winapi",
+]
+
+[[package]]
 name = "fs_extra"
 version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -615,6 +626,9 @@ dependencies = [
  "file-id",
  "getrandom 0.4.3",
  "helix-contracts",
+ "helix-dispatch-contracts",
+ "helix-dispatch-inbox-sqlite",
+ "helix-plan-dispatch",
  "helix-plan-preparation",
  "helix-replay-sqlite",
  "proptest",
@@ -623,6 +637,45 @@ dependencies = [
  "serde_json",
  "serde_json_canonicalizer",
  "sha2",
+]
+
+[[package]]
+name = "helix-dispatch-contracts"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "ed25519-dalek",
+ "proptest",
+ "serde",
+ "serde_json",
+ "serde_json_canonicalizer",
+ "sha2",
+ "unicode-normalization",
+]
+
+[[package]]
+name = "helix-dispatch-inbox-sqlite"
+version = "0.1.0"
+dependencies = [
+ "ed25519-dalek",
+ "fs-id",
+ "helix-dispatch-contracts",
+ "helix-plan-dispatch",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "serde_json_canonicalizer",
+ "sha2",
+]
+
+[[package]]
+name = "helix-plan-dispatch"
+version = "0.1.0"
+dependencies = [
+ "getrandom 0.4.3",
+ "helix-dispatch-contracts",
+ "serde_json",
+ "serde_json_canonicalizer",
 ]
 
 [[package]]
@@ -1771,6 +1824,28 @@ checksum = "dc1b4cb0cc549fcf58d7dfc081778139b3d283a081644e833e84682ad71cea24"
 dependencies = [
  "unicode-ident",
 ]
+
+[[package]]
+name = "winapi"
+version = "0.3.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c839a674fcd7a98952e593242ea400abe93992746761e38641405d28b00f419"
+dependencies = [
+ "winapi-i686-pc-windows-gnu",
+ "winapi-x86_64-pc-windows-gnu",
+]
+
+[[package]]
+name = "winapi-i686-pc-windows-gnu"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ac3b87c63620426dd9b991e5ce0329eff545bccbbb34f3be09ff6fb6ab51b7b6"
+
+[[package]]
+name = "winapi-x86_64-pc-windows-gnu"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 
 [[package]]
 name = "windows-link"

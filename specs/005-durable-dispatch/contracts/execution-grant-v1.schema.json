@@ -1,0 +1,372 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://helixos.local/contracts/execution-grant-v1.schema.json",
+  "title": "HelixOS Signed Execution Grant v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protected",
+    "grant_digest",
+    "signature"
+  ],
+  "properties": {
+    "protected": {
+      "$ref": "#/$defs/protectedGrant"
+    },
+    "grant_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "signature": {
+      "$ref": "#/$defs/ed25519Signature"
+    }
+  },
+  "$defs": {
+    "safeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "generation": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[-A-Za-z0-9._:]+$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "ed25519Signature": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{85}[AQgw]$"
+    },
+    "mediaType": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 127,
+      "pattern": "^[A-Za-z0-9!#$&^_.+-]{1,63}/[A-Za-z0-9!#$&^_.+-]{1,63}$"
+    },
+    "resourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "root_id",
+        "components"
+      ],
+      "properties": {
+        "root_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+        },
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "pattern": "^(?!\\.{1,2}$)(?!.*[ .]$)[^/\\\\:<>\"|?*\\u0000-\\u001F\\u007F]+$",
+            "$comment": "The decoder additionally enforces NFC, 255 UTF-8 bytes, default-ignorable denial and Windows device-name denial."
+          },
+          "$comment": "The decoder additionally limits combined component UTF-8 bytes to 4096."
+        }
+      }
+    },
+    "protectedGrant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "digest_algorithm",
+        "signature_algorithm",
+        "key_purpose",
+        "key_id",
+        "grant_id",
+        "dispatch_attempt_id",
+        "one_shot_nonce",
+        "operation_id",
+        "operation_state_generation",
+        "preparation_attempt_id",
+        "preparation_transition_generation",
+        "plan_id",
+        "task_id",
+        "workload_id",
+        "intent",
+        "target",
+        "precondition_digest",
+        "content_digest",
+        "content_byte_length",
+        "content_media_type",
+        "trust_generation",
+        "verified_key_fingerprint",
+        "workload_generation",
+        "workload_evidence_digest",
+        "lease_generation",
+        "lease_digest",
+        "lease_decision_digest",
+        "authorization_generation",
+        "authorization_evidence_digest",
+        "policy_generation",
+        "policy_decision_generation",
+        "policy_content_digest",
+        "policy_decision_digest",
+        "catalogue_generation",
+        "catalogue_decision_generation",
+        "catalogue_content_digest",
+        "catalogue_decision_digest",
+        "capability_report_generation",
+        "capability_report_digest",
+        "host_driver_context_digest",
+        "capability_observed_at_utc_ms",
+        "capability_max_age_ms",
+        "adapter_capability_digest",
+        "replay_claim_id",
+        "replay_claimant_generation",
+        "replay_binding_digest",
+        "budget_scope_id",
+        "budget_scope_generation",
+        "budget_scope_binding_digest",
+        "reservation_id",
+        "reservation_generation",
+        "reservation_binding_digest",
+        "reservation_vector_digest",
+        "recovery_reference_digest",
+        "recovery_mode",
+        "recovery_profile_digest",
+        "recovery_binding_digest",
+        "recovery_receipt_digest",
+        "destination_adapter_id",
+        "protocol_version",
+        "boot_id",
+        "instance_epoch",
+        "supervisor_epoch",
+        "supervisor_generation",
+        "clock_generation",
+        "issued_at_utc_ms",
+        "issued_at_monotonic_ms",
+        "deadline_monotonic_ms"
+      ],
+      "properties": {
+        "schema": {
+          "const": "helixos.execution-grant/1"
+        },
+        "digest_algorithm": {
+          "const": "sha-256"
+        },
+        "signature_algorithm": {
+          "const": "ed25519"
+        },
+        "key_purpose": {
+          "const": "coordinator-dispatch-signing"
+        },
+        "key_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "grant_id": {
+          "$ref": "#/$defs/digest"
+        },
+        "dispatch_attempt_id": {
+          "$ref": "#/$defs/digest"
+        },
+        "one_shot_nonce": {
+          "$ref": "#/$defs/digest"
+        },
+        "operation_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "operation_state_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "preparation_attempt_id": {
+          "$ref": "#/$defs/digest"
+        },
+        "preparation_transition_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "plan_id": {
+          "$ref": "#/$defs/digest"
+        },
+        "task_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "workload_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "intent": {
+          "const": "host.file.patch"
+        },
+        "target": {
+          "$ref": "#/$defs/resourceRef"
+        },
+        "precondition_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "content_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "content_byte_length": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "content_media_type": {
+          "$ref": "#/$defs/mediaType"
+        },
+        "trust_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "verified_key_fingerprint": {
+          "$ref": "#/$defs/digest"
+        },
+        "workload_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "workload_evidence_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "lease_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "lease_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "lease_decision_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "authorization_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "authorization_evidence_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "policy_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "policy_decision_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "policy_content_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "policy_decision_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "catalogue_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "catalogue_decision_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "catalogue_content_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "catalogue_decision_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "capability_report_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "capability_report_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "host_driver_context_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "capability_observed_at_utc_ms": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "capability_max_age_ms": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "adapter_capability_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "replay_claim_id": {
+          "$ref": "#/$defs/digest"
+        },
+        "replay_claimant_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "replay_binding_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "budget_scope_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "budget_scope_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "budget_scope_binding_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "reservation_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "reservation_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "reservation_binding_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "reservation_vector_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "recovery_reference_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "recovery_mode": {
+          "type": "string",
+          "enum": [
+            "COMPENSATION",
+            "IRREVERSIBLE"
+          ]
+        },
+        "recovery_profile_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "recovery_binding_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "recovery_receipt_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "destination_adapter_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "protocol_version": {
+          "const": 1
+        },
+        "boot_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "instance_epoch": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "supervisor_epoch": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "supervisor_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "clock_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "issued_at_utc_ms": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "issued_at_monotonic_ms": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "deadline_monotonic_ms": {
+          "$ref": "#/$defs/generation"
+        }
+      }
+    }
+  }
+}

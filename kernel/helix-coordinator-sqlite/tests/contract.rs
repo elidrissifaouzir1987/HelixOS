@@ -249,7 +249,7 @@ fn preparation_storage_has_no_dispatch_grant_legacy_or_mcp_reachability() {
         );
     }
 
-    let production = coordinator_source_tree();
+    let production = coordinator_source_tree(false);
     for forbidden_authority in [
         "ExecutionGrant",
         "EffectAdapter",
@@ -262,10 +262,19 @@ fn preparation_storage_has_no_dispatch_grant_legacy_or_mcp_reachability() {
             "preparation storage exposes forbidden authority {forbidden_authority}"
         );
     }
+
+    let dispatch_overlay = coordinator_source_tree(true);
+    for required_overlay_authority in ["DispatchOutbox", "DISPATCHING"] {
+        assert!(
+            dispatch_overlay.contains(required_overlay_authority),
+            "PLAN-005 authority must remain confined to dispatch modules: \
+             {required_overlay_authority}"
+        );
+    }
 }
 
-fn coordinator_source_tree() -> String {
-    fn visit(directory: &Path, sources: &mut Vec<String>) {
+fn coordinator_source_tree(dispatch_modules: bool) -> String {
+    fn visit(directory: &Path, dispatch_modules: bool, sources: &mut Vec<String>) {
         let mut entries = fs::read_dir(directory)
             .expect("coordinator source directory is readable")
             .map(|entry| entry.expect("coordinator source entry is readable").path())
@@ -273,8 +282,15 @@ fn coordinator_source_tree() -> String {
         entries.sort();
         for path in entries {
             if path.is_dir() {
-                visit(&path, sources);
+                visit(&path, dispatch_modules, sources);
             } else if path.extension().and_then(|value| value.to_str()) == Some("rs") {
+                let is_dispatch_module = path
+                    .file_stem()
+                    .and_then(|value| value.to_str())
+                    .is_some_and(|value| value.starts_with("dispatch"));
+                if is_dispatch_module != dispatch_modules {
+                    continue;
+                }
                 sources.push(fs::read_to_string(path).expect("coordinator Rust source is UTF-8"));
             }
         }
@@ -282,7 +298,7 @@ fn coordinator_source_tree() -> String {
 
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
     let mut sources = Vec::new();
-    visit(&root, &mut sources);
+    visit(&root, dispatch_modules, &mut sources);
     sources.join("\n")
 }
 

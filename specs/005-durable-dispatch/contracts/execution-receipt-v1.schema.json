@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://helixos.local/contracts/execution-receipt-v1.schema.json",
+  "title": "HelixOS Signed Execution Receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protected",
+    "receipt_digest",
+    "signature"
+  ],
+  "properties": {
+    "protected": {
+      "$ref": "#/$defs/protectedReceipt"
+    },
+    "receipt_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "signature": {
+      "$ref": "#/$defs/ed25519Signature"
+    }
+  },
+  "$defs": {
+    "safeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "generation": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[-A-Za-z0-9._:]+$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "ed25519Signature": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{85}[AQgw]$"
+    },
+    "nullableGeneration": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/generation"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "nullableDigest": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/digest"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "nullableRefusalCode": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "GRANT_EXPIRED",
+            "SUPERVISOR_EPOCH_MISMATCH",
+            "ADAPTER_PAUSED"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "protectedReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "digest_algorithm",
+        "signature_algorithm",
+        "key_purpose",
+        "key_id",
+        "receipt_id",
+        "grant_id",
+        "grant_digest",
+        "operation_id",
+        "destination_adapter_id",
+        "protocol_version",
+        "adapter_root_id",
+        "inbox_generation",
+        "consumption_generation",
+        "refusal_generation",
+        "receipt_generation",
+        "observed_boot_id",
+        "observed_supervisor_epoch",
+        "epoch_observer_generation",
+        "decision",
+        "refusal_code",
+        "no_consumption_tombstone_digest",
+        "decided_at_utc_ms",
+        "decided_at_monotonic_ms",
+        "trace_id"
+      ],
+      "properties": {
+        "schema": {
+          "const": "helixos.execution-receipt/1"
+        },
+        "digest_algorithm": {
+          "const": "sha-256"
+        },
+        "signature_algorithm": {
+          "const": "ed25519"
+        },
+        "key_purpose": {
+          "const": "adapter-receipt-signing"
+        },
+        "key_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "receipt_id": {
+          "$ref": "#/$defs/digest"
+        },
+        "grant_id": {
+          "$ref": "#/$defs/digest"
+        },
+        "grant_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "operation_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "destination_adapter_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "protocol_version": {
+          "const": 1
+        },
+        "adapter_root_id": {
+          "$ref": "#/$defs/digest"
+        },
+        "inbox_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "consumption_generation": {
+          "$ref": "#/$defs/nullableGeneration"
+        },
+        "refusal_generation": {
+          "$ref": "#/$defs/nullableGeneration"
+        },
+        "receipt_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "observed_boot_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "observed_supervisor_epoch": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "epoch_observer_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "CONSUMED",
+            "REFUSED_DEFINITE"
+          ]
+        },
+        "refusal_code": {
+          "$ref": "#/$defs/nullableRefusalCode"
+        },
+        "no_consumption_tombstone_digest": {
+          "$ref": "#/$defs/nullableDigest"
+        },
+        "decided_at_utc_ms": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "decided_at_monotonic_ms": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "trace_id": {
+          "$ref": "#/$defs/identifier"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "decision": {
+              "const": "CONSUMED"
+            },
+            "consumption_generation": {
+              "$ref": "#/$defs/generation"
+            },
+            "refusal_generation": {
+              "type": "null"
+            },
+            "refusal_code": {
+              "type": "null"
+            },
+            "no_consumption_tombstone_digest": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "properties": {
+            "decision": {
+              "const": "REFUSED_DEFINITE"
+            },
+            "consumption_generation": {
+              "type": "null"
+            },
+            "refusal_generation": {
+              "$ref": "#/$defs/generation"
+            },
+            "refusal_code": {
+              "type": "string",
+              "enum": [
+                "GRANT_EXPIRED",
+                "SUPERVISOR_EPOCH_MISMATCH",
+                "ADAPTER_PAUSED"
+              ]
+            },
+            "no_consumption_tombstone_digest": {
+              "$ref": "#/$defs/digest"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -172,9 +172,17 @@ not rewrite, downgrade or reuse an existing coordinator/recovery root. Retained 
 remains historical and must not be relabelled as evidence for another commit.
 
 The automated drill runs from the exact commit in an isolated detached worktree. It
-removes both Feature 004 crates and workspace members, the PLAN-004 catalogue block,
-workflow and fixtures, restores the frozen pre-Feature-004 lockfile, requires exactly
-the six baseline packages, and compares 146 protected files before and after removal.
+removes both Feature 004 crates, the PLAN-004 catalogue block, workflow and fixtures,
+uses locked/offline Cargo metadata to prove that both Feature 004 workspace members
+were present, and restores the frozen pre-Feature-004 workspace manifest and lockfile.
+The semantic metadata projection follows Cargo's `workspace_members` identities and
+binds every required package to its exact `kernel/<name>/Cargo.toml` path rather than
+scanning TOML text, so quoted keys, comments, multiline strings or decoy manifests
+cannot hide or impersonate a member. The manifest restoration is bound to SHA-256
+`070602901680b8921d89084db4af31d98e2a23346447fbc6a4eba511295c21eb`, requires exactly
+the six baseline packages, records any later dependent workspace members that were
+detached only inside the isolated copy, and compares 146 protected files before and
+after removal.
 It then runs the complete default, non-ignored PLAN-001 and PLAN-003 suites, the
 default PLAN-002 semantic suite, and the three legacy MVP-0 packages. Release/soak
 tests that are already explicitly ignored remain ignored. Exactly one PLAN-002
@@ -182,6 +190,9 @@ structural consumer-list test is explicitly skipped because its reviewed expecta
 names the intentionally removed preparation crate; the drill first proves that exact
 test still exists once, and its source bytes remain protected and unchanged. This is
 software removal evidence, not secure erasure or production-machine decommission
-evidence. The immutable run completed this drill successfully; its report, command logs
-and digests are inside release artifact `8262995815` and summarized in the immutable
-evidence record.
+evidence. The immutable run completed this drill successfully before PLAN-005 added
+downstream workspace members; its original report remains valid under the verifier's
+explicit legacy-compatible empty-downstream rule. Its report, command logs and digests
+are inside release artifact `8262995815` and summarized in the immutable evidence
+record. The later workspace-manifest binding is additive post-evidence remediation and
+does not relabel or replace that immutable run.

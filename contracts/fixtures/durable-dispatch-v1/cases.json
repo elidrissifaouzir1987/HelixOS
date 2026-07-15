@@ -1,0 +1,1802 @@
+{
+  "schema": "helixos.durable-dispatch-fixtures/1",
+  "contract_version": 1,
+  "description": "Closed parametric corpus for ExecutionGrantV1 and ExecutionReceiptV1.",
+  "verification_keys": {
+    "grant": {
+      "key_id": "fixture-grant-key-v1",
+      "purpose": "coordinator-dispatch-signing",
+      "algorithm": "ed25519",
+      "public_key_base64url": "p4lObZsavetdewMylTcpDluXO_ZnpT4RO6vPcLNobis"
+    },
+    "receipt": {
+      "key_id": "fixture-receipt-key-v1",
+      "purpose": "adapter-receipt-signing",
+      "algorithm": "ed25519",
+      "public_key_base64url": "SYr25OHw8CcWeKX-9LWkUhrzSJrc1ShZ_4Sd55r1lXg"
+    }
+  },
+  "base_envelopes": {
+    "grant.valid": {
+      "protected": {
+        "schema": "helixos.execution-grant/1",
+        "digest_algorithm": "sha-256",
+        "signature_algorithm": "ed25519",
+        "key_purpose": "coordinator-dispatch-signing",
+        "key_id": "fixture-grant-key-v1",
+        "grant_id": "e11c10ad33af1f082a3b2028bdfa66d9a9413f430105d6d1b3c9c7e975d32dbd",
+        "dispatch_attempt_id": "c1e6e4468b1c10a91e77bcec1e8d497b4742975acdf9ff0ac4ecb5c3391dc262",
+        "one_shot_nonce": "05c2ac80d8f460280e4f7115e1553e56dfe6a5cf27468d05a6abcac0a374a87a",
+        "operation_id": "operation-v1",
+        "operation_state_generation": 4,
+        "preparation_attempt_id": "bb2da3164c64d4684954f06217117eef8a6bbe723450c5312c49beb22fbc8728",
+        "preparation_transition_generation": 5,
+        "plan_id": "5f309731ce8f7a64f1691496c32db598869100fd89cb6bdeb3c2754ee782709b",
+        "task_id": "task-v1",
+        "workload_id": "workload-v1",
+        "intent": "host.file.patch",
+        "target": {
+          "root_id": "workspace",
+          "components": [
+            "artifact.txt"
+          ]
+        },
+        "precondition_digest": "ac27cf5248407a85a0cfe7e4b899851d938c9b7d25e4039993332b1d769924dc",
+        "content_digest": "ed7002b439e9ac845f22357d822bac1444730fbdb6016d3ec9432297b9ec9f73",
+        "content_byte_length": 12,
+        "content_media_type": "text/plain",
+        "trust_generation": 2,
+        "verified_key_fingerprint": "9242d1afdce0bb160ebac6a1826566a29fdc75619b7cc0009e5100a6ae758abf",
+        "workload_generation": 3,
+        "workload_evidence_digest": "67a9e94ba89702a16ee51fe891b9045adcf33d00009ebcfdfd1c40046e3d061d",
+        "lease_generation": 4,
+        "lease_digest": "b544a7686d1186680a9d8f24ff542b00d8ae60da4dd2613a38f6292a8337cc37",
+        "lease_decision_digest": "39cce0a3c84f973e7215067722fdc8f6a2c1e53d6db20396539cfe7d11a3ff6d",
+        "authorization_generation": 5,
+        "authorization_evidence_digest": "cbb82ebec6051b780ad26655ee48b5b42658c4ac49438888aac829e82195584f",
+        "policy_generation": 6,
+        "policy_decision_generation": 7,
+        "policy_content_digest": "42fd7cbccdf99fa2fdf9008fffd84ea5b8c7d77a6f411e7235f8cc4eabe1a15a",
+        "policy_decision_digest": "1c8f2c3d7906045c9f49537782712b0552121268d87f6f51052c2739147c60e1",
+        "catalogue_generation": 8,
+        "catalogue_decision_generation": 9,
+        "catalogue_content_digest": "d5557e7c0a02a3cd63c53f7f9d9329733112af607d4b04034afcabb08c675944",
+        "catalogue_decision_digest": "e24ef8ab672f0f6fa6c50d01e8f4699f8ba8db091b46b1ae23f47e23a17b5e8c",
+        "capability_report_generation": 10,
+        "capability_report_digest": "1ac9b014b14ca1477b7be8d6e4af9d660e2b28634d39db20308a4c6fe9246884",
+        "host_driver_context_digest": "09ae3bbef9b1732e59ce2108ba797785b436647ac8c2bd75a6c8031843aa45a7",
+        "capability_observed_at_utc_ms": 999000,
+        "capability_max_age_ms": 5000,
+        "adapter_capability_digest": "7bd116b849df045678b6521d504056fe77119b19a0eadb84d661878e6d5f667b",
+        "replay_claim_id": "64f32cd581889ffd5698fe8221e0e77719e0aeb849cc4ba760bbc39de6d85eeb",
+        "replay_claimant_generation": 11,
+        "replay_binding_digest": "1e7ee3f308539199a7c6e2e6aa434562341c7f4dd8a7bd796e7ca2b5a0e60ed4",
+        "budget_scope_id": "budget-scope-v1",
+        "budget_scope_generation": 12,
+        "budget_scope_binding_digest": "be5507ae7de4db05402cf69b8c3ce286879483be8275c7ff8f031174c0c70e82",
+        "reservation_id": "reservation-v1",
+        "reservation_generation": 13,
+        "reservation_binding_digest": "3401b84775b61cfc172329488a26c94cafaeecea0a67253967421020a5c44551",
+        "reservation_vector_digest": "c0ad43bba50da5feec43913dcb60d904192eafb52ea28ab810d4d0ee9c86f052",
+        "recovery_reference_digest": "98d94eb91aee7e5a8a2bbb850c22d8564882ff15e6e9cc3712ff879fba5dea9b",
+        "recovery_mode": "COMPENSATION",
+        "recovery_profile_digest": "3675ad8e6003f1e429c5292ec44b6a29575c8949d965a21a908b8de72d6d6039",
+        "recovery_binding_digest": "5d4c00d024b0566d0aaaa26dbc0d5d0700478b7352797078e6136a62849878af",
+        "recovery_receipt_digest": "47cbf832c726f86ac66bc7d22d9ee9a831157f92f2226a1ccf776c7c3ec51660",
+        "destination_adapter_id": "adapter-v1",
+        "protocol_version": 1,
+        "boot_id": "boot-v1",
+        "instance_epoch": 14,
+        "supervisor_epoch": 15,
+        "supervisor_generation": 16,
+        "clock_generation": 17,
+        "issued_at_utc_ms": 1000000,
+        "issued_at_monotonic_ms": 1000,
+        "deadline_monotonic_ms": 6000
+      },
+      "grant_digest": "292c5717771c0a66438957a7e8fab03f823dc2ab6e8f918a8667ccdb335effda",
+      "signature": "pbqNycFBjPXNpYSZoc6baullSVqFP2ZdGldfYh3bU9D1bRnAjm8Xy9XQsZbCTTZRKOYA8ZYKCVv2UYEfagCQAg"
+    },
+    "receipt.consumed.valid": {
+      "protected": {
+        "schema": "helixos.execution-receipt/1",
+        "digest_algorithm": "sha-256",
+        "signature_algorithm": "ed25519",
+        "key_purpose": "adapter-receipt-signing",
+        "key_id": "fixture-receipt-key-v1",
+        "receipt_id": "1838f7d719d50a12d430c31171392c54555fe93cc277a0e103357bf202a29244",
+        "grant_id": "e11c10ad33af1f082a3b2028bdfa66d9a9413f430105d6d1b3c9c7e975d32dbd",
+        "grant_digest": "292c5717771c0a66438957a7e8fab03f823dc2ab6e8f918a8667ccdb335effda",
+        "operation_id": "operation-v1",
+        "destination_adapter_id": "adapter-v1",
+        "protocol_version": 1,
+        "adapter_root_id": "cb4857fc9951f4cb964eaee4ce85bbb664d626a0c757ca01cce79b49e062b24b",
+        "inbox_generation": 1,
+        "consumption_generation": 2,
+        "refusal_generation": null,
+        "receipt_generation": 3,
+        "observed_boot_id": "boot-v1",
+        "observed_supervisor_epoch": 15,
+        "epoch_observer_generation": 18,
+        "decision": "CONSUMED",
+        "refusal_code": null,
+        "no_consumption_tombstone_digest": null,
+        "decided_at_utc_ms": 1000100,
+        "decided_at_monotonic_ms": 1100,
+        "trace_id": "fixture-trace-v1"
+      },
+      "receipt_digest": "beeb6dcb0e118cde4e022103b95af4099204a73c8b56b607a7b9c6173fbb68ef",
+      "signature": "jJofQD7x39CjC5j01LV8vfFRy0tojah-loxcEy8nt3MdACCcHSKPWPv9uad9NnGNb9Hd9j_Eqkz8sqjTPtdKDw"
+    },
+    "receipt.refused.grant-expired.valid": {
+      "protected": {
+        "schema": "helixos.execution-receipt/1",
+        "digest_algorithm": "sha-256",
+        "signature_algorithm": "ed25519",
+        "key_purpose": "adapter-receipt-signing",
+        "key_id": "fixture-receipt-key-v1",
+        "receipt_id": "2b48a7af9d9351cfb01743b5a247d74909f206fef9b35fa95d39929d622ccdf5",
+        "grant_id": "e11c10ad33af1f082a3b2028bdfa66d9a9413f430105d6d1b3c9c7e975d32dbd",
+        "grant_digest": "292c5717771c0a66438957a7e8fab03f823dc2ab6e8f918a8667ccdb335effda",
+        "operation_id": "operation-v1",
+        "destination_adapter_id": "adapter-v1",
+        "protocol_version": 1,
+        "adapter_root_id": "cb4857fc9951f4cb964eaee4ce85bbb664d626a0c757ca01cce79b49e062b24b",
+        "inbox_generation": 1,
+        "consumption_generation": null,
+        "refusal_generation": 2,
+        "receipt_generation": 3,
+        "observed_boot_id": "boot-v1",
+        "observed_supervisor_epoch": 15,
+        "epoch_observer_generation": 18,
+        "decision": "REFUSED_DEFINITE",
+        "refusal_code": "GRANT_EXPIRED",
+        "no_consumption_tombstone_digest": "8b8b42150acd8e7acaccb7e61149d72293f8b3017089090268f5757888307fd1",
+        "decided_at_utc_ms": 1005000,
+        "decided_at_monotonic_ms": 6000,
+        "trace_id": "fixture-trace-v1"
+      },
+      "receipt_digest": "ee17a16f6fa4981d777b3e88390e9d3ea0a1a2a4cc70feb13e27c21499a50111",
+      "signature": "_MROYI5V-bU88gCZzZ1n4xFJvNy4NoCv5R1oj4CYc4KvimI8UyvZ2ygVA2QUFTQRI1kJHFEcEDebqSrfYS5VDw"
+    },
+    "receipt.refused.supervisor-epoch-mismatch.valid": {
+      "protected": {
+        "schema": "helixos.execution-receipt/1",
+        "digest_algorithm": "sha-256",
+        "signature_algorithm": "ed25519",
+        "key_purpose": "adapter-receipt-signing",
+        "key_id": "fixture-receipt-key-v1",
+        "receipt_id": "bd5724993c65aa898c6629ea6952ab42cab806d9ab1e2796008f78dd9155362c",
+        "grant_id": "e11c10ad33af1f082a3b2028bdfa66d9a9413f430105d6d1b3c9c7e975d32dbd",
+        "grant_digest": "292c5717771c0a66438957a7e8fab03f823dc2ab6e8f918a8667ccdb335effda",
+        "operation_id": "operation-v1",
+        "destination_adapter_id": "adapter-v1",
+        "protocol_version": 1,
+        "adapter_root_id": "cb4857fc9951f4cb964eaee4ce85bbb664d626a0c757ca01cce79b49e062b24b",
+        "inbox_generation": 1,
+        "consumption_generation": null,
+        "refusal_generation": 2,
+        "receipt_generation": 3,
+        "observed_boot_id": "boot-v1",
+        "observed_supervisor_epoch": 16,
+        "epoch_observer_generation": 19,
+        "decision": "REFUSED_DEFINITE",
+        "refusal_code": "SUPERVISOR_EPOCH_MISMATCH",
+        "no_consumption_tombstone_digest": "0a73f567574c24f259c85fd5d94cc753ecf7f996b6d0c8e8312e5f75f95f1b17",
+        "decided_at_utc_ms": 1000100,
+        "decided_at_monotonic_ms": 1100,
+        "trace_id": "fixture-trace-v1"
+      },
+      "receipt_digest": "329d7c64b31ecafdf6d4fd93384b776a6d02bfc6b10088f475d4d406565e6c56",
+      "signature": "H-zQuaXI5hkdn-7cSLdHZua219OROKVr2f5q6bM-BmXzZgkilVv_HU-7dWUHq2x1N-99ym-Ux-uTUUhUH83WAg"
+    },
+    "receipt.refused.adapter-paused.valid": {
+      "protected": {
+        "schema": "helixos.execution-receipt/1",
+        "digest_algorithm": "sha-256",
+        "signature_algorithm": "ed25519",
+        "key_purpose": "adapter-receipt-signing",
+        "key_id": "fixture-receipt-key-v1",
+        "receipt_id": "6f8cbf8ae00cf1a7cfe604bcd65d99d59a321b312afe89dd798261a06b0bc9aa",
+        "grant_id": "e11c10ad33af1f082a3b2028bdfa66d9a9413f430105d6d1b3c9c7e975d32dbd",
+        "grant_digest": "292c5717771c0a66438957a7e8fab03f823dc2ab6e8f918a8667ccdb335effda",
+        "operation_id": "operation-v1",
+        "destination_adapter_id": "adapter-v1",
+        "protocol_version": 1,
+        "adapter_root_id": "cb4857fc9951f4cb964eaee4ce85bbb664d626a0c757ca01cce79b49e062b24b",
+        "inbox_generation": 1,
+        "consumption_generation": null,
+        "refusal_generation": 2,
+        "receipt_generation": 3,
+        "observed_boot_id": "boot-v1",
+        "observed_supervisor_epoch": 15,
+        "epoch_observer_generation": 18,
+        "decision": "REFUSED_DEFINITE",
+        "refusal_code": "ADAPTER_PAUSED",
+        "no_consumption_tombstone_digest": "34229097d6a47536072a1a871e8e19592359d7982e04d720a1072668bdd3c164",
+        "decided_at_utc_ms": 1000100,
+        "decided_at_monotonic_ms": 1100,
+        "trace_id": "fixture-trace-v1"
+      },
+      "receipt_digest": "9a8a732309f2aced7af39f3b547ae0554e808342ab61d0131f88251f5350af03",
+      "signature": "fuqpus-7a3IZbdnUW1nqOW3mPwwSDwoAhL6qwJNUHLPeNUEz496-dnGLp7wTbEMHrvd220nZ589K_E4ls2CpDw"
+    }
+  },
+  "mutation_vocabulary": [
+    "none",
+    "remove",
+    "add",
+    "replace",
+    "raw-transform"
+  ],
+  "coverage": {
+    "grant_protected_fields": [
+      "schema",
+      "digest_algorithm",
+      "signature_algorithm",
+      "key_purpose",
+      "key_id",
+      "grant_id",
+      "dispatch_attempt_id",
+      "one_shot_nonce",
+      "operation_id",
+      "operation_state_generation",
+      "preparation_attempt_id",
+      "preparation_transition_generation",
+      "plan_id",
+      "task_id",
+      "workload_id",
+      "intent",
+      "target",
+      "precondition_digest",
+      "content_digest",
+      "content_byte_length",
+      "content_media_type",
+      "trust_generation",
+      "verified_key_fingerprint",
+      "workload_generation",
+      "workload_evidence_digest",
+      "lease_generation",
+      "lease_digest",
+      "lease_decision_digest",
+      "authorization_generation",
+      "authorization_evidence_digest",
+      "policy_generation",
+      "policy_decision_generation",
+      "policy_content_digest",
+      "policy_decision_digest",
+      "catalogue_generation",
+      "catalogue_decision_generation",
+      "catalogue_content_digest",
+      "catalogue_decision_digest",
+      "capability_report_generation",
+      "capability_report_digest",
+      "host_driver_context_digest",
+      "capability_observed_at_utc_ms",
+      "capability_max_age_ms",
+      "adapter_capability_digest",
+      "replay_claim_id",
+      "replay_claimant_generation",
+      "replay_binding_digest",
+      "budget_scope_id",
+      "budget_scope_generation",
+      "budget_scope_binding_digest",
+      "reservation_id",
+      "reservation_generation",
+      "reservation_binding_digest",
+      "reservation_vector_digest",
+      "recovery_reference_digest",
+      "recovery_mode",
+      "recovery_profile_digest",
+      "recovery_binding_digest",
+      "recovery_receipt_digest",
+      "destination_adapter_id",
+      "protocol_version",
+      "boot_id",
+      "instance_epoch",
+      "supervisor_epoch",
+      "supervisor_generation",
+      "clock_generation",
+      "issued_at_utc_ms",
+      "issued_at_monotonic_ms",
+      "deadline_monotonic_ms"
+    ],
+    "receipt_protected_fields": [
+      "schema",
+      "digest_algorithm",
+      "signature_algorithm",
+      "key_purpose",
+      "key_id",
+      "receipt_id",
+      "grant_id",
+      "grant_digest",
+      "operation_id",
+      "destination_adapter_id",
+      "protocol_version",
+      "adapter_root_id",
+      "inbox_generation",
+      "consumption_generation",
+      "refusal_generation",
+      "receipt_generation",
+      "observed_boot_id",
+      "observed_supervisor_epoch",
+      "epoch_observer_generation",
+      "decision",
+      "refusal_code",
+      "no_consumption_tombstone_digest",
+      "decided_at_utc_ms",
+      "decided_at_monotonic_ms",
+      "trace_id"
+    ]
+  },
+  "cases": [
+    {
+      "id": "GRANT-VALID",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "none",
+        "path": ""
+      },
+      "expected_outcome_id": "GRANT-VALID"
+    },
+    {
+      "id": "RECEIPT-CONSUMED-VALID",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "none",
+        "path": ""
+      },
+      "expected_outcome_id": "RECEIPT-CONSUMED-VALID"
+    },
+    {
+      "id": "RECEIPT-REFUSED-GRANT-EXPIRED-VALID",
+      "contract": "receipt",
+      "base": "receipt.refused.grant-expired.valid",
+      "mutation": {
+        "op": "none",
+        "path": ""
+      },
+      "expected_outcome_id": "RECEIPT-REFUSED-GRANT-EXPIRED-VALID"
+    },
+    {
+      "id": "RECEIPT-REFUSED-SUPERVISOR-EPOCH-MISMATCH-VALID",
+      "contract": "receipt",
+      "base": "receipt.refused.supervisor-epoch-mismatch.valid",
+      "mutation": {
+        "op": "none",
+        "path": ""
+      },
+      "expected_outcome_id": "RECEIPT-REFUSED-SUPERVISOR-EPOCH-MISMATCH-VALID"
+    },
+    {
+      "id": "RECEIPT-REFUSED-ADAPTER-PAUSED-VALID",
+      "contract": "receipt",
+      "base": "receipt.refused.adapter-paused.valid",
+      "mutation": {
+        "op": "none",
+        "path": ""
+      },
+      "expected_outcome_id": "RECEIPT-REFUSED-ADAPTER-PAUSED-VALID"
+    },
+    {
+      "id": "GRANT-MISSING-SCHEMA",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/schema"
+      },
+      "expected_outcome_id": "GRANT-MISSING-SCHEMA"
+    },
+    {
+      "id": "GRANT-MISSING-DIGEST-ALGORITHM",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/digest_algorithm"
+      },
+      "expected_outcome_id": "GRANT-MISSING-DIGEST-ALGORITHM"
+    },
+    {
+      "id": "GRANT-MISSING-SIGNATURE-ALGORITHM",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/signature_algorithm"
+      },
+      "expected_outcome_id": "GRANT-MISSING-SIGNATURE-ALGORITHM"
+    },
+    {
+      "id": "GRANT-MISSING-KEY-PURPOSE",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/key_purpose"
+      },
+      "expected_outcome_id": "GRANT-MISSING-KEY-PURPOSE"
+    },
+    {
+      "id": "GRANT-MISSING-KEY-ID",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/key_id"
+      },
+      "expected_outcome_id": "GRANT-MISSING-KEY-ID"
+    },
+    {
+      "id": "GRANT-MISSING-GRANT-ID",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/grant_id"
+      },
+      "expected_outcome_id": "GRANT-MISSING-GRANT-ID"
+    },
+    {
+      "id": "GRANT-MISSING-DISPATCH-ATTEMPT-ID",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/dispatch_attempt_id"
+      },
+      "expected_outcome_id": "GRANT-MISSING-DISPATCH-ATTEMPT-ID"
+    },
+    {
+      "id": "GRANT-MISSING-ONE-SHOT-NONCE",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/one_shot_nonce"
+      },
+      "expected_outcome_id": "GRANT-MISSING-ONE-SHOT-NONCE"
+    },
+    {
+      "id": "GRANT-MISSING-OPERATION-ID",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/operation_id"
+      },
+      "expected_outcome_id": "GRANT-MISSING-OPERATION-ID"
+    },
+    {
+      "id": "GRANT-MISSING-OPERATION-STATE-GENERATION",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/operation_state_generation"
+      },
+      "expected_outcome_id": "GRANT-MISSING-OPERATION-STATE-GENERATION"
+    },
+    {
+      "id": "GRANT-MISSING-PREPARATION-ATTEMPT-ID",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/preparation_attempt_id"
+      },
+      "expected_outcome_id": "GRANT-MISSING-PREPARATION-ATTEMPT-ID"
+    },
+    {
+      "id": "GRANT-MISSING-PREPARATION-TRANSITION-GENERATION",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/preparation_transition_generation"
+      },
+      "expected_outcome_id": "GRANT-MISSING-PREPARATION-TRANSITION-GENERATION"
+    },
+    {
+      "id": "GRANT-MISSING-PLAN-ID",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/plan_id"
+      },
+      "expected_outcome_id": "GRANT-MISSING-PLAN-ID"
+    },
+    {
+      "id": "GRANT-MISSING-TASK-ID",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/task_id"
+      },
+      "expected_outcome_id": "GRANT-MISSING-TASK-ID"
+    },
+    {
+      "id": "GRANT-MISSING-WORKLOAD-ID",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/workload_id"
+      },
+      "expected_outcome_id": "GRANT-MISSING-WORKLOAD-ID"
+    },
+    {
+      "id": "GRANT-MISSING-INTENT",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/intent"
+      },
+      "expected_outcome_id": "GRANT-MISSING-INTENT"
+    },
+    {
+      "id": "GRANT-MISSING-TARGET",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/target"
+      },
+      "expected_outcome_id": "GRANT-MISSING-TARGET"
+    },
+    {
+      "id": "GRANT-MISSING-PRECONDITION-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/precondition_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-PRECONDITION-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-CONTENT-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/content_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-CONTENT-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-CONTENT-BYTE-LENGTH",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/content_byte_length"
+      },
+      "expected_outcome_id": "GRANT-MISSING-CONTENT-BYTE-LENGTH"
+    },
+    {
+      "id": "GRANT-MISSING-CONTENT-MEDIA-TYPE",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/content_media_type"
+      },
+      "expected_outcome_id": "GRANT-MISSING-CONTENT-MEDIA-TYPE"
+    },
+    {
+      "id": "GRANT-MISSING-TRUST-GENERATION",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/trust_generation"
+      },
+      "expected_outcome_id": "GRANT-MISSING-TRUST-GENERATION"
+    },
+    {
+      "id": "GRANT-MISSING-VERIFIED-KEY-FINGERPRINT",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/verified_key_fingerprint"
+      },
+      "expected_outcome_id": "GRANT-MISSING-VERIFIED-KEY-FINGERPRINT"
+    },
+    {
+      "id": "GRANT-MISSING-WORKLOAD-GENERATION",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/workload_generation"
+      },
+      "expected_outcome_id": "GRANT-MISSING-WORKLOAD-GENERATION"
+    },
+    {
+      "id": "GRANT-MISSING-WORKLOAD-EVIDENCE-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/workload_evidence_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-WORKLOAD-EVIDENCE-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-LEASE-GENERATION",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/lease_generation"
+      },
+      "expected_outcome_id": "GRANT-MISSING-LEASE-GENERATION"
+    },
+    {
+      "id": "GRANT-MISSING-LEASE-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/lease_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-LEASE-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-LEASE-DECISION-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/lease_decision_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-LEASE-DECISION-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-AUTHORIZATION-GENERATION",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/authorization_generation"
+      },
+      "expected_outcome_id": "GRANT-MISSING-AUTHORIZATION-GENERATION"
+    },
+    {
+      "id": "GRANT-MISSING-AUTHORIZATION-EVIDENCE-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/authorization_evidence_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-AUTHORIZATION-EVIDENCE-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-POLICY-GENERATION",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/policy_generation"
+      },
+      "expected_outcome_id": "GRANT-MISSING-POLICY-GENERATION"
+    },
+    {
+      "id": "GRANT-MISSING-POLICY-DECISION-GENERATION",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/policy_decision_generation"
+      },
+      "expected_outcome_id": "GRANT-MISSING-POLICY-DECISION-GENERATION"
+    },
+    {
+      "id": "GRANT-MISSING-POLICY-CONTENT-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/policy_content_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-POLICY-CONTENT-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-POLICY-DECISION-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/policy_decision_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-POLICY-DECISION-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-CATALOGUE-GENERATION",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/catalogue_generation"
+      },
+      "expected_outcome_id": "GRANT-MISSING-CATALOGUE-GENERATION"
+    },
+    {
+      "id": "GRANT-MISSING-CATALOGUE-DECISION-GENERATION",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/catalogue_decision_generation"
+      },
+      "expected_outcome_id": "GRANT-MISSING-CATALOGUE-DECISION-GENERATION"
+    },
+    {
+      "id": "GRANT-MISSING-CATALOGUE-CONTENT-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/catalogue_content_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-CATALOGUE-CONTENT-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-CATALOGUE-DECISION-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/catalogue_decision_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-CATALOGUE-DECISION-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-CAPABILITY-REPORT-GENERATION",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/capability_report_generation"
+      },
+      "expected_outcome_id": "GRANT-MISSING-CAPABILITY-REPORT-GENERATION"
+    },
+    {
+      "id": "GRANT-MISSING-CAPABILITY-REPORT-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/capability_report_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-CAPABILITY-REPORT-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-HOST-DRIVER-CONTEXT-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/host_driver_context_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-HOST-DRIVER-CONTEXT-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-CAPABILITY-OBSERVED-AT-UTC-MS",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/capability_observed_at_utc_ms"
+      },
+      "expected_outcome_id": "GRANT-MISSING-CAPABILITY-OBSERVED-AT-UTC-MS"
+    },
+    {
+      "id": "GRANT-MISSING-CAPABILITY-MAX-AGE-MS",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/capability_max_age_ms"
+      },
+      "expected_outcome_id": "GRANT-MISSING-CAPABILITY-MAX-AGE-MS"
+    },
+    {
+      "id": "GRANT-MISSING-ADAPTER-CAPABILITY-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/adapter_capability_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-ADAPTER-CAPABILITY-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-REPLAY-CLAIM-ID",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/replay_claim_id"
+      },
+      "expected_outcome_id": "GRANT-MISSING-REPLAY-CLAIM-ID"
+    },
+    {
+      "id": "GRANT-MISSING-REPLAY-CLAIMANT-GENERATION",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/replay_claimant_generation"
+      },
+      "expected_outcome_id": "GRANT-MISSING-REPLAY-CLAIMANT-GENERATION"
+    },
+    {
+      "id": "GRANT-MISSING-REPLAY-BINDING-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/replay_binding_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-REPLAY-BINDING-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-BUDGET-SCOPE-ID",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/budget_scope_id"
+      },
+      "expected_outcome_id": "GRANT-MISSING-BUDGET-SCOPE-ID"
+    },
+    {
+      "id": "GRANT-MISSING-BUDGET-SCOPE-GENERATION",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/budget_scope_generation"
+      },
+      "expected_outcome_id": "GRANT-MISSING-BUDGET-SCOPE-GENERATION"
+    },
+    {
+      "id": "GRANT-MISSING-BUDGET-SCOPE-BINDING-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/budget_scope_binding_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-BUDGET-SCOPE-BINDING-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-RESERVATION-ID",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/reservation_id"
+      },
+      "expected_outcome_id": "GRANT-MISSING-RESERVATION-ID"
+    },
+    {
+      "id": "GRANT-MISSING-RESERVATION-GENERATION",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/reservation_generation"
+      },
+      "expected_outcome_id": "GRANT-MISSING-RESERVATION-GENERATION"
+    },
+    {
+      "id": "GRANT-MISSING-RESERVATION-BINDING-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/reservation_binding_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-RESERVATION-BINDING-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-RESERVATION-VECTOR-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/reservation_vector_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-RESERVATION-VECTOR-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-RECOVERY-REFERENCE-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/recovery_reference_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-RECOVERY-REFERENCE-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-RECOVERY-MODE",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/recovery_mode"
+      },
+      "expected_outcome_id": "GRANT-MISSING-RECOVERY-MODE"
+    },
+    {
+      "id": "GRANT-MISSING-RECOVERY-PROFILE-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/recovery_profile_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-RECOVERY-PROFILE-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-RECOVERY-BINDING-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/recovery_binding_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-RECOVERY-BINDING-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-RECOVERY-RECEIPT-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/recovery_receipt_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-RECOVERY-RECEIPT-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-DESTINATION-ADAPTER-ID",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/destination_adapter_id"
+      },
+      "expected_outcome_id": "GRANT-MISSING-DESTINATION-ADAPTER-ID"
+    },
+    {
+      "id": "GRANT-MISSING-PROTOCOL-VERSION",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/protocol_version"
+      },
+      "expected_outcome_id": "GRANT-MISSING-PROTOCOL-VERSION"
+    },
+    {
+      "id": "GRANT-MISSING-BOOT-ID",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/boot_id"
+      },
+      "expected_outcome_id": "GRANT-MISSING-BOOT-ID"
+    },
+    {
+      "id": "GRANT-MISSING-INSTANCE-EPOCH",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/instance_epoch"
+      },
+      "expected_outcome_id": "GRANT-MISSING-INSTANCE-EPOCH"
+    },
+    {
+      "id": "GRANT-MISSING-SUPERVISOR-EPOCH",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/supervisor_epoch"
+      },
+      "expected_outcome_id": "GRANT-MISSING-SUPERVISOR-EPOCH"
+    },
+    {
+      "id": "GRANT-MISSING-SUPERVISOR-GENERATION",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/supervisor_generation"
+      },
+      "expected_outcome_id": "GRANT-MISSING-SUPERVISOR-GENERATION"
+    },
+    {
+      "id": "GRANT-MISSING-CLOCK-GENERATION",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/clock_generation"
+      },
+      "expected_outcome_id": "GRANT-MISSING-CLOCK-GENERATION"
+    },
+    {
+      "id": "GRANT-MISSING-ISSUED-AT-UTC-MS",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/issued_at_utc_ms"
+      },
+      "expected_outcome_id": "GRANT-MISSING-ISSUED-AT-UTC-MS"
+    },
+    {
+      "id": "GRANT-MISSING-ISSUED-AT-MONOTONIC-MS",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/issued_at_monotonic_ms"
+      },
+      "expected_outcome_id": "GRANT-MISSING-ISSUED-AT-MONOTONIC-MS"
+    },
+    {
+      "id": "GRANT-MISSING-DEADLINE-MONOTONIC-MS",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/deadline_monotonic_ms"
+      },
+      "expected_outcome_id": "GRANT-MISSING-DEADLINE-MONOTONIC-MS"
+    },
+    {
+      "id": "RECEIPT-MISSING-SCHEMA",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/schema"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-SCHEMA"
+    },
+    {
+      "id": "RECEIPT-MISSING-DIGEST-ALGORITHM",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/digest_algorithm"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-DIGEST-ALGORITHM"
+    },
+    {
+      "id": "RECEIPT-MISSING-SIGNATURE-ALGORITHM",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/signature_algorithm"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-SIGNATURE-ALGORITHM"
+    },
+    {
+      "id": "RECEIPT-MISSING-KEY-PURPOSE",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/key_purpose"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-KEY-PURPOSE"
+    },
+    {
+      "id": "RECEIPT-MISSING-KEY-ID",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/key_id"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-KEY-ID"
+    },
+    {
+      "id": "RECEIPT-MISSING-RECEIPT-ID",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/receipt_id"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-RECEIPT-ID"
+    },
+    {
+      "id": "RECEIPT-MISSING-GRANT-ID",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/grant_id"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-GRANT-ID"
+    },
+    {
+      "id": "RECEIPT-MISSING-GRANT-DIGEST",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/grant_digest"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-GRANT-DIGEST"
+    },
+    {
+      "id": "RECEIPT-MISSING-OPERATION-ID",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/operation_id"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-OPERATION-ID"
+    },
+    {
+      "id": "RECEIPT-MISSING-DESTINATION-ADAPTER-ID",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/destination_adapter_id"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-DESTINATION-ADAPTER-ID"
+    },
+    {
+      "id": "RECEIPT-MISSING-PROTOCOL-VERSION",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/protocol_version"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-PROTOCOL-VERSION"
+    },
+    {
+      "id": "RECEIPT-MISSING-ADAPTER-ROOT-ID",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/adapter_root_id"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-ADAPTER-ROOT-ID"
+    },
+    {
+      "id": "RECEIPT-MISSING-INBOX-GENERATION",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/inbox_generation"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-INBOX-GENERATION"
+    },
+    {
+      "id": "RECEIPT-MISSING-CONSUMPTION-GENERATION",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/consumption_generation"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-CONSUMPTION-GENERATION"
+    },
+    {
+      "id": "RECEIPT-MISSING-REFUSAL-GENERATION",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/refusal_generation"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-REFUSAL-GENERATION"
+    },
+    {
+      "id": "RECEIPT-MISSING-RECEIPT-GENERATION",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/receipt_generation"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-RECEIPT-GENERATION"
+    },
+    {
+      "id": "RECEIPT-MISSING-OBSERVED-BOOT-ID",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/observed_boot_id"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-OBSERVED-BOOT-ID"
+    },
+    {
+      "id": "RECEIPT-MISSING-OBSERVED-SUPERVISOR-EPOCH",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/observed_supervisor_epoch"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-OBSERVED-SUPERVISOR-EPOCH"
+    },
+    {
+      "id": "RECEIPT-MISSING-EPOCH-OBSERVER-GENERATION",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/epoch_observer_generation"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-EPOCH-OBSERVER-GENERATION"
+    },
+    {
+      "id": "RECEIPT-MISSING-DECISION",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/decision"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-DECISION"
+    },
+    {
+      "id": "RECEIPT-MISSING-REFUSAL-CODE",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/refusal_code"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-REFUSAL-CODE"
+    },
+    {
+      "id": "RECEIPT-MISSING-NO-CONSUMPTION-TOMBSTONE-DIGEST",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/no_consumption_tombstone_digest"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-NO-CONSUMPTION-TOMBSTONE-DIGEST"
+    },
+    {
+      "id": "RECEIPT-MISSING-DECIDED-AT-UTC-MS",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/decided_at_utc_ms"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-DECIDED-AT-UTC-MS"
+    },
+    {
+      "id": "RECEIPT-MISSING-DECIDED-AT-MONOTONIC-MS",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/decided_at_monotonic_ms"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-DECIDED-AT-MONOTONIC-MS"
+    },
+    {
+      "id": "RECEIPT-MISSING-TRACE-ID",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected/trace_id"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-TRACE-ID"
+    },
+    {
+      "id": "GRANT-MISSING-OUTER-PROTECTED",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected"
+      },
+      "expected_outcome_id": "GRANT-MISSING-OUTER-PROTECTED"
+    },
+    {
+      "id": "GRANT-MISSING-OUTER-GRANT-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/grant_digest"
+      },
+      "expected_outcome_id": "GRANT-MISSING-OUTER-GRANT-DIGEST"
+    },
+    {
+      "id": "GRANT-MISSING-OUTER-SIGNATURE",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/signature"
+      },
+      "expected_outcome_id": "GRANT-MISSING-OUTER-SIGNATURE"
+    },
+    {
+      "id": "GRANT-UNKNOWN-OUTER-FIELD",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "add",
+        "path": "/unexpected",
+        "value": 1
+      },
+      "expected_outcome_id": "GRANT-UNKNOWN-OUTER-FIELD"
+    },
+    {
+      "id": "GRANT-TAMPERED-DIGEST",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/grant_digest",
+        "value": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expected_outcome_id": "GRANT-TAMPERED-DIGEST"
+    },
+    {
+      "id": "GRANT-TAMPERED-SIGNATURE",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/signature",
+        "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      },
+      "expected_outcome_id": "GRANT-TAMPERED-SIGNATURE"
+    },
+    {
+      "id": "GRANT-RAW-DUPLICATE-MEMBER",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "raw-transform",
+        "path": "",
+        "value": "duplicate-member"
+      },
+      "expected_outcome_id": "GRANT-RAW-DUPLICATE-MEMBER"
+    },
+    {
+      "id": "GRANT-RAW-LEADING-WHITESPACE",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "raw-transform",
+        "path": "",
+        "value": "leading-whitespace"
+      },
+      "expected_outcome_id": "GRANT-RAW-LEADING-WHITESPACE"
+    },
+    {
+      "id": "GRANT-RAW-TRAILING-NEWLINE",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "raw-transform",
+        "path": "",
+        "value": "trailing-newline"
+      },
+      "expected_outcome_id": "GRANT-RAW-TRAILING-NEWLINE"
+    },
+    {
+      "id": "GRANT-RAW-UTF8-BOM",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "raw-transform",
+        "path": "",
+        "value": "utf8-bom"
+      },
+      "expected_outcome_id": "GRANT-RAW-UTF8-BOM"
+    },
+    {
+      "id": "GRANT-RAW-NONCANONICAL-KEY-ORDER",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "raw-transform",
+        "path": "",
+        "value": "noncanonical-key-order"
+      },
+      "expected_outcome_id": "GRANT-RAW-NONCANONICAL-KEY-ORDER"
+    },
+    {
+      "id": "GRANT-RAW-OVERSIZE",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "raw-transform",
+        "path": "",
+        "value": "oversize"
+      },
+      "expected_outcome_id": "GRANT-RAW-OVERSIZE"
+    },
+    {
+      "id": "RECEIPT-MISSING-OUTER-PROTECTED",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/protected"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-OUTER-PROTECTED"
+    },
+    {
+      "id": "RECEIPT-MISSING-OUTER-RECEIPT-DIGEST",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/receipt_digest"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-OUTER-RECEIPT-DIGEST"
+    },
+    {
+      "id": "RECEIPT-MISSING-OUTER-SIGNATURE",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "remove",
+        "path": "/signature"
+      },
+      "expected_outcome_id": "RECEIPT-MISSING-OUTER-SIGNATURE"
+    },
+    {
+      "id": "RECEIPT-UNKNOWN-OUTER-FIELD",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "add",
+        "path": "/unexpected",
+        "value": 1
+      },
+      "expected_outcome_id": "RECEIPT-UNKNOWN-OUTER-FIELD"
+    },
+    {
+      "id": "RECEIPT-TAMPERED-DIGEST",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/receipt_digest",
+        "value": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expected_outcome_id": "RECEIPT-TAMPERED-DIGEST"
+    },
+    {
+      "id": "RECEIPT-TAMPERED-SIGNATURE",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/signature",
+        "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      },
+      "expected_outcome_id": "RECEIPT-TAMPERED-SIGNATURE"
+    },
+    {
+      "id": "RECEIPT-RAW-DUPLICATE-MEMBER",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "raw-transform",
+        "path": "",
+        "value": "duplicate-member"
+      },
+      "expected_outcome_id": "RECEIPT-RAW-DUPLICATE-MEMBER"
+    },
+    {
+      "id": "RECEIPT-RAW-LEADING-WHITESPACE",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "raw-transform",
+        "path": "",
+        "value": "leading-whitespace"
+      },
+      "expected_outcome_id": "RECEIPT-RAW-LEADING-WHITESPACE"
+    },
+    {
+      "id": "RECEIPT-RAW-TRAILING-NEWLINE",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "raw-transform",
+        "path": "",
+        "value": "trailing-newline"
+      },
+      "expected_outcome_id": "RECEIPT-RAW-TRAILING-NEWLINE"
+    },
+    {
+      "id": "RECEIPT-RAW-UTF8-BOM",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "raw-transform",
+        "path": "",
+        "value": "utf8-bom"
+      },
+      "expected_outcome_id": "RECEIPT-RAW-UTF8-BOM"
+    },
+    {
+      "id": "RECEIPT-RAW-NONCANONICAL-KEY-ORDER",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "raw-transform",
+        "path": "",
+        "value": "noncanonical-key-order"
+      },
+      "expected_outcome_id": "RECEIPT-RAW-NONCANONICAL-KEY-ORDER"
+    },
+    {
+      "id": "RECEIPT-RAW-OVERSIZE",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "raw-transform",
+        "path": "",
+        "value": "oversize"
+      },
+      "expected_outcome_id": "RECEIPT-RAW-OVERSIZE"
+    },
+    {
+      "id": "GRANT-UNSUPPORTED-SCHEMA",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/schema",
+        "value": "helixos.execution-grant/2"
+      },
+      "expected_outcome_id": "GRANT-UNSUPPORTED-SCHEMA"
+    },
+    {
+      "id": "GRANT-UNSUPPORTED-DIGEST-ALGORITHM",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/digest_algorithm",
+        "value": "sha-512"
+      },
+      "expected_outcome_id": "GRANT-UNSUPPORTED-DIGEST-ALGORITHM"
+    },
+    {
+      "id": "GRANT-UNSUPPORTED-SIGNATURE-ALGORITHM",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/signature_algorithm",
+        "value": "unknown"
+      },
+      "expected_outcome_id": "GRANT-UNSUPPORTED-SIGNATURE-ALGORITHM"
+    },
+    {
+      "id": "GRANT-WRONG-KEY-PURPOSE",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/key_purpose",
+        "value": "adapter-receipt-signing"
+      },
+      "expected_outcome_id": "GRANT-WRONG-KEY-PURPOSE"
+    },
+    {
+      "id": "GRANT-GRANT-LIFETIME-EXCEEDED",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/deadline_monotonic_ms",
+        "value": 6001
+      },
+      "expected_outcome_id": "GRANT-GRANT-LIFETIME-EXCEEDED"
+    },
+    {
+      "id": "GRANT-UNSUPPORTED-PROTOCOL",
+      "contract": "grant",
+      "base": "grant.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/protocol_version",
+        "value": 2
+      },
+      "expected_outcome_id": "GRANT-UNSUPPORTED-PROTOCOL"
+    },
+    {
+      "id": "RECEIPT-PRE-RECEIVED-CODE-DESTINATION-MISMATCH",
+      "contract": "receipt",
+      "base": "receipt.refused.grant-expired.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/refusal_code",
+        "value": "DESTINATION_MISMATCH"
+      },
+      "expected_outcome_id": "RECEIPT-PRE-RECEIVED-CODE-DESTINATION-MISMATCH"
+    },
+    {
+      "id": "RECEIPT-PRE-RECEIVED-CODE-PROTOCOL-UNSUPPORTED",
+      "contract": "receipt",
+      "base": "receipt.refused.grant-expired.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/refusal_code",
+        "value": "PROTOCOL_UNSUPPORTED"
+      },
+      "expected_outcome_id": "RECEIPT-PRE-RECEIVED-CODE-PROTOCOL-UNSUPPORTED"
+    },
+    {
+      "id": "RECEIPT-PRE-RECEIVED-CODE-CAPABILITY-MISMATCH",
+      "contract": "receipt",
+      "base": "receipt.refused.grant-expired.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/refusal_code",
+        "value": "CAPABILITY_MISMATCH"
+      },
+      "expected_outcome_id": "RECEIPT-PRE-RECEIVED-CODE-CAPABILITY-MISMATCH"
+    },
+    {
+      "id": "RECEIPT-PRE-RECEIVED-CODE-INBOX-CAPACITY-EXHAUSTED",
+      "contract": "receipt",
+      "base": "receipt.refused.grant-expired.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/refusal_code",
+        "value": "INBOX_CAPACITY_EXHAUSTED"
+      },
+      "expected_outcome_id": "RECEIPT-PRE-RECEIVED-CODE-INBOX-CAPACITY-EXHAUSTED"
+    },
+    {
+      "id": "RECEIPT-UNKNOWN-DECISION",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/decision",
+        "value": "UNKNOWN"
+      },
+      "expected_outcome_id": "RECEIPT-UNKNOWN-DECISION"
+    },
+    {
+      "id": "RECEIPT-WRONG-KEY-PURPOSE",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/key_purpose",
+        "value": "coordinator-dispatch-signing"
+      },
+      "expected_outcome_id": "RECEIPT-WRONG-KEY-PURPOSE"
+    },
+    {
+      "id": "RECEIPT-UNSUPPORTED-PROTOCOL",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/protocol_version",
+        "value": 2
+      },
+      "expected_outcome_id": "RECEIPT-UNSUPPORTED-PROTOCOL"
+    },
+    {
+      "id": "RECEIPT-GRANT-BINDING-MISMATCH",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/grant_id",
+        "value": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "expected_outcome_id": "RECEIPT-GRANT-BINDING-MISMATCH"
+    },
+    {
+      "id": "RECEIPT-OPERATION-BINDING-MISMATCH",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/operation_id",
+        "value": "other-operation"
+      },
+      "expected_outcome_id": "RECEIPT-OPERATION-BINDING-MISMATCH"
+    },
+    {
+      "id": "RECEIPT-DESTINATION-BINDING-MISMATCH",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/destination_adapter_id",
+        "value": "other-adapter"
+      },
+      "expected_outcome_id": "RECEIPT-DESTINATION-BINDING-MISMATCH"
+    },
+    {
+      "id": "RECEIPT-ADAPTER-ROOT-BINDING-MISMATCH",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/adapter_root_id",
+        "value": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      },
+      "expected_outcome_id": "RECEIPT-ADAPTER-ROOT-BINDING-MISMATCH"
+    },
+    {
+      "id": "RECEIPT-SUPERVISOR-EPOCH-BINDING-MISMATCH",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/observed_supervisor_epoch",
+        "value": 16
+      },
+      "expected_outcome_id": "RECEIPT-SUPERVISOR-EPOCH-BINDING-MISMATCH"
+    },
+    {
+      "id": "RECEIPT-CONSUMED-WITH-REFUSAL-CODE",
+      "contract": "receipt",
+      "base": "receipt.consumed.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/refusal_code",
+        "value": "GRANT_EXPIRED"
+      },
+      "expected_outcome_id": "RECEIPT-CONSUMED-WITH-REFUSAL-CODE"
+    },
+    {
+      "id": "RECEIPT-REFUSED-WITH-CONSUMPTION-GENERATION",
+      "contract": "receipt",
+      "base": "receipt.refused.grant-expired.valid",
+      "mutation": {
+        "op": "replace",
+        "path": "/protected/consumption_generation",
+        "value": 2
+      },
+      "expected_outcome_id": "RECEIPT-REFUSED-WITH-CONSUMPTION-GENERATION"
+    }
+  ]
+}

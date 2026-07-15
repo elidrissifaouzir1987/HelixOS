@@ -20,6 +20,12 @@ __pycache__/
 /plan-004-release-evidence/
 **/plan-004-sbom.cdx.json
 
+# PLAN-005 release tooling writes generated evidence outside the retained sources.
+/plan-005-evidence/
+/plan-005-inputs/
+/plan-005-release-evidence/
+**/plan-005-sbom.cdx.json
+
 # Secrets stay local. A documented empty example may be committed.
 .env
 .env.*

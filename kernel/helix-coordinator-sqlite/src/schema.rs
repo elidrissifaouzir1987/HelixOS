@@ -516,8 +516,35 @@ pub(crate) fn transition_imported_backup_to_restore_pending_v1<R: Ed25519KeyReso
     let transaction = connection
         .transaction_with_behavior(TransactionBehavior::Immediate)
         .map_err(|error| map_sqlite_error(&error, InternalCoordinatorError::RootUnavailable))?;
-    let source = verify_lifecycle_v1(
+    verify_lifecycle_v1(
         &transaction,
+        LifecycleExpectationV1::ImportedActive(bindings.expected_source_generations),
+        historical_plan_keys,
+    )?;
+    let verified = stage_imported_backup_restore_pending_graph_v1(
+        &transaction,
+        bindings,
+        historical_plan_keys,
+    )?;
+    transaction
+        .commit()
+        .map_err(|error| map_sqlite_error(&error, InternalCoordinatorError::RootUnavailable))?;
+    Ok(verified)
+}
+
+/// Stages the unchanged PLAN-004 portion of an imported backup inside an owning
+/// transaction without committing it.
+///
+/// The dispatch-V2 restore path owns one local SQLite transaction that also changes the
+/// additive dispatch metadata. Keeping this helper transaction-borrowed lets that caller
+/// prove a single local V2 state change while preserving the original V1 transition.
+pub(crate) fn stage_imported_backup_restore_pending_graph_v1<R: Ed25519KeyResolver>(
+    transaction: &Connection,
+    bindings: RestorePendingBindingsV1,
+    historical_plan_keys: &R,
+) -> Result<VerifiedRestorePendingV1, InternalCoordinatorError> {
+    let source = verify_lifecycle_graph_v1(
+        transaction,
         LifecycleExpectationV1::ImportedActive(bindings.expected_source_generations),
         historical_plan_keys,
     )?;
@@ -526,11 +553,11 @@ pub(crate) fn transition_imported_backup_to_restore_pending_v1<R: Ed25519KeyReso
     }
 
     stamp_restored_source_generation_v1(
-        &transaction,
+        transaction,
         bindings.restored_source_generation,
         source.summary.operation_count,
     )?;
-    refresh_restored_comparison_digests_v1(&transaction, source.summary.operation_count)?;
+    refresh_restored_comparison_digests_v1(transaction, source.summary.operation_count)?;
 
     let next_store_generation = bindings
         .expected_source_generations
@@ -576,14 +603,11 @@ pub(crate) fn transition_imported_backup_to_restore_pending_v1<R: Ed25519KeyReso
         return Err(InternalCoordinatorError::InvariantFailed);
     }
 
-    let verified = verify_lifecycle_v1(
-        &transaction,
+    let verified = verify_lifecycle_graph_v1(
+        transaction,
         LifecycleExpectationV1::RestorePending(bindings),
         historical_plan_keys,
     )?;
-    transaction
-        .commit()
-        .map_err(|error| map_sqlite_error(&error, InternalCoordinatorError::RootUnavailable))?;
     Ok(VerifiedRestorePendingV1(verified))
 }
 
@@ -602,6 +626,62 @@ pub(crate) fn verify_restore_pending_v1<R: Ed25519KeyResolver>(
     .map(VerifiedRestorePendingV1)
 }
 
+/// Reads the opaque root identity needed to bind an imported dispatch-V2 source.
+///
+/// This read is not evidence on its own. The dispatch verifier immediately feeds the
+/// value back into the full exact-schema and graph verifier, and maintenance separately
+/// compares its domain digest with the signed package.
+pub(crate) fn imported_dispatch_root_identity_v1(
+    connection: &Connection,
+) -> Result<CoordinatorRootIdentityV1, InternalCoordinatorError> {
+    Ok(decode_single_metadata_row(connection)?.root_identity)
+}
+
+/// Revalidates the unchanged base graph under an already-verified dispatch-V2 ACTIVE cut.
+pub(crate) fn verify_dispatch_imported_active_graph_v1<R: Ed25519KeyResolver>(
+    connection: &Connection,
+    expected_source_generations: CoordinatorLifecycleGenerationsV1,
+    historical_plan_keys: &R,
+) -> Result<ImportedActiveBackupV1, InternalCoordinatorError> {
+    verify_lifecycle_graph_v1(
+        connection,
+        LifecycleExpectationV1::ImportedActive(expected_source_generations),
+        historical_plan_keys,
+    )
+    .map(ImportedActiveBackupV1)
+}
+
+/// Captures the exact base generations only after the complete ACTIVE base graph passes.
+pub(crate) fn capture_dispatch_active_generations_v1<R: Ed25519KeyResolver>(
+    connection: &Connection,
+    expected_root_identity: CoordinatorRootIdentityV1,
+    historical_plan_keys: &R,
+) -> Result<CoordinatorLifecycleGenerationsV1, InternalCoordinatorError> {
+    verify_lifecycle_graph_v1(
+        connection,
+        LifecycleExpectationV1::ActiveBound(expected_root_identity),
+        historical_plan_keys,
+    )
+    .map(|verified| verified.generations)
+}
+
+/// Revalidates the unchanged base graph for a dispatch-V2 RESTORE_PENDING root.
+pub(crate) fn verify_dispatch_restore_pending_graph_v1<R: Ed25519KeyResolver>(
+    connection: &Connection,
+    bindings: RestorePendingBindingsV1,
+    historical_plan_keys: &R,
+) -> Result<VerifiedRestorePendingV1, InternalCoordinatorError> {
+    verify_embedded_schema_digest()?;
+    verify_integrity_check(connection)?;
+    verify_foreign_key_check(connection)?;
+    verify_lifecycle_graph_v1(
+        connection,
+        LifecycleExpectationV1::RestorePending(bindings),
+        historical_plan_keys,
+    )
+    .map(VerifiedRestorePendingV1)
+}
+
 fn verify_lifecycle_v1<R: Ed25519KeyResolver>(
     connection: &Connection,
     expectation: LifecycleExpectationV1,
@@ -613,6 +693,36 @@ fn verify_lifecycle_v1<R: Ed25519KeyResolver>(
     verify_integrity_check(connection)?;
     verify_foreign_key_check(connection)?;
 
+    verify_lifecycle_graph_v1(connection, expectation, historical_plan_keys)
+}
+
+/// Revalidates the unchanged PLAN-004 graph after the private dispatch module has
+/// already proved the exact additive V2 schema identity.
+///
+/// This is deliberately not an open or migration API. The V1 path above retains its
+/// original identity, exact-schema, integrity and foreign-key gates. V2 repeats the
+/// integrity gates here and only substitutes its stricter V1-plus-overlay inventory.
+pub(crate) fn verify_dispatch_base_graph_v1<R: Ed25519KeyResolver>(
+    connection: &Connection,
+    expected_root_identity: CoordinatorRootIdentityV1,
+    historical_plan_keys: &R,
+) -> Result<StoreSummary, InternalCoordinatorError> {
+    verify_embedded_schema_digest()?;
+    verify_integrity_check(connection)?;
+    verify_foreign_key_check(connection)?;
+    verify_lifecycle_graph_v1(
+        connection,
+        LifecycleExpectationV1::ActiveBound(expected_root_identity),
+        historical_plan_keys,
+    )
+    .map(|verified| verified.summary)
+}
+
+fn verify_lifecycle_graph_v1<R: Ed25519KeyResolver>(
+    connection: &Connection,
+    expectation: LifecycleExpectationV1,
+    historical_plan_keys: &R,
+) -> Result<VerifiedCoordinatorLifecycleV1, InternalCoordinatorError> {
     let metadata = decode_single_metadata_row(connection)?;
     verify_expected_lifecycle_v1(metadata, expectation)?;
 
@@ -1494,6 +1604,9 @@ fn is_persisted_failure_reason(reason: &[u8]) -> bool {
             | b"PREPARATION_STORE_CONFLICT"
             | b"PREPARATION_STORE_COMMIT_ABORTED"
             | b"PREPARATION_STORE_DEFINITE_ABSENCE"
+            | b"ADAPTER_PAUSED"
+            | b"GRANT_EXPIRED"
+            | b"SUPERVISOR_EPOCH_MISMATCH"
     )
 }
 
@@ -2275,9 +2388,12 @@ mod tests {
                 "CREATE TABLE prepared_operations (failed_reason_code TEXT) STRICT; \
                  CREATE TABLE preparation_events (reason_code TEXT) STRICT; \
                  INSERT INTO prepared_operations VALUES \
-                     ('PREPARATION_STORE_COMMIT_ABORTED'); \
+                     ('PREPARATION_STORE_COMMIT_ABORTED'), \
+                     ('ADAPTER_PAUSED'), \
+                     ('GRANT_EXPIRED'); \
                  INSERT INTO preparation_events VALUES \
-                     ('PREPARATION_RECOVERY_UNAVAILABLE');",
+                     ('PREPARATION_RECOVERY_UNAVAILABLE'), \
+                     ('SUPERVISOR_EPOCH_MISMATCH');",
             )
             .expect("failure reason fixture creates");
         verify_failure_reason_codes(&connection).expect("documented reasons verify");

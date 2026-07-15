@@ -37,6 +37,8 @@ pub(crate) enum BaseQuarantineReasonV1 {
     AmbiguousCommit,
     OrphanMaterial,
     RestoredOldAuthority,
+    InvariantConflict,
+    StoreUnhealthy,
 }
 
 impl BaseQuarantineReasonV1 {
@@ -45,6 +47,8 @@ impl BaseQuarantineReasonV1 {
             Self::AmbiguousCommit => "AMBIGUOUS_COMMIT",
             Self::OrphanMaterial => "ORPHAN_MATERIAL",
             Self::RestoredOldAuthority => "RESTORED_OLD_AUTHORITY",
+            Self::InvariantConflict => "INVARIANT_CONFLICT",
+            Self::StoreUnhealthy => "STORE_UNHEALTHY",
         }
     }
 }
@@ -175,6 +179,23 @@ pub(crate) fn retain_base_quarantine_in_transaction_v1(
         input,
         &QuarantineFaultProbeV1::disabled_v1(),
     )
+}
+
+/// Reads back one exact base-quarantine incident without creating or mutating custody.
+///
+/// This is used after an uncertain caller-owned commit. `Some` proves the exact binding,
+/// reason, status and generation already retained; `None` proves no row with that attempt
+/// key is visible. Conflicting or malformed rows remain closed errors.
+pub(crate) fn read_exact_base_quarantine_v1(
+    connection: &Connection,
+    input: &BaseQuarantineInputV1,
+) -> Result<Option<BaseQuarantineCustodyV1>, BaseQuarantineErrorV1> {
+    validate_base_quarantine_input_v1(input)?;
+    let existing = read_by_attempt(connection, input.attempt_id)?;
+    if existing.is_empty() {
+        return Ok(None);
+    }
+    classify_existing(&existing, input).map(Some)
 }
 
 fn retain_base_quarantine_in_transaction_with_fault_probe_v1(

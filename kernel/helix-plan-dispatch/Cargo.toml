@@ -1,0 +1,19 @@
+[package]
+name = "helix-plan-dispatch"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Portable durable dispatch orchestration for HelixOS"
+
+[dependencies]
+getrandom = { version = "=0.4.3", default-features = false }
+helix-dispatch-contracts = { path = "../helix-dispatch-contracts" }
+
+[features]
+default = []
+controlled-benchmark = []
+test-fault-injection = []
+
+[dev-dependencies]
+serde_json = "=1.0.150"
+serde_json_canonicalizer = "=0.3.2"

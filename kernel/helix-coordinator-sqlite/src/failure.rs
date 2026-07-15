@@ -568,6 +568,18 @@ where
     };
     reach!(fault_probe, KnownFailureBeginImmediateAcquired);
 
+    // PLAN-004 known-failure is valid only before any durable dispatch authority exists.
+    // V1 roots have no overlay table and retain their exact historical behavior. On V2,
+    // the check runs under the same writer exclusion as the release transaction so an
+    // overlay can neither race this decision nor lose HELD/recovery custody.
+    match dispatch_overlay_blocks_known_failure_v1(&transaction, binding.operation_id) {
+        Ok(false) => {}
+        Ok(true) => return rollback_outcome_v1(transaction, PreparationFailureOutcomeV1::Mismatch),
+        Err(error) => {
+            return rollback_outcome_v1(transaction, map_transaction_error_v1(error));
+        }
+    }
+
     let operation = match load_preparing_operation_v1(&transaction, binding, reason_code, root_mode)
     {
         Ok(OperationClassificationV1::Preparing(operation)) => operation,
@@ -643,6 +655,30 @@ where
     };
     reach!(fault_probe, KnownFailureCommitClassified);
     outcome
+}
+
+fn dispatch_overlay_blocks_known_failure_v1(
+    transaction: &Transaction<'_>,
+    operation_id: &str,
+) -> Result<bool, FailureTransactionErrorV1> {
+    let overlay_exists: bool = transaction
+        .query_row(
+            "SELECT EXISTS (SELECT 1 FROM sqlite_schema \
+                            WHERE type = 'table' AND name = 'dispatch_records')",
+            [],
+            |row| row.get(0),
+        )
+        .map_err(map_sqlite_error_v1)?;
+    if !overlay_exists {
+        return Ok(false);
+    }
+    transaction
+        .query_row(
+            "SELECT EXISTS (SELECT 1 FROM dispatch_records WHERE operation_id = ?1)",
+            [operation_id],
+            |row| row.get(0),
+        )
+        .map_err(map_sqlite_error_v1)
 }
 
 enum OperationClassificationV1 {

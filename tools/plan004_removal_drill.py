@@ -17,6 +17,9 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 BASELINE_COMMIT = "01a9181ef83539c0516139f8285551a9dfabc3b5"
 BASELINE_LOCK_SHA256 = "f3b6c0cb07f9e9ddec2f6b64cb3b00f7df99fd93066315e92f1a5dfa4b3498f8"
+BASELINE_WORKSPACE_MANIFEST_SHA256 = (
+    "070602901680b8921d89084db4af31d98e2a23346447fbc6a4eba511295c21eb"
+)
 BASELINE_PACKAGES = {
     "helix-contracts",
     "helix-plan-eligibility",
@@ -26,6 +29,16 @@ BASELINE_PACKAGES = {
     "helixos-provision",
 }
 REMOVED_MEMBERS = {"helix-plan-preparation", "helix-coordinator-sqlite"}
+WORKSPACE_METADATA_ARGV = [
+    "cargo",
+    "metadata",
+    "--locked",
+    "--no-deps",
+    "--format-version",
+    "1",
+    "--manifest-path",
+    "kernel/Cargo.toml",
+]
 REMOVED_PATHS = (
     "kernel/helix-plan-preparation",
     "kernel/helix-coordinator-sqlite",
@@ -125,24 +138,6 @@ def remove_catalog_entry(text: str, acceptance_id: str) -> str:
         raise EvidenceError("catalog must contain exactly one {} entry".format(acceptance_id))
     match = matches[0]
     return text[: match.start()] + text[match.end() :]
-
-
-def remove_workspace_members(text: str, members: Set[str]) -> str:
-    removed: Set[str] = set()
-    output = []
-    for line in text.splitlines(keepends=True):
-        match = re.fullmatch(r'(\s*)"([^"]+)",(\r?\n)?', line)
-        if match and match.group(2) in members:
-            removed.add(match.group(2))
-            continue
-        output.append(line)
-    if removed != members:
-        missing = ", ".join(sorted(members - removed))
-        raise EvidenceError("workspace removal did not find exact members: {}".format(missing))
-    result = "".join(output)
-    if any(member in result for member in members):
-        raise EvidenceError("removed workspace member remains referenced")
-    return result
 
 
 def remove_plan004_attributes(text: str) -> str:
@@ -278,27 +273,99 @@ def _run_evidence_command(
     }
 
 
-def _metadata_packages(raw: str) -> Set[str]:
+def _load_metadata(raw: str) -> dict:
     try:
         metadata = json.loads(raw)
     except json.JSONDecodeError as error:
         raise EvidenceError("cargo metadata output is invalid: {}".format(error))
+    if not isinstance(metadata, dict):
+        raise EvidenceError("cargo metadata output is not an object")
+    return metadata
+
+
+def _workspace_package_entries(metadata: dict) -> List[dict]:
     packages = metadata.get("packages")
-    if not isinstance(packages, list):
-        raise EvidenceError("cargo metadata output lacks packages")
-    return {item.get("name") for item in packages if isinstance(item.get("name"), str)}
+    members = metadata.get("workspace_members")
+    if not isinstance(packages, list) or not isinstance(members, list) or not members:
+        raise EvidenceError("cargo metadata output lacks workspace packages")
+    by_id: Dict[str, dict] = {}
+    for package in packages:
+        package_id = package.get("id") if isinstance(package, dict) else None
+        if not isinstance(package_id, str) or not package_id or package_id in by_id:
+            raise EvidenceError("cargo metadata package identity is invalid")
+        by_id[package_id] = package
+    if any(not isinstance(member, str) for member in members) or len(members) != len(
+        set(members)
+    ):
+        raise EvidenceError("cargo metadata workspace member identities are invalid")
+    try:
+        selected = [by_id[member] for member in members]
+    except KeyError as error:
+        raise EvidenceError(
+            "cargo metadata workspace member is absent from packages: {}".format(error)
+        )
+    names = [package.get("name") for package in selected]
+    if any(not isinstance(name, str) or not name for name in names) or len(names) != len(
+        set(names)
+    ):
+        raise EvidenceError("cargo metadata workspace package names are invalid")
+    return selected
+
+
+def _metadata_packages(
+    raw: str,
+    repository: Optional[Path] = None,
+    required_paths: Iterable[str] = (),
+) -> Set[str]:
+    entries = _workspace_package_entries(_load_metadata(raw))
+    by_name = {package["name"]: package for package in entries}
+    required = set(required_paths)
+    if required:
+        if repository is None:
+            raise EvidenceError("workspace package path validation lacks repository")
+        missing = required - set(by_name)
+        if missing:
+            raise EvidenceError(
+                "cargo metadata lacks required workspace packages: {}".format(
+                    ", ".join(sorted(missing))
+                )
+            )
+        root = repository.resolve()
+        for name in sorted(required):
+            manifest = by_name[name].get("manifest_path")
+            expected = root / "kernel" / name / "Cargo.toml"
+            if (
+                not isinstance(manifest, str)
+                or Path(manifest).resolve() != expected
+                or not expected.is_file()
+            ):
+                raise EvidenceError(
+                    "cargo metadata workspace package path is invalid: {}".format(name)
+                )
+    return set(by_name)
+
+
+def _run_workspace_metadata(
+    repository: Path, environment: Dict[str, str]
+) -> str:
+    completed = subprocess.run(
+        WORKSPACE_METADATA_ARGV,
+        cwd=str(repository),
+        env=environment,
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if completed.returncode != 0:
+        raise EvidenceError("cargo metadata failed: {}".format(completed.stderr.strip()))
+    return completed.stdout
 
 
 def _normalized_metadata(raw: str) -> dict:
-    try:
-        metadata = json.loads(raw)
-    except json.JSONDecodeError as error:
-        raise EvidenceError("cargo metadata output is invalid: {}".format(error))
-    packages = metadata.get("packages")
-    if not isinstance(packages, list):
-        raise EvidenceError("cargo metadata output lacks packages")
+    metadata = _load_metadata(raw)
     normalized = []
-    for package in packages:
+    for package in _workspace_package_entries(metadata):
         name = package.get("name")
         version = package.get("version")
         if not isinstance(name, str) or not isinstance(version, str):
@@ -335,6 +402,24 @@ def _restore_baseline_lock(repository: Path, worktree: Path) -> str:
     digest = sha256_file(lock)
     if digest != BASELINE_LOCK_SHA256:
         raise EvidenceError("restored baseline Cargo.lock digest mismatch")
+    return digest
+
+
+def _restore_baseline_workspace_manifest(repository: Path, worktree: Path) -> str:
+    completed = subprocess.run(
+        ["git", "show", "{}:kernel/Cargo.toml".format(BASELINE_COMMIT)],
+        cwd=str(repository),
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if completed.returncode != 0:
+        raise EvidenceError("baseline workspace manifest is unavailable")
+    workspace = worktree / "kernel" / "Cargo.toml"
+    workspace.write_bytes(completed.stdout)
+    digest = sha256_file(workspace)
+    if digest != BASELINE_WORKSPACE_MANIFEST_SHA256:
+        raise EvidenceError("restored baseline workspace manifest digest mismatch")
     return digest
 
 
@@ -412,15 +497,29 @@ def execute_drill(args: argparse.Namespace) -> None:
         worktree_added = True
         before = snapshot_paths(removal_root, PROTECTED_PATHS)
 
+        environment = _clean_environment(dict(os.environ))
+        environment["CARGO_TERM_COLOR"] = "never"
+        environment["CARGO_NET_OFFLINE"] = "true"
+        environment["RUST_BACKTRACE"] = "1"
+        if args.cargo_target_dir:
+            environment["CARGO_TARGET_DIR"] = str(Path(args.cargo_target_dir).resolve())
+        required_source_packages = BASELINE_PACKAGES | REMOVED_MEMBERS
+        source_packages = _metadata_packages(
+            _run_workspace_metadata(removal_root, environment),
+            removal_root,
+            required_source_packages,
+        )
+        if not required_source_packages.issubset(source_packages):
+            missing = ", ".join(sorted(required_source_packages - source_packages))
+            raise EvidenceError(
+                "removal source lacks required workspace packages: {}".format(missing)
+            )
+        detached_downstream_members = sorted(
+            source_packages - required_source_packages
+        )
+
         for relative in REMOVED_PATHS:
             _remove_path(removal_root / relative)
-        workspace = removal_root / "kernel" / "Cargo.toml"
-        workspace.write_text(
-            remove_workspace_members(
-                workspace.read_text(encoding="utf-8"), REMOVED_MEMBERS
-            ),
-            encoding="utf-8",
-        )
         catalog = removal_root / "conformance" / "catalog.yaml"
         catalog.write_text(
             remove_catalog_entry(catalog.read_text(encoding="utf-8"), "PLAN-004"),
@@ -430,6 +529,9 @@ def execute_drill(args: argparse.Namespace) -> None:
         attributes.write_text(
             remove_plan004_attributes(attributes.read_text(encoding="utf-8")),
             encoding="utf-8",
+        )
+        restored_workspace_manifest_digest = _restore_baseline_workspace_manifest(
+            repository, removal_root
         )
         restored_lock_digest = _restore_baseline_lock(repository, removal_root)
 
@@ -441,44 +543,20 @@ def execute_drill(args: argparse.Namespace) -> None:
             raise EvidenceError("protected prerequisite bytes changed during removal")
         _assert_plan002_structural_skip_source(removal_root)
 
-        environment = _clean_environment(dict(os.environ))
-        environment["CARGO_TERM_COLOR"] = "never"
-        environment["CARGO_NET_OFFLINE"] = "true"
-        environment["RUST_BACKTRACE"] = "1"
-        if args.cargo_target_dir:
-            environment["CARGO_TARGET_DIR"] = str(Path(args.cargo_target_dir).resolve())
-        metadata_argv = [
-            "cargo",
-            "metadata",
-            "--locked",
-            "--no-deps",
-            "--format-version",
-            "1",
-            "--manifest-path",
-            "kernel/Cargo.toml",
-        ]
-        completed = subprocess.run(
-            metadata_argv,
-            cwd=str(removal_root),
-            env=environment,
-            check=False,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
+        metadata_raw = _run_workspace_metadata(removal_root, environment)
+        packages = _metadata_packages(
+            metadata_raw, removal_root, BASELINE_PACKAGES
         )
-        if completed.returncode != 0:
-            raise EvidenceError("baseline cargo metadata failed: {}".format(completed.stderr))
-        packages = _metadata_packages(completed.stdout)
         if packages != BASELINE_PACKAGES:
             raise EvidenceError(
                 "removal metadata package set mismatch: {}".format(", ".join(sorted(packages)))
             )
         metadata_path = output / "metadata-after-removal.json"
-        write_json(metadata_path, _normalized_metadata(completed.stdout))
+        write_json(metadata_path, _normalized_metadata(metadata_raw))
         commands.append(
             {
                 "name": "metadata-after-removal",
-                "argv": metadata_argv,
+                "argv": WORKSPACE_METADATA_ARGV,
                 "exit_code": 0,
                 "log": "removal/metadata-after-removal.json",
                 "log_sha256": sha256_file(metadata_path),
@@ -558,7 +636,11 @@ def execute_drill(args: argparse.Namespace) -> None:
             "removed_workspace_members": sorted(REMOVED_MEMBERS),
             "removed_paths": list(REMOVED_PATHS),
             "catalog_entry_removed": "PLAN-004",
+            "detached_downstream_workspace_members": detached_downstream_members,
             "restored_baseline_lock_sha256": restored_lock_digest,
+            "restored_baseline_workspace_manifest_sha256": (
+                restored_workspace_manifest_digest
+            ),
             "metadata_packages": sorted(packages),
             "protected_git_objects": protected_objects,
             "protected_file_count": len(before),

@@ -9,6 +9,7 @@
 /specs/003-durable-replay-store/evidence/* text eol=lf whitespace=-blank-at-eof
 
 # PLAN-004 SQL, canonical JSON, fixtures and retained evidence are digest-sensitive.
+/kernel/helix-plan-preparation/src/test_fault.rs text eol=lf
 /specs/004-durable-preparation/contracts/*.json text eol=lf
 /specs/004-durable-preparation/contracts/*.sql text eol=lf
 /specs/004-durable-preparation/evidence/* text eol=lf whitespace=-blank-at-eof
@@ -16,6 +17,15 @@
 /.github/workflows/durable-preparation.yml text eol=lf
 /tools/plan004_*.py text eol=lf
 /tools/tests/test_plan004_evidence.py text eol=lf
+
+# PLAN-005 wire/SQL contracts and portable fixtures are byte-sensitive.
+/specs/005-durable-dispatch/contracts/*.json text eol=lf
+/specs/005-durable-dispatch/contracts/*.sql text eol=lf
+/specs/005-durable-dispatch/evidence/* text eol=lf whitespace=-blank-at-eof
+/contracts/fixtures/durable-dispatch-v1/* text eol=lf
+/.github/workflows/durable-dispatch.yml text eol=lf
+/tools/plan005_*.py text eol=lf
+/tools/tests/test_plan005_evidence.py text eol=lf
 
 # The generated roadmap snapshot must compare byte-for-byte on every CI host.
 /docs/roadmap/index.html text eol=lf

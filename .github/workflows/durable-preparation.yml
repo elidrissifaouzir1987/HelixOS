@@ -187,6 +187,9 @@ jobs:
           --all-features
           -- --test-threads=1
           --skip held_writer_returns_by_absolute_injected_deadline_and_never_mutates_later
+          --skip exact_10_000_sequential_duplicates_retain_one_dispatch_and_one_consumption
+          --skip exact_100_rounds_of_64_threads_retain_one_dispatch_and_consumption_per_round
+          --skip exact_20_rounds_of_8_processes_retain_one_dispatch_and_consumption_per_round
 
       - name: Verify frozen corpus and stable runner summary
         shell: pwsh
@@ -330,6 +333,12 @@ jobs:
               test_threads = 1
               excluded_runtime_oracle = 'held_writer_returns_by_absolute_injected_deadline_and_never_mutates_later'
               exclusion_owner = 'PLAN-004-T043-SC-010-controlled-target'
+              excluded_downstream_release_oracles = @(
+                'exact_10_000_sequential_duplicates_retain_one_dispatch_and_one_consumption'
+                'exact_100_rounds_of_64_threads_retain_one_dispatch_and_consumption_per_round'
+                'exact_20_rounds_of_8_processes_retain_one_dispatch_and_consumption_per_round'
+              )
+              downstream_exclusion_owner = '.github/workflows/durable-dispatch.yml#plan005-release-contention-gates'
               physical_performance_evidence = $false
             }
             reviewed_artifacts = $digests
@@ -391,6 +400,8 @@ jobs:
             'coordinator_test_threads=1',
             'excluded_runtime_oracle=held_writer_returns_by_absolute_injected_deadline_and_never_mutates_later',
             'exclusion_owner=PLAN-004-T043-SC-010-controlled-target',
+            'excluded_downstream_release_oracles=exact_10_000_sequential_duplicates_retain_one_dispatch_and_one_consumption,exact_100_rounds_of_64_threads_retain_one_dispatch_and_consumption_per_round,exact_20_rounds_of_8_processes_retain_one_dispatch_and_consumption_per_round',
+            'downstream_exclusion_owner=.github/workflows/durable-dispatch.yml#plan005-release-contention-gates',
             'physical_performance_evidence=false',
             "artifact_id=$($env:ARTIFACT_ID)",
             "artifact_url=$($env:ARTIFACT_URL)",

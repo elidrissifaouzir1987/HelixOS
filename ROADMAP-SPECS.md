@@ -4,7 +4,7 @@
 > prouver ensuite le contrat sur Linux et Windows, puis seulement ajouter
 > connaissance et autonomie.
 
-**Date** : 2026-07-10
+**Date** : 2026-07-13
 **Architecture** : v2.0.0
 **Constitution** : v2.0.0
 **Principe de livraison** : une fonctionnalité n'est « supportée » que si son
