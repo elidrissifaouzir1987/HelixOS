@@ -40,7 +40,12 @@ Expected:
 
 ```sh
 cd kernel
-cargo fmt --all -- --check
+cargo fmt \
+  --package helix-dispatch-contracts \
+  --package helix-plan-dispatch \
+  --package helix-dispatch-inbox-sqlite \
+  --package helix-coordinator-sqlite \
+  -- --check
 cargo check --locked --workspace --all-targets
 cargo clippy --locked --workspace --all-targets -- -D warnings
 cargo test --locked --workspace
@@ -48,6 +53,10 @@ cargo test --locked --workspace
 
 Expected: all existing PLAN-001 through PLAN-004 tests and PLAN-005 tests pass without
 modifying golden bytes or frozen PLAN-004 fault registries.
+
+Rustfmt is intentionally limited to the four reviewed PLAN-005 production roots. The
+workspace-wide check, Clippy and test gates remain global, while the 27 user-owned Rust
+paths listed in section 1 remain excluded from formatting and rewriting.
 
 ## 4. Canonical grant and receipt corpus
 

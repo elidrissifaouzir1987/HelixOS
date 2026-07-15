@@ -26,6 +26,7 @@ MANIFEST_PATH = (
 )
 DRIVER_PATH = TOOLS / "plan005_removal_drill.py"
 WORKFLOW_PATH = REPOSITORY / ".github" / "workflows" / "durable-dispatch.yml"
+QUICKSTART_PATH = REPOSITORY / "specs" / "005-durable-dispatch" / "quickstart.md"
 sys.path.insert(0, str(TOOLS))
 
 import plan005_removal_drill as removal  # noqa: E402
@@ -1508,7 +1509,7 @@ class Plan005WorkflowTests(unittest.TestCase):
     def test_workflow_is_lf_only_and_all_actions_are_immutable_exact_pins(self):
         self.assertEqual(
             _sha256(self.raw),
-            "18aa4c38260aebb676a9f84710906158cdaab46fb88561430223e1e1d49423a9",
+            "ae48c4f443745d9a63436668402ec87491150236436b23d438a7a187d9db8b5a",
         )
         self.assertNotIn(b"\r", self.raw)
         self.assertNotIn(b"\t", self.raw)
@@ -1631,6 +1632,42 @@ class Plan005WorkflowTests(unittest.TestCase):
                 r"(?m)^\s+if \(([^)]+)\) \{$", self.step(conformance, name)
             )
             self.assertEqual(conditions, ["$LASTEXITCODE -ne 0"] * expected_count)
+        quality = self.step(conformance, "Check format, locked workspace and strict Clippy")
+        rustfmt = quality[: quality.index("          if ($LASTEXITCODE -ne 0) {")]
+        self.assertEqual(
+            tuple(re.findall(r"--package ([a-z0-9-]+)", rustfmt)),
+            supply.PRODUCTION_ROOTS,
+        )
+        for forbidden in (
+            "--all",
+            "--workspace",
+            "continue-on-error",
+            "helixos-kernel",
+            "helixos-mcp-shim",
+            "helixos-provision",
+        ):
+            self.assertNotIn(forbidden, rustfmt)
+        self.assertIn(
+            "cargo check --locked --manifest-path kernel/Cargo.toml `\n"
+            "            --workspace --all-targets",
+            quality,
+        )
+        self.assertIn(
+            "cargo clippy --locked --manifest-path kernel/Cargo.toml `\n"
+            "            --workspace --all-targets --all-features -- -D warnings",
+            quality,
+        )
+        quickstart = QUICKSTART_PATH.read_text(encoding="utf-8")
+        quickstart_fmt = quickstart[
+            quickstart.index("cargo fmt \\\n") : quickstart.index(
+                "cargo check --locked --workspace --all-targets"
+            )
+        ]
+        self.assertEqual(
+            tuple(re.findall(r"--package ([a-z0-9-]+)", quickstart_fmt)),
+            supply.PRODUCTION_ROOTS,
+        )
+        self.assertNotIn("--all", quickstart_fmt)
         required = (
             "--package helix-contracts",
             "--package helix-plan-eligibility",

@@ -221,7 +221,12 @@ jobs:
       - name: Check format, locked workspace and strict Clippy
         shell: pwsh
         run: |
-          cargo fmt --manifest-path kernel/Cargo.toml --all -- --check 2>&1 | `
+          cargo fmt --manifest-path kernel/Cargo.toml `
+            --package helix-dispatch-contracts `
+            --package helix-plan-dispatch `
+            --package helix-dispatch-inbox-sqlite `
+            --package helix-coordinator-sqlite `
+            -- --check 2>&1 | `
             Tee-Object -FilePath 'plan-005-evidence/format.txt'
           if ($LASTEXITCODE -ne 0) {
             throw 'rustfmt gate failed'
