@@ -1,0 +1,530 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:helixos:schema:task-authority-backup-manifest:1",
+  "title": "HelixOS Durable Task Authority Backup Manifest v1",
+  "description": "Closed published-last PAUSED backup envelope for the independent PLAN-006 authority root and the coherent prior-store components required to interpret its plan bindings.",
+  "$comment": "The exact UTF-8 envelope and protected object are RFC 8785 canonical. protected_digest is SHA-256 of protected JCS. The backup-provisioner Ed25519 signature is over HELIXOS\\0TASK-AUTHORITY-BACKUP\\0V1\\0 || protected JCS. Verification MUST first resolve signature_profile.key_id through an externally provisioned backup-provisioner-signing trust anchor and status history; keys embedded in this envelope are evidence copies only and cannot authenticate the envelope that contains them. Typed validation additionally denies duplicate members, noncanonical base64url, unsafe member aliases, component/order/count disagreement, changed generations across the cut, private-key material, and any restore destination that is not approved and empty.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protected",
+    "protected_digest",
+    "signature"
+  ],
+  "properties": {
+    "protected": {
+      "$ref": "#/$defs/protectedManifest"
+    },
+    "protected_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "signature": {
+      "$ref": "#/$defs/ed25519Signature"
+    }
+  },
+  "$defs": {
+    "safeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "positiveSafeInteger": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[-A-Za-z0-9._:]+$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "gitObject": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "ed25519Signature": {
+      "type": "string",
+      "minLength": 86,
+      "maxLength": 86,
+      "pattern": "^[A-Za-z0-9_-]{85}[AQgw]$"
+    },
+    "publicKey": {
+      "type": "string",
+      "minLength": 43,
+      "maxLength": 43,
+      "pattern": "^[A-Za-z0-9_-]{43}$",
+      "$comment": "Typed validation requires canonical unpadded base64url decoding to exactly 32 public Ed25519 key bytes. Private keys are forbidden."
+    },
+    "memberAlias": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[a-z0-9][a-z0-9._/-]{0,255}$",
+      "$comment": "Typed validation rejects absolute/native paths, empty or dot components, '..', repeated separators, backslash, colon, control/default-ignorable characters and aliases not declared by the closed package inventory."
+    },
+    "protectedManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "backup_id",
+        "source_commit",
+        "source_tree",
+        "created_at_utc_ms",
+        "pause_evidence_digest",
+        "quiescence_evidence_digest",
+        "custody_profile",
+        "backup_order",
+        "components",
+        "members",
+        "verification_keys",
+        "bootstrap_receipt_digest",
+        "restore_policy",
+        "provenance",
+        "signature_profile"
+      ],
+      "properties": {
+        "schema": {
+          "const": "helixos.task-authority-backup-manifest/1"
+        },
+        "backup_id": {
+          "$ref": "#/$defs/digest"
+        },
+        "source_commit": {
+          "$ref": "#/$defs/gitObject"
+        },
+        "source_tree": {
+          "$ref": "#/$defs/gitObject"
+        },
+        "created_at_utc_ms": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "pause_evidence_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "quiescence_evidence_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "custody_profile": {
+          "const": "PAUSED_FIXED_ORDER_INDEPENDENT_CHECKPOINTS_V1"
+        },
+        "backup_order": {
+          "$ref": "#/$defs/backupOrder"
+        },
+        "components": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/taskAuthorityComponent"
+            },
+            {
+              "$ref": "#/$defs/coordinatorComponent"
+            },
+            {
+              "$ref": "#/$defs/replayComponent"
+            },
+            {
+              "$ref": "#/$defs/dispatchInboxComponent"
+            }
+          ],
+          "items": false
+        },
+        "members": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/member"
+          },
+          "$comment": "Typed validation requires canonical alias order, a complete exact component inventory, no extra member, and manifest publication after every listed member."
+        },
+        "verification_keys": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/verificationKey"
+          },
+          "$comment": "Includes evidence copies for the three task-authority purposes and the backup-provisioner signer/history. The backup-provisioner entry MUST byte-match the externally provisioned resolver and is never a trust anchor."
+        },
+        "bootstrap_receipt_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "restore_policy": {
+          "$ref": "#/$defs/restorePolicy"
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        },
+        "signature_profile": {
+          "$ref": "#/$defs/signatureProfile"
+        }
+      }
+    },
+    "backupOrder": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "prefixItems": [
+        {
+          "const": "TASK_AUTHORITY"
+        },
+        {
+          "const": "COORDINATOR"
+        },
+        {
+          "const": "PLAN_REPLAY"
+        },
+        {
+          "const": "DISPATCH_INBOX"
+        },
+        {
+          "const": "MANIFEST_PUBLISHED_LAST"
+        }
+      ],
+      "items": false
+    },
+    "componentBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "component_id",
+        "application_id",
+        "user_version",
+        "root_id",
+        "schema_digest",
+        "checkpoint_digest",
+        "store_generation",
+        "record_counts_digest",
+        "member_alias",
+        "member_size_bytes",
+        "member_sha256"
+      ],
+      "properties": {
+        "component_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "application_id": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "user_version": {
+          "$ref": "#/$defs/positiveSafeInteger"
+        },
+        "root_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "schema_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "checkpoint_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "store_generation": {
+          "$ref": "#/$defs/positiveSafeInteger"
+        },
+        "record_counts_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "member_alias": {
+          "$ref": "#/$defs/memberAlias"
+        },
+        "member_size_bytes": {
+          "$ref": "#/$defs/positiveSafeInteger"
+        },
+        "member_sha256": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "taskAuthorityComponent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/componentBase"
+        },
+        {
+          "properties": {
+            "component_id": {
+              "const": "task-authority"
+            },
+            "application_id": {
+              "const": 1212962881
+            },
+            "user_version": {
+              "const": 1
+            }
+          }
+        }
+      ]
+    },
+    "coordinatorComponent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/componentBase"
+        },
+        {
+          "properties": {
+            "component_id": {
+              "const": "coordinator"
+            },
+            "application_id": {
+              "const": 1212962883
+            },
+            "user_version": {
+              "const": 2
+            }
+          }
+        }
+      ]
+    },
+    "replayComponent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/componentBase"
+        },
+        {
+          "properties": {
+            "component_id": {
+              "const": "plan-replay"
+            },
+            "application_id": {
+              "const": 1212962898
+            },
+            "user_version": {
+              "const": 1
+            }
+          }
+        }
+      ]
+    },
+    "dispatchInboxComponent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/componentBase"
+        },
+        {
+          "properties": {
+            "component_id": {
+              "const": "dispatch-inbox"
+            },
+            "application_id": {
+              "const": 1212962889
+            },
+            "user_version": {
+              "const": 1
+            }
+          }
+        }
+      ]
+    },
+    "member": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "alias",
+        "component_id",
+        "media_type",
+        "size_bytes",
+        "sha256"
+      ],
+      "properties": {
+        "alias": {
+          "$ref": "#/$defs/memberAlias"
+        },
+        "component_id": {
+          "type": "string",
+          "enum": [
+            "task-authority",
+            "coordinator",
+            "plan-replay",
+            "dispatch-inbox",
+            "public-key-history",
+            "bootstrap-receipt",
+            "provenance"
+          ]
+        },
+        "media_type": {
+          "type": "string",
+          "enum": [
+            "application/vnd.sqlite3",
+            "application/json",
+            "application/vnd.in-toto+json"
+          ]
+        },
+        "size_bytes": {
+          "$ref": "#/$defs/positiveSafeInteger"
+        },
+        "sha256": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "verificationKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key_purpose",
+        "key_id",
+        "algorithm",
+        "public_key",
+        "fingerprint",
+        "status",
+        "status_generation"
+      ],
+      "properties": {
+        "key_purpose": {
+          "type": "string",
+          "enum": [
+            "request-surface-grant-signing",
+            "core-task-lease-signing",
+            "core-approval-decision-signing",
+            "backup-provisioner-signing"
+          ]
+        },
+        "key_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "algorithm": {
+          "const": "ed25519"
+        },
+        "public_key": {
+          "$ref": "#/$defs/publicKey"
+        },
+        "fingerprint": {
+          "$ref": "#/$defs/digest"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "TRUSTED",
+            "RETIRED",
+            "REVOKED"
+          ]
+        },
+        "status_generation": {
+          "$ref": "#/$defs/positiveSafeInteger"
+        }
+      }
+    },
+    "restorePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approved_empty_destinations_required",
+        "publish_lifecycle",
+        "system_mode",
+        "rotate_root_id",
+        "rotate_boot_id",
+        "rotate_instance_epoch",
+        "rotate_fencing_epoch",
+        "rotate_restore_epoch",
+        "reactivated_nonterminal_leases_max",
+        "reactivated_approvals_max",
+        "automatic_reissue",
+        "automatic_redelivery"
+      ],
+      "properties": {
+        "approved_empty_destinations_required": {
+          "const": true
+        },
+        "publish_lifecycle": {
+          "const": "RESTORE_PENDING"
+        },
+        "system_mode": {
+          "const": "PAUSED"
+        },
+        "rotate_root_id": {
+          "const": true
+        },
+        "rotate_boot_id": {
+          "const": true
+        },
+        "rotate_instance_epoch": {
+          "const": true
+        },
+        "rotate_fencing_epoch": {
+          "const": true
+        },
+        "rotate_restore_epoch": {
+          "const": true
+        },
+        "reactivated_nonterminal_leases_max": {
+          "const": 0
+        },
+        "reactivated_approvals_max": {
+          "const": 0
+        },
+        "automatic_reissue": {
+          "const": false
+        },
+        "automatic_redelivery": {
+          "const": false
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool_identity",
+        "tool_digest",
+        "artifact_set_digest",
+        "attestation_subject_digest",
+        "exact_commit_required"
+      ],
+      "properties": {
+        "tool_identity": {
+          "$ref": "#/$defs/identifier"
+        },
+        "tool_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "artifact_set_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "attestation_subject_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "exact_commit_required": {
+          "const": true
+        }
+      }
+    },
+    "signatureProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "digest_algorithm",
+        "signature_algorithm",
+        "key_purpose",
+        "key_id",
+        "signature_domain"
+      ],
+      "properties": {
+        "digest_algorithm": {
+          "const": "sha-256"
+        },
+        "signature_algorithm": {
+          "const": "ed25519"
+        },
+        "key_purpose": {
+          "const": "backup-provisioner-signing"
+        },
+        "key_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "signature_domain": {
+          "const": "HELIXOS\u0000TASK-AUTHORITY-BACKUP\u0000V1\u0000"
+        }
+      }
+    }
+  }
+}
