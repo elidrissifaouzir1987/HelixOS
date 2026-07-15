@@ -358,8 +358,10 @@ fn frozen_fault_registry_has_exact_digest_order_owners_and_compiled_ids() {
     }
     assert_eq!(owner_counts.values().sum::<usize>(), 90);
     assert!(FAULT_SOURCE.contains("CLOSED_FAULT_BOUNDARY_COUNT_V1: usize = 90"));
-    assert!(LIB_SOURCE.contains("#[cfg(feature = \"test-fault-injection\")]\nmod test_fault;"));
-    assert!(!LIB_SOURCE.contains("pub mod test_fault"));
+    let normalized_lib_source = LIB_SOURCE.replace("\r\n", "\n");
+    assert!(normalized_lib_source
+        .contains("#[cfg(feature = \"test-fault-injection\")]\nmod test_fault;"));
+    assert!(!normalized_lib_source.contains("pub mod test_fault"));
 }
 
 #[test]
