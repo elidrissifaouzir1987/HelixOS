@@ -1538,7 +1538,7 @@ class Plan005WorkflowTests(unittest.TestCase):
     def test_workflow_is_lf_only_and_all_actions_are_immutable_exact_pins(self):
         self.assertEqual(
             _sha256(self.raw),
-            "95fc217796caf929697651ee534b7ff40e1ca7a5c7b64959db7f32cac18b5dc4",
+            "855a7ee853acb3a9029c9e134b2dfcfa2b3f2752cfb3492b02be33272ba3fe0d",
         )
         self.assertNotIn(b"\r", self.raw)
         self.assertNotIn(b"\t", self.raw)
@@ -1661,6 +1661,16 @@ class Plan005WorkflowTests(unittest.TestCase):
                 r"(?m)^\s+if \(([^)]+)\) \{$", self.step(conformance, name)
             )
             self.assertEqual(conditions, ["$LASTEXITCODE -ne 0"] * expected_count)
+        contention = self.step(
+            conformance, "Prove exact end-to-end one-shot contention cardinalities"
+        )
+        self.assertEqual(contention.count("cargo test --locked --release"), 3)
+        for exact_name in (
+            "exact_10_000_sequential_duplicates_retain_one_dispatch_and_one_consumption",
+            "exact_100_rounds_of_64_threads_retain_one_dispatch_and_consumption_per_round",
+            "exact_20_rounds_of_8_processes_retain_one_dispatch_and_consumption_per_round",
+        ):
+            self.assertEqual(contention.count(exact_name), 1)
         quality = self.step(conformance, "Check format, locked workspace and strict Clippy")
         rustfmt = quality[: quality.index("          if ($LASTEXITCODE -ne 0) {")]
         self.assertEqual(
