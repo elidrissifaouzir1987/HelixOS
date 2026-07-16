@@ -66,11 +66,11 @@ EXPECTED_RELEASE_ORACLE = {
     "spdx_text_count": 10,
 }
 EXPECTED_RUSTSEC_REPORT_SHA256 = (
-    "95b6445f8828c8e9a79d5ef32e225a1ff6cdbcc39d2ec1fcf24b74da2180f396"
+    "f3cc655afe7d84a1a14d8dc67753c224a68270bfe9151b13e4d5688d5dc30bb7"
 )
 EXPECTED_RUSTSEC_DATABASE_TIMESTAMP = "2026-07-12T09:10:54+02:00"
 EXPECTED_RELEASE_ARTIFACT_SHA256 = {
-    "graph/production-closure.json": "c5b84e89350646b19773af58f5e508c646805d28bbea28fe059d98af7d512154",
+    "graph/production-closure.json": "b52d4bfbe69c74f66c420279dd81abfa16bdd64b05d4fdc8d371cf72bae8ef48",
     "licenses/inventory.json": "cb648b830b004c0aafcff84b2aad852f4d4093cd3a288dcad489c6ebca275d89",
     "sbom/plan-005-sbom.cdx.json": "feedaabe86ed6f33dba025ef85edf72fd445a2925fc25ae5df1c72d867035be9",
 }

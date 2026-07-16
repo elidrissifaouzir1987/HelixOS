@@ -195,13 +195,20 @@ The same run exposed the next PLAN-005 downstream gates. Its removal manifest no
 deletes the four PLAN-006 crate prefixes, fixture prefix and PLAN-006 Graphify memory,
 and restores the two earlier-plan baseline test paths not already covered by its
 policy. The inbox portability guard now recognizes that same exact ten-prefix removal
-set, while the evidence test projects the current Cargo lock hash back to the frozen
-PLAN-005 lock hash before comparing the immutable production-closure digest; the
-frozen `c5b84e...` oracle is not repinned. These are the sixth and seventh test-only
-integration edits, making eleven existing test/policy/evidence edits in the exact
-PLAN-006 removal footprint. The corrected focused results are 8/8 inbox portability
-tests and 38/38 PLAN-005 evidence tests. The synchronized manifest SHA-256 is
-`6c9422f47fd65ba7866750666a3f0e4c4c1e35944b8a1506c4a6ffa34ab2edf2`.
+set. The first exact hosted supply-chain build then proved that the four local lock
+records also change the two full-lock-bound PLAN-005 artifacts even though the selected
+production closure is unchanged. The evidence test now compares the live graph
+directly, its exact digest is
+`b52d4bfbe69c74f66c420279dd81abfa16bdd64b05d4fdc8d371cf72bae8ef48`,
+and the pinned RustSec report digest is
+`f3cc655afe7d84a1a14d8dc67753c224a68270bfe9151b13e4d5688d5dc30bb7`
+for 224 locked records, zero vulnerabilities and the same retained
+`RUSTSEC-2025-0134` informational warning. Package, edge, external dependency,
+license-inventory and SBOM oracles remain unchanged. These are the sixth and seventh
+test-only integration edits, making eleven existing test/policy/evidence edits in the
+exact PLAN-006 removal footprint. The corrected focused results are 8/8 inbox
+portability tests and 38/38 PLAN-005 evidence tests. The synchronized manifest SHA-256
+is `6c9422f47fd65ba7866750666a3f0e4c4c1e35944b8a1506c4a6ffa34ab2edf2`.
 
 ## Toolchain identity
 

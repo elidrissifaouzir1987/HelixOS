@@ -59,11 +59,13 @@ projection leaf. The semantic workspace-removal guard in
 `tools/tests/test_plan004_evidence.py` may recognize all four PLAN-006 crates as
 downstream members while retaining the exact prior sets. PLAN-005's removal manifest,
 removal driver, supply verifier, evidence test and retained removal record may classify
-the PLAN-006 crate/fixture/Graphify prefixes and current lock extension without
-repinning the frozen PLAN-005 production-closure oracle. The PLAN-005 inbox portability
-guard may recognize the same reviewed removal-prefix set. These seven test edits and four
-retained PLAN-005 policy/evidence artifacts belong to the PLAN-006 integration and
-removal footprint. All new production crates use `#![forbid(unsafe_code)]`.
+the PLAN-006 crate/fixture/Graphify prefixes and current lock extension, including
+repinning only the exact full-lock-bound RustSec report and production-graph artifact
+digests while preserving the selected package, edge, external dependency, license and
+SBOM oracles. The PLAN-005 inbox portability guard may recognize the same reviewed
+removal-prefix set. These seven test edits and four retained PLAN-005 policy/evidence
+artifacts belong to the PLAN-006 integration and removal footprint. All new production
+crates use `#![forbid(unsafe_code)]`.
 
 **Rationale**: Contract, authority semantics, native persistence and downstream
 projection have different portability and dependency surfaces. The split lets

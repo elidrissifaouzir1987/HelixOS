@@ -67,11 +67,12 @@ PLAN-001 through PLAN-005 production Rust sources and wire contracts also remain
 unchanged. Four dependency-policy tests may recognize the new reviewed PLAN-006 leaf
 consumer and one workspace-removal test may recognize the four PLAN-006 packages as
 downstream members. PLAN-005 removal/supply policy tests and retained policy/evidence
-artifacts may classify only the PLAN-006 crate, fixture, Graphify and lock extension
-without repinning its frozen production closure; no other allowlist or frozen set may
-be weakened. New dependencies flow from PLAN-006 toward existing public seams; no
-existing crate gains a PLAN-006 dependency. `docs/roadmap/roadmap-data.js` is generated
-and is never edited by hand.
+artifacts may classify only the PLAN-006 crate, fixture, Graphify and lock extension,
+repinning only exact artifacts that bind the full lockfile while preserving the
+selected production package, edge, external dependency, license and SBOM oracles; no
+other allowlist or frozen set may be weakened. New dependencies flow from PLAN-006
+toward existing public seams; no existing crate gains a PLAN-006 dependency.
+`docs/roadmap/roadmap-data.js` is generated and is never edited by hand.
 
 ---
 

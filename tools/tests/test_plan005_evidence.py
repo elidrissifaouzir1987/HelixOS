@@ -634,15 +634,15 @@ class Plan005SupplyChainTests(unittest.TestCase):
             graph["cargo_lock"]["sha256"],
             "1ee27ea28ed2c51167acb180f79bf5f3722ca26a1c775013c6f7ce3082d87d3c",
         )
-        frozen_graph = copy.deepcopy(graph)
-        frozen_graph["cargo_lock"]["sha256"] = (
-            "f18941ac90749f8eb9adffc2e4e9b91e1d9705da8c0cad0c9fe53b451759ff4d"
-        )
         self.assertEqual(
-            _sha256(supply.canonical_json_bytes(frozen_graph)),
+            _sha256(supply.canonical_json_bytes(graph)),
             supply.EXPECTED_RELEASE_ARTIFACT_SHA256[
                 "graph/production-closure.json"
             ],
+        )
+        self.assertEqual(
+            supply.EXPECTED_RUSTSEC_REPORT_SHA256,
+            "f3cc655afe7d84a1a14d8dc67753c224a68270bfe9151b13e4d5688d5dc30bb7",
         )
         self.assertEqual(graph["cargo_lock"]["selected_registry_package_count"], 77)
         self.assertEqual(
