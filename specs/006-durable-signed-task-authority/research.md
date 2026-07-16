@@ -49,8 +49,14 @@ trust boundaries and make acceptance claims ambiguous.
    projections to PLAN-002/004/005 interfaces.
 
 Dependencies flow from PLAN-006 toward existing PLAN-001/002/004/005 APIs.
-No existing signed wire changes and no protected legacy runtime source is
-modified. All new production crates use `#![forbid(unsafe_code)]`.
+No existing signed wire or production source changes and no protected legacy runtime
+source is modified. The exact direct-consumer guards in
+`kernel/helix-plan-eligibility/tests/portability.rs`,
+`kernel/helix-plan-preparation/tests/contract.rs`,
+`kernel/helix-coordinator-sqlite/tests/portability.rs` and
+`kernel/helix-plan-dispatch/tests/portability.rs` may recognize only the new reviewed
+projection leaf. These four test-only edits belong to the PLAN-006 integration and
+removal footprint. All new production crates use `#![forbid(unsafe_code)]`.
 
 **Rationale**: Contract, authority semantics, native persistence and downstream
 projection have different portability and dependency surfaces. The split lets
@@ -411,6 +417,9 @@ redaction, portability, controlled performance/overload, supply chain and exact
 removal. The removal baseline is commit
 `c324f528dc76007a599005e5cc054dcbe1370b1a`, tree
 `c70a3f2157498dd880822f97ef74d3d4757347d7`.
+Exact removal also restores the four existing dependency-policy test blobs changed
+only to recognize `helix-task-authority-projections`, so the baseline package set and
+its original expected-consumer lists pass after every PLAN-006 crate is deleted.
 
 The catalogue maps only `REQUEST-001`, `SEC-002` and `SEC-003` and remains
 `pending-evidence` until exact-commit workflow artifacts satisfy their own gates.

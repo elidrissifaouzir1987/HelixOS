@@ -417,6 +417,7 @@ fn removal_boundary_owns_the_portable_crate_and_all_direct_consumers() {
         vec![
             "helix-coordinator-sqlite".to_owned(),
             "helix-dispatch-inbox-sqlite".to_owned(),
+            "helix-task-authority-projections".to_owned(),
         ]
     );
 }

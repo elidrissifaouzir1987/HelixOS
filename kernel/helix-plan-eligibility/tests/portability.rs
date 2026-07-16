@@ -79,8 +79,9 @@ fn only_reviewed_consumers_depend_on_the_eligibility_contract() {
         vec![
             "helix-plan-preparation".to_owned(),
             "helix-replay-sqlite".to_owned(),
+            "helix-task-authority-projections".to_owned(),
         ],
-        "only the portable preparation crate and reviewed replay adapter may depend on eligibility"
+        "only the reviewed replay, preparation and signed-authority projection leaves may depend on eligibility"
     );
 }
 

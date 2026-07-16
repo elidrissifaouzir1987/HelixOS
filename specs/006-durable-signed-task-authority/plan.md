@@ -407,6 +407,7 @@ contracts/fixtures/durable-signed-task-authority-v1/
 ├── expected-outcomes.json
 ├── public-keys.json
 └── golden/
+    ├── README.md
     ├── human-request-grant.protected.jcs
     ├── human-request-grant.envelope.jcs
     ├── root-task-lease.protected.jcs
@@ -434,9 +435,12 @@ tools/tests/test_plan006_evidence.py
 wire contracts are leaf-portable; the authority core owns semantics and abstract
 store/guard interfaces; SQLite implements those interfaces in the independent
 `HLXA` root; and the projection adapter alone imports existing PLAN-002/004/005
-types. Existing crates and protected legacy runtime sources remain unchanged.
-Fixtures, workflow and evidence tools are PLAN-006-owned and disappear in the
-isolated-removal drill.
+types. Existing production crates, wire contracts and protected legacy runtime
+sources remain unchanged. Four existing dependency-policy tests may add only the
+reviewed `helix-task-authority-projections` direct consumer; those four test blobs
+are part of the PLAN-006 integration and exact-removal footprint and must be restored
+to the clean source versions when PLAN-006 is removed. Fixtures, workflow and
+evidence tools are PLAN-006-owned and disappear in the isolated-removal drill.
 
 ## Complexity Tracking
 

@@ -63,10 +63,11 @@ kernel/helixos-mcp-shim/tests/shim_kernel_e2e.rs
 kernel/helixos-provision/src/main.rs
 ```
 
-PLAN-001 through PLAN-005 Rust sources and wire contracts also remain unchanged. New
-dependencies flow from PLAN-006 toward existing public seams; no existing crate gains a
-PLAN-006 dependency. `docs/roadmap/roadmap-data.js` is generated and is never edited by
-hand.
+PLAN-001 through PLAN-005 production Rust sources and wire contracts also remain
+unchanged. Their dependency-policy tests may recognize the new reviewed PLAN-006 leaf
+consumer, but may not weaken any other allowlist. New dependencies flow from PLAN-006
+toward existing public seams; no existing crate gains a PLAN-006 dependency.
+`docs/roadmap/roadmap-data.js` is generated and is never edited by hand.
 
 ---
 
@@ -75,14 +76,14 @@ hand.
 **Purpose**: Establish exact ownership, package boundaries, fixtures and baseline
 evidence before implementing authority.
 
-- [ ] T001 Record the PLAN-005 commit/tree baseline, full protected-object inventory, exact 27-path exclusion list/hash, existing package set and clean-scope reproduction commands in `specs/006-durable-signed-task-authority/evidence/baseline.md`
-- [ ] T002 Add the four edition-2021 `unsafe`-forbidden workspace members with exact dependency pins, bundled SQLite features, non-default `test-fault-injection`/`controlled-benchmark` features and one-way dependency direction in `kernel/Cargo.toml`, `kernel/Cargo.lock`, `kernel/helix-task-authority-contracts/Cargo.toml`, `kernel/helix-task-authority/Cargo.toml`, `kernel/helix-task-authority-sqlite/Cargo.toml` and `kernel/helix-task-authority-projections/Cargo.toml`
-- [ ] T003 [P] Create the closed contract-crate module skeleton and redacted public surface in `kernel/helix-task-authority-contracts/src/lib.rs`
-- [ ] T004 [P] Create the portable authority-core module skeleton and redacted public surface in `kernel/helix-task-authority/src/lib.rs`
-- [ ] T005 [P] Create the SQLite implementation module skeleton with fault hooks absent from default builds in `kernel/helix-task-authority-sqlite/src/lib.rs`
-- [ ] T006 [P] Create the leaf projection-adapter module skeleton without coordinator, inbox or legacy dependencies in `kernel/helix-task-authority-projections/src/lib.rs`
-- [ ] T007 [P] Create the versioned fixture inventory/golden-directory skeleton, pin PLAN-006 JSON/SQL/fixture/workflow/tool files to LF and ignore only generated evidence outputs in `contracts/fixtures/durable-signed-task-authority-v1/README.md`, `contracts/fixtures/durable-signed-task-authority-v1/cases.json`, `contracts/fixtures/durable-signed-task-authority-v1/chain-cases.json`, `contracts/fixtures/durable-signed-task-authority-v1/expected-outcomes.json`, `contracts/fixtures/durable-signed-task-authority-v1/public-keys.json`, `.gitattributes` and `.gitignore`
-- [ ] T008 Run the locked PLAN-001 through PLAN-005 and protected-package baseline tests without formatting or staging excluded paths, then record exact Rust/Cargo/SQLite/source/lock/schema results in `specs/006-durable-signed-task-authority/evidence/baseline.md`
+- [X] T001 Record the PLAN-005 commit/tree baseline, full protected-object inventory, exact 27-path exclusion list/hash, existing package set and clean-scope reproduction commands in `specs/006-durable-signed-task-authority/evidence/baseline.md`
+- [X] T002 Add the four edition-2021 `unsafe`-forbidden workspace members with exact dependency pins, bundled SQLite features, non-default `test-fault-injection`/`controlled-benchmark` features and one-way dependency direction in `kernel/Cargo.toml`, `kernel/Cargo.lock`, `kernel/helix-task-authority-contracts/Cargo.toml`, `kernel/helix-task-authority/Cargo.toml`, `kernel/helix-task-authority-sqlite/Cargo.toml` and `kernel/helix-task-authority-projections/Cargo.toml`; update only the frozen consumer allowlists to recognize the reviewed projection leaf in `kernel/helix-plan-eligibility/tests/portability.rs`, `kernel/helix-plan-preparation/tests/contract.rs`, `kernel/helix-coordinator-sqlite/tests/portability.rs` and `kernel/helix-plan-dispatch/tests/portability.rs`
+- [X] T003 [P] Create the closed contract-crate module skeleton and redacted public surface in `kernel/helix-task-authority-contracts/src/lib.rs`
+- [X] T004 [P] Create the portable authority-core module skeleton and redacted public surface in `kernel/helix-task-authority/src/lib.rs`
+- [X] T005 [P] Create the SQLite implementation module skeleton with fault hooks absent from default builds in `kernel/helix-task-authority-sqlite/src/lib.rs`
+- [X] T006 [P] Create the leaf projection-adapter module skeleton without coordinator, inbox or legacy dependencies in `kernel/helix-task-authority-projections/src/lib.rs`
+- [X] T007 [P] Create the versioned fixture inventory/golden-directory skeleton, pin PLAN-006 JSON/SQL/fixture/workflow/tool files to LF and ignore only generated evidence outputs in `contracts/fixtures/durable-signed-task-authority-v1/README.md`, `contracts/fixtures/durable-signed-task-authority-v1/golden/README.md`, `contracts/fixtures/durable-signed-task-authority-v1/cases.json`, `contracts/fixtures/durable-signed-task-authority-v1/chain-cases.json`, `contracts/fixtures/durable-signed-task-authority-v1/expected-outcomes.json`, `contracts/fixtures/durable-signed-task-authority-v1/public-keys.json`, `.gitattributes` and `.gitignore`
+- [X] T008 Run the locked PLAN-001 through PLAN-005 and protected-package baseline tests without formatting or staging excluded paths, then record exact Rust/Cargo/SQLite/source/lock/schema results in `specs/006-durable-signed-task-authority/evidence/baseline.md`
 
 **Checkpoint**: The PLAN-006-owned surface is isolated, dependency direction is
 reviewable, and all prior behavior is captured before feature implementation.
@@ -322,7 +323,7 @@ and removal back to the frozen PLAN-005 tree with no protected-path change.
 - [ ] T096 [US6] Implement deterministic materialization of the unchanged positive/negative/single-fault/concurrency/generated corpus and byte-identical machine summary in `kernel/helix-task-authority-sqlite/examples/durable_task_authority_corpus.rs`
 - [ ] T097 [US6] Implement controlled raw-sample capture for 500 warmups plus 10,000 three-contract/projection, root issue, delegation and decision measurements with declared metadata and independent percentiles in `kernel/helix-task-authority-sqlite/examples/durable_task_authority_benchmark.rs`
 - [ ] T098 [US6] Implement exact-commit dependency closure, bundled SQLite/toolchain/schema/source/lock digests, licenses, advisories, SBOM/provenance, secret/path scans and independent bundle verification in `tools/plan006_supply_chain.py`
-- [ ] T099 [US6] Implement the detached exact-removal drill that deletes PLAN-006 executable surfaces, restores every baseline blob/mode, proves the frozen tree/package set, runs locked/offline prior tests and never touches the 27 excluded paths in `tools/plan006_removal_drill.py`
+- [ ] T099 [US6] Implement the detached exact-removal drill that deletes PLAN-006 executable surfaces, restores every baseline blob/mode plus the four PLAN-006-owned dependency-policy test edits, proves the frozen tree/package set and original consumer lists, runs locked/offline prior tests and never touches the 27 excluded paths in `tools/plan006_removal_drill.py`
 - [ ] T100 [US6] Add policy, Linux/macOS/Windows conformance, release-evidence and exact-attestation jobs with hosted diagnostic/non-effect/non-power-loss claims only in `.github/workflows/durable-signed-task-authority.yml`
 - [ ] T101 [US6] Update only the existing PLAN-006 `REQUEST-001`, `SEC-002` and `SEC-003` catalogue mappings with exact implementation/evidence paths while preserving `pending-evidence`, run the roadmap generator to refresh `docs/roadmap/roadmap-data.js` without hand editing it, and verify the static shell remains unchanged in `conformance/catalog.yaml` and `docs/roadmap/index.html`
 - [ ] T102 [US6] Run the unchanged three-platform corpus, overload profile and hosted diagnostic benchmark, compare exact summaries and retain machine-readable artifacts/nonclaims in `specs/006-durable-signed-task-authority/evidence/us6-portability-performance.md`

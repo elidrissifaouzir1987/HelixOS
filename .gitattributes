@@ -27,6 +27,15 @@
 /tools/plan005_*.py text eol=lf
 /tools/tests/test_plan005_evidence.py text eol=lf
 
+# PLAN-006 contracts, fixtures and future release tooling are byte-sensitive.
+/specs/006-durable-signed-task-authority/contracts/*.json text eol=lf
+/specs/006-durable-signed-task-authority/contracts/*.sql text eol=lf
+/specs/006-durable-signed-task-authority/evidence/* text eol=lf whitespace=-blank-at-eof
+/contracts/fixtures/durable-signed-task-authority-v1/** text eol=lf
+/.github/workflows/durable-signed-task-authority.yml text eol=lf
+/tools/plan006_*.py text eol=lf
+/tools/tests/test_plan006_evidence.py text eol=lf
+
 # The generated roadmap snapshot must compare byte-for-byte on every CI host.
 /docs/roadmap/index.html text eol=lf
 /docs/roadmap/roadmap-data.js text eol=lf
