@@ -500,7 +500,10 @@ fn removal_allowlist_owns_plan005_adapter_and_preserves_plan004() {
             &evidence,
             "/removal_policy/added_prefixes_retained_for_audit"
         ),
-        BTreeSet::from(["specs/005-durable-dispatch/".to_owned()])
+        BTreeSet::from([
+            "specs/005-durable-dispatch/".to_owned(),
+            "specs/006-durable-signed-task-authority/".to_owned(),
+        ])
     );
     let restored = json_string_set(&evidence, "/removal_policy/baseline_paths_restored");
     for required in [

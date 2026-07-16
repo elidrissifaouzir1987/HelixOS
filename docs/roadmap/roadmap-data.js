@@ -8,7 +8,18 @@ window.HELIXOS_ROADMAP_DATA = {
       "title": "R0 n'est pas formellement ferm\u00e9"
     }
   ],
-  "currentFocus": null,
+  "currentFocus": {
+    "description": "Record the PLAN-005 commit/tree baseline, full protected-object inventory, exact 27-path exclusion list/hash, existing package set and clean-scope reproduction commands in specs/006-durable-signed-task-authority/evidence/baseline.md",
+    "done": false,
+    "id": "T001",
+    "kind": "implementation",
+    "phase": "Setup and Frozen Baseline",
+    "phaseNumber": 1,
+    "planId": "PLAN-006",
+    "planTitle": "Durable signed task authority",
+    "source": "specs/006-durable-signed-task-authority/tasks.md#L78",
+    "tags": []
+  },
   "definitionOfDone": [
     "architecture/threat model et Constitution Check sont \u00e0 jour",
     "contrats et migrations sont versionn\u00e9s",
@@ -4123,12 +4134,2944 @@ window.HELIXOS_ROADMAP_DATA = {
       ],
       "title": "Durable one-shot dispatch",
       "total": 98
+    },
+    {
+      "completed": 0,
+      "conformance": {
+        "ciWorkflow": null,
+        "claimStatus": "pending-evidence",
+        "evidence": {
+          "immutable": "pending-workflow-evidence",
+          "local": "pending",
+          "macMiniM4": "pending-physical-evidence"
+        },
+        "feature": "specs/006-durable-signed-task-authority",
+        "id": "PLAN-006",
+        "spec": "specs/006-durable-signed-task-authority/spec.md",
+        "title": "Durable signed task authority"
+      },
+      "id": "PLAN-006",
+      "phases": [
+        {
+          "done": 0,
+          "number": 1,
+          "title": "Setup and Frozen Baseline",
+          "total": 8
+        },
+        {
+          "done": 0,
+          "number": 2,
+          "title": "Foundational Contracts, Store and Control Boundaries",
+          "total": 16
+        },
+        {
+          "done": 0,
+          "number": 3,
+          "title": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+          "total": 14
+        },
+        {
+          "done": 0,
+          "number": 4,
+          "title": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+          "total": 14
+        },
+        {
+          "done": 0,
+          "number": 5,
+          "title": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+          "total": 12
+        },
+        {
+          "done": 0,
+          "number": 6,
+          "title": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+          "total": 13
+        },
+        {
+          "done": 0,
+          "number": 7,
+          "title": "User Story 5 - Recover Authority Safely (Priority: P2)",
+          "total": 15
+        },
+        {
+          "done": 0,
+          "number": 8,
+          "title": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+          "total": 11
+        },
+        {
+          "done": 0,
+          "number": 9,
+          "title": "Polish and Cross-Cutting Validation",
+          "total": 7
+        }
+      ],
+      "remaining": 110,
+      "taskPercent": 0.0,
+      "taskSource": "specs/006-durable-signed-task-authority/tasks.md",
+      "taskTitle": "Durable Signed Task Authority",
+      "tasks": [
+        {
+          "description": "Record the PLAN-005 commit/tree baseline, full protected-object inventory, exact 27-path exclusion list/hash, existing package set and clean-scope reproduction commands in specs/006-durable-signed-task-authority/evidence/baseline.md",
+          "done": false,
+          "id": "T001",
+          "kind": "implementation",
+          "phase": "Setup and Frozen Baseline",
+          "phaseNumber": 1,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L78",
+          "tags": []
+        },
+        {
+          "description": "Add the four edition-2021 unsafe-forbidden workspace members with exact dependency pins, bundled SQLite features, non-default test-fault-injection/controlled-benchmark features and one-way dependency direction in kernel/Cargo.toml, kernel/Cargo.lock, kernel/helix-task-authority-contracts/Cargo.toml, kernel/helix-task-authority/Cargo.toml, kernel/helix-task-authority-sqlite/Cargo.toml and kernel/helix-task-authority-projections/Cargo.toml",
+          "done": false,
+          "id": "T002",
+          "kind": "implementation",
+          "phase": "Setup and Frozen Baseline",
+          "phaseNumber": 1,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L79",
+          "tags": []
+        },
+        {
+          "description": "Create the closed contract-crate module skeleton and redacted public surface in kernel/helix-task-authority-contracts/src/lib.rs",
+          "done": false,
+          "id": "T003",
+          "kind": "implementation",
+          "phase": "Setup and Frozen Baseline",
+          "phaseNumber": 1,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L80",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Create the portable authority-core module skeleton and redacted public surface in kernel/helix-task-authority/src/lib.rs",
+          "done": false,
+          "id": "T004",
+          "kind": "implementation",
+          "phase": "Setup and Frozen Baseline",
+          "phaseNumber": 1,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L81",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Create the SQLite implementation module skeleton with fault hooks absent from default builds in kernel/helix-task-authority-sqlite/src/lib.rs",
+          "done": false,
+          "id": "T005",
+          "kind": "implementation",
+          "phase": "Setup and Frozen Baseline",
+          "phaseNumber": 1,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L82",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Create the leaf projection-adapter module skeleton without coordinator, inbox or legacy dependencies in kernel/helix-task-authority-projections/src/lib.rs",
+          "done": false,
+          "id": "T006",
+          "kind": "implementation",
+          "phase": "Setup and Frozen Baseline",
+          "phaseNumber": 1,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L83",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Create the versioned fixture inventory/golden-directory skeleton, pin PLAN-006 JSON/SQL/fixture/workflow/tool files to LF and ignore only generated evidence outputs in contracts/fixtures/durable-signed-task-authority-v1/README.md, contracts/fixtures/durable-signed-task-authority-v1/cases.json, contracts/fixtures/durable-signed-task-authority-v1/chain-cases.json, contracts/fixtures/durable-signed-task-authority-v1/expected-outcomes.json, contracts/fixtures/durable-signed-task-authority-v1/public-keys.json, .gitattributes and .gitignore",
+          "done": false,
+          "id": "T007",
+          "kind": "implementation",
+          "phase": "Setup and Frozen Baseline",
+          "phaseNumber": 1,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L84",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Run the locked PLAN-001 through PLAN-005 and protected-package baseline tests without formatting or staging excluded paths, then record exact Rust/Cargo/SQLite/source/lock/schema results in specs/006-durable-signed-task-authority/evidence/baseline.md",
+          "done": false,
+          "id": "T008",
+          "kind": "implementation",
+          "phase": "Setup and Frozen Baseline",
+          "phaseNumber": 1,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L85",
+          "tags": []
+        },
+        {
+          "description": "Write failing cross-contract primitive, duplicate-member, canonical-byte, digest/base64url, unknown-version and generated leaf-coverage tests in kernel/helix-task-authority-contracts/tests/cross_contract.rs and kernel/helix-task-authority-contracts/tests/property.rs",
+          "done": false,
+          "id": "T009",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Store and Control Boundaries",
+          "phaseNumber": 2,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L101",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Write failing source/dependency, OS-neutral primitive, non-Serde/non-Clone authority-marker and seeded public-redaction tests in kernel/helix-task-authority-contracts/tests/portability.rs and kernel/helix-task-authority-contracts/tests/redaction.rs",
+          "done": false,
+          "id": "T010",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Store and Control Boundaries",
+          "phaseNumber": 2,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L102",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Implement bounded duplicate-aware RFC 8785 input handling, exact byte equality, SHA-256 protected digests and canonical envelope helpers in kernel/helix-task-authority-contracts/src/canonical.rs and kernel/helix-task-authority-contracts/src/digest.rs",
+          "done": false,
+          "id": "T011",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Store and Control Boundaries",
+          "phaseNumber": 2,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L106",
+          "tags": []
+        },
+        {
+          "description": "Implement strict canonical base64url Ed25519 signature verification, purpose-separated signer/resolver traits and immutable key-fingerprint evidence in kernel/helix-task-authority-contracts/src/crypto.rs",
+          "done": false,
+          "id": "T012",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Store and Control Boundaries",
+          "phaseNumber": 2,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L107",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Implement safe integers, identifiers, NFC/resource components, closed enums, checked time/bound validation and payload-free public error codes in kernel/helix-task-authority-contracts/src/validation.rs and kernel/helix-task-authority-contracts/src/error.rs",
+          "done": false,
+          "id": "T013",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Store and Control Boundaries",
+          "phaseNumber": 2,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L108",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Expose only closed signed/authentic marker APIs with redacted Debug, no defaulted fields and no caller-constructible current authority in kernel/helix-task-authority-contracts/src/lib.rs",
+          "done": false,
+          "id": "T014",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Store and Control Boundaries",
+          "phaseNumber": 2,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L109",
+          "tags": []
+        },
+        {
+          "description": "Define the nine exact idempotency domains, closed stable preimages excluding candidate-generated values, immutable attempt/namespace/input/outcome bindings, closed mutation/readback outcomes and abstract atomic store operations shared by every story in kernel/helix-task-authority/src/outcome.rs and kernel/helix-task-authority/src/store.rs",
+          "done": false,
+          "id": "T015",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Store and Control Boundaries",
+          "phaseNumber": 2,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L110",
+          "tags": []
+        },
+        {
+          "description": "Define trusted clock/deadline capture, 1,024 ordinary plus 32 reserved-control capacity, unified non-cloneable authority guard custody and nonconstructible projection-provider traits in kernel/helix-task-authority/src/control.rs, kernel/helix-task-authority/src/guard.rs and kernel/helix-task-authority/src/projection.rs",
+          "done": false,
+          "id": "T016",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Store and Control Boundaries",
+          "phaseNumber": 2,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L111",
+          "tags": []
+        },
+        {
+          "description": "Embed and digest the exact strict HLXA v1 normalized SQL contract, required tables/triggers/indexes and application/schema constants in kernel/helix-task-authority-sqlite/src/schema.rs from specs/006-durable-signed-task-authority/contracts/task-authority-store-schema-v1.sql",
+          "done": false,
+          "id": "T017",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Store and Control Boundaries",
+          "phaseNumber": 2,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L112",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Implement provisioned local-root configuration, filesystem identity checks and injected trusted UTC/monotonic/boot observations without native paths in portable outputs in kernel/helix-task-authority-sqlite/src/config.rs, kernel/helix-task-authority-sqlite/src/root_safety.rs and kernel/helix-task-authority-sqlite/src/clock.rs",
+          "done": false,
+          "id": "T018",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Store and Control Boundaries",
+          "phaseNumber": 2,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L113",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Implement exclusive root initialization/publication and strict ordinary open with HLXA application ID, schema v1, WAL/FULL, foreign keys, recursive triggers, trusted_schema=OFF, cell_size_check=ON, disabled auto-checkpoint and bounded busy waits in kernel/helix-task-authority-sqlite/src/connection.rs",
+          "done": false,
+          "id": "T019",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Store and Control Boundaries",
+          "phaseNumber": 2,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L114",
+          "tags": []
+        },
+        {
+          "description": "Implement non-mutating exact schema/root/durability/integrity/cross-record admission verification with no repair, downgrade or implicit migration in kernel/helix-task-authority-sqlite/src/schema.rs",
+          "done": false,
+          "id": "T020",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Store and Control Boundaries",
+          "phaseNumber": 2,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L115",
+          "tags": []
+        },
+        {
+          "description": "Implement append-only public-key history, immutable purpose/key identity, current trust status, generation-increasing revocation and redacted transition/conflict events in kernel/helix-task-authority-sqlite/src/revocation.rs and kernel/helix-task-authority-sqlite/src/event.rs",
+          "done": false,
+          "id": "T021",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Store and Control Boundaries",
+          "phaseNumber": 2,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L116",
+          "tags": []
+        },
+        {
+          "description": "Implement one-fresh-connection uncertainty readback types and complete-graph/healthy-absence/conflict/ambiguity classification without retry authority in kernel/helix-task-authority-sqlite/src/readback.rs",
+          "done": false,
+          "id": "T022",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Store and Control Boundaries",
+          "phaseNumber": 2,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L117",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Implement bounded ordinary admission, duplicate coalescing and reserved revocation/status control lanes with injected deadlines in kernel/helix-task-authority-sqlite/src/queue.rs",
+          "done": false,
+          "id": "T023",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Store and Control Boundaries",
+          "phaseNumber": 2,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L118",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Wire the closed non-default fault-selection seam, prove default production builds cannot read environment/process fault selectors, and make the foundation tests pass in kernel/helix-task-authority/src/test_fault.rs, kernel/helix-task-authority-sqlite/src/test_fault.rs and kernel/helix-task-authority-sqlite/tests/contract.rs",
+          "done": false,
+          "id": "T024",
+          "kind": "implementation",
+          "phase": "Foundational Contracts, Store and Control Boundaries",
+          "phaseNumber": 2,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L119",
+          "tags": []
+        },
+        {
+          "description": "Write failing HumanRequestGrant canonical/domain/purpose/context/expiry/current-trust contract tests and every protected-leaf mutation case in kernel/helix-task-authority-contracts/tests/human_request_grant_contract.rs",
+          "done": false,
+          "id": "T025",
+          "kind": "implementation",
+          "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L140",
+          "tags": [
+            "P",
+            "US1"
+          ]
+        },
+        {
+          "description": "Write failing root TaskLease shape, source-grant, scope-intersection, exact-digest and exclusive deadline contract tests in kernel/helix-task-authority-contracts/tests/task_lease_contract.rs",
+          "done": false,
+          "id": "T026",
+          "kind": "implementation",
+          "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L141",
+          "tags": [
+            "P",
+            "US1"
+          ]
+        },
+        {
+          "description": "Write failing core tests for forged/replayed/wrong-context grants, key rotation/revocation, signing failure before claim, exact retry/conflict outcomes and current-versus-historical authority after source/ancestor/decision revocation in kernel/helix-task-authority/tests/request.rs and kernel/helix-task-authority/tests/revocation.rs",
+          "done": false,
+          "id": "T027",
+          "kind": "implementation",
+          "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L142",
+          "tags": [
+            "P",
+            "US1"
+          ]
+        },
+        {
+          "description": "Write failing 10,000 sequential, 100 x 64-thread and 20 x eight-process one-shot root issuance tests with exact retained bytes and invariant reopen in kernel/helix-task-authority-sqlite/tests/contention.rs",
+          "done": false,
+          "id": "T028",
+          "kind": "implementation",
+          "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L143",
+          "tags": [
+            "P",
+            "US1"
+          ]
+        },
+        {
+          "description": "Write failing SQLite atomic-graph and readback tests proving grant record, one claim, one root lease, initial usage, generations and event are all visible or all absent in kernel/helix-task-authority-sqlite/tests/contract.rs",
+          "done": false,
+          "id": "T029",
+          "kind": "implementation",
+          "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L144",
+          "tags": [
+            "P",
+            "US1"
+          ]
+        },
+        {
+          "description": "Implement the closed HumanRequestGrant protected/envelope/authentic types and fixed verification order for helixos.human-request-grant/1 in kernel/helix-task-authority-contracts/src/human_request_grant.rs from specs/006-durable-signed-task-authority/contracts/human-request-grant-v1.schema.json",
+          "done": false,
+          "id": "T030",
+          "kind": "implementation",
+          "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L148",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Implement the root TaskLease protected/envelope/authentic types, explicit null parent branch, source digest and purpose-separated signing needed by root issuance in kernel/helix-task-authority-contracts/src/task_lease.rs from specs/006-durable-signed-task-authority/contracts/task-lease-v1.schema.json",
+          "done": false,
+          "id": "T031",
+          "kind": "implementation",
+          "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L149",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Implement current grant-context resolution, scope/policy/catalogue intersection, sign-before-writer root candidate construction and closed request outcomes in kernel/helix-task-authority/src/request.rs and kernel/helix-task-authority/src/lease.rs",
+          "done": false,
+          "id": "T032",
+          "kind": "implementation",
+          "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L150",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Implement create-only exact grant retention, issuer-scoped claim uniqueness, current trust/scope/time recheck and conflict tombstones in kernel/helix-task-authority-sqlite/src/grant.rs",
+          "done": false,
+          "id": "T033",
+          "kind": "implementation",
+          "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L151",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Implement the single BEGIN IMMEDIATE root graph that commits grant, claim, signed root lease, initial usage, generations and redacted event atomically in kernel/helix-task-authority-sqlite/src/lease.rs",
+          "done": false,
+          "id": "T034",
+          "kind": "implementation",
+          "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L152",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Implement exact retry retrieval and one-readback handling for lost acknowledgement without re-signing or reissuing in kernel/helix-task-authority-sqlite/src/grant.rs and kernel/helix-task-authority-sqlite/src/readback.rs",
+          "done": false,
+          "id": "T035",
+          "kind": "implementation",
+          "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L153",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Enforce immutable key IDs, new-ID rotation, current-versus-historical trust and signer/grant revocation before consumption in kernel/helix-task-authority/src/revocation.rs and kernel/helix-task-authority-sqlite/src/revocation.rs",
+          "done": false,
+          "id": "T036",
+          "kind": "implementation",
+          "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L154",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Freeze public synthetic grant/root-lease canonical bytes, signatures, context/replay/expiry mutations and exact outcomes in contracts/fixtures/durable-signed-task-authority-v1/golden/human-request-grant.protected.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/human-request-grant.envelope.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/root-task-lease.protected.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/root-task-lease.envelope.jcs, contracts/fixtures/durable-signed-task-authority-v1/cases.json and contracts/fixtures/durable-signed-task-authority-v1/expected-outcomes.json",
+          "done": false,
+          "id": "T037",
+          "kind": "implementation",
+          "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L155",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Run and record PLAN006-REQUEST, FR-007\u2013FR-011, FR-031\u2013FR-032, FR-035\u2013FR-036, SC-002\u2013SC-003 and SC-007 with exact mutation/generation deltas and zero authority from bare messages or notifications in specs/006-durable-signed-task-authority/evidence/us1-request.md",
+          "done": false,
+          "id": "T038",
+          "kind": "implementation",
+          "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+          "phaseNumber": 3,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L156",
+          "tags": [
+            "US1"
+          ]
+        },
+        {
+          "description": "Extend failing TaskLease contract tests to child shape, depth, resource/catalogue subsets, every budget/counter/trust/time one-unit widening and exact-limit acceptance in kernel/helix-task-authority-contracts/tests/task_lease_contract.rs",
+          "done": false,
+          "id": "T039",
+          "kind": "implementation",
+          "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L176",
+          "tags": [
+            "P",
+            "US2"
+          ]
+        },
+        {
+          "description": "Write failing core delegation tests for non-delegable parents, cross-task/workload/source use, unions, renewals, ancestor gaps/cycles and monotonic counter rules in kernel/helix-task-authority/tests/delegation.rs",
+          "done": false,
+          "id": "T040",
+          "kind": "implementation",
+          "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L177",
+          "tags": [
+            "P",
+            "US2"
+          ]
+        },
+        {
+          "description": "Write a failing independent checked oracle for at least 100,000 generated restrictive-delegation/allocation cases in kernel/helix-task-authority/tests/delegation_property.rs",
+          "done": false,
+          "id": "T041",
+          "kind": "implementation",
+          "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L178",
+          "tags": [
+            "P",
+            "US2"
+          ]
+        },
+        {
+          "description": "Extend failing SQLite contention tests for exact aggregate limits, oversubscribing sibling threads/processes, unique allocation IDs and complete invariant reopen in kernel/helix-task-authority-sqlite/tests/contention.rs",
+          "done": false,
+          "id": "T042",
+          "kind": "implementation",
+          "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L179",
+          "tags": [
+            "P",
+            "US2"
+          ]
+        },
+        {
+          "description": "Complete TaskLease child decoding and semantic validation for canonical resources, intentions, budgets, counters, trust/catalogue bounds, depth and same-boot deadlines in kernel/helix-task-authority-contracts/src/task_lease.rs",
+          "done": false,
+          "id": "T043",
+          "kind": "implementation",
+          "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L183",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Implement field-by-field restrictive delegation, checked subset/prefix arithmetic and exact parent/ancestor validation in kernel/helix-task-authority/src/delegation.rs",
+          "done": false,
+          "id": "T044",
+          "kind": "implementation",
+          "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L184",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Implement monotonic direct counter-consumption semantics with no decrement, release, reset, renewal or widening API in kernel/helix-task-authority/src/lease.rs",
+          "done": false,
+          "id": "T045",
+          "kind": "implementation",
+          "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L185",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Implement the atomic parent allocation, child signed lease, child usage, parent summary, generations and event transaction in kernel/helix-task-authority-sqlite/src/delegation.rs",
+          "done": false,
+          "id": "T046",
+          "kind": "implementation",
+          "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L186",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Implement append-only counter-consumption tombstones and reproducible checked usage summaries in kernel/helix-task-authority-sqlite/src/lease.rs",
+          "done": false,
+          "id": "T047",
+          "kind": "implementation",
+          "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L187",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Implement complete acyclic ancestor resolution and descendant non-current derivation for source/ancestor expiry, exhaustion, reboot, instance mismatch and revocation in kernel/helix-task-authority/src/projection.rs and kernel/helix-task-authority-sqlite/src/projection.rs",
+          "done": false,
+          "id": "T048",
+          "kind": "implementation",
+          "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L188",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Implement exact allocation/counter retries, conflicting namespace tombstones and complete-graph uncertainty readback in kernel/helix-task-authority-sqlite/src/delegation.rs and kernel/helix-task-authority-sqlite/src/readback.rs",
+          "done": false,
+          "id": "T049",
+          "kind": "implementation",
+          "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L189",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Freeze canonical child-lease bytes plus exact-limit, one-unit widening, ancestry, exhaustion, revocation and sibling-allocation cases in contracts/fixtures/durable-signed-task-authority-v1/golden/child-task-lease.protected.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/child-task-lease.envelope.jcs, contracts/fixtures/durable-signed-task-authority-v1/chain-cases.json and contracts/fixtures/durable-signed-task-authority-v1/expected-outcomes.json",
+          "done": false,
+          "id": "T050",
+          "kind": "implementation",
+          "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L190",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Run the release 100,000-case oracle and retain seed, case counts, exact/minus-one/plus-one results and zero-widening summary in specs/006-durable-signed-task-authority/evidence/us2-property.md",
+          "done": false,
+          "id": "T051",
+          "kind": "implementation",
+          "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L191",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Run and record PLAN006-LEASE, FR-012\u2013FR-021, FR-031, FR-033, FR-036, SC-004 and SC-007 across normal/thread/process contention with zero partial allocation or counter reset in specs/006-durable-signed-task-authority/evidence/us2-lease.md",
+          "done": false,
+          "id": "T052",
+          "kind": "implementation",
+          "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+          "phaseNumber": 4,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L192",
+          "tags": [
+            "US2"
+          ]
+        },
+        {
+          "description": "Write failing ApprovalDecision canonical/domain/purpose/terminal/plan-chain/deadline tests and every protected-leaf mutation case in kernel/helix-task-authority-contracts/tests/approval_decision_contract.rs",
+          "done": false,
+          "id": "T053",
+          "kind": "implementation",
+          "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+          "phaseNumber": 5,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L211",
+          "tags": [
+            "P",
+            "US3"
+          ]
+        },
+        {
+          "description": "Write failing core tests for exact PLAN-001 envelope binding, approve/deny immutability, weak L2 evidence, synthetic non-production evidence and current-chain mutation in kernel/helix-task-authority/tests/decision.rs",
+          "done": false,
+          "id": "T054",
+          "kind": "implementation",
+          "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+          "phaseNumber": 5,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L212",
+          "tags": [
+            "P",
+            "US3"
+          ]
+        },
+        {
+          "description": "Extend failing thread/process contention tests so concurrent approve/deny retains one terminal wire/event and cannot flip on retry in kernel/helix-task-authority-sqlite/tests/contention.rs",
+          "done": false,
+          "id": "T055",
+          "kind": "implementation",
+          "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+          "phaseNumber": 5,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L213",
+          "tags": [
+            "P",
+            "US3"
+          ]
+        },
+        {
+          "description": "Write failing seeded redaction tests for raw messages, authentication assertions, bearer/private-key/native-path/identifier/digest/provider sentinels in kernel/helix-task-authority/tests/redaction.rs",
+          "done": false,
+          "id": "T056",
+          "kind": "implementation",
+          "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+          "phaseNumber": 5,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L214",
+          "tags": [
+            "P",
+            "US3"
+          ]
+        },
+        {
+          "description": "Implement the closed ApprovalDecision protected/envelope/authentic types, exact canonical plan-envelope digest and purpose-separated signature profile in kernel/helix-task-authority-contracts/src/approval_decision.rs from specs/006-durable-signed-task-authority/contracts/approval-decision-v1.schema.json",
+          "done": false,
+          "id": "T057",
+          "kind": "implementation",
+          "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+          "phaseNumber": 5,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L218",
+          "tags": [
+            "US3"
+          ]
+        },
+        {
+          "description": "Implement exact authentic PLAN-001 target verification, current grant/lease/ancestor resolution, evidence-profile/risk policy and sign-before-writer terminal candidate construction in kernel/helix-task-authority/src/decision.rs",
+          "done": false,
+          "id": "T058",
+          "kind": "implementation",
+          "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+          "phaseNumber": 5,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L219",
+          "tags": [
+            "US3"
+          ]
+        },
+        {
+          "description": "Implement the single atomic plan binding, terminal decision, uniqueness, generation and redacted event transaction in kernel/helix-task-authority-sqlite/src/decision.rs",
+          "done": false,
+          "id": "T059",
+          "kind": "implementation",
+          "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+          "phaseNumber": 5,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L220",
+          "tags": [
+            "US3"
+          ]
+        },
+        {
+          "description": "Implement exact decision retry, conflicting terminal tombstone and one-fresh-readback classification without decision flipping in kernel/helix-task-authority-sqlite/src/decision.rs and kernel/helix-task-authority-sqlite/src/readback.rs",
+          "done": false,
+          "id": "T060",
+          "kind": "implementation",
+          "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+          "phaseNumber": 5,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L221",
+          "tags": [
+            "US3"
+          ]
+        },
+        {
+          "description": "Derive current approved, current denied, expired, revoked, chain-non-current, boot/instance/fencing mismatch, weak-evidence and historical-only states without editing signed bytes in kernel/helix-task-authority/src/revocation.rs and kernel/helix-task-authority/src/projection.rs",
+          "done": false,
+          "id": "T061",
+          "kind": "implementation",
+          "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+          "phaseNumber": 5,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L222",
+          "tags": [
+            "US3"
+          ]
+        },
+        {
+          "description": "Freeze canonical approved/denied wires, terminal races, every exact-binding mutation and labelled synthetic evidence cases in contracts/fixtures/durable-signed-task-authority-v1/golden/approval-approved.protected.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/approval-approved.envelope.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/approval-denied.protected.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/approval-denied.envelope.jcs, contracts/fixtures/durable-signed-task-authority-v1/chain-cases.json and contracts/fixtures/durable-signed-task-authority-v1/expected-outcomes.json",
+          "done": false,
+          "id": "T062",
+          "kind": "implementation",
+          "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+          "phaseNumber": 5,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L223",
+          "tags": [
+            "US3"
+          ]
+        },
+        {
+          "description": "Complete the three-wire fixture/outcome bijection, schema-leaf coverage and cross-contract source/plan/lease/decision tests in kernel/helix-task-authority-contracts/tests/cross_contract.rs against specs/006-durable-signed-task-authority/contracts/signed-task-authority-v1.md",
+          "done": false,
+          "id": "T063",
+          "kind": "implementation",
+          "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+          "phaseNumber": 5,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L224",
+          "tags": [
+            "US3"
+          ]
+        },
+        {
+          "description": "Run and record PLAN006-CONTRACT and PLAN006-DECISION, FR-001\u2013FR-006, FR-022\u2013FR-031, FR-034\u2013FR-036, SC-001, SC-005, SC-007 and SC-011 with zero positive authority from DENIED or synthetic evidence in specs/006-durable-signed-task-authority/evidence/us3-decision.md",
+          "done": false,
+          "id": "T064",
+          "kind": "implementation",
+          "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+          "phaseNumber": 5,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L225",
+          "tags": [
+            "US3"
+          ]
+        },
+        {
+          "description": "Write failing core projection tests for the complete signed graph, every closed ancestor-vector/plan-bound-lease/revocation preimage leaf and order, current-vs-historical status and earliest exclusive deadlines in kernel/helix-task-authority/tests/projection.rs, freezing exact bytes and lowercase digests in contracts/fixtures/durable-signed-task-authority-v1/golden/ancestor-vector.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/ancestor-vector.sha256, contracts/fixtures/durable-signed-task-authority-v1/golden/plan-bound-lease-projection.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/plan-bound-lease-projection.sha256, contracts/fixtures/durable-signed-task-authority-v1/golden/revocation-vector.jcs and contracts/fixtures/durable-signed-task-authority-v1/golden/revocation-vector.sha256",
+          "done": false,
+          "id": "T065",
+          "kind": "implementation",
+          "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+          "phaseNumber": 6,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L246",
+          "tags": [
+            "P",
+            "US4"
+          ]
+        },
+        {
+          "description": "Write failing PLAN-002 mapping tests proving signed lease/authorization views, authority-before-claim denial and exact TaskLease/HumanRequestGrant/ApprovalDecision bindings in kernel/helix-task-authority-projections/tests/plan002.rs",
+          "done": false,
+          "id": "T066",
+          "kind": "implementation",
+          "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+          "phaseNumber": 6,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L247",
+          "tags": [
+            "P",
+            "US4"
+          ]
+        },
+        {
+          "description": "Write failing PLAN-004 preliminary/final comparison tests proving the unified authority guard survives through prepare_plan_v1 commit and every changed leaf causes zero preparation mutation in kernel/helix-task-authority-projections/tests/plan004.rs",
+          "done": false,
+          "id": "T067",
+          "kind": "implementation",
+          "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+          "phaseNumber": 6,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L248",
+          "tags": [
+            "P",
+            "US4"
+          ]
+        },
+        {
+          "description": "Write failing PLAN-005 preliminary/FinalGuarded tests proving exact view mapping, retained guard custody through dispatch_prepared_once_v1 and zero dispatch mutation on mismatch in kernel/helix-task-authority-projections/tests/plan005.rs",
+          "done": false,
+          "id": "T068",
+          "kind": "implementation",
+          "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+          "phaseNumber": 6,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L249",
+          "tags": [
+            "P",
+            "US4"
+          ]
+        },
+        {
+          "description": "Write failing fixed-order, reverse-release, commit-classification/custody-transfer, absolute-deadline, cross-process revocation/usage TOCTOU and mutation-provider-reentry tests proving no Clock/Signer/Workload/Policy/Catalogue acquisition occurs under HLXA in kernel/helix-task-authority-projections/tests/guard_order.rs",
+          "done": false,
+          "id": "T069",
+          "kind": "implementation",
+          "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+          "phaseNumber": 6,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L250",
+          "tags": [
+            "P",
+            "US4"
+          ]
+        },
+        {
+          "description": "Write failing dependency/source/legacy/caller-positive-view and redaction tests proving existing crates and all protected paths cannot produce or import PLAN-006 authority in kernel/helix-task-authority-projections/tests/portability.rs and kernel/helix-task-authority-projections/tests/redaction.rs",
+          "done": false,
+          "id": "T070",
+          "kind": "implementation",
+          "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+          "phaseNumber": 6,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L251",
+          "tags": [
+            "P",
+            "US4"
+          ]
+        },
+        {
+          "description": "Implement nonconstructible current authority, lease and authorization projections from exact signed records, trust, ancestry, usage, revocation, epochs and checked deadlines in kernel/helix-task-authority/src/projection.rs from specs/006-durable-signed-task-authority/contracts/task-authority-projections-v1.md",
+          "done": false,
+          "id": "T071",
+          "kind": "implementation",
+          "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+          "phaseNumber": 6,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L255",
+          "tags": [
+            "US4"
+          ]
+        },
+        {
+          "description": "Implement strict complete-graph projection loading and canonical ancestor/revocation/plan-bound lease digest derivation from one verified SQLite snapshot in kernel/helix-task-authority-sqlite/src/projection.rs",
+          "done": false,
+          "id": "T072",
+          "kind": "implementation",
+          "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+          "phaseNumber": 6,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L256",
+          "tags": [
+            "US4"
+          ]
+        },
+        {
+          "description": "Implement one deadline-bounded HLXA BEGIN IMMEDIATE guard acquired at Lease, Authorization validation in the same transaction, reverse release and authority-before-replay/coordinator lock order in kernel/helix-task-authority-sqlite/src/guard.rs",
+          "done": false,
+          "id": "T073",
+          "kind": "implementation",
+          "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+          "phaseNumber": 6,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L257",
+          "tags": [
+            "US4"
+          ]
+        },
+        {
+          "description": "Implement evaluate_and_claim_signed_authority_plan_v1 so non-authority inputs cannot carry lease/authorization views and the guard remains held through the unchanged PLAN-002 claim in kernel/helix-task-authority-projections/src/eligibility.rs",
+          "done": false,
+          "id": "T074",
+          "kind": "implementation",
+          "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+          "phaseNumber": 6,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L258",
+          "tags": [
+            "US4"
+          ]
+        },
+        {
+          "description": "Implement SignedPreparationAuthoritySourceV1 with exact PLAN-006 field replacement at existing Lease/Authorization slots and no change to PLAN-004 source in kernel/helix-task-authority-projections/src/preparation.rs",
+          "done": false,
+          "id": "T075",
+          "kind": "implementation",
+          "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+          "phaseNumber": 6,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L259",
+          "tags": [
+            "US4"
+          ]
+        },
+        {
+          "description": "Implement SignedDispatchAuthorityProviderV1 and SignedDispatchGuardProviderV1 with exact preliminary/final mapping and no change or dependency addition to PLAN-005 in kernel/helix-task-authority-projections/src/dispatch.rs and kernel/helix-task-authority-projections/src/guards.rs",
+          "done": false,
+          "id": "T076",
+          "kind": "implementation",
+          "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+          "phaseNumber": 6,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L260",
+          "tags": [
+            "US4"
+          ]
+        },
+        {
+          "description": "Run and record PLAN006-PROJECTION, FR-014, FR-020, FR-024\u2013FR-029, FR-041\u2013FR-045 and SC-006 for every digest/generation/ancestor/revocation/deadline mutation, legacy refusal and authority-write-before/after-commit linearization in specs/006-durable-signed-task-authority/evidence/us4-projections.md",
+          "done": false,
+          "id": "T077",
+          "kind": "implementation",
+          "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+          "phaseNumber": 6,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L261",
+          "tags": [
+            "US4"
+          ]
+        },
+        {
+          "description": "Write failing schema/root/PRAGMA/indexed-wire/cross-record corruption and no-admission-repair cases in kernel/helix-task-authority-sqlite/tests/corruption.rs",
+          "done": false,
+          "id": "T078",
+          "kind": "implementation",
+          "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+          "phaseNumber": 7,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L280",
+          "tags": [
+            "P",
+            "US5"
+          ]
+        },
+        {
+          "description": "Write the failing in-process and applicable child-process kill matrix for every root/delegation/counter/decision/revocation/readback transition in kernel/helix-task-authority-sqlite/tests/process_crash.rs",
+          "done": false,
+          "id": "T079",
+          "kind": "implementation",
+          "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+          "phaseNumber": 7,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L281",
+          "tags": [
+            "P",
+            "US5"
+          ]
+        },
+        {
+          "description": "Write failing explicit paused bootstrap, same-identity restart, wrong-source/version/downgrade/partial publication and zero-import tests in kernel/helix-task-authority-sqlite/tests/bootstrap_migration.rs",
+          "done": false,
+          "id": "T080",
+          "kind": "implementation",
+          "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+          "phaseNumber": 7,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L282",
+          "tags": [
+            "P",
+            "US5"
+          ]
+        },
+        {
+          "description": "Write failing quiescent checkpoint, manifest-last, substitution/extra/missing member, exact backup-provisioner-signing purpose/domain, complete public key history with no private keys, clean-root restore, epoch rotation and zero-reactivation cases in kernel/helix-task-authority-sqlite/tests/backup_restore.rs",
+          "done": false,
+          "id": "T081",
+          "kind": "implementation",
+          "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+          "phaseNumber": 7,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L283",
+          "tags": [
+            "P",
+            "US5"
+          ]
+        },
+        {
+          "description": "Write failing permanent-retention, no-prune/no-delete and restricted/public redaction cases for wires, keys, tombstones, manifests and restore evidence in kernel/helix-task-authority-sqlite/tests/retention.rs and kernel/helix-task-authority-sqlite/tests/redaction.rs",
+          "done": false,
+          "id": "T082",
+          "kind": "evidence",
+          "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+          "phaseNumber": 7,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L284",
+          "tags": [
+            "P",
+            "US5"
+          ]
+        },
+        {
+          "description": "Implement the exact HLXA v1 strict schema contract with its metadata/receipt/key/grant/claim/lease/usage/allocation/consumption/plan/decision/revocation/attempt/event/conflict tables, attempt foreign-key graph, immutable-record and strict monotonic-generation triggers, final user_version=1 publication and normalized schema-digest verification in kernel/helix-task-authority-sqlite/src/schema.rs from specs/006-durable-signed-task-authority/contracts/task-authority-store-schema-v1.sql",
+          "done": false,
+          "id": "T083",
+          "kind": "evidence",
+          "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+          "phaseNumber": 7,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L288",
+          "tags": [
+            "US5"
+          ]
+        },
+        {
+          "description": "Complete operation-specific exact-graph readback for every atomic transition, abandoning the original connection and allowing at most one automatic fresh observation in kernel/helix-task-authority-sqlite/src/readback.rs",
+          "done": false,
+          "id": "T084",
+          "kind": "implementation",
+          "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+          "phaseNumber": 7,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L289",
+          "tags": [
+            "US5"
+          ]
+        },
+        {
+          "description": "Derive stable boundary instances for phases P00\u2013P10 after transaction/publication operations stabilize, prove registry/driver bijection for each applicable in-process or process-kill model, and implement only the closed non-default probes in specs/006-durable-signed-task-authority/contracts/fault-boundaries-v1.json and kernel/helix-task-authority-sqlite/src/test_fault.rs",
+          "done": false,
+          "id": "T085",
+          "kind": "implementation",
+          "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+          "phaseNumber": 7,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L290",
+          "tags": [
+            "US5"
+          ]
+        },
+        {
+          "description": "Implement explicit PAUSED bootstrap from exact coordinator V2 source backup to a new empty staged HLXA root, zero imported authority, receipt binding, publish-last and same-identity restart/readback in kernel/helix-task-authority-sqlite/src/maintenance.rs",
+          "done": false,
+          "id": "T086",
+          "kind": "implementation",
+          "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+          "phaseNumber": 7,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L291",
+          "tags": [
+            "US5"
+          ]
+        },
+        {
+          "description": "Implement the closed RFC 8785/Ed25519 published-last backup manifest codec with exact Task Authority\u2192Coordinator\u2192Plan Replay\u2192Dispatch Inbox order, bounded portable member aliases, complete four-purpose public-key history without private keys, provenance and exact backup-provisioner-signing purpose/domain verification through an externally provisioned trust resolver; require every embedded backup key/history entry to byte-match that resolver and never trust the self-contained copy in kernel/helix-task-authority-sqlite/src/manifest.rs from specs/006-durable-signed-task-authority/contracts/task-authority-backup-manifest-v1.schema.json",
+          "done": false,
+          "id": "T087",
+          "kind": "implementation",
+          "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+          "phaseNumber": 7,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L292",
+          "tags": [
+            "US5"
+          ]
+        },
+        {
+          "description": "Implement PAUSE/quiescence custody, fixed root order, independent online checkpoints, generation recheck, staged members and atomic package publication in kernel/helix-task-authority-sqlite/src/maintenance.rs",
+          "done": false,
+          "id": "T088",
+          "kind": "implementation",
+          "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+          "phaseNumber": 7,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L293",
+          "tags": [
+            "US5"
+          ]
+        },
+        {
+          "description": "Implement full pre-publication package verification, approved empty destinations, root/boot/instance/fencing/restore epoch rotation and RESTORE_PENDING publication with zero projection/reissue/redelivery in kernel/helix-task-authority-sqlite/src/maintenance.rs",
+          "done": false,
+          "id": "T089",
+          "kind": "implementation",
+          "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+          "phaseNumber": 7,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L294",
+          "tags": [
+            "US5"
+          ]
+        },
+        {
+          "description": "Implement admission/readback/backup/restore invariant verification, permanent v1 tombstone/key history retention and fail-closed quarantine of corrupt or ambiguous state in kernel/helix-task-authority-sqlite/src/maintenance.rs and kernel/helix-task-authority-sqlite/src/schema.rs",
+          "done": false,
+          "id": "T090",
+          "kind": "implementation",
+          "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+          "phaseNumber": 7,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L295",
+          "tags": [
+            "US5"
+          ]
+        },
+        {
+          "description": "Run the complete normal/fault/process-kill/bootstrap/backup/restore matrices and record exact boundary counts, absence/retained/ambiguous classifications, package mutations and zero reactivation in specs/006-durable-signed-task-authority/evidence/us5-recovery.md",
+          "done": false,
+          "id": "T091",
+          "kind": "implementation",
+          "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+          "phaseNumber": 7,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L296",
+          "tags": [
+            "US5"
+          ]
+        },
+        {
+          "description": "Build and self-verify PLAN006-DURABILITY for FR-009\u2013FR-010, FR-018\u2013FR-021, FR-028\u2013FR-039 and SC-003\u2013SC-009 plus PLAN006-RESTORE for FR-037\u2013FR-040 and SC-008\u2013SC-009, with shared support references explicit while labelling process-kill as non-power-loss and restore as non-full-machine in specs/006-durable-signed-task-authority/evidence/us5-gates.json",
+          "done": false,
+          "id": "T092",
+          "kind": "implementation",
+          "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+          "phaseNumber": 7,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L297",
+          "tags": [
+            "US5"
+          ]
+        },
+        {
+          "description": "Write failing evidence-tool tests for exact commit/tree, workflow provenance, dependency/license/advisory inputs, manifest tampering, nonclaims and protected-path exclusion in tools/tests/test_plan006_evidence.py",
+          "done": false,
+          "id": "T093",
+          "kind": "implementation",
+          "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+          "phaseNumber": 8,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L316",
+          "tags": [
+            "P",
+            "US6"
+          ]
+        },
+        {
+          "description": "Write failing three-OS common-semantics, exact fixture/outcome summary, SQLite capability-refusal and no platform-conditioned contract tests in kernel/helix-task-authority-sqlite/tests/portability.rs",
+          "done": false,
+          "id": "T094",
+          "kind": "implementation",
+          "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+          "phaseNumber": 8,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L317",
+          "tags": [
+            "P",
+            "US6"
+          ]
+        },
+        {
+          "description": "Write the failing 100-trial x 10,000-duplicate overload test proving ordinary work is bounded/refused within 50 ms and reserved revocation/status lookup remains p99 <= 100 ms in kernel/helix-task-authority-sqlite/tests/queue_control.rs",
+          "done": false,
+          "id": "T095",
+          "kind": "implementation",
+          "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+          "phaseNumber": 8,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L318",
+          "tags": [
+            "P",
+            "US6"
+          ]
+        },
+        {
+          "description": "Implement deterministic materialization of the unchanged positive/negative/single-fault/concurrency/generated corpus and byte-identical machine summary in kernel/helix-task-authority-sqlite/examples/durable_task_authority_corpus.rs",
+          "done": false,
+          "id": "T096",
+          "kind": "implementation",
+          "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+          "phaseNumber": 8,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L322",
+          "tags": [
+            "US6"
+          ]
+        },
+        {
+          "description": "Implement controlled raw-sample capture for 500 warmups plus 10,000 three-contract/projection, root issue, delegation and decision measurements with declared metadata and independent percentiles in kernel/helix-task-authority-sqlite/examples/durable_task_authority_benchmark.rs",
+          "done": false,
+          "id": "T097",
+          "kind": "implementation",
+          "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+          "phaseNumber": 8,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L323",
+          "tags": [
+            "US6"
+          ]
+        },
+        {
+          "description": "Implement exact-commit dependency closure, bundled SQLite/toolchain/schema/source/lock digests, licenses, advisories, SBOM/provenance, secret/path scans and independent bundle verification in tools/plan006_supply_chain.py",
+          "done": false,
+          "id": "T098",
+          "kind": "implementation",
+          "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+          "phaseNumber": 8,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L324",
+          "tags": [
+            "US6"
+          ]
+        },
+        {
+          "description": "Implement the detached exact-removal drill that deletes PLAN-006 executable surfaces, restores every baseline blob/mode, proves the frozen tree/package set, runs locked/offline prior tests and never touches the 27 excluded paths in tools/plan006_removal_drill.py",
+          "done": false,
+          "id": "T099",
+          "kind": "implementation",
+          "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+          "phaseNumber": 8,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L325",
+          "tags": [
+            "US6"
+          ]
+        },
+        {
+          "description": "Add policy, Linux/macOS/Windows conformance, release-evidence and exact-attestation jobs with hosted diagnostic/non-effect/non-power-loss claims only in .github/workflows/durable-signed-task-authority.yml",
+          "done": false,
+          "id": "T100",
+          "kind": "implementation",
+          "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+          "phaseNumber": 8,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L326",
+          "tags": [
+            "US6"
+          ]
+        },
+        {
+          "description": "Update only the existing PLAN-006 REQUEST-001, SEC-002 and SEC-003 catalogue mappings with exact implementation/evidence paths while preserving pending-evidence, run the roadmap generator to refresh docs/roadmap/roadmap-data.js without hand editing it, and verify the static shell remains unchanged in conformance/catalog.yaml and docs/roadmap/index.html",
+          "done": false,
+          "id": "T101",
+          "kind": "implementation",
+          "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+          "phaseNumber": 8,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L327",
+          "tags": [
+            "US6"
+          ]
+        },
+        {
+          "description": "Run the unchanged three-platform corpus, overload profile and hosted diagnostic benchmark, compare exact summaries and retain machine-readable artifacts/nonclaims in specs/006-durable-signed-task-authority/evidence/us6-portability-performance.md",
+          "done": false,
+          "id": "T102",
+          "kind": "implementation",
+          "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+          "phaseNumber": 8,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L328",
+          "tags": [
+            "US6"
+          ]
+        },
+        {
+          "description": "Build and self-verify PLAN006-PORTABILITY for FR-001\u2013FR-006, FR-046, SC-001 and SC-010\u2013SC-011; PLAN006-PERFORMANCE for FR-036, FR-048 and SC-012\u2013SC-013; and PLAN006-SUPPLY for FR-044, FR-046\u2013FR-048, SC-009\u2013SC-011 and SC-014 from one exact commit, while leaving physical-M4/Tier-1 claims pending in specs/006-durable-signed-task-authority/evidence/us6-release.md",
+          "done": false,
+          "id": "T103",
+          "kind": "implementation",
+          "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+          "phaseNumber": 8,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L329",
+          "tags": [
+            "US6"
+          ]
+        },
+        {
+          "description": "Create a complete FR-001\u2013FR-048, SC-001\u2013SC-014, user-story, contract, test, gate and evidence traceability matrix with no uncovered item and one explicit primary owner plus labelled supporting owners for every shared acceptance item in specs/006-durable-signed-task-authority/evidence/traceability.md",
+          "done": false,
+          "id": "T104",
+          "kind": "implementation",
+          "phase": "Polish and Cross-Cutting Validation",
+          "phaseNumber": 9,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L341",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Reconcile implemented names/commands/nonclaims across design artifacts and verify every local link/schema/fixture/fault reference without weakening normative requirements in specs/006-durable-signed-task-authority/quickstart.md and specs/006-durable-signed-task-authority/contracts/",
+          "done": false,
+          "id": "T105",
+          "kind": "implementation",
+          "phase": "Polish and Cross-Cutting Validation",
+          "phaseNumber": 9,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L342",
+          "tags": [
+            "P"
+          ]
+        },
+        {
+          "description": "Run cargo fmt --package with -- --check for only helix-task-authority-contracts, helix-task-authority, helix-task-authority-sqlite and helix-task-authority-projections, then run locked workspace check, strict Clippy, default/non-default feature checks and full tests without formatting any existing or protected crate, and retain exact results in specs/006-durable-signed-task-authority/evidence/quality.md",
+          "done": false,
+          "id": "T106",
+          "kind": "implementation",
+          "phase": "Polish and Cross-Cutting Validation",
+          "phaseNumber": 9,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L343",
+          "tags": []
+        },
+        {
+          "description": "Execute every applicable quickstart contract, request, lease, decision, projection, TOCTOU, migration, durability, restore, portability, overload, supply and removal command and record pass/fail/non-applicable evidence honestly in specs/006-durable-signed-task-authority/evidence/quickstart-validation.md",
+          "done": false,
+          "id": "T107",
+          "kind": "evidence",
+          "phase": "Polish and Cross-Cutting Validation",
+          "phaseNumber": 9,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L344",
+          "tags": []
+        },
+        {
+          "description": "Run source/dependency/reverse-reachability, forbidden host/effect/egress/secret, legacy-positive-authority and exact 27-path hash/status gates, then record zero protected-path mutation in specs/006-durable-signed-task-authority/evidence/boundary.md",
+          "done": false,
+          "id": "T108",
+          "kind": "implementation",
+          "phase": "Polish and Cross-Cutting Validation",
+          "phaseNumber": 9,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L345",
+          "tags": []
+        },
+        {
+          "description": "Refresh the derived knowledge graph after code changes, persist concise evidence-based results/reflections without secrets, regenerate the roadmap only when authoritative status changed and verify current output in graphify-out/reflections/LESSONS.md and docs/roadmap/index.html",
+          "done": false,
+          "id": "T109",
+          "kind": "implementation",
+          "phase": "Polish and Cross-Cutting Validation",
+          "phaseNumber": 9,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L346",
+          "tags": []
+        },
+        {
+          "description": "From one pushed immutable exact commit, run and verify the release workflow/attestation, all ten PLAN006 gate manifests and exact-removal evidence; confirm catalogue attestations remain pending-evidence with no promotion, then run Spec Kit analyze/converge, git diff --check and the final acceptance/nonclaim review in specs/006-durable-signed-task-authority/evidence/final.md",
+          "done": false,
+          "id": "T110",
+          "kind": "implementation",
+          "phase": "Polish and Cross-Cutting Validation",
+          "phaseNumber": 9,
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L347",
+          "tags": []
+        }
+      ],
+      "title": "Durable signed task authority",
+      "total": 110
     }
   ],
-  "openTasks": [],
+  "openTasks": [
+    {
+      "description": "Record the PLAN-005 commit/tree baseline, full protected-object inventory, exact 27-path exclusion list/hash, existing package set and clean-scope reproduction commands in specs/006-durable-signed-task-authority/evidence/baseline.md",
+      "done": false,
+      "id": "T001",
+      "kind": "implementation",
+      "phase": "Setup and Frozen Baseline",
+      "phaseNumber": 1,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L78",
+      "tags": []
+    },
+    {
+      "description": "Add the four edition-2021 unsafe-forbidden workspace members with exact dependency pins, bundled SQLite features, non-default test-fault-injection/controlled-benchmark features and one-way dependency direction in kernel/Cargo.toml, kernel/Cargo.lock, kernel/helix-task-authority-contracts/Cargo.toml, kernel/helix-task-authority/Cargo.toml, kernel/helix-task-authority-sqlite/Cargo.toml and kernel/helix-task-authority-projections/Cargo.toml",
+      "done": false,
+      "id": "T002",
+      "kind": "implementation",
+      "phase": "Setup and Frozen Baseline",
+      "phaseNumber": 1,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L79",
+      "tags": []
+    },
+    {
+      "description": "Create the closed contract-crate module skeleton and redacted public surface in kernel/helix-task-authority-contracts/src/lib.rs",
+      "done": false,
+      "id": "T003",
+      "kind": "implementation",
+      "phase": "Setup and Frozen Baseline",
+      "phaseNumber": 1,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L80",
+      "tags": [
+        "P"
+      ]
+    },
+    {
+      "description": "Create the portable authority-core module skeleton and redacted public surface in kernel/helix-task-authority/src/lib.rs",
+      "done": false,
+      "id": "T004",
+      "kind": "implementation",
+      "phase": "Setup and Frozen Baseline",
+      "phaseNumber": 1,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L81",
+      "tags": [
+        "P"
+      ]
+    },
+    {
+      "description": "Create the SQLite implementation module skeleton with fault hooks absent from default builds in kernel/helix-task-authority-sqlite/src/lib.rs",
+      "done": false,
+      "id": "T005",
+      "kind": "implementation",
+      "phase": "Setup and Frozen Baseline",
+      "phaseNumber": 1,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L82",
+      "tags": [
+        "P"
+      ]
+    },
+    {
+      "description": "Create the leaf projection-adapter module skeleton without coordinator, inbox or legacy dependencies in kernel/helix-task-authority-projections/src/lib.rs",
+      "done": false,
+      "id": "T006",
+      "kind": "implementation",
+      "phase": "Setup and Frozen Baseline",
+      "phaseNumber": 1,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L83",
+      "tags": [
+        "P"
+      ]
+    },
+    {
+      "description": "Create the versioned fixture inventory/golden-directory skeleton, pin PLAN-006 JSON/SQL/fixture/workflow/tool files to LF and ignore only generated evidence outputs in contracts/fixtures/durable-signed-task-authority-v1/README.md, contracts/fixtures/durable-signed-task-authority-v1/cases.json, contracts/fixtures/durable-signed-task-authority-v1/chain-cases.json, contracts/fixtures/durable-signed-task-authority-v1/expected-outcomes.json, contracts/fixtures/durable-signed-task-authority-v1/public-keys.json, .gitattributes and .gitignore",
+      "done": false,
+      "id": "T007",
+      "kind": "implementation",
+      "phase": "Setup and Frozen Baseline",
+      "phaseNumber": 1,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L84",
+      "tags": [
+        "P"
+      ]
+    },
+    {
+      "description": "Run the locked PLAN-001 through PLAN-005 and protected-package baseline tests without formatting or staging excluded paths, then record exact Rust/Cargo/SQLite/source/lock/schema results in specs/006-durable-signed-task-authority/evidence/baseline.md",
+      "done": false,
+      "id": "T008",
+      "kind": "implementation",
+      "phase": "Setup and Frozen Baseline",
+      "phaseNumber": 1,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L85",
+      "tags": []
+    },
+    {
+      "description": "Write failing cross-contract primitive, duplicate-member, canonical-byte, digest/base64url, unknown-version and generated leaf-coverage tests in kernel/helix-task-authority-contracts/tests/cross_contract.rs and kernel/helix-task-authority-contracts/tests/property.rs",
+      "done": false,
+      "id": "T009",
+      "kind": "implementation",
+      "phase": "Foundational Contracts, Store and Control Boundaries",
+      "phaseNumber": 2,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L101",
+      "tags": [
+        "P"
+      ]
+    },
+    {
+      "description": "Write failing source/dependency, OS-neutral primitive, non-Serde/non-Clone authority-marker and seeded public-redaction tests in kernel/helix-task-authority-contracts/tests/portability.rs and kernel/helix-task-authority-contracts/tests/redaction.rs",
+      "done": false,
+      "id": "T010",
+      "kind": "implementation",
+      "phase": "Foundational Contracts, Store and Control Boundaries",
+      "phaseNumber": 2,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L102",
+      "tags": [
+        "P"
+      ]
+    },
+    {
+      "description": "Implement bounded duplicate-aware RFC 8785 input handling, exact byte equality, SHA-256 protected digests and canonical envelope helpers in kernel/helix-task-authority-contracts/src/canonical.rs and kernel/helix-task-authority-contracts/src/digest.rs",
+      "done": false,
+      "id": "T011",
+      "kind": "implementation",
+      "phase": "Foundational Contracts, Store and Control Boundaries",
+      "phaseNumber": 2,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L106",
+      "tags": []
+    },
+    {
+      "description": "Implement strict canonical base64url Ed25519 signature verification, purpose-separated signer/resolver traits and immutable key-fingerprint evidence in kernel/helix-task-authority-contracts/src/crypto.rs",
+      "done": false,
+      "id": "T012",
+      "kind": "implementation",
+      "phase": "Foundational Contracts, Store and Control Boundaries",
+      "phaseNumber": 2,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L107",
+      "tags": [
+        "P"
+      ]
+    },
+    {
+      "description": "Implement safe integers, identifiers, NFC/resource components, closed enums, checked time/bound validation and payload-free public error codes in kernel/helix-task-authority-contracts/src/validation.rs and kernel/helix-task-authority-contracts/src/error.rs",
+      "done": false,
+      "id": "T013",
+      "kind": "implementation",
+      "phase": "Foundational Contracts, Store and Control Boundaries",
+      "phaseNumber": 2,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L108",
+      "tags": [
+        "P"
+      ]
+    },
+    {
+      "description": "Expose only closed signed/authentic marker APIs with redacted Debug, no defaulted fields and no caller-constructible current authority in kernel/helix-task-authority-contracts/src/lib.rs",
+      "done": false,
+      "id": "T014",
+      "kind": "implementation",
+      "phase": "Foundational Contracts, Store and Control Boundaries",
+      "phaseNumber": 2,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L109",
+      "tags": []
+    },
+    {
+      "description": "Define the nine exact idempotency domains, closed stable preimages excluding candidate-generated values, immutable attempt/namespace/input/outcome bindings, closed mutation/readback outcomes and abstract atomic store operations shared by every story in kernel/helix-task-authority/src/outcome.rs and kernel/helix-task-authority/src/store.rs",
+      "done": false,
+      "id": "T015",
+      "kind": "implementation",
+      "phase": "Foundational Contracts, Store and Control Boundaries",
+      "phaseNumber": 2,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L110",
+      "tags": []
+    },
+    {
+      "description": "Define trusted clock/deadline capture, 1,024 ordinary plus 32 reserved-control capacity, unified non-cloneable authority guard custody and nonconstructible projection-provider traits in kernel/helix-task-authority/src/control.rs, kernel/helix-task-authority/src/guard.rs and kernel/helix-task-authority/src/projection.rs",
+      "done": false,
+      "id": "T016",
+      "kind": "implementation",
+      "phase": "Foundational Contracts, Store and Control Boundaries",
+      "phaseNumber": 2,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L111",
+      "tags": []
+    },
+    {
+      "description": "Embed and digest the exact strict HLXA v1 normalized SQL contract, required tables/triggers/indexes and application/schema constants in kernel/helix-task-authority-sqlite/src/schema.rs from specs/006-durable-signed-task-authority/contracts/task-authority-store-schema-v1.sql",
+      "done": false,
+      "id": "T017",
+      "kind": "implementation",
+      "phase": "Foundational Contracts, Store and Control Boundaries",
+      "phaseNumber": 2,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L112",
+      "tags": [
+        "P"
+      ]
+    },
+    {
+      "description": "Implement provisioned local-root configuration, filesystem identity checks and injected trusted UTC/monotonic/boot observations without native paths in portable outputs in kernel/helix-task-authority-sqlite/src/config.rs, kernel/helix-task-authority-sqlite/src/root_safety.rs and kernel/helix-task-authority-sqlite/src/clock.rs",
+      "done": false,
+      "id": "T018",
+      "kind": "implementation",
+      "phase": "Foundational Contracts, Store and Control Boundaries",
+      "phaseNumber": 2,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L113",
+      "tags": [
+        "P"
+      ]
+    },
+    {
+      "description": "Implement exclusive root initialization/publication and strict ordinary open with HLXA application ID, schema v1, WAL/FULL, foreign keys, recursive triggers, trusted_schema=OFF, cell_size_check=ON, disabled auto-checkpoint and bounded busy waits in kernel/helix-task-authority-sqlite/src/connection.rs",
+      "done": false,
+      "id": "T019",
+      "kind": "implementation",
+      "phase": "Foundational Contracts, Store and Control Boundaries",
+      "phaseNumber": 2,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L114",
+      "tags": []
+    },
+    {
+      "description": "Implement non-mutating exact schema/root/durability/integrity/cross-record admission verification with no repair, downgrade or implicit migration in kernel/helix-task-authority-sqlite/src/schema.rs",
+      "done": false,
+      "id": "T020",
+      "kind": "implementation",
+      "phase": "Foundational Contracts, Store and Control Boundaries",
+      "phaseNumber": 2,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L115",
+      "tags": []
+    },
+    {
+      "description": "Implement append-only public-key history, immutable purpose/key identity, current trust status, generation-increasing revocation and redacted transition/conflict events in kernel/helix-task-authority-sqlite/src/revocation.rs and kernel/helix-task-authority-sqlite/src/event.rs",
+      "done": false,
+      "id": "T021",
+      "kind": "implementation",
+      "phase": "Foundational Contracts, Store and Control Boundaries",
+      "phaseNumber": 2,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L116",
+      "tags": []
+    },
+    {
+      "description": "Implement one-fresh-connection uncertainty readback types and complete-graph/healthy-absence/conflict/ambiguity classification without retry authority in kernel/helix-task-authority-sqlite/src/readback.rs",
+      "done": false,
+      "id": "T022",
+      "kind": "implementation",
+      "phase": "Foundational Contracts, Store and Control Boundaries",
+      "phaseNumber": 2,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L117",
+      "tags": [
+        "P"
+      ]
+    },
+    {
+      "description": "Implement bounded ordinary admission, duplicate coalescing and reserved revocation/status control lanes with injected deadlines in kernel/helix-task-authority-sqlite/src/queue.rs",
+      "done": false,
+      "id": "T023",
+      "kind": "implementation",
+      "phase": "Foundational Contracts, Store and Control Boundaries",
+      "phaseNumber": 2,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L118",
+      "tags": [
+        "P"
+      ]
+    },
+    {
+      "description": "Wire the closed non-default fault-selection seam, prove default production builds cannot read environment/process fault selectors, and make the foundation tests pass in kernel/helix-task-authority/src/test_fault.rs, kernel/helix-task-authority-sqlite/src/test_fault.rs and kernel/helix-task-authority-sqlite/tests/contract.rs",
+      "done": false,
+      "id": "T024",
+      "kind": "implementation",
+      "phase": "Foundational Contracts, Store and Control Boundaries",
+      "phaseNumber": 2,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L119",
+      "tags": []
+    },
+    {
+      "description": "Write failing HumanRequestGrant canonical/domain/purpose/context/expiry/current-trust contract tests and every protected-leaf mutation case in kernel/helix-task-authority-contracts/tests/human_request_grant_contract.rs",
+      "done": false,
+      "id": "T025",
+      "kind": "implementation",
+      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+      "phaseNumber": 3,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L140",
+      "tags": [
+        "P",
+        "US1"
+      ]
+    },
+    {
+      "description": "Write failing root TaskLease shape, source-grant, scope-intersection, exact-digest and exclusive deadline contract tests in kernel/helix-task-authority-contracts/tests/task_lease_contract.rs",
+      "done": false,
+      "id": "T026",
+      "kind": "implementation",
+      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+      "phaseNumber": 3,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L141",
+      "tags": [
+        "P",
+        "US1"
+      ]
+    },
+    {
+      "description": "Write failing core tests for forged/replayed/wrong-context grants, key rotation/revocation, signing failure before claim, exact retry/conflict outcomes and current-versus-historical authority after source/ancestor/decision revocation in kernel/helix-task-authority/tests/request.rs and kernel/helix-task-authority/tests/revocation.rs",
+      "done": false,
+      "id": "T027",
+      "kind": "implementation",
+      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+      "phaseNumber": 3,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L142",
+      "tags": [
+        "P",
+        "US1"
+      ]
+    },
+    {
+      "description": "Write failing 10,000 sequential, 100 x 64-thread and 20 x eight-process one-shot root issuance tests with exact retained bytes and invariant reopen in kernel/helix-task-authority-sqlite/tests/contention.rs",
+      "done": false,
+      "id": "T028",
+      "kind": "implementation",
+      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+      "phaseNumber": 3,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L143",
+      "tags": [
+        "P",
+        "US1"
+      ]
+    },
+    {
+      "description": "Write failing SQLite atomic-graph and readback tests proving grant record, one claim, one root lease, initial usage, generations and event are all visible or all absent in kernel/helix-task-authority-sqlite/tests/contract.rs",
+      "done": false,
+      "id": "T029",
+      "kind": "implementation",
+      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+      "phaseNumber": 3,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L144",
+      "tags": [
+        "P",
+        "US1"
+      ]
+    },
+    {
+      "description": "Implement the closed HumanRequestGrant protected/envelope/authentic types and fixed verification order for helixos.human-request-grant/1 in kernel/helix-task-authority-contracts/src/human_request_grant.rs from specs/006-durable-signed-task-authority/contracts/human-request-grant-v1.schema.json",
+      "done": false,
+      "id": "T030",
+      "kind": "implementation",
+      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+      "phaseNumber": 3,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L148",
+      "tags": [
+        "US1"
+      ]
+    },
+    {
+      "description": "Implement the root TaskLease protected/envelope/authentic types, explicit null parent branch, source digest and purpose-separated signing needed by root issuance in kernel/helix-task-authority-contracts/src/task_lease.rs from specs/006-durable-signed-task-authority/contracts/task-lease-v1.schema.json",
+      "done": false,
+      "id": "T031",
+      "kind": "implementation",
+      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+      "phaseNumber": 3,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L149",
+      "tags": [
+        "US1"
+      ]
+    },
+    {
+      "description": "Implement current grant-context resolution, scope/policy/catalogue intersection, sign-before-writer root candidate construction and closed request outcomes in kernel/helix-task-authority/src/request.rs and kernel/helix-task-authority/src/lease.rs",
+      "done": false,
+      "id": "T032",
+      "kind": "implementation",
+      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+      "phaseNumber": 3,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L150",
+      "tags": [
+        "US1"
+      ]
+    },
+    {
+      "description": "Implement create-only exact grant retention, issuer-scoped claim uniqueness, current trust/scope/time recheck and conflict tombstones in kernel/helix-task-authority-sqlite/src/grant.rs",
+      "done": false,
+      "id": "T033",
+      "kind": "implementation",
+      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+      "phaseNumber": 3,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L151",
+      "tags": [
+        "US1"
+      ]
+    },
+    {
+      "description": "Implement the single BEGIN IMMEDIATE root graph that commits grant, claim, signed root lease, initial usage, generations and redacted event atomically in kernel/helix-task-authority-sqlite/src/lease.rs",
+      "done": false,
+      "id": "T034",
+      "kind": "implementation",
+      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+      "phaseNumber": 3,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L152",
+      "tags": [
+        "US1"
+      ]
+    },
+    {
+      "description": "Implement exact retry retrieval and one-readback handling for lost acknowledgement without re-signing or reissuing in kernel/helix-task-authority-sqlite/src/grant.rs and kernel/helix-task-authority-sqlite/src/readback.rs",
+      "done": false,
+      "id": "T035",
+      "kind": "implementation",
+      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+      "phaseNumber": 3,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L153",
+      "tags": [
+        "US1"
+      ]
+    },
+    {
+      "description": "Enforce immutable key IDs, new-ID rotation, current-versus-historical trust and signer/grant revocation before consumption in kernel/helix-task-authority/src/revocation.rs and kernel/helix-task-authority-sqlite/src/revocation.rs",
+      "done": false,
+      "id": "T036",
+      "kind": "implementation",
+      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+      "phaseNumber": 3,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L154",
+      "tags": [
+        "US1"
+      ]
+    },
+    {
+      "description": "Freeze public synthetic grant/root-lease canonical bytes, signatures, context/replay/expiry mutations and exact outcomes in contracts/fixtures/durable-signed-task-authority-v1/golden/human-request-grant.protected.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/human-request-grant.envelope.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/root-task-lease.protected.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/root-task-lease.envelope.jcs, contracts/fixtures/durable-signed-task-authority-v1/cases.json and contracts/fixtures/durable-signed-task-authority-v1/expected-outcomes.json",
+      "done": false,
+      "id": "T037",
+      "kind": "implementation",
+      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+      "phaseNumber": 3,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L155",
+      "tags": [
+        "US1"
+      ]
+    },
+    {
+      "description": "Run and record PLAN006-REQUEST, FR-007\u2013FR-011, FR-031\u2013FR-032, FR-035\u2013FR-036, SC-002\u2013SC-003 and SC-007 with exact mutation/generation deltas and zero authority from bare messages or notifications in specs/006-durable-signed-task-authority/evidence/us1-request.md",
+      "done": false,
+      "id": "T038",
+      "kind": "implementation",
+      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+      "phaseNumber": 3,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L156",
+      "tags": [
+        "US1"
+      ]
+    },
+    {
+      "description": "Extend failing TaskLease contract tests to child shape, depth, resource/catalogue subsets, every budget/counter/trust/time one-unit widening and exact-limit acceptance in kernel/helix-task-authority-contracts/tests/task_lease_contract.rs",
+      "done": false,
+      "id": "T039",
+      "kind": "implementation",
+      "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+      "phaseNumber": 4,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L176",
+      "tags": [
+        "P",
+        "US2"
+      ]
+    },
+    {
+      "description": "Write failing core delegation tests for non-delegable parents, cross-task/workload/source use, unions, renewals, ancestor gaps/cycles and monotonic counter rules in kernel/helix-task-authority/tests/delegation.rs",
+      "done": false,
+      "id": "T040",
+      "kind": "implementation",
+      "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+      "phaseNumber": 4,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L177",
+      "tags": [
+        "P",
+        "US2"
+      ]
+    },
+    {
+      "description": "Write a failing independent checked oracle for at least 100,000 generated restrictive-delegation/allocation cases in kernel/helix-task-authority/tests/delegation_property.rs",
+      "done": false,
+      "id": "T041",
+      "kind": "implementation",
+      "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+      "phaseNumber": 4,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L178",
+      "tags": [
+        "P",
+        "US2"
+      ]
+    },
+    {
+      "description": "Extend failing SQLite contention tests for exact aggregate limits, oversubscribing sibling threads/processes, unique allocation IDs and complete invariant reopen in kernel/helix-task-authority-sqlite/tests/contention.rs",
+      "done": false,
+      "id": "T042",
+      "kind": "implementation",
+      "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+      "phaseNumber": 4,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L179",
+      "tags": [
+        "P",
+        "US2"
+      ]
+    },
+    {
+      "description": "Complete TaskLease child decoding and semantic validation for canonical resources, intentions, budgets, counters, trust/catalogue bounds, depth and same-boot deadlines in kernel/helix-task-authority-contracts/src/task_lease.rs",
+      "done": false,
+      "id": "T043",
+      "kind": "implementation",
+      "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+      "phaseNumber": 4,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L183",
+      "tags": [
+        "US2"
+      ]
+    },
+    {
+      "description": "Implement field-by-field restrictive delegation, checked subset/prefix arithmetic and exact parent/ancestor validation in kernel/helix-task-authority/src/delegation.rs",
+      "done": false,
+      "id": "T044",
+      "kind": "implementation",
+      "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+      "phaseNumber": 4,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L184",
+      "tags": [
+        "US2"
+      ]
+    },
+    {
+      "description": "Implement monotonic direct counter-consumption semantics with no decrement, release, reset, renewal or widening API in kernel/helix-task-authority/src/lease.rs",
+      "done": false,
+      "id": "T045",
+      "kind": "implementation",
+      "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+      "phaseNumber": 4,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L185",
+      "tags": [
+        "US2"
+      ]
+    },
+    {
+      "description": "Implement the atomic parent allocation, child signed lease, child usage, parent summary, generations and event transaction in kernel/helix-task-authority-sqlite/src/delegation.rs",
+      "done": false,
+      "id": "T046",
+      "kind": "implementation",
+      "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+      "phaseNumber": 4,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L186",
+      "tags": [
+        "US2"
+      ]
+    },
+    {
+      "description": "Implement append-only counter-consumption tombstones and reproducible checked usage summaries in kernel/helix-task-authority-sqlite/src/lease.rs",
+      "done": false,
+      "id": "T047",
+      "kind": "implementation",
+      "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+      "phaseNumber": 4,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L187",
+      "tags": [
+        "US2"
+      ]
+    },
+    {
+      "description": "Implement complete acyclic ancestor resolution and descendant non-current derivation for source/ancestor expiry, exhaustion, reboot, instance mismatch and revocation in kernel/helix-task-authority/src/projection.rs and kernel/helix-task-authority-sqlite/src/projection.rs",
+      "done": false,
+      "id": "T048",
+      "kind": "implementation",
+      "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+      "phaseNumber": 4,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L188",
+      "tags": [
+        "US2"
+      ]
+    },
+    {
+      "description": "Implement exact allocation/counter retries, conflicting namespace tombstones and complete-graph uncertainty readback in kernel/helix-task-authority-sqlite/src/delegation.rs and kernel/helix-task-authority-sqlite/src/readback.rs",
+      "done": false,
+      "id": "T049",
+      "kind": "implementation",
+      "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+      "phaseNumber": 4,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L189",
+      "tags": [
+        "US2"
+      ]
+    },
+    {
+      "description": "Freeze canonical child-lease bytes plus exact-limit, one-unit widening, ancestry, exhaustion, revocation and sibling-allocation cases in contracts/fixtures/durable-signed-task-authority-v1/golden/child-task-lease.protected.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/child-task-lease.envelope.jcs, contracts/fixtures/durable-signed-task-authority-v1/chain-cases.json and contracts/fixtures/durable-signed-task-authority-v1/expected-outcomes.json",
+      "done": false,
+      "id": "T050",
+      "kind": "implementation",
+      "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+      "phaseNumber": 4,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L190",
+      "tags": [
+        "US2"
+      ]
+    },
+    {
+      "description": "Run the release 100,000-case oracle and retain seed, case counts, exact/minus-one/plus-one results and zero-widening summary in specs/006-durable-signed-task-authority/evidence/us2-property.md",
+      "done": false,
+      "id": "T051",
+      "kind": "implementation",
+      "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+      "phaseNumber": 4,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L191",
+      "tags": [
+        "US2"
+      ]
+    },
+    {
+      "description": "Run and record PLAN006-LEASE, FR-012\u2013FR-021, FR-031, FR-033, FR-036, SC-004 and SC-007 across normal/thread/process contention with zero partial allocation or counter reset in specs/006-durable-signed-task-authority/evidence/us2-lease.md",
+      "done": false,
+      "id": "T052",
+      "kind": "implementation",
+      "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+      "phaseNumber": 4,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L192",
+      "tags": [
+        "US2"
+      ]
+    },
+    {
+      "description": "Write failing ApprovalDecision canonical/domain/purpose/terminal/plan-chain/deadline tests and every protected-leaf mutation case in kernel/helix-task-authority-contracts/tests/approval_decision_contract.rs",
+      "done": false,
+      "id": "T053",
+      "kind": "implementation",
+      "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+      "phaseNumber": 5,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L211",
+      "tags": [
+        "P",
+        "US3"
+      ]
+    },
+    {
+      "description": "Write failing core tests for exact PLAN-001 envelope binding, approve/deny immutability, weak L2 evidence, synthetic non-production evidence and current-chain mutation in kernel/helix-task-authority/tests/decision.rs",
+      "done": false,
+      "id": "T054",
+      "kind": "implementation",
+      "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+      "phaseNumber": 5,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L212",
+      "tags": [
+        "P",
+        "US3"
+      ]
+    },
+    {
+      "description": "Extend failing thread/process contention tests so concurrent approve/deny retains one terminal wire/event and cannot flip on retry in kernel/helix-task-authority-sqlite/tests/contention.rs",
+      "done": false,
+      "id": "T055",
+      "kind": "implementation",
+      "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+      "phaseNumber": 5,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L213",
+      "tags": [
+        "P",
+        "US3"
+      ]
+    },
+    {
+      "description": "Write failing seeded redaction tests for raw messages, authentication assertions, bearer/private-key/native-path/identifier/digest/provider sentinels in kernel/helix-task-authority/tests/redaction.rs",
+      "done": false,
+      "id": "T056",
+      "kind": "implementation",
+      "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+      "phaseNumber": 5,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L214",
+      "tags": [
+        "P",
+        "US3"
+      ]
+    },
+    {
+      "description": "Implement the closed ApprovalDecision protected/envelope/authentic types, exact canonical plan-envelope digest and purpose-separated signature profile in kernel/helix-task-authority-contracts/src/approval_decision.rs from specs/006-durable-signed-task-authority/contracts/approval-decision-v1.schema.json",
+      "done": false,
+      "id": "T057",
+      "kind": "implementation",
+      "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+      "phaseNumber": 5,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L218",
+      "tags": [
+        "US3"
+      ]
+    },
+    {
+      "description": "Implement exact authentic PLAN-001 target verification, current grant/lease/ancestor resolution, evidence-profile/risk policy and sign-before-writer terminal candidate construction in kernel/helix-task-authority/src/decision.rs",
+      "done": false,
+      "id": "T058",
+      "kind": "implementation",
+      "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+      "phaseNumber": 5,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L219",
+      "tags": [
+        "US3"
+      ]
+    },
+    {
+      "description": "Implement the single atomic plan binding, terminal decision, uniqueness, generation and redacted event transaction in kernel/helix-task-authority-sqlite/src/decision.rs",
+      "done": false,
+      "id": "T059",
+      "kind": "implementation",
+      "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+      "phaseNumber": 5,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L220",
+      "tags": [
+        "US3"
+      ]
+    },
+    {
+      "description": "Implement exact decision retry, conflicting terminal tombstone and one-fresh-readback classification without decision flipping in kernel/helix-task-authority-sqlite/src/decision.rs and kernel/helix-task-authority-sqlite/src/readback.rs",
+      "done": false,
+      "id": "T060",
+      "kind": "implementation",
+      "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+      "phaseNumber": 5,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L221",
+      "tags": [
+        "US3"
+      ]
+    },
+    {
+      "description": "Derive current approved, current denied, expired, revoked, chain-non-current, boot/instance/fencing mismatch, weak-evidence and historical-only states without editing signed bytes in kernel/helix-task-authority/src/revocation.rs and kernel/helix-task-authority/src/projection.rs",
+      "done": false,
+      "id": "T061",
+      "kind": "implementation",
+      "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+      "phaseNumber": 5,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L222",
+      "tags": [
+        "US3"
+      ]
+    },
+    {
+      "description": "Freeze canonical approved/denied wires, terminal races, every exact-binding mutation and labelled synthetic evidence cases in contracts/fixtures/durable-signed-task-authority-v1/golden/approval-approved.protected.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/approval-approved.envelope.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/approval-denied.protected.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/approval-denied.envelope.jcs, contracts/fixtures/durable-signed-task-authority-v1/chain-cases.json and contracts/fixtures/durable-signed-task-authority-v1/expected-outcomes.json",
+      "done": false,
+      "id": "T062",
+      "kind": "implementation",
+      "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+      "phaseNumber": 5,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L223",
+      "tags": [
+        "US3"
+      ]
+    },
+    {
+      "description": "Complete the three-wire fixture/outcome bijection, schema-leaf coverage and cross-contract source/plan/lease/decision tests in kernel/helix-task-authority-contracts/tests/cross_contract.rs against specs/006-durable-signed-task-authority/contracts/signed-task-authority-v1.md",
+      "done": false,
+      "id": "T063",
+      "kind": "implementation",
+      "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+      "phaseNumber": 5,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L224",
+      "tags": [
+        "US3"
+      ]
+    },
+    {
+      "description": "Run and record PLAN006-CONTRACT and PLAN006-DECISION, FR-001\u2013FR-006, FR-022\u2013FR-031, FR-034\u2013FR-036, SC-001, SC-005, SC-007 and SC-011 with zero positive authority from DENIED or synthetic evidence in specs/006-durable-signed-task-authority/evidence/us3-decision.md",
+      "done": false,
+      "id": "T064",
+      "kind": "implementation",
+      "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
+      "phaseNumber": 5,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L225",
+      "tags": [
+        "US3"
+      ]
+    },
+    {
+      "description": "Write failing core projection tests for the complete signed graph, every closed ancestor-vector/plan-bound-lease/revocation preimage leaf and order, current-vs-historical status and earliest exclusive deadlines in kernel/helix-task-authority/tests/projection.rs, freezing exact bytes and lowercase digests in contracts/fixtures/durable-signed-task-authority-v1/golden/ancestor-vector.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/ancestor-vector.sha256, contracts/fixtures/durable-signed-task-authority-v1/golden/plan-bound-lease-projection.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/plan-bound-lease-projection.sha256, contracts/fixtures/durable-signed-task-authority-v1/golden/revocation-vector.jcs and contracts/fixtures/durable-signed-task-authority-v1/golden/revocation-vector.sha256",
+      "done": false,
+      "id": "T065",
+      "kind": "implementation",
+      "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+      "phaseNumber": 6,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L246",
+      "tags": [
+        "P",
+        "US4"
+      ]
+    },
+    {
+      "description": "Write failing PLAN-002 mapping tests proving signed lease/authorization views, authority-before-claim denial and exact TaskLease/HumanRequestGrant/ApprovalDecision bindings in kernel/helix-task-authority-projections/tests/plan002.rs",
+      "done": false,
+      "id": "T066",
+      "kind": "implementation",
+      "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+      "phaseNumber": 6,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L247",
+      "tags": [
+        "P",
+        "US4"
+      ]
+    },
+    {
+      "description": "Write failing PLAN-004 preliminary/final comparison tests proving the unified authority guard survives through prepare_plan_v1 commit and every changed leaf causes zero preparation mutation in kernel/helix-task-authority-projections/tests/plan004.rs",
+      "done": false,
+      "id": "T067",
+      "kind": "implementation",
+      "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+      "phaseNumber": 6,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L248",
+      "tags": [
+        "P",
+        "US4"
+      ]
+    },
+    {
+      "description": "Write failing PLAN-005 preliminary/FinalGuarded tests proving exact view mapping, retained guard custody through dispatch_prepared_once_v1 and zero dispatch mutation on mismatch in kernel/helix-task-authority-projections/tests/plan005.rs",
+      "done": false,
+      "id": "T068",
+      "kind": "implementation",
+      "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+      "phaseNumber": 6,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L249",
+      "tags": [
+        "P",
+        "US4"
+      ]
+    },
+    {
+      "description": "Write failing fixed-order, reverse-release, commit-classification/custody-transfer, absolute-deadline, cross-process revocation/usage TOCTOU and mutation-provider-reentry tests proving no Clock/Signer/Workload/Policy/Catalogue acquisition occurs under HLXA in kernel/helix-task-authority-projections/tests/guard_order.rs",
+      "done": false,
+      "id": "T069",
+      "kind": "implementation",
+      "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+      "phaseNumber": 6,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L250",
+      "tags": [
+        "P",
+        "US4"
+      ]
+    },
+    {
+      "description": "Write failing dependency/source/legacy/caller-positive-view and redaction tests proving existing crates and all protected paths cannot produce or import PLAN-006 authority in kernel/helix-task-authority-projections/tests/portability.rs and kernel/helix-task-authority-projections/tests/redaction.rs",
+      "done": false,
+      "id": "T070",
+      "kind": "implementation",
+      "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+      "phaseNumber": 6,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L251",
+      "tags": [
+        "P",
+        "US4"
+      ]
+    },
+    {
+      "description": "Implement nonconstructible current authority, lease and authorization projections from exact signed records, trust, ancestry, usage, revocation, epochs and checked deadlines in kernel/helix-task-authority/src/projection.rs from specs/006-durable-signed-task-authority/contracts/task-authority-projections-v1.md",
+      "done": false,
+      "id": "T071",
+      "kind": "implementation",
+      "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+      "phaseNumber": 6,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L255",
+      "tags": [
+        "US4"
+      ]
+    },
+    {
+      "description": "Implement strict complete-graph projection loading and canonical ancestor/revocation/plan-bound lease digest derivation from one verified SQLite snapshot in kernel/helix-task-authority-sqlite/src/projection.rs",
+      "done": false,
+      "id": "T072",
+      "kind": "implementation",
+      "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+      "phaseNumber": 6,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L256",
+      "tags": [
+        "US4"
+      ]
+    },
+    {
+      "description": "Implement one deadline-bounded HLXA BEGIN IMMEDIATE guard acquired at Lease, Authorization validation in the same transaction, reverse release and authority-before-replay/coordinator lock order in kernel/helix-task-authority-sqlite/src/guard.rs",
+      "done": false,
+      "id": "T073",
+      "kind": "implementation",
+      "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+      "phaseNumber": 6,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L257",
+      "tags": [
+        "US4"
+      ]
+    },
+    {
+      "description": "Implement evaluate_and_claim_signed_authority_plan_v1 so non-authority inputs cannot carry lease/authorization views and the guard remains held through the unchanged PLAN-002 claim in kernel/helix-task-authority-projections/src/eligibility.rs",
+      "done": false,
+      "id": "T074",
+      "kind": "implementation",
+      "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+      "phaseNumber": 6,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L258",
+      "tags": [
+        "US4"
+      ]
+    },
+    {
+      "description": "Implement SignedPreparationAuthoritySourceV1 with exact PLAN-006 field replacement at existing Lease/Authorization slots and no change to PLAN-004 source in kernel/helix-task-authority-projections/src/preparation.rs",
+      "done": false,
+      "id": "T075",
+      "kind": "implementation",
+      "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+      "phaseNumber": 6,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L259",
+      "tags": [
+        "US4"
+      ]
+    },
+    {
+      "description": "Implement SignedDispatchAuthorityProviderV1 and SignedDispatchGuardProviderV1 with exact preliminary/final mapping and no change or dependency addition to PLAN-005 in kernel/helix-task-authority-projections/src/dispatch.rs and kernel/helix-task-authority-projections/src/guards.rs",
+      "done": false,
+      "id": "T076",
+      "kind": "implementation",
+      "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+      "phaseNumber": 6,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L260",
+      "tags": [
+        "US4"
+      ]
+    },
+    {
+      "description": "Run and record PLAN006-PROJECTION, FR-014, FR-020, FR-024\u2013FR-029, FR-041\u2013FR-045 and SC-006 for every digest/generation/ancestor/revocation/deadline mutation, legacy refusal and authority-write-before/after-commit linearization in specs/006-durable-signed-task-authority/evidence/us4-projections.md",
+      "done": false,
+      "id": "T077",
+      "kind": "implementation",
+      "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
+      "phaseNumber": 6,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L261",
+      "tags": [
+        "US4"
+      ]
+    },
+    {
+      "description": "Write failing schema/root/PRAGMA/indexed-wire/cross-record corruption and no-admission-repair cases in kernel/helix-task-authority-sqlite/tests/corruption.rs",
+      "done": false,
+      "id": "T078",
+      "kind": "implementation",
+      "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+      "phaseNumber": 7,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L280",
+      "tags": [
+        "P",
+        "US5"
+      ]
+    },
+    {
+      "description": "Write the failing in-process and applicable child-process kill matrix for every root/delegation/counter/decision/revocation/readback transition in kernel/helix-task-authority-sqlite/tests/process_crash.rs",
+      "done": false,
+      "id": "T079",
+      "kind": "implementation",
+      "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+      "phaseNumber": 7,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L281",
+      "tags": [
+        "P",
+        "US5"
+      ]
+    },
+    {
+      "description": "Write failing explicit paused bootstrap, same-identity restart, wrong-source/version/downgrade/partial publication and zero-import tests in kernel/helix-task-authority-sqlite/tests/bootstrap_migration.rs",
+      "done": false,
+      "id": "T080",
+      "kind": "implementation",
+      "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+      "phaseNumber": 7,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L282",
+      "tags": [
+        "P",
+        "US5"
+      ]
+    },
+    {
+      "description": "Write failing quiescent checkpoint, manifest-last, substitution/extra/missing member, exact backup-provisioner-signing purpose/domain, complete public key history with no private keys, clean-root restore, epoch rotation and zero-reactivation cases in kernel/helix-task-authority-sqlite/tests/backup_restore.rs",
+      "done": false,
+      "id": "T081",
+      "kind": "implementation",
+      "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+      "phaseNumber": 7,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L283",
+      "tags": [
+        "P",
+        "US5"
+      ]
+    },
+    {
+      "description": "Write failing permanent-retention, no-prune/no-delete and restricted/public redaction cases for wires, keys, tombstones, manifests and restore evidence in kernel/helix-task-authority-sqlite/tests/retention.rs and kernel/helix-task-authority-sqlite/tests/redaction.rs",
+      "done": false,
+      "id": "T082",
+      "kind": "evidence",
+      "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+      "phaseNumber": 7,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L284",
+      "tags": [
+        "P",
+        "US5"
+      ]
+    },
+    {
+      "description": "Implement the exact HLXA v1 strict schema contract with its metadata/receipt/key/grant/claim/lease/usage/allocation/consumption/plan/decision/revocation/attempt/event/conflict tables, attempt foreign-key graph, immutable-record and strict monotonic-generation triggers, final user_version=1 publication and normalized schema-digest verification in kernel/helix-task-authority-sqlite/src/schema.rs from specs/006-durable-signed-task-authority/contracts/task-authority-store-schema-v1.sql",
+      "done": false,
+      "id": "T083",
+      "kind": "evidence",
+      "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+      "phaseNumber": 7,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L288",
+      "tags": [
+        "US5"
+      ]
+    },
+    {
+      "description": "Complete operation-specific exact-graph readback for every atomic transition, abandoning the original connection and allowing at most one automatic fresh observation in kernel/helix-task-authority-sqlite/src/readback.rs",
+      "done": false,
+      "id": "T084",
+      "kind": "implementation",
+      "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+      "phaseNumber": 7,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L289",
+      "tags": [
+        "US5"
+      ]
+    },
+    {
+      "description": "Derive stable boundary instances for phases P00\u2013P10 after transaction/publication operations stabilize, prove registry/driver bijection for each applicable in-process or process-kill model, and implement only the closed non-default probes in specs/006-durable-signed-task-authority/contracts/fault-boundaries-v1.json and kernel/helix-task-authority-sqlite/src/test_fault.rs",
+      "done": false,
+      "id": "T085",
+      "kind": "implementation",
+      "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+      "phaseNumber": 7,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L290",
+      "tags": [
+        "US5"
+      ]
+    },
+    {
+      "description": "Implement explicit PAUSED bootstrap from exact coordinator V2 source backup to a new empty staged HLXA root, zero imported authority, receipt binding, publish-last and same-identity restart/readback in kernel/helix-task-authority-sqlite/src/maintenance.rs",
+      "done": false,
+      "id": "T086",
+      "kind": "implementation",
+      "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+      "phaseNumber": 7,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L291",
+      "tags": [
+        "US5"
+      ]
+    },
+    {
+      "description": "Implement the closed RFC 8785/Ed25519 published-last backup manifest codec with exact Task Authority\u2192Coordinator\u2192Plan Replay\u2192Dispatch Inbox order, bounded portable member aliases, complete four-purpose public-key history without private keys, provenance and exact backup-provisioner-signing purpose/domain verification through an externally provisioned trust resolver; require every embedded backup key/history entry to byte-match that resolver and never trust the self-contained copy in kernel/helix-task-authority-sqlite/src/manifest.rs from specs/006-durable-signed-task-authority/contracts/task-authority-backup-manifest-v1.schema.json",
+      "done": false,
+      "id": "T087",
+      "kind": "implementation",
+      "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+      "phaseNumber": 7,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L292",
+      "tags": [
+        "US5"
+      ]
+    },
+    {
+      "description": "Implement PAUSE/quiescence custody, fixed root order, independent online checkpoints, generation recheck, staged members and atomic package publication in kernel/helix-task-authority-sqlite/src/maintenance.rs",
+      "done": false,
+      "id": "T088",
+      "kind": "implementation",
+      "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+      "phaseNumber": 7,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L293",
+      "tags": [
+        "US5"
+      ]
+    },
+    {
+      "description": "Implement full pre-publication package verification, approved empty destinations, root/boot/instance/fencing/restore epoch rotation and RESTORE_PENDING publication with zero projection/reissue/redelivery in kernel/helix-task-authority-sqlite/src/maintenance.rs",
+      "done": false,
+      "id": "T089",
+      "kind": "implementation",
+      "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+      "phaseNumber": 7,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L294",
+      "tags": [
+        "US5"
+      ]
+    },
+    {
+      "description": "Implement admission/readback/backup/restore invariant verification, permanent v1 tombstone/key history retention and fail-closed quarantine of corrupt or ambiguous state in kernel/helix-task-authority-sqlite/src/maintenance.rs and kernel/helix-task-authority-sqlite/src/schema.rs",
+      "done": false,
+      "id": "T090",
+      "kind": "implementation",
+      "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+      "phaseNumber": 7,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L295",
+      "tags": [
+        "US5"
+      ]
+    },
+    {
+      "description": "Run the complete normal/fault/process-kill/bootstrap/backup/restore matrices and record exact boundary counts, absence/retained/ambiguous classifications, package mutations and zero reactivation in specs/006-durable-signed-task-authority/evidence/us5-recovery.md",
+      "done": false,
+      "id": "T091",
+      "kind": "implementation",
+      "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+      "phaseNumber": 7,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L296",
+      "tags": [
+        "US5"
+      ]
+    },
+    {
+      "description": "Build and self-verify PLAN006-DURABILITY for FR-009\u2013FR-010, FR-018\u2013FR-021, FR-028\u2013FR-039 and SC-003\u2013SC-009 plus PLAN006-RESTORE for FR-037\u2013FR-040 and SC-008\u2013SC-009, with shared support references explicit while labelling process-kill as non-power-loss and restore as non-full-machine in specs/006-durable-signed-task-authority/evidence/us5-gates.json",
+      "done": false,
+      "id": "T092",
+      "kind": "implementation",
+      "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
+      "phaseNumber": 7,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L297",
+      "tags": [
+        "US5"
+      ]
+    },
+    {
+      "description": "Write failing evidence-tool tests for exact commit/tree, workflow provenance, dependency/license/advisory inputs, manifest tampering, nonclaims and protected-path exclusion in tools/tests/test_plan006_evidence.py",
+      "done": false,
+      "id": "T093",
+      "kind": "implementation",
+      "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+      "phaseNumber": 8,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L316",
+      "tags": [
+        "P",
+        "US6"
+      ]
+    },
+    {
+      "description": "Write failing three-OS common-semantics, exact fixture/outcome summary, SQLite capability-refusal and no platform-conditioned contract tests in kernel/helix-task-authority-sqlite/tests/portability.rs",
+      "done": false,
+      "id": "T094",
+      "kind": "implementation",
+      "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+      "phaseNumber": 8,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L317",
+      "tags": [
+        "P",
+        "US6"
+      ]
+    },
+    {
+      "description": "Write the failing 100-trial x 10,000-duplicate overload test proving ordinary work is bounded/refused within 50 ms and reserved revocation/status lookup remains p99 <= 100 ms in kernel/helix-task-authority-sqlite/tests/queue_control.rs",
+      "done": false,
+      "id": "T095",
+      "kind": "implementation",
+      "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+      "phaseNumber": 8,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L318",
+      "tags": [
+        "P",
+        "US6"
+      ]
+    },
+    {
+      "description": "Implement deterministic materialization of the unchanged positive/negative/single-fault/concurrency/generated corpus and byte-identical machine summary in kernel/helix-task-authority-sqlite/examples/durable_task_authority_corpus.rs",
+      "done": false,
+      "id": "T096",
+      "kind": "implementation",
+      "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+      "phaseNumber": 8,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L322",
+      "tags": [
+        "US6"
+      ]
+    },
+    {
+      "description": "Implement controlled raw-sample capture for 500 warmups plus 10,000 three-contract/projection, root issue, delegation and decision measurements with declared metadata and independent percentiles in kernel/helix-task-authority-sqlite/examples/durable_task_authority_benchmark.rs",
+      "done": false,
+      "id": "T097",
+      "kind": "implementation",
+      "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+      "phaseNumber": 8,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L323",
+      "tags": [
+        "US6"
+      ]
+    },
+    {
+      "description": "Implement exact-commit dependency closure, bundled SQLite/toolchain/schema/source/lock digests, licenses, advisories, SBOM/provenance, secret/path scans and independent bundle verification in tools/plan006_supply_chain.py",
+      "done": false,
+      "id": "T098",
+      "kind": "implementation",
+      "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+      "phaseNumber": 8,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L324",
+      "tags": [
+        "US6"
+      ]
+    },
+    {
+      "description": "Implement the detached exact-removal drill that deletes PLAN-006 executable surfaces, restores every baseline blob/mode, proves the frozen tree/package set, runs locked/offline prior tests and never touches the 27 excluded paths in tools/plan006_removal_drill.py",
+      "done": false,
+      "id": "T099",
+      "kind": "implementation",
+      "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+      "phaseNumber": 8,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L325",
+      "tags": [
+        "US6"
+      ]
+    },
+    {
+      "description": "Add policy, Linux/macOS/Windows conformance, release-evidence and exact-attestation jobs with hosted diagnostic/non-effect/non-power-loss claims only in .github/workflows/durable-signed-task-authority.yml",
+      "done": false,
+      "id": "T100",
+      "kind": "implementation",
+      "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+      "phaseNumber": 8,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L326",
+      "tags": [
+        "US6"
+      ]
+    },
+    {
+      "description": "Update only the existing PLAN-006 REQUEST-001, SEC-002 and SEC-003 catalogue mappings with exact implementation/evidence paths while preserving pending-evidence, run the roadmap generator to refresh docs/roadmap/roadmap-data.js without hand editing it, and verify the static shell remains unchanged in conformance/catalog.yaml and docs/roadmap/index.html",
+      "done": false,
+      "id": "T101",
+      "kind": "implementation",
+      "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+      "phaseNumber": 8,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L327",
+      "tags": [
+        "US6"
+      ]
+    },
+    {
+      "description": "Run the unchanged three-platform corpus, overload profile and hosted diagnostic benchmark, compare exact summaries and retain machine-readable artifacts/nonclaims in specs/006-durable-signed-task-authority/evidence/us6-portability-performance.md",
+      "done": false,
+      "id": "T102",
+      "kind": "implementation",
+      "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+      "phaseNumber": 8,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L328",
+      "tags": [
+        "US6"
+      ]
+    },
+    {
+      "description": "Build and self-verify PLAN006-PORTABILITY for FR-001\u2013FR-006, FR-046, SC-001 and SC-010\u2013SC-011; PLAN006-PERFORMANCE for FR-036, FR-048 and SC-012\u2013SC-013; and PLAN006-SUPPLY for FR-044, FR-046\u2013FR-048, SC-009\u2013SC-011 and SC-014 from one exact commit, while leaving physical-M4/Tier-1 claims pending in specs/006-durable-signed-task-authority/evidence/us6-release.md",
+      "done": false,
+      "id": "T103",
+      "kind": "implementation",
+      "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
+      "phaseNumber": 8,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L329",
+      "tags": [
+        "US6"
+      ]
+    },
+    {
+      "description": "Create a complete FR-001\u2013FR-048, SC-001\u2013SC-014, user-story, contract, test, gate and evidence traceability matrix with no uncovered item and one explicit primary owner plus labelled supporting owners for every shared acceptance item in specs/006-durable-signed-task-authority/evidence/traceability.md",
+      "done": false,
+      "id": "T104",
+      "kind": "implementation",
+      "phase": "Polish and Cross-Cutting Validation",
+      "phaseNumber": 9,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L341",
+      "tags": [
+        "P"
+      ]
+    },
+    {
+      "description": "Reconcile implemented names/commands/nonclaims across design artifacts and verify every local link/schema/fixture/fault reference without weakening normative requirements in specs/006-durable-signed-task-authority/quickstart.md and specs/006-durable-signed-task-authority/contracts/",
+      "done": false,
+      "id": "T105",
+      "kind": "implementation",
+      "phase": "Polish and Cross-Cutting Validation",
+      "phaseNumber": 9,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L342",
+      "tags": [
+        "P"
+      ]
+    },
+    {
+      "description": "Run cargo fmt --package with -- --check for only helix-task-authority-contracts, helix-task-authority, helix-task-authority-sqlite and helix-task-authority-projections, then run locked workspace check, strict Clippy, default/non-default feature checks and full tests without formatting any existing or protected crate, and retain exact results in specs/006-durable-signed-task-authority/evidence/quality.md",
+      "done": false,
+      "id": "T106",
+      "kind": "implementation",
+      "phase": "Polish and Cross-Cutting Validation",
+      "phaseNumber": 9,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L343",
+      "tags": []
+    },
+    {
+      "description": "Execute every applicable quickstart contract, request, lease, decision, projection, TOCTOU, migration, durability, restore, portability, overload, supply and removal command and record pass/fail/non-applicable evidence honestly in specs/006-durable-signed-task-authority/evidence/quickstart-validation.md",
+      "done": false,
+      "id": "T107",
+      "kind": "evidence",
+      "phase": "Polish and Cross-Cutting Validation",
+      "phaseNumber": 9,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L344",
+      "tags": []
+    },
+    {
+      "description": "Run source/dependency/reverse-reachability, forbidden host/effect/egress/secret, legacy-positive-authority and exact 27-path hash/status gates, then record zero protected-path mutation in specs/006-durable-signed-task-authority/evidence/boundary.md",
+      "done": false,
+      "id": "T108",
+      "kind": "implementation",
+      "phase": "Polish and Cross-Cutting Validation",
+      "phaseNumber": 9,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L345",
+      "tags": []
+    },
+    {
+      "description": "Refresh the derived knowledge graph after code changes, persist concise evidence-based results/reflections without secrets, regenerate the roadmap only when authoritative status changed and verify current output in graphify-out/reflections/LESSONS.md and docs/roadmap/index.html",
+      "done": false,
+      "id": "T109",
+      "kind": "implementation",
+      "phase": "Polish and Cross-Cutting Validation",
+      "phaseNumber": 9,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L346",
+      "tags": []
+    },
+    {
+      "description": "From one pushed immutable exact commit, run and verify the release workflow/attestation, all ten PLAN006 gate manifests and exact-removal evidence; confirm catalogue attestations remain pending-evidence with no promotion, then run Spec Kit analyze/converge, git diff --check and the final acceptance/nonclaim review in specs/006-durable-signed-task-authority/evidence/final.md",
+      "done": false,
+      "id": "T110",
+      "kind": "implementation",
+      "phase": "Polish and Cross-Cutting Validation",
+      "phaseNumber": 9,
+      "planId": "PLAN-006",
+      "planTitle": "Durable signed task authority",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L347",
+      "tags": []
+    }
+  ],
   "roadmapDate": "2026-07-13",
   "schema": "helixos.roadmap-data/1",
-  "sourceFingerprint": "246c823188c4bedca8786cee656c5e7bb513607bc8a352e81c554cc056333293",
+  "sourceFingerprint": "2523fa2838d8379b0dc0a13ecff7e37b15242ec8e3b3188e3e529fd7735667e2",
   "sources": [
     {
       "path": "ROADMAP-SPECS.md",
@@ -4136,7 +7079,7 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "conformance/catalog.yaml",
-      "sha256": "8f16bbcf4875abb727cd80ab35bdffec49284703d6bb7b2d98e0bc025d8507d2"
+      "sha256": "3386883a0191c9c861cd07e49b97663a6c6c94dcae27397bee41e90d9b439409"
     },
     {
       "path": "specs/001-portable-signed-contracts/tasks.md",
@@ -4157,6 +7100,10 @@ window.HELIXOS_ROADMAP_DATA = {
     {
       "path": "specs/005-durable-dispatch/tasks.md",
       "sha256": "344533dff0403c4ce38507861c74d1a77629c8982b63dde62b8e4e872f756776"
+    },
+    {
+      "path": "specs/006-durable-signed-task-authority/tasks.md",
+      "sha256": "d3c29d794925c9429e13d75fc90eb9c9662b2d6054240ff770914429871e168c"
     }
   ],
   "strategicStages": [
@@ -4176,7 +7123,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "status": "active",
       "title": "Fondation portable et coordinateur durable",
       "trackedTaskCompleted": 319,
-      "trackedTaskTotal": 319
+      "trackedTaskTotal": 429
     },
     {
       "effort": "4\u20136 semaines, plus le soak.",
@@ -4238,11 +7185,11 @@ window.HELIXOS_ROADMAP_DATA = {
   "summary": {
     "acceptedClaims": 0,
     "completedTasks": 319,
-    "focusPlan": "PLAN-005",
-    "remainingTasks": 0,
+    "focusPlan": "PLAN-006",
+    "remainingTasks": 110,
     "strategicStage": "R1",
-    "totalClaims": 5,
-    "trackedTaskPercent": 100.0,
-    "trackedTasks": 319
+    "totalClaims": 6,
+    "trackedTaskPercent": 74.4,
+    "trackedTasks": 429
   }
 };

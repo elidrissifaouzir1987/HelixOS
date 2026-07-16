@@ -30,8 +30,9 @@ use helix_dispatch_inbox_sqlite::{
 #[cfg(feature = "test-fault-injection")]
 use helix_dispatch_inbox_sqlite::{
     AdapterCorruptionAuditLifecycleV1, AdapterCorruptionAuditOutcomeV1,
-    AdapterCorruptionAuditSelectionV1, AdapterInboxProfileV1, AdapterInboxRootIdentityEvidenceV1,
-    AdapterInboxStoreConfigV1, AdapterInboxStoreOpenErrorV1, SqliteDispatchInboxStoreV1,
+    AdapterCorruptionAuditSelectionV1, AdapterInboxInitializationV1, AdapterInboxProfileV1,
+    AdapterInboxRootIdentityEvidenceV1, AdapterInboxStoreConfigV1, AdapterInboxStoreOpenErrorV1,
+    SqliteDispatchInboxStoreV1,
 };
 #[cfg(feature = "test-fault-injection")]
 use helix_plan_dispatch::{
@@ -226,6 +227,29 @@ struct StrictAdapterRootV1 {
 
 #[cfg(feature = "test-fault-injection")]
 impl StrictAdapterRootV1 {
+    fn new_empty_custody(label: &str) -> Self {
+        let path = unique_test_root("adapter-custody", label);
+        fs::create_dir(&path).expect("T097 empty adapter custody root creates");
+        let identity = AdapterInboxRootIdentityEvidenceV1::from_attested_bytes(
+            Sha256::digest(path.to_string_lossy().as_bytes()).into(),
+        );
+        let config = AdapterInboxStoreConfigV1::try_new_empty_attested(path.clone(), identity, 25)
+            .expect("T097 empty adapter custody root is provisioner-attested");
+        let initial = AdapterInboxInitializationV1::try_new(9, 1, [0x82; 32])
+            .expect("T097 empty adapter custody initialization is exact");
+        drop(
+            SqliteDispatchInboxStoreV1::initialize_empty_v1(config, initial, adapter_profile())
+                .expect("T097 empty adapter custody initializes"),
+        );
+        let fixture = Self { path, identity };
+        drop(
+            fixture
+                .reopen()
+                .expect("T097 empty adapter custody strictly reopens"),
+        );
+        fixture
+    }
+
     fn database(&self) -> PathBuf {
         self.path.join(ADAPTER_DATABASE_FILENAME)
     }
@@ -2211,10 +2235,9 @@ fn production_coordinator_caller_accepts_all_five_real_t096_lifecycles() {
             trusted_coordinator.fork(&format!("t097-production-caller-clean-coord-{ordinal}"));
         let observed_adapter =
             trusted_adapter.fork(&format!("t097-production-caller-clean-adapter-{ordinal}"));
-        let (_custody_coordinator, custody_adapter) = materialize_lifecycle_roots(
-            &format!("t097-production-caller-clean-custody-{ordinal}"),
-            T097CoordinatorLifecycleForTestV1::Prepared,
-        );
+        let custody_adapter = StrictAdapterRootV1::new_empty_custody(&format!(
+            "t097-production-caller-clean-custody-{ordinal}"
+        ));
         let mut pause = ExactAdapterCorruptionPauseV1::new(
             0x70_u8.saturating_add(u8::try_from(ordinal).expect("ordinal fits")),
             None,
@@ -2264,10 +2287,8 @@ fn production_coordinator_caller_fences_cross_store_adapter_only_and_retains_exa
         trusted_coordinator.fork("t097-production-caller-conflict-coordinator");
     let (_other_coordinator, observed_adapter) =
         materialize_lifecycle_roots("t097-production-caller-conflict-adapter", lifecycle);
-    let (_custody_coordinator, custody_adapter) = materialize_lifecycle_roots(
-        "t097-production-caller-conflict-custody",
-        T097CoordinatorLifecycleForTestV1::Prepared,
-    );
+    let custody_adapter =
+        StrictAdapterRootV1::new_empty_custody("t097-production-caller-conflict-custody");
     let mut pause = ExactAdapterCorruptionPauseV1::new(0x91, None);
 
     let outcome = audit_adapter_through_production_coordinator_v1(
@@ -2330,10 +2351,9 @@ fn production_coordinator_caller_fails_closed_on_each_pause_recheck() {
         let observed_adapter = trusted_adapter.fork(&format!(
             "t097-production-caller-pause-adapter-{fail_recheck}"
         ));
-        let (_custody_coordinator, custody_adapter) = materialize_lifecycle_roots(
-            &format!("t097-production-caller-pause-custody-{fail_recheck}"),
-            lifecycle,
-        );
+        let custody_adapter = StrictAdapterRootV1::new_empty_custody(&format!(
+            "t097-production-caller-pause-custody-{fail_recheck}"
+        ));
         let mut pause = ExactAdapterCorruptionPauseV1::new(
             0xa0_u8.saturating_add(u8::try_from(fail_recheck).expect("recheck fits")),
             Some(fail_recheck),

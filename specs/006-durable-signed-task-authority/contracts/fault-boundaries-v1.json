@@ -1,0 +1,282 @@
+{
+  "schema": "helixos.task-authority-fault-registry-design/1",
+  "registry_id": "plan006-durable-signed-task-authority-v1",
+  "feature": "PLAN-006",
+  "status": "phase-contract-boundary-instances-pending-implementation-derivation",
+  "source_baseline": {
+    "commit": "c324f528dc76007a599005e5cc054dcbe1370b1a",
+    "tree": "c70a3f2157498dd880822f97ef74d3d4757347d7"
+  },
+  "store_identity": {
+    "application_id": 1212962881,
+    "application_id_hex": "0x484c5841",
+    "application_id_ascii": "HLXA",
+    "user_version": 1
+  },
+  "fault_models": [
+    {
+      "id": "IN_PROCESS_SINGLE_FAULT",
+      "meaning": "One deterministic non-default injected error at one reached boundary; the test process remains alive."
+    },
+    {
+      "id": "PROCESS_KILL_SINGLE_FAULT",
+      "meaning": "One child process is terminated at one reached durable boundary and the exact disposable root is reopened by a fresh verifier."
+    }
+  ],
+  "excluded_fault_claims": [
+    "PHYSICAL_POWER_LOSS",
+    "FILESYSTEM_OR_DEVICE_DURABILITY",
+    "FULL_MACHINE_RESTORE",
+    "PRODUCTION_KEY_CUSTODY",
+    "HOST_EFFECT_RECOVERY"
+  ],
+  "closed_reopen_results": [
+    "HEALTHY_ABSENCE",
+    "COMPLETE_EXACT_RETAINED_GRAPH",
+    "CONFLICT_RETAINED",
+    "AMBIGUOUS_RECONCILIATION_REQUIRED",
+    "FAIL_CLOSED_CORRUPT_OR_UNSUPPORTED"
+  ],
+  "phases": [
+    {
+      "phase_id": "P00-CONTRACT",
+      "owner": "helix-task-authority-contracts",
+      "operations": [
+        "bounded-wire-admission",
+        "duplicate-aware-parse",
+        "canonical-byte-compare",
+        "closed-typed-validation",
+        "protected-digest-verify",
+        "purpose-key-resolution",
+        "strict-signature-verify",
+        "candidate-sign-before-writer"
+      ],
+      "required_fault_models": [
+        "IN_PROCESS_SINGLE_FAULT"
+      ],
+      "required_invariant": "Any failure produces no authentic/current marker and no durable mutation."
+    },
+    {
+      "phase_id": "P01-ROOT-ISSUE",
+      "owner": "helix-task-authority-sqlite",
+      "operations": [
+        "before-begin-immediate",
+        "after-current-grant-trust-scope-time-recheck",
+        "after-grant-row",
+        "after-one-shot-claim",
+        "after-root-lease-row",
+        "after-initial-usage",
+        "after-generation-update",
+        "after-event",
+        "immediately-before-commit",
+        "immediately-after-commit-before-acknowledgement",
+        "fresh-readback"
+      ],
+      "required_fault_models": [
+        "IN_PROCESS_SINGLE_FAULT",
+        "PROCESS_KILL_SINGLE_FAULT"
+      ],
+      "required_invariant": "Reopen yields absence, one exact claim/root graph, or explicit ambiguity; never two root leases or blind re-signing."
+    },
+    {
+      "phase_id": "P02-DELEGATION",
+      "owner": "helix-task-authority-sqlite",
+      "operations": [
+        "before-begin-immediate",
+        "after-source-parent-ancestor-recheck",
+        "after-checked-sibling-aggregate",
+        "after-allocation-row",
+        "after-child-lease-row",
+        "after-parent-usage-update",
+        "after-child-usage-row",
+        "after-generation-update",
+        "after-event",
+        "immediately-before-commit",
+        "immediately-after-commit-before-acknowledgement",
+        "fresh-readback"
+      ],
+      "required_fault_models": [
+        "IN_PROCESS_SINGLE_FAULT",
+        "PROCESS_KILL_SINGLE_FAULT"
+      ],
+      "required_invariant": "Allocation and child lease are both absent or both exact; aggregate authority never widens or oversubscribes."
+    },
+    {
+      "phase_id": "P03-COUNTER",
+      "owner": "helix-task-authority-sqlite",
+      "operations": [
+        "before-begin-immediate",
+        "after-current-lease-recheck",
+        "after-consumption-tombstone",
+        "after-monotonic-usage-update",
+        "after-generation-update",
+        "after-event",
+        "immediately-before-commit",
+        "immediately-after-commit-before-acknowledgement",
+        "fresh-readback"
+      ],
+      "required_fault_models": [
+        "IN_PROCESS_SINGLE_FAULT",
+        "PROCESS_KILL_SINGLE_FAULT"
+      ],
+      "required_invariant": "Consumption and usage move together once; no decrement, reset, overflow or duplicate spend is possible."
+    },
+    {
+      "phase_id": "P04-DECISION",
+      "owner": "helix-task-authority-sqlite",
+      "operations": [
+        "before-begin-immediate",
+        "after-plan-grant-lease-current-recheck",
+        "after-plan-binding-row",
+        "after-terminal-decision-row",
+        "after-generation-update",
+        "after-event",
+        "immediately-before-commit",
+        "immediately-after-commit-before-acknowledgement",
+        "fresh-readback"
+      ],
+      "required_fault_models": [
+        "IN_PROCESS_SINGLE_FAULT",
+        "PROCESS_KILL_SINGLE_FAULT"
+      ],
+      "required_invariant": "Exactly one complete terminal result is retained and can never flip; partial or conflicting graphs are never positive authority."
+    },
+    {
+      "phase_id": "P05-TRUST-REVOCATION",
+      "owner": "helix-task-authority-sqlite",
+      "operations": [
+        "before-begin-immediate",
+        "after-key-status-or-revocation-row",
+        "after-subject-generation-update",
+        "after-event",
+        "immediately-before-commit",
+        "immediately-after-commit-before-acknowledgement",
+        "fresh-readback"
+      ],
+      "required_fault_models": [
+        "IN_PROCESS_SINGLE_FAULT",
+        "PROCESS_KILL_SINGLE_FAULT"
+      ],
+      "required_invariant": "A current projection observes the complete old generation or complete new revocation; signed historical bytes remain unchanged."
+    },
+    {
+      "phase_id": "P06-PROJECTION-GUARD",
+      "owner": "helix-task-authority-projections",
+      "operations": [
+        "before-unified-hlxa-begin-immediate",
+        "after-lease-chain-resolution",
+        "after-authorization-resolution-same-snapshot",
+        "after-later-ordered-guards",
+        "after-final-projection-capture",
+        "immediately-before-downstream-commit",
+        "immediately-after-downstream-commit-classification",
+        "before-reverse-release"
+      ],
+      "required_fault_models": [
+        "IN_PROCESS_SINGLE_FAULT",
+        "PROCESS_KILL_SINGLE_FAULT"
+      ],
+      "required_invariant": "Authority mutation linearizes before refusal or after downstream commit; no separate Lease/Authorization writer, deadlock, late mutation or cross-store atomicity claim exists."
+    },
+    {
+      "phase_id": "P07-BOOTSTRAP",
+      "owner": "helix-task-authority-sqlite",
+      "operations": [
+        "after-pause-quiescence",
+        "after-source-v2-verification",
+        "after-source-backup-verification",
+        "after-destination-reservation",
+        "after-staging-schema",
+        "after-staging-root-metadata",
+        "after-zero-import-bootstrap-receipt",
+        "after-fresh-staging-readback",
+        "immediately-before-root-publication",
+        "immediately-after-root-publication-before-acknowledgement",
+        "bootstrap-resume-readback"
+      ],
+      "required_fault_models": [
+        "IN_PROCESS_SINGLE_FAULT",
+        "PROCESS_KILL_SINGLE_FAULT"
+      ],
+      "required_invariant": "Restart resumes or classifies one bootstrap identity; no second root and zero legacy/synthetic grant, lease or decision rows are created."
+    },
+    {
+      "phase_id": "P08-BACKUP",
+      "owner": "helix-task-authority-sqlite",
+      "operations": [
+        "after-pause-custody",
+        "after-each-independent-component-checkpoint",
+        "after-each-member-hash",
+        "after-key-history-inventory",
+        "after-cross-component-recheck",
+        "after-manifest-signing",
+        "immediately-before-manifest-publication",
+        "immediately-after-manifest-publication-before-acknowledgement"
+      ],
+      "required_fault_models": [
+        "IN_PROCESS_SINGLE_FAULT",
+        "PROCESS_KILL_SINGLE_FAULT"
+      ],
+      "required_invariant": "Only a complete generation-stable member set receives a published-last manifest; private keys and native paths never enter the package."
+    },
+    {
+      "phase_id": "P09-RESTORE",
+      "owner": "helix-task-authority-sqlite",
+      "operations": [
+        "after-package-envelope-verification",
+        "after-each-member-verification",
+        "after-empty-destination-reservation",
+        "after-staging-import",
+        "after-root-boot-instance-fencing-restore-rotation",
+        "after-restore-pending-receipt",
+        "after-zero-reactivation-audit",
+        "immediately-before-restored-root-publication",
+        "immediately-after-restored-root-publication-before-acknowledgement",
+        "restore-resume-readback"
+      ],
+      "required_fault_models": [
+        "IN_PROCESS_SINGLE_FAULT",
+        "PROCESS_KILL_SINGLE_FAULT"
+      ],
+      "required_invariant": "Only complete verified empty-root restore reaches RESTORE_PENDING/PAUSED under new epochs; zero lease or approval reactivates."
+    },
+    {
+      "phase_id": "P10-CORRUPTION-READBACK",
+      "owner": "helix-task-authority-sqlite",
+      "operations": [
+        "fresh-open-identity-schema-durability-check",
+        "signed-wire-recanonicalize-redigest-reverify",
+        "foreign-key-and-graph-invariants",
+        "usage-recomputation",
+        "generation-and-event-chain-validation",
+        "attempt-graph-classification",
+        "closed-public-outcome"
+      ],
+      "required_fault_models": [
+        "IN_PROCESS_SINGLE_FAULT"
+      ],
+      "required_invariant": "Corrupt, partial, substituted, rolled-back or unsupported state fails closed and cannot be repaired during admission or become current authority."
+    }
+  ],
+  "instance_derivation_rules": {
+    "when": "After Rust transaction statements and maintenance publication steps stabilize, before the fault corpus can pass.",
+    "stable_id_format": "PLAN006-FB-<PHASE-ORDINAL>-<OPERATION-ORDINAL>-<BEFORE|AFTER>",
+    "ordering": "Phase order above, then normative operation order, then BEFORE before AFTER.",
+    "required_members": [
+      "boundary_id",
+      "phase_id",
+      "owner",
+      "operation",
+      "ordinal",
+      "fault_model",
+      "expected_reopen_result",
+      "expected_authority",
+      "expected_late_mutations_max"
+    ],
+    "coverage": "Every derived reachable boundary maps exactly once to each applicable fault model and expected outcome; tests prove registry-to-driver and driver-to-registry bijection.",
+    "cardinality": "Computed from the frozen derived instances and asserted by tests; this design artifact deliberately does not invent a boundary or case count before implementation.",
+    "single_fault": true,
+    "late_mutations_max": 0,
+    "physical_power_loss_eligible": false
+  }
+}

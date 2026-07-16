@@ -1,0 +1,433 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:helixos:schema:task-lease:1",
+  "title": "HelixOS Signed Task Lease v1",
+  "description": "Closed language-neutral wire shape for helixos.task-lease/1. Typed validation additionally enforces restrictive delegation, aggregate parent allocation, source-grant, current policy/catalogue and same-boot time invariants.",
+  "$comment": "The complete UTF-8 wire is limited to 1048576 bytes. JSON Schema cannot detect duplicate object names, prove RFC 8785 byte equality, count UTF-8 bytes, enforce NFC or prove subset and aggregate-allocation relationships; the trust-boundary decoder and authority store enforce those rules.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protected",
+    "lease_digest",
+    "signature"
+  ],
+  "properties": {
+    "protected": {
+      "$ref": "#/$defs/protectedLease"
+    },
+    "lease_digest": {
+      "$ref": "#/$defs/sha256Digest"
+    },
+    "signature": {
+      "$ref": "#/$defs/ed25519Signature"
+    }
+  },
+  "$defs": {
+    "safeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "generation": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[-A-Za-z0-9._:]+$",
+      "$comment": "Identifiers are opaque correlation values, never user content, credentials, bearer links or native paths."
+    },
+    "rootIdentifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+    },
+    "resourceComponent": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^(?!\\.{1,2}$)(?!.*[ .]$)[^/\\\\:<>\"|?*\\u0000-\\u001F\\u007F]+$",
+      "$comment": "Typed validation additionally requires NFC, at most 255 UTF-8 bytes, rejects default-ignorables and Windows device basenames, and limits all components in one resource root to 4096 UTF-8 bytes."
+    },
+    "resourceRoot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "root_id",
+        "components"
+      ],
+      "properties": {
+        "root_id": {
+          "$ref": "#/$defs/rootIdentifier"
+        },
+        "components": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 128,
+          "items": {
+            "$ref": "#/$defs/resourceComponent"
+          },
+          "$comment": "An empty component list denotes the approved opaque root. Non-empty components denote an exact relative prefix, never an OS-native path."
+        }
+      }
+    },
+    "sha256Digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "nullableDigest": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "ed25519Signature": {
+      "type": "string",
+      "minLength": 86,
+      "maxLength": 86,
+      "pattern": "^[A-Za-z0-9_-]{85}[AQgw]$",
+      "$comment": "The decoder additionally decodes canonical unpadded base64url and requires exactly 64 Ed25519 signature bytes."
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "read_bytes_limit",
+        "distinct_files_limit",
+        "action_limit",
+        "egress_bytes_limit",
+        "currency_code",
+        "max_cost_micro_units",
+        "price_table_id"
+      ],
+      "properties": {
+        "read_bytes_limit": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "distinct_files_limit": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "action_limit": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "egress_bytes_limit": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "currency_code": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "max_cost_micro_units": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "price_table_id": {
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    },
+    "counterLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plan_limit",
+        "approval_limit",
+        "child_lease_limit",
+        "max_delegation_depth"
+      ],
+      "properties": {
+        "plan_limit": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "approval_limit": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "child_lease_limit": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "max_delegation_depth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 32
+        }
+      }
+    },
+    "trustBound": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maximum_risk_level",
+        "minimum_authentication_profile",
+        "policy_id",
+        "policy_content_digest",
+        "policy_generation"
+      ],
+      "properties": {
+        "maximum_risk_level": {
+          "type": "string",
+          "enum": [
+            "L0",
+            "L1",
+            "L2"
+          ]
+        },
+        "minimum_authentication_profile": {
+          "type": "string",
+          "enum": [
+            "SESSION_AUTHENTICATED_V1",
+            "USER_VERIFICATION_V1"
+          ]
+        },
+        "policy_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "policy_content_digest": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "policy_generation": {
+          "$ref": "#/$defs/generation"
+        }
+      }
+    },
+    "catalogueBound": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "catalogue_id",
+        "catalogue_content_digest",
+        "catalogue_generation",
+        "allowed_catalogue_entries"
+      ],
+      "properties": {
+        "catalogue_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "catalogue_content_digest": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "catalogue_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "allowed_catalogue_entries": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          },
+          "$comment": "Typed validation requires canonical ascending byte order and child leases to use a subset of the parent entries."
+        }
+      }
+    },
+    "protectedLease": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "digest_algorithm",
+        "signature_algorithm",
+        "key_purpose",
+        "key_id",
+        "lease_id",
+        "issuer_id",
+        "task_id",
+        "workload_id",
+        "audience",
+        "source_kind",
+        "source_grant_id",
+        "source_grant_digest",
+        "source_principal_id",
+        "allowed_intentions",
+        "resource_roots",
+        "budget",
+        "counter_limits",
+        "trust_bound",
+        "catalogue_bound",
+        "delegation_mode",
+        "parent_lease_id",
+        "parent_lease_digest",
+        "parent_allocation_id",
+        "delegation_depth",
+        "clock_generation",
+        "boot_id",
+        "instance_epoch",
+        "issued_at_utc_ms",
+        "not_before_utc_ms",
+        "expires_at_utc_ms",
+        "issued_at_monotonic_ms",
+        "deadline_monotonic_ms"
+      ],
+      "properties": {
+        "schema": {
+          "const": "helixos.task-lease/1"
+        },
+        "digest_algorithm": {
+          "const": "sha-256"
+        },
+        "signature_algorithm": {
+          "const": "ed25519"
+        },
+        "key_purpose": {
+          "const": "core-task-lease-signing"
+        },
+        "key_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "lease_id": {
+          "$ref": "#/$defs/sha256Digest",
+          "$comment": "Create-only identity independent of signer key identity."
+        },
+        "issuer_id": {
+          "$ref": "#/$defs/identifier",
+          "$comment": "Configured core lease issuer; together with lease_id this is the durable namespace and must equal the indexed lease_issuer_id."
+        },
+        "task_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "workload_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "audience": {
+          "$ref": "#/$defs/identifier"
+        },
+        "source_kind": {
+          "const": "HUMAN_REQUEST_GRANT"
+        },
+        "source_grant_id": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "source_grant_digest": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "source_principal_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "allowed_intentions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "const": "host.file.patch"
+          },
+          "$comment": "V1 is closed to the only PLAN-001 intent. A new intention requires a new declared contract version and fixtures."
+        },
+        "resource_roots": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/resourceRoot"
+          },
+          "$comment": "Typed validation requires canonical ascending order and each child resource root to be equal to or below one parent prefix."
+        },
+        "budget": {
+          "$ref": "#/$defs/budget"
+        },
+        "counter_limits": {
+          "$ref": "#/$defs/counterLimits"
+        },
+        "trust_bound": {
+          "$ref": "#/$defs/trustBound"
+        },
+        "catalogue_bound": {
+          "$ref": "#/$defs/catalogueBound"
+        },
+        "delegation_mode": {
+          "type": "string",
+          "enum": [
+            "DELEGABLE",
+            "NON_DELEGABLE"
+          ]
+        },
+        "parent_lease_id": {
+          "$ref": "#/$defs/nullableDigest"
+        },
+        "parent_lease_digest": {
+          "$ref": "#/$defs/nullableDigest"
+        },
+        "parent_allocation_id": {
+          "$ref": "#/$defs/nullableDigest"
+        },
+        "delegation_depth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 32
+        },
+        "clock_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "boot_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "instance_epoch": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "issued_at_utc_ms": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "not_before_utc_ms": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "expires_at_utc_ms": {
+          "$ref": "#/$defs/safeInteger",
+          "$comment": "Exclusive UTC boundary."
+        },
+        "issued_at_monotonic_ms": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "deadline_monotonic_ms": {
+          "$ref": "#/$defs/safeInteger",
+          "$comment": "Exclusive deadline valid only in the exact boot_id domain."
+        }
+      },
+      "oneOf": [
+        {
+          "title": "Root lease",
+          "properties": {
+            "parent_lease_id": {
+              "type": "null"
+            },
+            "parent_lease_digest": {
+              "type": "null"
+            },
+            "parent_allocation_id": {
+              "type": "null"
+            },
+            "delegation_depth": {
+              "const": 0
+            }
+          }
+        },
+        {
+          "title": "Delegated child lease",
+          "properties": {
+            "parent_lease_id": {
+              "$ref": "#/$defs/sha256Digest"
+            },
+            "parent_lease_digest": {
+              "$ref": "#/$defs/sha256Digest"
+            },
+            "parent_allocation_id": {
+              "$ref": "#/$defs/sha256Digest"
+            },
+            "delegation_depth": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 32
+            }
+          }
+        }
+      ]
+    }
+  }
+}

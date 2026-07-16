@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:helixos:schema:human-request-grant:1",
+  "title": "HelixOS Signed Human Request Grant v1",
+  "description": "Closed language-neutral wire shape for helixos.human-request-grant/1. Typed validation additionally enforces RFC 8785 canonical bytes, time ordering, current trust, scope-template and one-shot invariants.",
+  "$comment": "The complete UTF-8 wire is limited to 65536 bytes. JSON Schema cannot detect duplicate object names, prove RFC 8785 byte equality, count UTF-8 bytes, validate trust/revocation state or atomically consume a grant identity; the trust-boundary decoder and authority store enforce those rules.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protected",
+    "grant_digest",
+    "signature"
+  ],
+  "properties": {
+    "protected": {
+      "$ref": "#/$defs/protectedGrant"
+    },
+    "grant_digest": {
+      "$ref": "#/$defs/sha256Digest"
+    },
+    "signature": {
+      "$ref": "#/$defs/ed25519Signature"
+    }
+  },
+  "$defs": {
+    "safeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "generation": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[-A-Za-z0-9._:]+$",
+      "$comment": "Identifiers are opaque correlation values, never user content, credentials, bearer links or native paths."
+    },
+    "sha256Digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "ed25519Signature": {
+      "type": "string",
+      "minLength": 86,
+      "maxLength": 86,
+      "pattern": "^[A-Za-z0-9_-]{85}[AQgw]$",
+      "$comment": "The decoder additionally decodes canonical unpadded base64url and requires exactly 64 Ed25519 signature bytes."
+    },
+    "protectedGrant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "digest_algorithm",
+        "signature_algorithm",
+        "key_purpose",
+        "key_id",
+        "grant_id",
+        "issuer_id",
+        "audience",
+        "principal_id",
+        "message_digest",
+        "channel_id",
+        "session_id",
+        "scope_template_id",
+        "scope_template_digest",
+        "scope_template_generation",
+        "issued_at_utc_ms",
+        "expires_at_utc_ms"
+      ],
+      "properties": {
+        "schema": {
+          "const": "helixos.human-request-grant/1"
+        },
+        "digest_algorithm": {
+          "const": "sha-256"
+        },
+        "signature_algorithm": {
+          "const": "ed25519"
+        },
+        "key_purpose": {
+          "const": "request-surface-grant-signing"
+        },
+        "key_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "grant_id": {
+          "$ref": "#/$defs/sha256Digest",
+          "$comment": "A create-only issuer-scoped one-shot identity generated independently of key identity and PLAN-003 replay identity."
+        },
+        "issuer_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "audience": {
+          "$ref": "#/$defs/identifier"
+        },
+        "principal_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "message_digest": {
+          "$ref": "#/$defs/sha256Digest",
+          "$comment": "Digest of the exact authenticated request message; raw message bytes are forbidden from this wire."
+        },
+        "channel_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "session_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "scope_template_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "scope_template_digest": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "scope_template_generation": {
+          "$ref": "#/$defs/generation"
+        },
+        "issued_at_utc_ms": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "expires_at_utc_ms": {
+          "$ref": "#/$defs/safeInteger",
+          "$comment": "Exclusive UTC boundary. Typed validation requires issued_at_utc_ms < expires_at_utc_ms; equality is expired."
+        }
+      }
+    }
+  }
+}
