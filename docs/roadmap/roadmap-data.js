@@ -9,18 +9,16 @@ window.HELIXOS_ROADMAP_DATA = {
     }
   ],
   "currentFocus": {
-    "description": "Write failing cross-contract primitive, duplicate-member, canonical-byte, digest/base64url, unknown-version and generated leaf-coverage tests in kernel/helix-task-authority-contracts/tests/cross_contract.rs and kernel/helix-task-authority-contracts/tests/property.rs",
+    "description": "Implement bounded duplicate-aware RFC 8785 input handling, exact byte equality, SHA-256 protected digests and canonical envelope helpers in kernel/helix-task-authority-contracts/src/canonical.rs and kernel/helix-task-authority-contracts/src/digest.rs",
     "done": false,
-    "id": "T009",
+    "id": "T011",
     "kind": "implementation",
     "phase": "Foundational Contracts, Store and Control Boundaries",
     "phaseNumber": 2,
     "planId": "PLAN-006",
     "planTitle": "Durable signed task authority",
-    "source": "specs/006-durable-signed-task-authority/tasks.md#L107",
-    "tags": [
-      "P"
-    ]
+    "source": "specs/006-durable-signed-task-authority/tasks.md#L112",
+    "tags": []
   },
   "definitionOfDone": [
     "architecture/threat model et Constitution Check sont \u00e0 jour",
@@ -4138,7 +4136,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "total": 98
     },
     {
-      "completed": 8,
+      "completed": 10,
       "conformance": {
         "ciWorkflow": null,
         "claimStatus": "pending-evidence",
@@ -4161,7 +4159,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 8
         },
         {
-          "done": 0,
+          "done": 2,
           "number": 2,
           "title": "Foundational Contracts, Store and Control Boundaries",
           "total": 16
@@ -4209,8 +4207,8 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 7
         }
       ],
-      "remaining": 102,
-      "taskPercent": 7.3,
+      "remaining": 100,
+      "taskPercent": 9.1,
       "taskSource": "specs/006-durable-signed-task-authority/tasks.md",
       "taskTitle": "Durable Signed Task Authority",
       "tasks": [
@@ -4306,7 +4304,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Write failing cross-contract primitive, duplicate-member, canonical-byte, digest/base64url, unknown-version and generated leaf-coverage tests in kernel/helix-task-authority-contracts/tests/cross_contract.rs and kernel/helix-task-authority-contracts/tests/property.rs",
-          "done": false,
+          "done": true,
           "id": "T009",
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
@@ -4318,7 +4316,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Write failing source/dependency, OS-neutral primitive, non-Serde/non-Clone authority-marker and seeded public-redaction tests in kernel/helix-task-authority-contracts/tests/portability.rs and kernel/helix-task-authority-contracts/tests/redaction.rs",
-          "done": false,
+          "done": true,
           "id": "T010",
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
@@ -5535,34 +5533,6 @@ window.HELIXOS_ROADMAP_DATA = {
     }
   ],
   "openTasks": [
-    {
-      "description": "Write failing cross-contract primitive, duplicate-member, canonical-byte, digest/base64url, unknown-version and generated leaf-coverage tests in kernel/helix-task-authority-contracts/tests/cross_contract.rs and kernel/helix-task-authority-contracts/tests/property.rs",
-      "done": false,
-      "id": "T009",
-      "kind": "implementation",
-      "phase": "Foundational Contracts, Store and Control Boundaries",
-      "phaseNumber": 2,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L107",
-      "tags": [
-        "P"
-      ]
-    },
-    {
-      "description": "Write failing source/dependency, OS-neutral primitive, non-Serde/non-Clone authority-marker and seeded public-redaction tests in kernel/helix-task-authority-contracts/tests/portability.rs and kernel/helix-task-authority-contracts/tests/redaction.rs",
-      "done": false,
-      "id": "T010",
-      "kind": "implementation",
-      "phase": "Foundational Contracts, Store and Control Boundaries",
-      "phaseNumber": 2,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L108",
-      "tags": [
-        "P"
-      ]
-    },
     {
       "description": "Implement bounded duplicate-aware RFC 8785 input handling, exact byte equality, SHA-256 protected digests and canonical envelope helpers in kernel/helix-task-authority-contracts/src/canonical.rs and kernel/helix-task-authority-contracts/src/digest.rs",
       "done": false,
@@ -6967,7 +6937,7 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "roadmapDate": "2026-07-13",
   "schema": "helixos.roadmap-data/1",
-  "sourceFingerprint": "055d1a39410f19733df7ca94d11d0bede6f43883c6257568b99e3b3c8cdc0fe7",
+  "sourceFingerprint": "f5d12ee69efecc21f7b919f674efb4fdd35e1e874eabd2043c2a1121e5eb3e0d",
   "sources": [
     {
       "path": "ROADMAP-SPECS.md",
@@ -6999,7 +6969,7 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "specs/006-durable-signed-task-authority/tasks.md",
-      "sha256": "37baf66d530d58270f0626a734143f0f48a5d0aa0ecdb79018aa3e44d2a83543"
+      "sha256": "3b647af74bd8a57446f8f8448d8f8955efee85323cacde49ad231999e2cab98c"
     }
   ],
   "strategicStages": [
@@ -7018,7 +6988,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "id": "R1",
       "status": "active",
       "title": "Fondation portable et coordinateur durable",
-      "trackedTaskCompleted": 327,
+      "trackedTaskCompleted": 329,
       "trackedTaskTotal": 429
     },
     {
@@ -7080,12 +7050,12 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "summary": {
     "acceptedClaims": 0,
-    "completedTasks": 327,
+    "completedTasks": 329,
     "focusPlan": "PLAN-006",
-    "remainingTasks": 102,
+    "remainingTasks": 100,
     "strategicStage": "R1",
     "totalClaims": 6,
-    "trackedTaskPercent": 76.2,
+    "trackedTaskPercent": 76.7,
     "trackedTasks": 429
   }
 };
