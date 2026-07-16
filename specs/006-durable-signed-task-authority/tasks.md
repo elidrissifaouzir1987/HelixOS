@@ -109,7 +109,7 @@ fault seams that block every story until complete.
 
 ### Shared implementation
 
-- [ ] T011 Implement bounded duplicate-aware RFC 8785 input handling, exact byte equality, SHA-256 protected digests and canonical envelope helpers in `kernel/helix-task-authority-contracts/src/canonical.rs` and `kernel/helix-task-authority-contracts/src/digest.rs`
+- [X] T011 Implement bounded duplicate-aware RFC 8785 input handling, exact byte equality, SHA-256 protected digests and canonical envelope helpers in `kernel/helix-task-authority-contracts/src/canonical.rs` and `kernel/helix-task-authority-contracts/src/digest.rs`
 - [ ] T012 [P] Implement strict canonical base64url Ed25519 signature verification, purpose-separated signer/resolver traits and immutable key-fingerprint evidence in `kernel/helix-task-authority-contracts/src/crypto.rs`
 - [ ] T013 [P] Implement safe integers, identifiers, NFC/resource components, closed enums, checked time/bound validation and payload-free public error codes in `kernel/helix-task-authority-contracts/src/validation.rs` and `kernel/helix-task-authority-contracts/src/error.rs`
 - [ ] T014 Expose only closed signed/authentic marker APIs with redacted `Debug`, no defaulted fields and no caller-constructible current authority in `kernel/helix-task-authority-contracts/src/lib.rs`
