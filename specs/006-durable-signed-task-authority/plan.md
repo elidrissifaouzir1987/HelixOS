@@ -437,10 +437,14 @@ store/guard interfaces; SQLite implements those interfaces in the independent
 `HLXA` root; and the projection adapter alone imports existing PLAN-002/004/005
 types. Existing production crates, wire contracts and protected legacy runtime
 sources remain unchanged. Four existing dependency-policy tests may add only the
-reviewed `helix-task-authority-projections` direct consumer; those four test blobs
+reviewed `helix-task-authority-projections` direct consumer, while one PLAN-004
+workspace-removal test may recognize the four new PLAN-006 packages as downstream
+members. PLAN-005's retained removal/supply guards may classify the new crate,
+fixture and Graphify prefixes while proving its frozen production closure is otherwise
+unchanged. These seven test edits and four retained PLAN-005 policy/evidence artifacts
 are part of the PLAN-006 integration and exact-removal footprint and must be restored
-to the clean source versions when PLAN-006 is removed. Fixtures, workflow and
-evidence tools are PLAN-006-owned and disappear in the isolated-removal drill.
+to the clean source versions when PLAN-006 is removed. Fixtures, workflow and evidence
+tools are PLAN-006-owned and disappear in the isolated-removal drill.
 
 ## Complexity Tracking
 

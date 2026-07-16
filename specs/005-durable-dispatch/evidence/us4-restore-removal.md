@@ -192,7 +192,7 @@ tracked leaf blob in baseline commit
 | Modes | 490 × `100644`; 5 × `100755` |
 | Full NUL inventory SHA-256 | `3495ead55ab40e469940c5a6a585064d75137eaba9af9b5adeaf51b553fba7b9` |
 | NUL path inventory SHA-256 | `0a7a3e4cda89f78a7ccda8184c9c78f7bc52073b92003d7db669e4817ac0ec11` |
-| Manifest file SHA-256 | `754d0c993c744061293178a094080a4aa5e50ae06a762e492ec7cf65cb08f9c6` |
+| Manifest file SHA-256 | `6c9422f47fd65ba7866750666a3f0e4c4c1e35944b8a1506c4a6ffa34ab2edf2` |
 | Driver SHA-256 | `be5f28c0f544280c4af2124a57853e988c3d58ec9e6152df7717ffe39cf6a79e` |
 
 Each entry contains path, Git mode, object type, blob OID and content SHA-256. The driver
@@ -202,9 +202,11 @@ own baseline inventory and is itself pinned by the driver. PLAN-005 evidence, wo
 and tool paths are forced to LF by `.gitattributes` so exact bytes remain portable on
 Windows checkouts. The repinned removal class contains both the
 `dispatch_maintenance_faults.rs` target and the coordinator base-quarantine integration
-explicitly, while the non-executable PLAN-006 specification tree is retained as audit
-history. The full PLAN-005 evidence module passes 38/38 after this synchronization;
-the prerequisite PLAN-004 evidence module passes 24/24, for 62/62 evidence-tool tests.
+explicitly. It retains the PLAN-006 specification tree as audit history, removes the
+classified PLAN-006 Phase 1 fixture/crate/Graphify executable surface, and restores the
+two earlier-plan baseline test paths that Phase 1 changes. The full PLAN-005 evidence
+module passes 38/38 after this synchronization; the prerequisite PLAN-004 evidence
+module passes 24/24, for 62/62 evidence-tool tests.
 
 The 27 user-owned dirty Rust paths remain protected through their committed baseline
 blobs but their local bytes are never copied into the removal source, edited, formatted,

@@ -185,6 +185,24 @@ were:
 | `helix-coordinator-sqlite --test portability` | 8 passed |
 | `helix-plan-dispatch --test portability` | 7 passed |
 
+The first pull-request policy run then exposed one separate PLAN-004 removal guard
+whose exact downstream workspace set predated PLAN-006. Its expected set was extended
+with the four new PLAN-006 packages in `tools/tests/test_plan004_evidence.py`. This is
+a fifth test-only PLAN-006 integration edit, is included in the exact-removal
+footprint, and does not change PLAN-004 tooling or production behavior.
+
+The same run exposed the next PLAN-005 downstream gates. Its removal manifest now
+deletes the four PLAN-006 crate prefixes, fixture prefix and PLAN-006 Graphify memory,
+and restores the two earlier-plan baseline test paths not already covered by its
+policy. The inbox portability guard now recognizes that same exact ten-prefix removal
+set, while the evidence test projects the current Cargo lock hash back to the frozen
+PLAN-005 lock hash before comparing the immutable production-closure digest; the
+frozen `c5b84e...` oracle is not repinned. These are the sixth and seventh test-only
+integration edits, making eleven existing test/policy/evidence edits in the exact
+PLAN-006 removal footprint. The corrected focused results are 8/8 inbox portability
+tests and 38/38 PLAN-005 evidence tests. The synchronized manifest SHA-256 is
+`6c9422f47fd65ba7866750666a3f0e4c4c1e35944b8a1506c4a6ffa34ab2edf2`.
+
 ## Toolchain identity
 
 | Component | Exact identity |
@@ -207,8 +225,9 @@ the run. An external Cargo target cache was reused only for build artifacts; Car
 compiled the workspace packages from the detached source paths.
 
 The Phase 1 column was then executed in the implementation worktree after adding the
-four local packages and the four exact expected-consumer updates. This separates the
-unchanged source baseline from the post-setup regression result.
+four local packages, the four exact expected-consumer updates and the synchronized
+downstream policy guards. This separates the unchanged source baseline from the
+post-setup regression result.
 
 ```sh
 SOURCE_BASE=551421cca045e192655b69cccdfd9e0c9dd2f6ce
@@ -317,6 +336,8 @@ sqlite3 "$DB" 'PRAGMA integrity_check;'
 | Package-scoped `cargo fmt -- --check` for the four new packages | PASS |
 | SQLite package with `test-fault-injection` | PASS; feature is non-default |
 | SQLite package with `controlled-benchmark` | PASS; feature is non-default |
+| PLAN-004 evidence/removal unit suite | PASS; 24 tests |
+| PLAN-005 evidence policy suite that reuses the PLAN-004 guard | PASS; 38 tests |
 | Four fixture JSON files parsed as JSON | PASS |
 | Tracked non-authority `golden/` placeholder survives commit and clone | PASS |
 | Recursive PLAN-006 LF attributes, including future `golden/` files | PASS |

@@ -489,10 +489,15 @@ fn removal_allowlist_owns_plan005_adapter_and_preserves_plan004() {
         json_string_set(&evidence, "/removal_policy/added_prefixes_removed"),
         BTreeSet::from([
             "contracts/fixtures/durable-dispatch-v1/".to_owned(),
+            "contracts/fixtures/durable-signed-task-authority-v1/".to_owned(),
             "graphify-out/memory/".to_owned(),
             "kernel/helix-dispatch-contracts/".to_owned(),
             "kernel/helix-dispatch-inbox-sqlite/".to_owned(),
             "kernel/helix-plan-dispatch/".to_owned(),
+            "kernel/helix-task-authority-contracts/".to_owned(),
+            "kernel/helix-task-authority-projections/".to_owned(),
+            "kernel/helix-task-authority-sqlite/".to_owned(),
+            "kernel/helix-task-authority/".to_owned(),
         ])
     );
     assert_eq!(

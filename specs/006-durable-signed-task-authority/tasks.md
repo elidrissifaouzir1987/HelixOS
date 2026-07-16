@@ -64,10 +64,14 @@ kernel/helixos-provision/src/main.rs
 ```
 
 PLAN-001 through PLAN-005 production Rust sources and wire contracts also remain
-unchanged. Their dependency-policy tests may recognize the new reviewed PLAN-006 leaf
-consumer, but may not weaken any other allowlist. New dependencies flow from PLAN-006
-toward existing public seams; no existing crate gains a PLAN-006 dependency.
-`docs/roadmap/roadmap-data.js` is generated and is never edited by hand.
+unchanged. Four dependency-policy tests may recognize the new reviewed PLAN-006 leaf
+consumer and one workspace-removal test may recognize the four PLAN-006 packages as
+downstream members. PLAN-005 removal/supply policy tests and retained policy/evidence
+artifacts may classify only the PLAN-006 crate, fixture, Graphify and lock extension
+without repinning its frozen production closure; no other allowlist or frozen set may
+be weakened. New dependencies flow from PLAN-006 toward existing public seams; no
+existing crate gains a PLAN-006 dependency. `docs/roadmap/roadmap-data.js` is generated
+and is never edited by hand.
 
 ---
 
@@ -77,7 +81,7 @@ toward existing public seams; no existing crate gains a PLAN-006 dependency.
 evidence before implementing authority.
 
 - [X] T001 Record the PLAN-005 commit/tree baseline, full protected-object inventory, exact 27-path exclusion list/hash, existing package set and clean-scope reproduction commands in `specs/006-durable-signed-task-authority/evidence/baseline.md`
-- [X] T002 Add the four edition-2021 `unsafe`-forbidden workspace members with exact dependency pins, bundled SQLite features, non-default `test-fault-injection`/`controlled-benchmark` features and one-way dependency direction in `kernel/Cargo.toml`, `kernel/Cargo.lock`, `kernel/helix-task-authority-contracts/Cargo.toml`, `kernel/helix-task-authority/Cargo.toml`, `kernel/helix-task-authority-sqlite/Cargo.toml` and `kernel/helix-task-authority-projections/Cargo.toml`; update only the frozen consumer allowlists to recognize the reviewed projection leaf in `kernel/helix-plan-eligibility/tests/portability.rs`, `kernel/helix-plan-preparation/tests/contract.rs`, `kernel/helix-coordinator-sqlite/tests/portability.rs` and `kernel/helix-plan-dispatch/tests/portability.rs`
+- [X] T002 Add the four edition-2021 `unsafe`-forbidden workspace members with exact dependency pins, bundled SQLite features, non-default `test-fault-injection`/`controlled-benchmark` features and one-way dependency direction in `kernel/Cargo.toml`, `kernel/Cargo.lock`, `kernel/helix-task-authority-contracts/Cargo.toml`, `kernel/helix-task-authority/Cargo.toml`, `kernel/helix-task-authority-sqlite/Cargo.toml` and `kernel/helix-task-authority-projections/Cargo.toml`; update only the frozen consumer allowlists to recognize the reviewed projection leaf in `kernel/helix-plan-eligibility/tests/portability.rs`, `kernel/helix-plan-preparation/tests/contract.rs`, `kernel/helix-coordinator-sqlite/tests/portability.rs` and `kernel/helix-plan-dispatch/tests/portability.rs`, the exact downstream workspace set in `tools/tests/test_plan004_evidence.py`, the PLAN-005 inbox removal allowlist in `kernel/helix-dispatch-inbox-sqlite/tests/portability.rs`, and the PLAN-005 downstream removal/supply projection in `specs/005-durable-dispatch/evidence/removal-protected-files.json`, `specs/005-durable-dispatch/evidence/us4-restore-removal.md`, `tools/plan005_removal_drill.py`, `tools/plan005_supply_chain.py` and `tools/tests/test_plan005_evidence.py`
 - [X] T003 [P] Create the closed contract-crate module skeleton and redacted public surface in `kernel/helix-task-authority-contracts/src/lib.rs`
 - [X] T004 [P] Create the portable authority-core module skeleton and redacted public surface in `kernel/helix-task-authority/src/lib.rs`
 - [X] T005 [P] Create the SQLite implementation module skeleton with fault hooks absent from default builds in `kernel/helix-task-authority-sqlite/src/lib.rs`
@@ -323,7 +327,7 @@ and removal back to the frozen PLAN-005 tree with no protected-path change.
 - [ ] T096 [US6] Implement deterministic materialization of the unchanged positive/negative/single-fault/concurrency/generated corpus and byte-identical machine summary in `kernel/helix-task-authority-sqlite/examples/durable_task_authority_corpus.rs`
 - [ ] T097 [US6] Implement controlled raw-sample capture for 500 warmups plus 10,000 three-contract/projection, root issue, delegation and decision measurements with declared metadata and independent percentiles in `kernel/helix-task-authority-sqlite/examples/durable_task_authority_benchmark.rs`
 - [ ] T098 [US6] Implement exact-commit dependency closure, bundled SQLite/toolchain/schema/source/lock digests, licenses, advisories, SBOM/provenance, secret/path scans and independent bundle verification in `tools/plan006_supply_chain.py`
-- [ ] T099 [US6] Implement the detached exact-removal drill that deletes PLAN-006 executable surfaces, restores every baseline blob/mode plus the four PLAN-006-owned dependency-policy test edits, proves the frozen tree/package set and original consumer lists, runs locked/offline prior tests and never touches the 27 excluded paths in `tools/plan006_removal_drill.py`
+- [ ] T099 [US6] Implement the detached exact-removal drill that deletes PLAN-006 executable surfaces, restores every baseline blob/mode plus the eleven PLAN-006-owned existing test/policy/evidence edits, proves the frozen tree/package set and original consumer/downstream/removal/supply oracles, runs locked/offline prior tests and never touches the 27 excluded paths in `tools/plan006_removal_drill.py`
 - [ ] T100 [US6] Add policy, Linux/macOS/Windows conformance, release-evidence and exact-attestation jobs with hosted diagnostic/non-effect/non-power-loss claims only in `.github/workflows/durable-signed-task-authority.yml`
 - [ ] T101 [US6] Update only the existing PLAN-006 `REQUEST-001`, `SEC-002` and `SEC-003` catalogue mappings with exact implementation/evidence paths while preserving `pending-evidence`, run the roadmap generator to refresh `docs/roadmap/roadmap-data.js` without hand editing it, and verify the static shell remains unchanged in `conformance/catalog.yaml` and `docs/roadmap/index.html`
 - [ ] T102 [US6] Run the unchanged three-platform corpus, overload profile and hosted diagnostic benchmark, compare exact summaries and retain machine-readable artifacts/nonclaims in `specs/006-durable-signed-task-authority/evidence/us6-portability-performance.md`

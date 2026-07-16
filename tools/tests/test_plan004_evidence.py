@@ -405,6 +405,10 @@ class RemovalEvidenceTests(unittest.TestCase):
                 "helix-dispatch-contracts",
                 "helix-dispatch-inbox-sqlite",
                 "helix-plan-dispatch",
+                "helix-task-authority",
+                "helix-task-authority-contracts",
+                "helix-task-authority-projections",
+                "helix-task-authority-sqlite",
             },
         )
 

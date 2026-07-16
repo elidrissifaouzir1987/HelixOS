@@ -175,7 +175,7 @@ class Plan005RemovalManifestTests(unittest.TestCase):
         )
         self.assertEqual(
             removal.PROTECTED_MANIFEST_SHA256,
-            "754d0c993c744061293178a094080a4aa5e50ae06a762e492ec7cf65cb08f9c6",
+            "6c9422f47fd65ba7866750666a3f0e4c4c1e35944b8a1506c4a6ffa34ab2edf2",
         )
         self.assertEqual(
             supply.REMOVAL_MANIFEST_SHA256,
@@ -260,9 +260,9 @@ class Plan005RemovalManifestTests(unittest.TestCase):
     def test_removal_policy_is_closed_sorted_and_non_overlapping(self):
         policy = self.manifest["removal_policy"]
         expected_counts = {
-            "baseline_paths_restored": 30,
+            "baseline_paths_restored": 32,
             "added_paths_removed": 29,
-            "added_prefixes_removed": 5,
+            "added_prefixes_removed": 10,
             "added_paths_retained_for_audit": 3,
             "added_prefixes_retained_for_audit": 2,
         }
@@ -275,10 +275,15 @@ class Plan005RemovalManifestTests(unittest.TestCase):
             policy["added_prefixes_removed"],
             [
                 "contracts/fixtures/durable-dispatch-v1/",
+                "contracts/fixtures/durable-signed-task-authority-v1/",
                 "graphify-out/memory/",
                 "kernel/helix-dispatch-contracts/",
                 "kernel/helix-dispatch-inbox-sqlite/",
                 "kernel/helix-plan-dispatch/",
+                "kernel/helix-task-authority-contracts/",
+                "kernel/helix-task-authority-projections/",
+                "kernel/helix-task-authority-sqlite/",
+                "kernel/helix-task-authority/",
             ],
         )
         self.assertEqual(
@@ -626,7 +631,15 @@ class Plan005SupplyChainTests(unittest.TestCase):
         self.assertEqual(graph["package_count"], 84)
         self.assertEqual(graph["dependency_edge_count"], 143)
         self.assertEqual(
-            _sha256(supply.canonical_json_bytes(graph)),
+            graph["cargo_lock"]["sha256"],
+            "1ee27ea28ed2c51167acb180f79bf5f3722ca26a1c775013c6f7ce3082d87d3c",
+        )
+        frozen_graph = copy.deepcopy(graph)
+        frozen_graph["cargo_lock"]["sha256"] = (
+            "f18941ac90749f8eb9adffc2e4e9b91e1d9705da8c0cad0c9fe53b451759ff4d"
+        )
+        self.assertEqual(
+            _sha256(supply.canonical_json_bytes(frozen_graph)),
             supply.EXPECTED_RELEASE_ARTIFACT_SHA256[
                 "graph/production-closure.json"
             ],
