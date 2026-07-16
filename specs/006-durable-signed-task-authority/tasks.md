@@ -104,8 +104,8 @@ fault seams that block every story until complete.
 
 ### Tests for the foundation
 
-- [ ] T009 [P] Write failing cross-contract primitive, duplicate-member, canonical-byte, digest/base64url, unknown-version and generated leaf-coverage tests in `kernel/helix-task-authority-contracts/tests/cross_contract.rs` and `kernel/helix-task-authority-contracts/tests/property.rs`
-- [ ] T010 [P] Write failing source/dependency, OS-neutral primitive, non-Serde/non-Clone authority-marker and seeded public-redaction tests in `kernel/helix-task-authority-contracts/tests/portability.rs` and `kernel/helix-task-authority-contracts/tests/redaction.rs`
+- [X] T009 [P] Write failing cross-contract primitive, duplicate-member, canonical-byte, digest/base64url, unknown-version and generated leaf-coverage tests in `kernel/helix-task-authority-contracts/tests/cross_contract.rs` and `kernel/helix-task-authority-contracts/tests/property.rs`
+- [X] T010 [P] Write failing source/dependency, OS-neutral primitive, non-Serde/non-Clone authority-marker and seeded public-redaction tests in `kernel/helix-task-authority-contracts/tests/portability.rs` and `kernel/helix-task-authority-contracts/tests/redaction.rs`
 
 ### Shared implementation
 
