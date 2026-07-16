@@ -38,7 +38,7 @@ const REMOVAL_MANIFEST_BYTES: &[u8] =
 const FAULT_REGISTRY_SHA256: &str =
     "afef6e0b580a8ea62906227e25c59e7b067c7aa5dc55d5458d9ccf92f0b1ff26";
 const REMOVAL_MANIFEST_SHA256: &str =
-    "754d0c993c744061293178a094080a4aa5e50ae06a762e492ec7cf65cb08f9c6";
+    "6c9422f47fd65ba7866750666a3f0e4c4c1e35944b8a1506c4a6ffa34ab2edf2";
 
 fn section_keys<'manifest>(manifest: &'manifest str, section: &str) -> BTreeSet<&'manifest str> {
     let header = format!("[{section}]");
@@ -417,6 +417,7 @@ fn removal_boundary_owns_the_portable_crate_and_all_direct_consumers() {
         vec![
             "helix-coordinator-sqlite".to_owned(),
             "helix-dispatch-inbox-sqlite".to_owned(),
+            "helix-task-authority-projections".to_owned(),
         ]
     );
 }

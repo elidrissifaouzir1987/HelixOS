@@ -3536,10 +3536,15 @@
     ],
     "added_prefixes_removed": [
       "contracts/fixtures/durable-dispatch-v1/",
+      "contracts/fixtures/durable-signed-task-authority-v1/",
       "graphify-out/memory/",
       "kernel/helix-dispatch-contracts/",
       "kernel/helix-dispatch-inbox-sqlite/",
-      "kernel/helix-plan-dispatch/"
+      "kernel/helix-plan-dispatch/",
+      "kernel/helix-task-authority-contracts/",
+      "kernel/helix-task-authority-projections/",
+      "kernel/helix-task-authority-sqlite/",
+      "kernel/helix-task-authority/"
     ],
     "added_prefixes_retained_for_audit": [
       "specs/005-durable-dispatch/",
@@ -3571,13 +3576,15 @@
       "kernel/helix-coordinator-sqlite/tests/contract.rs",
       "kernel/helix-coordinator-sqlite/tests/portability.rs",
       "kernel/helix-coordinator-sqlite/tests/schema_corruption.rs",
+      "kernel/helix-plan-eligibility/tests/portability.rs",
+      "kernel/helix-plan-preparation/tests/contract.rs",
       "specs/004-durable-preparation/evidence/README.md",
       "specs/004-durable-preparation/quickstart.md",
       "tools/plan004_removal_drill.py",
       "tools/plan004_supply_chain.py",
       "tools/tests/test_plan004_evidence.py"
     ],
-    "policy": "Every source delta must match exactly one class. Baseline modifications are restored from frozen Git blobs; executable or derived PLAN-005 additions are deleted; specifications, retained evidence, and verification tools remain non-executable audit history."
+    "policy": "Every source delta must match exactly one class. Baseline modifications are restored from frozen Git blobs; executable or derived PLAN-005 additions and classified downstream PLAN-006 executable surfaces are deleted; specifications, retained evidence, and verification tools remain non-executable audit history."
   },
   "schema": "helixos.plan-005-removal-protected-files/1",
   "working_tree_exclusions": {

@@ -719,6 +719,65 @@ dependencies = [
 ]
 
 [[package]]
+name = "helix-task-authority"
+version = "0.1.0"
+dependencies = [
+ "ed25519-dalek",
+ "getrandom 0.4.3",
+ "helix-contracts",
+ "helix-task-authority-contracts",
+ "proptest",
+ "serde_json",
+ "serde_json_canonicalizer",
+]
+
+[[package]]
+name = "helix-task-authority-contracts"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "ed25519-dalek",
+ "proptest",
+ "serde",
+ "serde_json",
+ "serde_json_canonicalizer",
+ "sha2",
+ "unicode-normalization",
+]
+
+[[package]]
+name = "helix-task-authority-projections"
+version = "0.1.0"
+dependencies = [
+ "ed25519-dalek",
+ "helix-contracts",
+ "helix-dispatch-contracts",
+ "helix-plan-dispatch",
+ "helix-plan-eligibility",
+ "helix-plan-preparation",
+ "helix-task-authority",
+ "helix-task-authority-contracts",
+ "helix-task-authority-sqlite",
+]
+
+[[package]]
+name = "helix-task-authority-sqlite"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "ed25519-dalek",
+ "fs-id",
+ "getrandom 0.4.3",
+ "helix-task-authority",
+ "helix-task-authority-contracts",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "serde_json_canonicalizer",
+ "sha2",
+]
+
+[[package]]
 name = "helixos-kernel"
 version = "0.0.1"
 dependencies = [

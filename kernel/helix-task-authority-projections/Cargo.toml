@@ -1,0 +1,22 @@
+[package]
+name = "helix-task-authority-projections"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Leaf adapters from signed task authority into reviewed HelixOS plan seams"
+
+[dependencies]
+helix-contracts = { path = "../helix-contracts" }
+helix-dispatch-contracts = { path = "../helix-dispatch-contracts" }
+helix-plan-dispatch = { path = "../helix-plan-dispatch" }
+helix-plan-eligibility = { path = "../helix-plan-eligibility" }
+helix-plan-preparation = { path = "../helix-plan-preparation" }
+helix-task-authority = { path = "../helix-task-authority" }
+
+[features]
+default = []
+
+[dev-dependencies]
+ed25519-dalek = { version = "=2.2.0", default-features = false, features = ["std"] }
+helix-task-authority-contracts = { path = "../helix-task-authority-contracts" }
+helix-task-authority-sqlite = { path = "../helix-task-authority-sqlite" }

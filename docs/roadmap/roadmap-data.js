@@ -9,16 +9,18 @@ window.HELIXOS_ROADMAP_DATA = {
     }
   ],
   "currentFocus": {
-    "description": "Record the PLAN-005 commit/tree baseline, full protected-object inventory, exact 27-path exclusion list/hash, existing package set and clean-scope reproduction commands in specs/006-durable-signed-task-authority/evidence/baseline.md",
+    "description": "Write failing cross-contract primitive, duplicate-member, canonical-byte, digest/base64url, unknown-version and generated leaf-coverage tests in kernel/helix-task-authority-contracts/tests/cross_contract.rs and kernel/helix-task-authority-contracts/tests/property.rs",
     "done": false,
-    "id": "T001",
+    "id": "T009",
     "kind": "implementation",
-    "phase": "Setup and Frozen Baseline",
-    "phaseNumber": 1,
+    "phase": "Foundational Contracts, Store and Control Boundaries",
+    "phaseNumber": 2,
     "planId": "PLAN-006",
     "planTitle": "Durable signed task authority",
-    "source": "specs/006-durable-signed-task-authority/tasks.md#L78",
-    "tags": []
+    "source": "specs/006-durable-signed-task-authority/tasks.md#L107",
+    "tags": [
+      "P"
+    ]
   },
   "definitionOfDone": [
     "architecture/threat model et Constitution Check sont \u00e0 jour",
@@ -4136,7 +4138,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "total": 98
     },
     {
-      "completed": 0,
+      "completed": 8,
       "conformance": {
         "ciWorkflow": null,
         "claimStatus": "pending-evidence",
@@ -4153,7 +4155,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "id": "PLAN-006",
       "phases": [
         {
-          "done": 0,
+          "done": 8,
           "number": 1,
           "title": "Setup and Frozen Baseline",
           "total": 8
@@ -4207,99 +4209,99 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 7
         }
       ],
-      "remaining": 110,
-      "taskPercent": 0.0,
+      "remaining": 102,
+      "taskPercent": 7.3,
       "taskSource": "specs/006-durable-signed-task-authority/tasks.md",
       "taskTitle": "Durable Signed Task Authority",
       "tasks": [
         {
           "description": "Record the PLAN-005 commit/tree baseline, full protected-object inventory, exact 27-path exclusion list/hash, existing package set and clean-scope reproduction commands in specs/006-durable-signed-task-authority/evidence/baseline.md",
-          "done": false,
+          "done": true,
           "id": "T001",
           "kind": "implementation",
           "phase": "Setup and Frozen Baseline",
           "phaseNumber": 1,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L78",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L84",
           "tags": []
         },
         {
-          "description": "Add the four edition-2021 unsafe-forbidden workspace members with exact dependency pins, bundled SQLite features, non-default test-fault-injection/controlled-benchmark features and one-way dependency direction in kernel/Cargo.toml, kernel/Cargo.lock, kernel/helix-task-authority-contracts/Cargo.toml, kernel/helix-task-authority/Cargo.toml, kernel/helix-task-authority-sqlite/Cargo.toml and kernel/helix-task-authority-projections/Cargo.toml",
-          "done": false,
+          "description": "Add the four edition-2021 unsafe-forbidden workspace members with exact dependency pins, bundled SQLite features, non-default test-fault-injection/controlled-benchmark features and one-way dependency direction in kernel/Cargo.toml, kernel/Cargo.lock, kernel/helix-task-authority-contracts/Cargo.toml, kernel/helix-task-authority/Cargo.toml, kernel/helix-task-authority-sqlite/Cargo.toml and kernel/helix-task-authority-projections/Cargo.toml; update only the frozen consumer allowlists to recognize the reviewed projection leaf in kernel/helix-plan-eligibility/tests/portability.rs, kernel/helix-plan-preparation/tests/contract.rs, kernel/helix-coordinator-sqlite/tests/portability.rs and kernel/helix-plan-dispatch/tests/portability.rs, the exact downstream workspace set in tools/tests/test_plan004_evidence.py, the PLAN-005 inbox removal allowlist in kernel/helix-dispatch-inbox-sqlite/tests/portability.rs, and the PLAN-005 downstream removal/supply projection in specs/005-durable-dispatch/evidence/removal-protected-files.json, specs/005-durable-dispatch/evidence/us4-restore-removal.md, tools/plan005_removal_drill.py, tools/plan005_supply_chain.py and tools/tests/test_plan005_evidence.py",
+          "done": true,
           "id": "T002",
           "kind": "implementation",
           "phase": "Setup and Frozen Baseline",
           "phaseNumber": 1,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L79",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L85",
           "tags": []
         },
         {
           "description": "Create the closed contract-crate module skeleton and redacted public surface in kernel/helix-task-authority-contracts/src/lib.rs",
-          "done": false,
+          "done": true,
           "id": "T003",
           "kind": "implementation",
           "phase": "Setup and Frozen Baseline",
           "phaseNumber": 1,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L80",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L86",
           "tags": [
             "P"
           ]
         },
         {
           "description": "Create the portable authority-core module skeleton and redacted public surface in kernel/helix-task-authority/src/lib.rs",
-          "done": false,
+          "done": true,
           "id": "T004",
           "kind": "implementation",
           "phase": "Setup and Frozen Baseline",
           "phaseNumber": 1,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L81",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L87",
           "tags": [
             "P"
           ]
         },
         {
           "description": "Create the SQLite implementation module skeleton with fault hooks absent from default builds in kernel/helix-task-authority-sqlite/src/lib.rs",
-          "done": false,
+          "done": true,
           "id": "T005",
           "kind": "implementation",
           "phase": "Setup and Frozen Baseline",
           "phaseNumber": 1,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L82",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L88",
           "tags": [
             "P"
           ]
         },
         {
           "description": "Create the leaf projection-adapter module skeleton without coordinator, inbox or legacy dependencies in kernel/helix-task-authority-projections/src/lib.rs",
-          "done": false,
+          "done": true,
           "id": "T006",
           "kind": "implementation",
           "phase": "Setup and Frozen Baseline",
           "phaseNumber": 1,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L83",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L89",
           "tags": [
             "P"
           ]
         },
         {
-          "description": "Create the versioned fixture inventory/golden-directory skeleton, pin PLAN-006 JSON/SQL/fixture/workflow/tool files to LF and ignore only generated evidence outputs in contracts/fixtures/durable-signed-task-authority-v1/README.md, contracts/fixtures/durable-signed-task-authority-v1/cases.json, contracts/fixtures/durable-signed-task-authority-v1/chain-cases.json, contracts/fixtures/durable-signed-task-authority-v1/expected-outcomes.json, contracts/fixtures/durable-signed-task-authority-v1/public-keys.json, .gitattributes and .gitignore",
-          "done": false,
+          "description": "Create the versioned fixture inventory/golden-directory skeleton, pin PLAN-006 JSON/SQL/fixture/workflow/tool files to LF and ignore only generated evidence outputs in contracts/fixtures/durable-signed-task-authority-v1/README.md, contracts/fixtures/durable-signed-task-authority-v1/golden/README.md, contracts/fixtures/durable-signed-task-authority-v1/cases.json, contracts/fixtures/durable-signed-task-authority-v1/chain-cases.json, contracts/fixtures/durable-signed-task-authority-v1/expected-outcomes.json, contracts/fixtures/durable-signed-task-authority-v1/public-keys.json, .gitattributes and .gitignore",
+          "done": true,
           "id": "T007",
           "kind": "implementation",
           "phase": "Setup and Frozen Baseline",
           "phaseNumber": 1,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L84",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L90",
           "tags": [
             "P"
           ]
         },
         {
           "description": "Run the locked PLAN-001 through PLAN-005 and protected-package baseline tests without formatting or staging excluded paths, then record exact Rust/Cargo/SQLite/source/lock/schema results in specs/006-durable-signed-task-authority/evidence/baseline.md",
-          "done": false,
+          "done": true,
           "id": "T008",
           "kind": "implementation",
           "phase": "Setup and Frozen Baseline",
           "phaseNumber": 1,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L85",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L91",
           "tags": []
         },
         {
@@ -4309,7 +4311,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
           "phaseNumber": 2,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L101",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L107",
           "tags": [
             "P"
           ]
@@ -4321,7 +4323,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
           "phaseNumber": 2,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L102",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L108",
           "tags": [
             "P"
           ]
@@ -4333,7 +4335,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
           "phaseNumber": 2,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L106",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L112",
           "tags": []
         },
         {
@@ -4343,7 +4345,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
           "phaseNumber": 2,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L107",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L113",
           "tags": [
             "P"
           ]
@@ -4355,7 +4357,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
           "phaseNumber": 2,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L108",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L114",
           "tags": [
             "P"
           ]
@@ -4367,7 +4369,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
           "phaseNumber": 2,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L109",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L115",
           "tags": []
         },
         {
@@ -4377,7 +4379,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
           "phaseNumber": 2,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L110",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L116",
           "tags": []
         },
         {
@@ -4387,7 +4389,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
           "phaseNumber": 2,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L111",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L117",
           "tags": []
         },
         {
@@ -4397,7 +4399,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
           "phaseNumber": 2,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L112",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L118",
           "tags": [
             "P"
           ]
@@ -4409,7 +4411,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
           "phaseNumber": 2,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L113",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L119",
           "tags": [
             "P"
           ]
@@ -4421,7 +4423,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
           "phaseNumber": 2,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L114",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L120",
           "tags": []
         },
         {
@@ -4431,7 +4433,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
           "phaseNumber": 2,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L115",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L121",
           "tags": []
         },
         {
@@ -4441,7 +4443,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
           "phaseNumber": 2,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L116",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L122",
           "tags": []
         },
         {
@@ -4451,7 +4453,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
           "phaseNumber": 2,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L117",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L123",
           "tags": [
             "P"
           ]
@@ -4463,7 +4465,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
           "phaseNumber": 2,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L118",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L124",
           "tags": [
             "P"
           ]
@@ -4475,7 +4477,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
           "phaseNumber": 2,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L119",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L125",
           "tags": []
         },
         {
@@ -4485,7 +4487,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
           "phaseNumber": 3,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L140",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L146",
           "tags": [
             "P",
             "US1"
@@ -4498,7 +4500,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
           "phaseNumber": 3,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L141",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L147",
           "tags": [
             "P",
             "US1"
@@ -4511,7 +4513,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
           "phaseNumber": 3,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L142",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L148",
           "tags": [
             "P",
             "US1"
@@ -4524,7 +4526,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
           "phaseNumber": 3,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L143",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L149",
           "tags": [
             "P",
             "US1"
@@ -4537,7 +4539,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
           "phaseNumber": 3,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L144",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L150",
           "tags": [
             "P",
             "US1"
@@ -4550,7 +4552,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
           "phaseNumber": 3,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L148",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L154",
           "tags": [
             "US1"
           ]
@@ -4562,7 +4564,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
           "phaseNumber": 3,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L149",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L155",
           "tags": [
             "US1"
           ]
@@ -4574,7 +4576,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
           "phaseNumber": 3,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L150",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L156",
           "tags": [
             "US1"
           ]
@@ -4586,7 +4588,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
           "phaseNumber": 3,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L151",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L157",
           "tags": [
             "US1"
           ]
@@ -4598,7 +4600,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
           "phaseNumber": 3,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L152",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L158",
           "tags": [
             "US1"
           ]
@@ -4610,7 +4612,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
           "phaseNumber": 3,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L153",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L159",
           "tags": [
             "US1"
           ]
@@ -4622,7 +4624,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
           "phaseNumber": 3,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L154",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L160",
           "tags": [
             "US1"
           ]
@@ -4634,7 +4636,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
           "phaseNumber": 3,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L155",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L161",
           "tags": [
             "US1"
           ]
@@ -4646,7 +4648,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
           "phaseNumber": 3,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L156",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L162",
           "tags": [
             "US1"
           ]
@@ -4658,7 +4660,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
           "phaseNumber": 4,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L176",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L182",
           "tags": [
             "P",
             "US2"
@@ -4671,7 +4673,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
           "phaseNumber": 4,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L177",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L183",
           "tags": [
             "P",
             "US2"
@@ -4684,7 +4686,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
           "phaseNumber": 4,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L178",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L184",
           "tags": [
             "P",
             "US2"
@@ -4697,7 +4699,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
           "phaseNumber": 4,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L179",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L185",
           "tags": [
             "P",
             "US2"
@@ -4710,7 +4712,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
           "phaseNumber": 4,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L183",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L189",
           "tags": [
             "US2"
           ]
@@ -4722,7 +4724,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
           "phaseNumber": 4,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L184",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L190",
           "tags": [
             "US2"
           ]
@@ -4734,7 +4736,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
           "phaseNumber": 4,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L185",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L191",
           "tags": [
             "US2"
           ]
@@ -4746,7 +4748,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
           "phaseNumber": 4,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L186",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L192",
           "tags": [
             "US2"
           ]
@@ -4758,7 +4760,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
           "phaseNumber": 4,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L187",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L193",
           "tags": [
             "US2"
           ]
@@ -4770,7 +4772,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
           "phaseNumber": 4,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L188",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L194",
           "tags": [
             "US2"
           ]
@@ -4782,7 +4784,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
           "phaseNumber": 4,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L189",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L195",
           "tags": [
             "US2"
           ]
@@ -4794,7 +4796,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
           "phaseNumber": 4,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L190",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L196",
           "tags": [
             "US2"
           ]
@@ -4806,7 +4808,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
           "phaseNumber": 4,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L191",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L197",
           "tags": [
             "US2"
           ]
@@ -4818,7 +4820,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
           "phaseNumber": 4,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L192",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L198",
           "tags": [
             "US2"
           ]
@@ -4830,7 +4832,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
           "phaseNumber": 5,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L211",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L217",
           "tags": [
             "P",
             "US3"
@@ -4843,7 +4845,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
           "phaseNumber": 5,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L212",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L218",
           "tags": [
             "P",
             "US3"
@@ -4856,7 +4858,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
           "phaseNumber": 5,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L213",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L219",
           "tags": [
             "P",
             "US3"
@@ -4869,7 +4871,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
           "phaseNumber": 5,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L214",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L220",
           "tags": [
             "P",
             "US3"
@@ -4882,7 +4884,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
           "phaseNumber": 5,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L218",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L224",
           "tags": [
             "US3"
           ]
@@ -4894,7 +4896,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
           "phaseNumber": 5,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L219",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L225",
           "tags": [
             "US3"
           ]
@@ -4906,7 +4908,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
           "phaseNumber": 5,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L220",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L226",
           "tags": [
             "US3"
           ]
@@ -4918,7 +4920,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
           "phaseNumber": 5,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L221",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L227",
           "tags": [
             "US3"
           ]
@@ -4930,7 +4932,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
           "phaseNumber": 5,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L222",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L228",
           "tags": [
             "US3"
           ]
@@ -4942,7 +4944,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
           "phaseNumber": 5,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L223",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L229",
           "tags": [
             "US3"
           ]
@@ -4954,7 +4956,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
           "phaseNumber": 5,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L224",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L230",
           "tags": [
             "US3"
           ]
@@ -4966,7 +4968,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 3 - Bind One Terminal Decision to One Exact Plan (Priority: P1)",
           "phaseNumber": 5,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L225",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L231",
           "tags": [
             "US3"
           ]
@@ -4978,7 +4980,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
           "phaseNumber": 6,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L246",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L252",
           "tags": [
             "P",
             "US4"
@@ -4991,7 +4993,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
           "phaseNumber": 6,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L247",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L253",
           "tags": [
             "P",
             "US4"
@@ -5004,7 +5006,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
           "phaseNumber": 6,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L248",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L254",
           "tags": [
             "P",
             "US4"
@@ -5017,7 +5019,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
           "phaseNumber": 6,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L249",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L255",
           "tags": [
             "P",
             "US4"
@@ -5030,7 +5032,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
           "phaseNumber": 6,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L250",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L256",
           "tags": [
             "P",
             "US4"
@@ -5043,7 +5045,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
           "phaseNumber": 6,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L251",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L257",
           "tags": [
             "P",
             "US4"
@@ -5056,7 +5058,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
           "phaseNumber": 6,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L255",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L261",
           "tags": [
             "US4"
           ]
@@ -5068,7 +5070,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
           "phaseNumber": 6,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L256",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L262",
           "tags": [
             "US4"
           ]
@@ -5080,7 +5082,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
           "phaseNumber": 6,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L257",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L263",
           "tags": [
             "US4"
           ]
@@ -5092,7 +5094,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
           "phaseNumber": 6,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L258",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L264",
           "tags": [
             "US4"
           ]
@@ -5104,7 +5106,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
           "phaseNumber": 6,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L259",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L265",
           "tags": [
             "US4"
           ]
@@ -5116,7 +5118,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
           "phaseNumber": 6,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L260",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L266",
           "tags": [
             "US4"
           ]
@@ -5128,7 +5130,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 4 - Replace Synthetic and Legacy Authority Views (Priority: P2)",
           "phaseNumber": 6,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L261",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L267",
           "tags": [
             "US4"
           ]
@@ -5140,7 +5142,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
           "phaseNumber": 7,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L280",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L286",
           "tags": [
             "P",
             "US5"
@@ -5153,7 +5155,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
           "phaseNumber": 7,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L281",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L287",
           "tags": [
             "P",
             "US5"
@@ -5166,7 +5168,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
           "phaseNumber": 7,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L282",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L288",
           "tags": [
             "P",
             "US5"
@@ -5179,7 +5181,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
           "phaseNumber": 7,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L283",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L289",
           "tags": [
             "P",
             "US5"
@@ -5192,7 +5194,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "evidence",
           "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
           "phaseNumber": 7,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L284",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L290",
           "tags": [
             "P",
             "US5"
@@ -5205,7 +5207,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "evidence",
           "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
           "phaseNumber": 7,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L288",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L294",
           "tags": [
             "US5"
           ]
@@ -5217,7 +5219,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
           "phaseNumber": 7,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L289",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L295",
           "tags": [
             "US5"
           ]
@@ -5229,7 +5231,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
           "phaseNumber": 7,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L290",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L296",
           "tags": [
             "US5"
           ]
@@ -5241,7 +5243,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
           "phaseNumber": 7,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L291",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L297",
           "tags": [
             "US5"
           ]
@@ -5253,7 +5255,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
           "phaseNumber": 7,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L292",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L298",
           "tags": [
             "US5"
           ]
@@ -5265,7 +5267,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
           "phaseNumber": 7,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L293",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L299",
           "tags": [
             "US5"
           ]
@@ -5277,7 +5279,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
           "phaseNumber": 7,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L294",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L300",
           "tags": [
             "US5"
           ]
@@ -5289,7 +5291,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
           "phaseNumber": 7,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L295",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L301",
           "tags": [
             "US5"
           ]
@@ -5301,7 +5303,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
           "phaseNumber": 7,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L296",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L302",
           "tags": [
             "US5"
           ]
@@ -5313,7 +5315,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 5 - Recover Authority Safely (Priority: P2)",
           "phaseNumber": 7,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L297",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L303",
           "tags": [
             "US5"
           ]
@@ -5325,7 +5327,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
           "phaseNumber": 8,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L316",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L322",
           "tags": [
             "P",
             "US6"
@@ -5338,7 +5340,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
           "phaseNumber": 8,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L317",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L323",
           "tags": [
             "P",
             "US6"
@@ -5351,7 +5353,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
           "phaseNumber": 8,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L318",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L324",
           "tags": [
             "P",
             "US6"
@@ -5364,7 +5366,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
           "phaseNumber": 8,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L322",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L328",
           "tags": [
             "US6"
           ]
@@ -5376,7 +5378,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
           "phaseNumber": 8,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L323",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L329",
           "tags": [
             "US6"
           ]
@@ -5388,19 +5390,19 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
           "phaseNumber": 8,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L324",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L330",
           "tags": [
             "US6"
           ]
         },
         {
-          "description": "Implement the detached exact-removal drill that deletes PLAN-006 executable surfaces, restores every baseline blob/mode, proves the frozen tree/package set, runs locked/offline prior tests and never touches the 27 excluded paths in tools/plan006_removal_drill.py",
+          "description": "Implement the detached exact-removal drill that deletes PLAN-006 executable surfaces, restores every baseline blob/mode plus the eleven PLAN-006-owned existing test/policy/evidence edits, proves the frozen tree/package set and original consumer/downstream/removal/supply oracles, runs locked/offline prior tests and never touches the 27 excluded paths in tools/plan006_removal_drill.py",
           "done": false,
           "id": "T099",
           "kind": "implementation",
           "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
           "phaseNumber": 8,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L325",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L331",
           "tags": [
             "US6"
           ]
@@ -5412,7 +5414,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
           "phaseNumber": 8,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L326",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L332",
           "tags": [
             "US6"
           ]
@@ -5424,7 +5426,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
           "phaseNumber": 8,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L327",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L333",
           "tags": [
             "US6"
           ]
@@ -5436,7 +5438,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
           "phaseNumber": 8,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L328",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L334",
           "tags": [
             "US6"
           ]
@@ -5448,7 +5450,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "User Story 6 - Produce Reusable Release Evidence (Priority: P3)",
           "phaseNumber": 8,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L329",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L335",
           "tags": [
             "US6"
           ]
@@ -5460,7 +5462,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Polish and Cross-Cutting Validation",
           "phaseNumber": 9,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L341",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L347",
           "tags": [
             "P"
           ]
@@ -5472,7 +5474,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Polish and Cross-Cutting Validation",
           "phaseNumber": 9,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L342",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L348",
           "tags": [
             "P"
           ]
@@ -5484,7 +5486,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Polish and Cross-Cutting Validation",
           "phaseNumber": 9,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L343",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L349",
           "tags": []
         },
         {
@@ -5494,7 +5496,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "evidence",
           "phase": "Polish and Cross-Cutting Validation",
           "phaseNumber": 9,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L344",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L350",
           "tags": []
         },
         {
@@ -5504,7 +5506,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Polish and Cross-Cutting Validation",
           "phaseNumber": 9,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L345",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L351",
           "tags": []
         },
         {
@@ -5514,7 +5516,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Polish and Cross-Cutting Validation",
           "phaseNumber": 9,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L346",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L352",
           "tags": []
         },
         {
@@ -5524,7 +5526,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "kind": "implementation",
           "phase": "Polish and Cross-Cutting Validation",
           "phaseNumber": 9,
-          "source": "specs/006-durable-signed-task-authority/tasks.md#L347",
+          "source": "specs/006-durable-signed-task-authority/tasks.md#L353",
           "tags": []
         }
       ],
@@ -5534,112 +5536,6 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "openTasks": [
     {
-      "description": "Record the PLAN-005 commit/tree baseline, full protected-object inventory, exact 27-path exclusion list/hash, existing package set and clean-scope reproduction commands in specs/006-durable-signed-task-authority/evidence/baseline.md",
-      "done": false,
-      "id": "T001",
-      "kind": "implementation",
-      "phase": "Setup and Frozen Baseline",
-      "phaseNumber": 1,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L78",
-      "tags": []
-    },
-    {
-      "description": "Add the four edition-2021 unsafe-forbidden workspace members with exact dependency pins, bundled SQLite features, non-default test-fault-injection/controlled-benchmark features and one-way dependency direction in kernel/Cargo.toml, kernel/Cargo.lock, kernel/helix-task-authority-contracts/Cargo.toml, kernel/helix-task-authority/Cargo.toml, kernel/helix-task-authority-sqlite/Cargo.toml and kernel/helix-task-authority-projections/Cargo.toml",
-      "done": false,
-      "id": "T002",
-      "kind": "implementation",
-      "phase": "Setup and Frozen Baseline",
-      "phaseNumber": 1,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L79",
-      "tags": []
-    },
-    {
-      "description": "Create the closed contract-crate module skeleton and redacted public surface in kernel/helix-task-authority-contracts/src/lib.rs",
-      "done": false,
-      "id": "T003",
-      "kind": "implementation",
-      "phase": "Setup and Frozen Baseline",
-      "phaseNumber": 1,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L80",
-      "tags": [
-        "P"
-      ]
-    },
-    {
-      "description": "Create the portable authority-core module skeleton and redacted public surface in kernel/helix-task-authority/src/lib.rs",
-      "done": false,
-      "id": "T004",
-      "kind": "implementation",
-      "phase": "Setup and Frozen Baseline",
-      "phaseNumber": 1,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L81",
-      "tags": [
-        "P"
-      ]
-    },
-    {
-      "description": "Create the SQLite implementation module skeleton with fault hooks absent from default builds in kernel/helix-task-authority-sqlite/src/lib.rs",
-      "done": false,
-      "id": "T005",
-      "kind": "implementation",
-      "phase": "Setup and Frozen Baseline",
-      "phaseNumber": 1,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L82",
-      "tags": [
-        "P"
-      ]
-    },
-    {
-      "description": "Create the leaf projection-adapter module skeleton without coordinator, inbox or legacy dependencies in kernel/helix-task-authority-projections/src/lib.rs",
-      "done": false,
-      "id": "T006",
-      "kind": "implementation",
-      "phase": "Setup and Frozen Baseline",
-      "phaseNumber": 1,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L83",
-      "tags": [
-        "P"
-      ]
-    },
-    {
-      "description": "Create the versioned fixture inventory/golden-directory skeleton, pin PLAN-006 JSON/SQL/fixture/workflow/tool files to LF and ignore only generated evidence outputs in contracts/fixtures/durable-signed-task-authority-v1/README.md, contracts/fixtures/durable-signed-task-authority-v1/cases.json, contracts/fixtures/durable-signed-task-authority-v1/chain-cases.json, contracts/fixtures/durable-signed-task-authority-v1/expected-outcomes.json, contracts/fixtures/durable-signed-task-authority-v1/public-keys.json, .gitattributes and .gitignore",
-      "done": false,
-      "id": "T007",
-      "kind": "implementation",
-      "phase": "Setup and Frozen Baseline",
-      "phaseNumber": 1,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L84",
-      "tags": [
-        "P"
-      ]
-    },
-    {
-      "description": "Run the locked PLAN-001 through PLAN-005 and protected-package baseline tests without formatting or staging excluded paths, then record exact Rust/Cargo/SQLite/source/lock/schema results in specs/006-durable-signed-task-authority/evidence/baseline.md",
-      "done": false,
-      "id": "T008",
-      "kind": "implementation",
-      "phase": "Setup and Frozen Baseline",
-      "phaseNumber": 1,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L85",
-      "tags": []
-    },
-    {
       "description": "Write failing cross-contract primitive, duplicate-member, canonical-byte, digest/base64url, unknown-version and generated leaf-coverage tests in kernel/helix-task-authority-contracts/tests/cross_contract.rs and kernel/helix-task-authority-contracts/tests/property.rs",
       "done": false,
       "id": "T009",
@@ -5648,7 +5544,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 2,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L101",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L107",
       "tags": [
         "P"
       ]
@@ -5662,7 +5558,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 2,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L102",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L108",
       "tags": [
         "P"
       ]
@@ -5676,7 +5572,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 2,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L106",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L112",
       "tags": []
     },
     {
@@ -5688,7 +5584,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 2,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L107",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L113",
       "tags": [
         "P"
       ]
@@ -5702,7 +5598,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 2,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L108",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L114",
       "tags": [
         "P"
       ]
@@ -5716,7 +5612,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 2,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L109",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L115",
       "tags": []
     },
     {
@@ -5728,7 +5624,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 2,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L110",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L116",
       "tags": []
     },
     {
@@ -5740,7 +5636,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 2,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L111",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L117",
       "tags": []
     },
     {
@@ -5752,7 +5648,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 2,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L112",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L118",
       "tags": [
         "P"
       ]
@@ -5766,7 +5662,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 2,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L113",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L119",
       "tags": [
         "P"
       ]
@@ -5780,7 +5676,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 2,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L114",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L120",
       "tags": []
     },
     {
@@ -5792,7 +5688,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 2,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L115",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L121",
       "tags": []
     },
     {
@@ -5804,7 +5700,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 2,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L116",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L122",
       "tags": []
     },
     {
@@ -5816,7 +5712,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 2,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L117",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L123",
       "tags": [
         "P"
       ]
@@ -5830,7 +5726,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 2,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L118",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L124",
       "tags": [
         "P"
       ]
@@ -5844,7 +5740,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 2,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L119",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L125",
       "tags": []
     },
     {
@@ -5856,7 +5752,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 3,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L140",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L146",
       "tags": [
         "P",
         "US1"
@@ -5871,7 +5767,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 3,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L141",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L147",
       "tags": [
         "P",
         "US1"
@@ -5886,7 +5782,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 3,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L142",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L148",
       "tags": [
         "P",
         "US1"
@@ -5901,7 +5797,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 3,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L143",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L149",
       "tags": [
         "P",
         "US1"
@@ -5916,7 +5812,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 3,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L144",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L150",
       "tags": [
         "P",
         "US1"
@@ -5931,7 +5827,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 3,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L148",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L154",
       "tags": [
         "US1"
       ]
@@ -5945,7 +5841,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 3,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L149",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L155",
       "tags": [
         "US1"
       ]
@@ -5959,7 +5855,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 3,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L150",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L156",
       "tags": [
         "US1"
       ]
@@ -5973,7 +5869,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 3,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L151",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L157",
       "tags": [
         "US1"
       ]
@@ -5987,7 +5883,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 3,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L152",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L158",
       "tags": [
         "US1"
       ]
@@ -6001,7 +5897,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 3,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L153",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L159",
       "tags": [
         "US1"
       ]
@@ -6015,7 +5911,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 3,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L154",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L160",
       "tags": [
         "US1"
       ]
@@ -6029,7 +5925,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 3,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L155",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L161",
       "tags": [
         "US1"
       ]
@@ -6043,7 +5939,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 3,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L156",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L162",
       "tags": [
         "US1"
       ]
@@ -6057,7 +5953,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 4,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L176",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L182",
       "tags": [
         "P",
         "US2"
@@ -6072,7 +5968,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 4,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L177",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L183",
       "tags": [
         "P",
         "US2"
@@ -6087,7 +5983,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 4,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L178",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L184",
       "tags": [
         "P",
         "US2"
@@ -6102,7 +5998,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 4,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L179",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L185",
       "tags": [
         "P",
         "US2"
@@ -6117,7 +6013,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 4,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L183",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L189",
       "tags": [
         "US2"
       ]
@@ -6131,7 +6027,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 4,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L184",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L190",
       "tags": [
         "US2"
       ]
@@ -6145,7 +6041,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 4,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L185",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L191",
       "tags": [
         "US2"
       ]
@@ -6159,7 +6055,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 4,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L186",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L192",
       "tags": [
         "US2"
       ]
@@ -6173,7 +6069,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 4,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L187",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L193",
       "tags": [
         "US2"
       ]
@@ -6187,7 +6083,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 4,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L188",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L194",
       "tags": [
         "US2"
       ]
@@ -6201,7 +6097,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 4,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L189",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L195",
       "tags": [
         "US2"
       ]
@@ -6215,7 +6111,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 4,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L190",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L196",
       "tags": [
         "US2"
       ]
@@ -6229,7 +6125,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 4,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L191",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L197",
       "tags": [
         "US2"
       ]
@@ -6243,7 +6139,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 4,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L192",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L198",
       "tags": [
         "US2"
       ]
@@ -6257,7 +6153,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 5,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L211",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L217",
       "tags": [
         "P",
         "US3"
@@ -6272,7 +6168,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 5,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L212",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L218",
       "tags": [
         "P",
         "US3"
@@ -6287,7 +6183,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 5,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L213",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L219",
       "tags": [
         "P",
         "US3"
@@ -6302,7 +6198,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 5,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L214",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L220",
       "tags": [
         "P",
         "US3"
@@ -6317,7 +6213,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 5,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L218",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L224",
       "tags": [
         "US3"
       ]
@@ -6331,7 +6227,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 5,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L219",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L225",
       "tags": [
         "US3"
       ]
@@ -6345,7 +6241,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 5,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L220",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L226",
       "tags": [
         "US3"
       ]
@@ -6359,7 +6255,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 5,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L221",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L227",
       "tags": [
         "US3"
       ]
@@ -6373,7 +6269,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 5,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L222",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L228",
       "tags": [
         "US3"
       ]
@@ -6387,7 +6283,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 5,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L223",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L229",
       "tags": [
         "US3"
       ]
@@ -6401,7 +6297,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 5,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L224",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L230",
       "tags": [
         "US3"
       ]
@@ -6415,7 +6311,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 5,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L225",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L231",
       "tags": [
         "US3"
       ]
@@ -6429,7 +6325,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 6,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L246",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L252",
       "tags": [
         "P",
         "US4"
@@ -6444,7 +6340,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 6,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L247",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L253",
       "tags": [
         "P",
         "US4"
@@ -6459,7 +6355,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 6,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L248",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L254",
       "tags": [
         "P",
         "US4"
@@ -6474,7 +6370,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 6,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L249",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L255",
       "tags": [
         "P",
         "US4"
@@ -6489,7 +6385,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 6,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L250",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L256",
       "tags": [
         "P",
         "US4"
@@ -6504,7 +6400,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 6,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L251",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L257",
       "tags": [
         "P",
         "US4"
@@ -6519,7 +6415,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 6,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L255",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L261",
       "tags": [
         "US4"
       ]
@@ -6533,7 +6429,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 6,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L256",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L262",
       "tags": [
         "US4"
       ]
@@ -6547,7 +6443,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 6,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L257",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L263",
       "tags": [
         "US4"
       ]
@@ -6561,7 +6457,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 6,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L258",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L264",
       "tags": [
         "US4"
       ]
@@ -6575,7 +6471,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 6,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L259",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L265",
       "tags": [
         "US4"
       ]
@@ -6589,7 +6485,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 6,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L260",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L266",
       "tags": [
         "US4"
       ]
@@ -6603,7 +6499,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 6,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L261",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L267",
       "tags": [
         "US4"
       ]
@@ -6617,7 +6513,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 7,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L280",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L286",
       "tags": [
         "P",
         "US5"
@@ -6632,7 +6528,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 7,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L281",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L287",
       "tags": [
         "P",
         "US5"
@@ -6647,7 +6543,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 7,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L282",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L288",
       "tags": [
         "P",
         "US5"
@@ -6662,7 +6558,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 7,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L283",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L289",
       "tags": [
         "P",
         "US5"
@@ -6677,7 +6573,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 7,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L284",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L290",
       "tags": [
         "P",
         "US5"
@@ -6692,7 +6588,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 7,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L288",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L294",
       "tags": [
         "US5"
       ]
@@ -6706,7 +6602,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 7,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L289",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L295",
       "tags": [
         "US5"
       ]
@@ -6720,7 +6616,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 7,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L290",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L296",
       "tags": [
         "US5"
       ]
@@ -6734,7 +6630,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 7,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L291",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L297",
       "tags": [
         "US5"
       ]
@@ -6748,7 +6644,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 7,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L292",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L298",
       "tags": [
         "US5"
       ]
@@ -6762,7 +6658,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 7,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L293",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L299",
       "tags": [
         "US5"
       ]
@@ -6776,7 +6672,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 7,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L294",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L300",
       "tags": [
         "US5"
       ]
@@ -6790,7 +6686,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 7,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L295",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L301",
       "tags": [
         "US5"
       ]
@@ -6804,7 +6700,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 7,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L296",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L302",
       "tags": [
         "US5"
       ]
@@ -6818,7 +6714,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 7,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L297",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L303",
       "tags": [
         "US5"
       ]
@@ -6832,7 +6728,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 8,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L316",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L322",
       "tags": [
         "P",
         "US6"
@@ -6847,7 +6743,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 8,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L317",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L323",
       "tags": [
         "P",
         "US6"
@@ -6862,7 +6758,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 8,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L318",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L324",
       "tags": [
         "P",
         "US6"
@@ -6877,7 +6773,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 8,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L322",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L328",
       "tags": [
         "US6"
       ]
@@ -6891,7 +6787,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 8,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L323",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L329",
       "tags": [
         "US6"
       ]
@@ -6905,13 +6801,13 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 8,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L324",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L330",
       "tags": [
         "US6"
       ]
     },
     {
-      "description": "Implement the detached exact-removal drill that deletes PLAN-006 executable surfaces, restores every baseline blob/mode, proves the frozen tree/package set, runs locked/offline prior tests and never touches the 27 excluded paths in tools/plan006_removal_drill.py",
+      "description": "Implement the detached exact-removal drill that deletes PLAN-006 executable surfaces, restores every baseline blob/mode plus the eleven PLAN-006-owned existing test/policy/evidence edits, proves the frozen tree/package set and original consumer/downstream/removal/supply oracles, runs locked/offline prior tests and never touches the 27 excluded paths in tools/plan006_removal_drill.py",
       "done": false,
       "id": "T099",
       "kind": "implementation",
@@ -6919,7 +6815,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 8,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L325",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L331",
       "tags": [
         "US6"
       ]
@@ -6933,7 +6829,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 8,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L326",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L332",
       "tags": [
         "US6"
       ]
@@ -6947,7 +6843,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 8,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L327",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L333",
       "tags": [
         "US6"
       ]
@@ -6961,7 +6857,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 8,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L328",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L334",
       "tags": [
         "US6"
       ]
@@ -6975,7 +6871,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 8,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L329",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L335",
       "tags": [
         "US6"
       ]
@@ -6989,7 +6885,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 9,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L341",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L347",
       "tags": [
         "P"
       ]
@@ -7003,7 +6899,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 9,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L342",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L348",
       "tags": [
         "P"
       ]
@@ -7017,7 +6913,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 9,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L343",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L349",
       "tags": []
     },
     {
@@ -7029,7 +6925,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 9,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L344",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L350",
       "tags": []
     },
     {
@@ -7041,7 +6937,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 9,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L345",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L351",
       "tags": []
     },
     {
@@ -7053,7 +6949,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 9,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L346",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L352",
       "tags": []
     },
     {
@@ -7065,13 +6961,13 @@ window.HELIXOS_ROADMAP_DATA = {
       "phaseNumber": 9,
       "planId": "PLAN-006",
       "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L347",
+      "source": "specs/006-durable-signed-task-authority/tasks.md#L353",
       "tags": []
     }
   ],
   "roadmapDate": "2026-07-13",
   "schema": "helixos.roadmap-data/1",
-  "sourceFingerprint": "2523fa2838d8379b0dc0a13ecff7e37b15242ec8e3b3188e3e529fd7735667e2",
+  "sourceFingerprint": "055d1a39410f19733df7ca94d11d0bede6f43883c6257568b99e3b3c8cdc0fe7",
   "sources": [
     {
       "path": "ROADMAP-SPECS.md",
@@ -7103,7 +6999,7 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "specs/006-durable-signed-task-authority/tasks.md",
-      "sha256": "d3c29d794925c9429e13d75fc90eb9c9662b2d6054240ff770914429871e168c"
+      "sha256": "37baf66d530d58270f0626a734143f0f48a5d0aa0ecdb79018aa3e44d2a83543"
     }
   ],
   "strategicStages": [
@@ -7122,7 +7018,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "id": "R1",
       "status": "active",
       "title": "Fondation portable et coordinateur durable",
-      "trackedTaskCompleted": 319,
+      "trackedTaskCompleted": 327,
       "trackedTaskTotal": 429
     },
     {
@@ -7184,12 +7080,12 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "summary": {
     "acceptedClaims": 0,
-    "completedTasks": 319,
+    "completedTasks": 327,
     "focusPlan": "PLAN-006",
-    "remainingTasks": 110,
+    "remainingTasks": 102,
     "strategicStage": "R1",
     "totalClaims": 6,
-    "trackedTaskPercent": 74.4,
+    "trackedTaskPercent": 76.2,
     "trackedTasks": 429
   }
 };

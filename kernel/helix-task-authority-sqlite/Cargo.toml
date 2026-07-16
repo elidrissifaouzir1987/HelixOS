@@ -1,0 +1,29 @@
+[package]
+name = "helix-task-authority-sqlite"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "SQLite-backed durable signed task authority for HelixOS"
+
+[dependencies]
+base64 = { version = "=0.22.1", default-features = false, features = ["std"] }
+ed25519-dalek = { version = "=2.2.0", default-features = false, features = ["std"] }
+getrandom = { version = "=0.4.3", default-features = false }
+helix-task-authority = { path = "../helix-task-authority" }
+helix-task-authority-contracts = { path = "../helix-task-authority-contracts" }
+rusqlite = { version = "=0.40.1", default-features = false, features = ["backup", "bundled", "serialize"] }
+serde = { version = "=1.0.228", default-features = false, features = ["derive", "std"] }
+serde_json = { version = "=1.0.150", default-features = false, features = ["std"] }
+serde_json_canonicalizer = "=0.3.2"
+sha2 = { version = "=0.10.9", default-features = false }
+
+[target.'cfg(windows)'.dependencies]
+fs-id = { version = "=0.2.0", default-features = false }
+
+[features]
+default = []
+controlled-benchmark = ["helix-task-authority/controlled-benchmark"]
+test-fault-injection = ["helix-task-authority/test-fault-injection"]
+
+[dev-dependencies]
+ed25519-dalek = { version = "=2.2.0", default-features = false, features = ["std"] }

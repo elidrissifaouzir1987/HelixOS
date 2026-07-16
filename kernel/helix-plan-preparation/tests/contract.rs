@@ -192,8 +192,11 @@ fn only_the_reviewed_sqlite_coordinator_depends_on_preparation() {
     coordinator_consumers.sort();
     assert_eq!(
         preparation_consumers,
-        vec!["helix-coordinator-sqlite".to_owned()],
-        "legacy, MCP, dispatch, grant and effect-adapter crates must not reach preparation"
+        vec![
+            "helix-coordinator-sqlite".to_owned(),
+            "helix-task-authority-projections".to_owned(),
+        ],
+        "only the reviewed coordinator and signed-authority projection leaves may reach preparation"
     );
     assert!(
         coordinator_consumers.is_empty(),

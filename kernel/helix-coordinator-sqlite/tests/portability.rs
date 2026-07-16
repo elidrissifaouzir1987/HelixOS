@@ -524,7 +524,10 @@ fn feature_004_dependency_and_removal_boundary_is_exact() {
     coordinator_consumers.sort();
     assert_eq!(
         preparation_consumers,
-        vec!["helix-coordinator-sqlite".to_owned()]
+        vec![
+            "helix-coordinator-sqlite".to_owned(),
+            "helix-task-authority-projections".to_owned(),
+        ]
     );
     assert!(coordinator_consumers.is_empty());
 

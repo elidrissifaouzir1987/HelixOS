@@ -49,8 +49,23 @@ trust boundaries and make acceptance claims ambiguous.
    projections to PLAN-002/004/005 interfaces.
 
 Dependencies flow from PLAN-006 toward existing PLAN-001/002/004/005 APIs.
-No existing signed wire changes and no protected legacy runtime source is
-modified. All new production crates use `#![forbid(unsafe_code)]`.
+No existing signed wire or production source changes and no protected legacy runtime
+source is modified. The exact direct-consumer guards in
+`kernel/helix-plan-eligibility/tests/portability.rs`,
+`kernel/helix-plan-preparation/tests/contract.rs`,
+`kernel/helix-coordinator-sqlite/tests/portability.rs` and
+`kernel/helix-plan-dispatch/tests/portability.rs` may recognize only the new reviewed
+projection leaf. The semantic workspace-removal guard in
+`tools/tests/test_plan004_evidence.py` may recognize all four PLAN-006 crates as
+downstream members while retaining the exact prior sets. PLAN-005's removal manifest,
+removal driver, supply verifier, evidence test and retained removal record may classify
+the PLAN-006 crate/fixture/Graphify prefixes and current lock extension, including
+repinning only the exact full-lock-bound RustSec report and production-graph artifact
+digests while preserving the selected package, edge, external dependency, license and
+SBOM oracles. The PLAN-005 inbox portability guard may recognize the same reviewed
+removal-prefix set. These seven test edits and four retained PLAN-005 policy/evidence
+artifacts belong to the PLAN-006 integration and removal footprint. All new production
+crates use `#![forbid(unsafe_code)]`.
 
 **Rationale**: Contract, authority semantics, native persistence and downstream
 projection have different portability and dependency surfaces. The split lets
@@ -411,6 +426,13 @@ redaction, portability, controlled performance/overload, supply chain and exact
 removal. The removal baseline is commit
 `c324f528dc76007a599005e5cc054dcbe1370b1a`, tree
 `c70a3f2157498dd880822f97ef74d3d4757347d7`.
+Exact removal also restores the four existing dependency-policy test blobs changed
+only to recognize `helix-task-authority-projections` plus the PLAN-004 workspace-
+removal test changed to recognize all four PLAN-006 crates, the two PLAN-005 policy
+tests that validate the inbox removal allowlist and downstream removal/lock projection,
+and the four retained PLAN-005 policy/evidence artifacts synchronized by Phase 1. The
+baseline package set, original expected-consumer/downstream lists and original PLAN-005
+manifest/oracles must pass after every PLAN-006 crate is deleted.
 
 The catalogue maps only `REQUEST-001`, `SEC-002` and `SEC-003` and remains
 `pending-evidence` until exact-commit workflow artifacts satisfy their own gates.

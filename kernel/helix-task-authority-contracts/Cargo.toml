@@ -1,0 +1,21 @@
+[package]
+name = "helix-task-authority-contracts"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Canonical signed task-authority contracts for HelixOS"
+
+[dependencies]
+base64 = { version = "=0.22.1", default-features = false, features = ["std"] }
+ed25519-dalek = { version = "=2.2.0", default-features = false, features = ["std"] }
+serde = { version = "=1.0.228", default-features = false, features = ["derive", "std"] }
+serde_json = { version = "=1.0.150", default-features = false, features = ["std"] }
+serde_json_canonicalizer = "=0.3.2"
+sha2 = { version = "=0.10.9", default-features = false }
+unicode-normalization = "=0.1.25"
+
+[features]
+default = []
+
+[dev-dependencies]
+proptest = "=1.11.0"

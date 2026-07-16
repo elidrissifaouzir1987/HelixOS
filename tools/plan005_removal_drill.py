@@ -31,7 +31,7 @@ EXCLUSION_LIST_SHA256 = (
     "cd755b4089997ff229a31980b81473eba48504de241903fccef0e908fdbea530"
 )
 PROTECTED_MANIFEST_SHA256 = (
-    "754d0c993c744061293178a094080a4aa5e50ae06a762e492ec7cf65cb08f9c6"
+    "6c9422f47fd65ba7866750666a3f0e4c4c1e35944b8a1506c4a6ffa34ab2edf2"
 )
 MANIFEST_SCHEMA = "helixos.plan-005-removal-protected-files/1"
 REPORT_SCHEMA = "helixos.plan-005-removal-drill/1"
@@ -600,7 +600,9 @@ def _classify_source_delta(
                 )
             )
         if path.startswith("graphify-out/memory/") and not re.search(
-            r"(?:plan_005|durable_dispatch|helix_plan_dispatch|t0[0-9]{2})",
+            r"(?:plan_005|durable_dispatch|helix_plan_dispatch|"
+            r"plan_006|durable_signed_task_authority|helix_task_authority|"
+            r"t0[0-9]{2})",
             PurePosixPath(path).name,
         ):
             raise EvidenceError(
