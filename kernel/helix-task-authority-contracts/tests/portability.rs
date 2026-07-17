@@ -214,6 +214,110 @@ fn code_without_line_comments(source: &str) -> String {
         .join("\n")
 }
 
+fn source_with_reviewed_json_float_bridge_neutralized(name: &str, source: &str) -> String {
+    if name != "canonical.rs" {
+        return source.to_owned();
+    }
+
+    let visitor = braced_block(source, "impl<'de> Visitor<'de> for UniqueVisitor");
+    assert_eq!(
+        visitor.matches("fn visit_f64<").count(),
+        1,
+        "the duplicate-aware JSON visitor must have one reviewed float bridge"
+    );
+    let bridge = braced_block(visitor, "fn visit_f64<");
+    const REVIEWED_BRIDGE: &str = r#"fn visit_f64<E>(self, value: f64) -> std::result::Result<Self::Value, E>
+    where
+        E: de::Error,
+    {
+        Number::from_f64(value)
+            .map(Value::Number)
+            .ok_or_else(|| E::custom("non-finite JSON number"))
+    }"#;
+    assert_eq!(
+        bridge, REVIEWED_BRIDGE,
+        "the duplicate-aware JSON float bridge changed outside its reviewed adapter shape"
+    );
+    let floating_tokens = identifier_tokens(bridge)
+        .into_iter()
+        .filter(|token| token.contains("f32") || token.contains("f64"))
+        .collect::<Vec<_>>();
+    assert_eq!(
+        floating_tokens,
+        ["visit_f64", "f64", "from_f64"],
+        "the JSON float bridge gained an unreviewed floating-point use"
+    );
+
+    // Keep the complete bridge visible to every non-floating portability scan. Only the
+    // three exact adapter identifiers reviewed above are neutralized for the float ban.
+    let neutralized_bridge = bridge
+        .replacen("visit_f64", "visit_json_number", 1)
+        .replacen("from_f64", "from_json_number", 1)
+        .replacen("f64", "ReviewedJsonNumber", 1);
+    source.replacen(bridge, &neutralized_bridge, 1)
+}
+
+fn assert_no_forbidden_portable_primitives(production: &str) {
+    for forbidden_fragment in [
+        "std::fs",
+        "std::path",
+        "std::net",
+        "std::os",
+        "std::process",
+        "std::env",
+        "std::time",
+        "cfg(windows)",
+        "cfg(unix)",
+        "async fn",
+        "println!",
+        "eprintln!",
+        "dbg!",
+        "tracing::",
+        "log::",
+        "unsafe {",
+        "unsafe fn",
+    ] {
+        assert!(
+            !production.contains(forbidden_fragment),
+            "portable production source contains forbidden primitive {forbidden_fragment}"
+        );
+    }
+
+    let tokens = identifier_tokens(production);
+    for forbidden_identifier in [
+        "PathBuf",
+        "OsStr",
+        "OsString",
+        "SystemTime",
+        "Instant",
+        "target_os",
+        "target_arch",
+        "target_family",
+        "RawFd",
+        "OwnedFd",
+        "RawHandle",
+        "OwnedHandle",
+        "RawSocket",
+        "OwnedSocket",
+        "TcpStream",
+        "UdpSocket",
+        "UnixStream",
+        "rusqlite",
+        "sqlite3",
+        "tokio",
+        "reqwest",
+        "hyper",
+        "tonic",
+        "f32",
+        "f64",
+    ] {
+        assert!(
+            !tokens.contains(&forbidden_identifier),
+            "portable production source contains forbidden primitive {forbidden_identifier}"
+        );
+    }
+}
+
 #[test]
 fn foundation_sources_are_private_complete_and_os_neutral() {
     let required = [
@@ -243,59 +347,60 @@ fn foundation_sources_are_private_complete_and_os_neutral() {
 
     let production = required
         .iter()
-        .map(|name| code_without_line_comments(&production_source(name).unwrap()))
+        .map(|name| {
+            let source = code_without_line_comments(&production_source(name).unwrap());
+            source_with_reviewed_json_float_bridge_neutralized(name, &source)
+        })
         .chain([lib])
         .collect::<Vec<_>>()
         .join("\n");
-    for forbidden in [
-        "std::fs",
-        "std::path",
-        "PathBuf",
-        "OsStr",
-        "OsString",
-        "std::net",
-        "std::os",
-        "std::process",
-        "std::env",
-        "std::time",
-        "SystemTime",
-        "Instant",
-        "target_os",
-        "target_arch",
-        "target_family",
-        "cfg(windows)",
-        "cfg(unix)",
-        "RawFd",
-        "OwnedFd",
-        "RawHandle",
-        "OwnedHandle",
-        "RawSocket",
-        "OwnedSocket",
-        "TcpStream",
-        "UdpSocket",
-        "UnixStream",
-        "rusqlite",
-        "sqlite3",
-        "tokio",
-        "async fn",
-        "reqwest",
-        "hyper",
-        "tonic",
-        "f32",
-        "f64",
-        "println!",
-        "eprintln!",
-        "dbg!",
-        "tracing::",
-        "log::",
-        "unsafe {",
-        "unsafe fn",
-    ] {
+    assert_no_forbidden_portable_primitives(&production);
+}
+
+#[test]
+fn canonical_float_bridge_exception_is_exact_and_authority_fields_stay_forbidden() {
+    let canonical = code_without_line_comments(&production_source("canonical.rs").unwrap());
+    let scanned = source_with_reviewed_json_float_bridge_neutralized("canonical.rs", &canonical);
+    assert_no_forbidden_portable_primitives(&scanned);
+
+    for floating_type in ["f32", "f64"] {
+        let seeded = format!("{scanned}\npub struct AuthorityProbe {{ budget: {floating_type} }}");
         assert!(
-            !production.contains(forbidden),
-            "portable production source contains forbidden primitive {forbidden}"
+            std::panic::catch_unwind(|| assert_no_forbidden_portable_primitives(&seeded)).is_err(),
+            "authority field {floating_type} escaped the portability oracle"
         );
     }
+
+    assert_no_forbidden_portable_primitives("fn earliest_deadline_monotonic_ms() {}");
+    assert!(
+        std::panic::catch_unwind(|| {
+            assert_no_forbidden_portable_primitives("use tonic::transport;")
+        })
+        .is_err(),
+        "the exact forbidden tonic crate identifier escaped the portability oracle"
+    );
+
+    let bridge = braced_block(
+        braced_block(&canonical, "impl<'de> Visitor<'de> for UniqueVisitor"),
+        "fn visit_f64<",
+    );
+    let seeded_bridge = bridge.replacen(
+        "Number::from_f64(value)",
+        "use tonic::transport;\n        Number::from_f64(value)",
+        1,
+    );
+    let seeded_inside_bridge = canonical.replacen(bridge, &seeded_bridge, 1);
+    assert!(
+        std::panic::catch_unwind(|| {
+            let scanned = source_with_reviewed_json_float_bridge_neutralized(
+                "canonical.rs",
+                &seeded_inside_bridge,
+            );
+            assert_no_forbidden_portable_primitives(&scanned);
+        })
+        .is_err(),
+        "a forbidden primitive inside the reviewed float bridge escaped the oracle"
+    );
 }
 
 fn declaration_prefix<'a>(source: &'a str, declaration: &str) -> &'a str {
