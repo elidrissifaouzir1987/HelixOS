@@ -9,16 +9,18 @@ window.HELIXOS_ROADMAP_DATA = {
     }
   ],
   "currentFocus": {
-    "description": "Define trusted clock/deadline capture, 1,024 ordinary plus 32 reserved-control capacity, unified non-cloneable authority guard custody and nonconstructible projection-provider traits in kernel/helix-task-authority/src/control.rs, kernel/helix-task-authority/src/guard.rs and kernel/helix-task-authority/src/projection.rs",
+    "description": "Embed and digest the exact strict HLXA v1 normalized SQL contract, required tables/triggers/indexes and application/schema constants in kernel/helix-task-authority-sqlite/src/schema.rs from specs/006-durable-signed-task-authority/contracts/task-authority-store-schema-v1.sql",
     "done": false,
-    "id": "T016",
+    "id": "T017",
     "kind": "implementation",
     "phase": "Foundational Contracts, Store and Control Boundaries",
     "phaseNumber": 2,
     "planId": "PLAN-006",
     "planTitle": "Durable signed task authority",
-    "source": "specs/006-durable-signed-task-authority/tasks.md#L117",
-    "tags": []
+    "source": "specs/006-durable-signed-task-authority/tasks.md#L118",
+    "tags": [
+      "P"
+    ]
   },
   "definitionOfDone": [
     "architecture/threat model et Constitution Check sont \u00e0 jour",
@@ -4136,7 +4138,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "total": 98
     },
     {
-      "completed": 15,
+      "completed": 16,
       "conformance": {
         "ciWorkflow": null,
         "claimStatus": "pending-evidence",
@@ -4159,7 +4161,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 8
         },
         {
-          "done": 7,
+          "done": 8,
           "number": 2,
           "title": "Foundational Contracts, Store and Control Boundaries",
           "total": 16
@@ -4207,8 +4209,8 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 7
         }
       ],
-      "remaining": 95,
-      "taskPercent": 13.6,
+      "remaining": 94,
+      "taskPercent": 14.5,
       "taskSource": "specs/006-durable-signed-task-authority/tasks.md",
       "taskTitle": "Durable Signed Task Authority",
       "tasks": [
@@ -4382,7 +4384,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Define trusted clock/deadline capture, 1,024 ordinary plus 32 reserved-control capacity, unified non-cloneable authority guard custody and nonconstructible projection-provider traits in kernel/helix-task-authority/src/control.rs, kernel/helix-task-authority/src/guard.rs and kernel/helix-task-authority/src/projection.rs",
-          "done": false,
+          "done": true,
           "id": "T016",
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
@@ -5533,18 +5535,6 @@ window.HELIXOS_ROADMAP_DATA = {
     }
   ],
   "openTasks": [
-    {
-      "description": "Define trusted clock/deadline capture, 1,024 ordinary plus 32 reserved-control capacity, unified non-cloneable authority guard custody and nonconstructible projection-provider traits in kernel/helix-task-authority/src/control.rs, kernel/helix-task-authority/src/guard.rs and kernel/helix-task-authority/src/projection.rs",
-      "done": false,
-      "id": "T016",
-      "kind": "implementation",
-      "phase": "Foundational Contracts, Store and Control Boundaries",
-      "phaseNumber": 2,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L117",
-      "tags": []
-    },
     {
       "description": "Embed and digest the exact strict HLXA v1 normalized SQL contract, required tables/triggers/indexes and application/schema constants in kernel/helix-task-authority-sqlite/src/schema.rs from specs/006-durable-signed-task-authority/contracts/task-authority-store-schema-v1.sql",
       "done": false,
@@ -6873,7 +6863,7 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "roadmapDate": "2026-07-13",
   "schema": "helixos.roadmap-data/1",
-  "sourceFingerprint": "b291a994954bee560a75d3ee007dc23a27ef021ef9d72e40f6860e9eced8afb0",
+  "sourceFingerprint": "1fd68b7412a3ee8615afb2cd18663a4f2f373fca10d282d741f2136e75961614",
   "sources": [
     {
       "path": "ROADMAP-SPECS.md",
@@ -6905,7 +6895,7 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "specs/006-durable-signed-task-authority/tasks.md",
-      "sha256": "25b71d2322d55753f3a9e3f515c6c21ecd6da2efda6cf29fe045270a05c035db"
+      "sha256": "d93ff971e38a20636cefc91b256eca1ea16a0a3071e0b6cee825c70d2e865422"
     }
   ],
   "strategicStages": [
@@ -6924,7 +6914,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "id": "R1",
       "status": "active",
       "title": "Fondation portable et coordinateur durable",
-      "trackedTaskCompleted": 334,
+      "trackedTaskCompleted": 335,
       "trackedTaskTotal": 429
     },
     {
@@ -6986,12 +6976,12 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "summary": {
     "acceptedClaims": 0,
-    "completedTasks": 334,
+    "completedTasks": 335,
     "focusPlan": "PLAN-006",
-    "remainingTasks": 95,
+    "remainingTasks": 94,
     "strategicStage": "R1",
     "totalClaims": 6,
-    "trackedTaskPercent": 77.9,
+    "trackedTaskPercent": 78.1,
     "trackedTasks": 429
   }
 };
