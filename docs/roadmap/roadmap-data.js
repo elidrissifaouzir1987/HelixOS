@@ -9,18 +9,16 @@ window.HELIXOS_ROADMAP_DATA = {
     }
   ],
   "currentFocus": {
-    "description": "Implement safe integers, identifiers, NFC/resource components, closed enums, checked time/bound validation and payload-free public error codes in kernel/helix-task-authority-contracts/src/validation.rs and kernel/helix-task-authority-contracts/src/error.rs",
+    "description": "Expose only closed signed/authentic marker APIs with redacted Debug, no defaulted fields and no caller-constructible current authority in kernel/helix-task-authority-contracts/src/lib.rs",
     "done": false,
-    "id": "T013",
+    "id": "T014",
     "kind": "implementation",
     "phase": "Foundational Contracts, Store and Control Boundaries",
     "phaseNumber": 2,
     "planId": "PLAN-006",
     "planTitle": "Durable signed task authority",
-    "source": "specs/006-durable-signed-task-authority/tasks.md#L114",
-    "tags": [
-      "P"
-    ]
+    "source": "specs/006-durable-signed-task-authority/tasks.md#L115",
+    "tags": []
   },
   "definitionOfDone": [
     "architecture/threat model et Constitution Check sont \u00e0 jour",
@@ -4138,7 +4136,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "total": 98
     },
     {
-      "completed": 12,
+      "completed": 13,
       "conformance": {
         "ciWorkflow": null,
         "claimStatus": "pending-evidence",
@@ -4161,7 +4159,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 8
         },
         {
-          "done": 4,
+          "done": 5,
           "number": 2,
           "title": "Foundational Contracts, Store and Control Boundaries",
           "total": 16
@@ -4209,8 +4207,8 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 7
         }
       ],
-      "remaining": 98,
-      "taskPercent": 10.9,
+      "remaining": 97,
+      "taskPercent": 11.8,
       "taskSource": "specs/006-durable-signed-task-authority/tasks.md",
       "taskTitle": "Durable Signed Task Authority",
       "tasks": [
@@ -4352,7 +4350,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Implement safe integers, identifiers, NFC/resource components, closed enums, checked time/bound validation and payload-free public error codes in kernel/helix-task-authority-contracts/src/validation.rs and kernel/helix-task-authority-contracts/src/error.rs",
-          "done": false,
+          "done": true,
           "id": "T013",
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
@@ -5535,20 +5533,6 @@ window.HELIXOS_ROADMAP_DATA = {
     }
   ],
   "openTasks": [
-    {
-      "description": "Implement safe integers, identifiers, NFC/resource components, closed enums, checked time/bound validation and payload-free public error codes in kernel/helix-task-authority-contracts/src/validation.rs and kernel/helix-task-authority-contracts/src/error.rs",
-      "done": false,
-      "id": "T013",
-      "kind": "implementation",
-      "phase": "Foundational Contracts, Store and Control Boundaries",
-      "phaseNumber": 2,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L114",
-      "tags": [
-        "P"
-      ]
-    },
     {
       "description": "Expose only closed signed/authentic marker APIs with redacted Debug, no defaulted fields and no caller-constructible current authority in kernel/helix-task-authority-contracts/src/lib.rs",
       "done": false,
@@ -6913,7 +6897,7 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "roadmapDate": "2026-07-13",
   "schema": "helixos.roadmap-data/1",
-  "sourceFingerprint": "e4674187edea586e1aacb8f118cea70faacb28e59874733abbeac1f58cd76ca0",
+  "sourceFingerprint": "b64cc8b9b0fde6556e7be532f91eb49f71d5e40c4d03956ce2091ecdcdd3a0ba",
   "sources": [
     {
       "path": "ROADMAP-SPECS.md",
@@ -6945,7 +6929,7 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "specs/006-durable-signed-task-authority/tasks.md",
-      "sha256": "8712562f00139ce57af0b9e8e95961d5b3bb458e5f0e5f52b9b7c40665dac593"
+      "sha256": "638a3a0ab55d1595c0ce8643b95549fcd0ee5da0da4177573e79e7487651e8ab"
     }
   ],
   "strategicStages": [
@@ -6964,7 +6948,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "id": "R1",
       "status": "active",
       "title": "Fondation portable et coordinateur durable",
-      "trackedTaskCompleted": 331,
+      "trackedTaskCompleted": 332,
       "trackedTaskTotal": 429
     },
     {
@@ -7026,12 +7010,12 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "summary": {
     "acceptedClaims": 0,
-    "completedTasks": 331,
+    "completedTasks": 332,
     "focusPlan": "PLAN-006",
-    "remainingTasks": 98,
+    "remainingTasks": 97,
     "strategicStage": "R1",
     "totalClaims": 6,
-    "trackedTaskPercent": 77.2,
+    "trackedTaskPercent": 77.4,
     "trackedTasks": 429
   }
 };
