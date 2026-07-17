@@ -18,7 +18,7 @@ mod projection;
 mod store;
 
 #[cfg(feature = "test-fault-injection")]
-mod test_fault {}
+mod test_fault;
 
 pub use control::{
     capture_authority_deadline_v1, AuthorityAdmissionClassV1, AuthorityAdmissionLaneV1,
@@ -54,4 +54,10 @@ pub use store::{
     BootstrapPreimageV1, ChildLeaseIssuePreimageV1, CounterConsumePreimageV1,
     DecisionRetainPreimageV1, KeyStatusChangePreimageV1, RestorePublishPreimageV1,
     RootLeaseIssuePreimageV1,
+};
+#[cfg(feature = "test-fault-injection")]
+#[doc(hidden)]
+pub use test_fault::{
+    AuthorityFaultDecisionV1, AuthorityFaultModeV1, AuthorityFaultProbeV1,
+    AuthorityFaultSelectionErrorV1,
 };

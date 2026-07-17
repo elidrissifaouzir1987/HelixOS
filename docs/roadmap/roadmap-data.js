@@ -9,17 +9,18 @@ window.HELIXOS_ROADMAP_DATA = {
     }
   ],
   "currentFocus": {
-    "description": "Embed and digest the exact strict HLXA v1 normalized SQL contract, required tables/triggers/indexes and application/schema constants in kernel/helix-task-authority-sqlite/src/schema.rs from specs/006-durable-signed-task-authority/contracts/task-authority-store-schema-v1.sql",
+    "description": "Write failing HumanRequestGrant canonical/domain/purpose/context/expiry/current-trust contract tests and every protected-leaf mutation case in kernel/helix-task-authority-contracts/tests/human_request_grant_contract.rs",
     "done": false,
-    "id": "T017",
+    "id": "T025",
     "kind": "implementation",
-    "phase": "Foundational Contracts, Store and Control Boundaries",
-    "phaseNumber": 2,
+    "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
+    "phaseNumber": 3,
     "planId": "PLAN-006",
     "planTitle": "Durable signed task authority",
-    "source": "specs/006-durable-signed-task-authority/tasks.md#L118",
+    "source": "specs/006-durable-signed-task-authority/tasks.md#L146",
     "tags": [
-      "P"
+      "P",
+      "US1"
     ]
   },
   "definitionOfDone": [
@@ -4138,7 +4139,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "total": 98
     },
     {
-      "completed": 16,
+      "completed": 24,
       "conformance": {
         "ciWorkflow": null,
         "claimStatus": "pending-evidence",
@@ -4161,7 +4162,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 8
         },
         {
-          "done": 8,
+          "done": 16,
           "number": 2,
           "title": "Foundational Contracts, Store and Control Boundaries",
           "total": 16
@@ -4209,8 +4210,8 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 7
         }
       ],
-      "remaining": 94,
-      "taskPercent": 14.5,
+      "remaining": 86,
+      "taskPercent": 21.8,
       "taskSource": "specs/006-durable-signed-task-authority/tasks.md",
       "taskTitle": "Durable Signed Task Authority",
       "tasks": [
@@ -4394,7 +4395,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Embed and digest the exact strict HLXA v1 normalized SQL contract, required tables/triggers/indexes and application/schema constants in kernel/helix-task-authority-sqlite/src/schema.rs from specs/006-durable-signed-task-authority/contracts/task-authority-store-schema-v1.sql",
-          "done": false,
+          "done": true,
           "id": "T017",
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
@@ -4406,7 +4407,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Implement provisioned local-root configuration, filesystem identity checks and injected trusted UTC/monotonic/boot observations without native paths in portable outputs in kernel/helix-task-authority-sqlite/src/config.rs, kernel/helix-task-authority-sqlite/src/root_safety.rs and kernel/helix-task-authority-sqlite/src/clock.rs",
-          "done": false,
+          "done": true,
           "id": "T018",
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
@@ -4418,7 +4419,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Implement exclusive root initialization/publication and strict ordinary open with HLXA application ID, schema v1, WAL/FULL, foreign keys, recursive triggers, trusted_schema=OFF, cell_size_check=ON, disabled auto-checkpoint and bounded busy waits in kernel/helix-task-authority-sqlite/src/connection.rs",
-          "done": false,
+          "done": true,
           "id": "T019",
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
@@ -4428,7 +4429,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Implement non-mutating exact schema/root/durability/integrity/cross-record admission verification with no repair, downgrade or implicit migration in kernel/helix-task-authority-sqlite/src/schema.rs",
-          "done": false,
+          "done": true,
           "id": "T020",
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
@@ -4438,7 +4439,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Implement append-only public-key history, immutable purpose/key identity, current trust status, generation-increasing revocation and redacted transition/conflict events in kernel/helix-task-authority-sqlite/src/revocation.rs and kernel/helix-task-authority-sqlite/src/event.rs",
-          "done": false,
+          "done": true,
           "id": "T021",
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
@@ -4448,7 +4449,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Implement one-fresh-connection uncertainty readback types and complete-graph/healthy-absence/conflict/ambiguity classification without retry authority in kernel/helix-task-authority-sqlite/src/readback.rs",
-          "done": false,
+          "done": true,
           "id": "T022",
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
@@ -4460,7 +4461,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Implement bounded ordinary admission, duplicate coalescing and reserved revocation/status control lanes with injected deadlines in kernel/helix-task-authority-sqlite/src/queue.rs",
-          "done": false,
+          "done": true,
           "id": "T023",
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
@@ -4472,7 +4473,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Wire the closed non-default fault-selection seam, prove default production builds cannot read environment/process fault selectors, and make the foundation tests pass in kernel/helix-task-authority/src/test_fault.rs, kernel/helix-task-authority-sqlite/src/test_fault.rs and kernel/helix-task-authority-sqlite/tests/contract.rs",
-          "done": false,
+          "done": true,
           "id": "T024",
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
@@ -5535,110 +5536,6 @@ window.HELIXOS_ROADMAP_DATA = {
     }
   ],
   "openTasks": [
-    {
-      "description": "Embed and digest the exact strict HLXA v1 normalized SQL contract, required tables/triggers/indexes and application/schema constants in kernel/helix-task-authority-sqlite/src/schema.rs from specs/006-durable-signed-task-authority/contracts/task-authority-store-schema-v1.sql",
-      "done": false,
-      "id": "T017",
-      "kind": "implementation",
-      "phase": "Foundational Contracts, Store and Control Boundaries",
-      "phaseNumber": 2,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L118",
-      "tags": [
-        "P"
-      ]
-    },
-    {
-      "description": "Implement provisioned local-root configuration, filesystem identity checks and injected trusted UTC/monotonic/boot observations without native paths in portable outputs in kernel/helix-task-authority-sqlite/src/config.rs, kernel/helix-task-authority-sqlite/src/root_safety.rs and kernel/helix-task-authority-sqlite/src/clock.rs",
-      "done": false,
-      "id": "T018",
-      "kind": "implementation",
-      "phase": "Foundational Contracts, Store and Control Boundaries",
-      "phaseNumber": 2,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L119",
-      "tags": [
-        "P"
-      ]
-    },
-    {
-      "description": "Implement exclusive root initialization/publication and strict ordinary open with HLXA application ID, schema v1, WAL/FULL, foreign keys, recursive triggers, trusted_schema=OFF, cell_size_check=ON, disabled auto-checkpoint and bounded busy waits in kernel/helix-task-authority-sqlite/src/connection.rs",
-      "done": false,
-      "id": "T019",
-      "kind": "implementation",
-      "phase": "Foundational Contracts, Store and Control Boundaries",
-      "phaseNumber": 2,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L120",
-      "tags": []
-    },
-    {
-      "description": "Implement non-mutating exact schema/root/durability/integrity/cross-record admission verification with no repair, downgrade or implicit migration in kernel/helix-task-authority-sqlite/src/schema.rs",
-      "done": false,
-      "id": "T020",
-      "kind": "implementation",
-      "phase": "Foundational Contracts, Store and Control Boundaries",
-      "phaseNumber": 2,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L121",
-      "tags": []
-    },
-    {
-      "description": "Implement append-only public-key history, immutable purpose/key identity, current trust status, generation-increasing revocation and redacted transition/conflict events in kernel/helix-task-authority-sqlite/src/revocation.rs and kernel/helix-task-authority-sqlite/src/event.rs",
-      "done": false,
-      "id": "T021",
-      "kind": "implementation",
-      "phase": "Foundational Contracts, Store and Control Boundaries",
-      "phaseNumber": 2,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L122",
-      "tags": []
-    },
-    {
-      "description": "Implement one-fresh-connection uncertainty readback types and complete-graph/healthy-absence/conflict/ambiguity classification without retry authority in kernel/helix-task-authority-sqlite/src/readback.rs",
-      "done": false,
-      "id": "T022",
-      "kind": "implementation",
-      "phase": "Foundational Contracts, Store and Control Boundaries",
-      "phaseNumber": 2,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L123",
-      "tags": [
-        "P"
-      ]
-    },
-    {
-      "description": "Implement bounded ordinary admission, duplicate coalescing and reserved revocation/status control lanes with injected deadlines in kernel/helix-task-authority-sqlite/src/queue.rs",
-      "done": false,
-      "id": "T023",
-      "kind": "implementation",
-      "phase": "Foundational Contracts, Store and Control Boundaries",
-      "phaseNumber": 2,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L124",
-      "tags": [
-        "P"
-      ]
-    },
-    {
-      "description": "Wire the closed non-default fault-selection seam, prove default production builds cannot read environment/process fault selectors, and make the foundation tests pass in kernel/helix-task-authority/src/test_fault.rs, kernel/helix-task-authority-sqlite/src/test_fault.rs and kernel/helix-task-authority-sqlite/tests/contract.rs",
-      "done": false,
-      "id": "T024",
-      "kind": "implementation",
-      "phase": "Foundational Contracts, Store and Control Boundaries",
-      "phaseNumber": 2,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L125",
-      "tags": []
-    },
     {
       "description": "Write failing HumanRequestGrant canonical/domain/purpose/context/expiry/current-trust contract tests and every protected-leaf mutation case in kernel/helix-task-authority-contracts/tests/human_request_grant_contract.rs",
       "done": false,
@@ -6863,7 +6760,7 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "roadmapDate": "2026-07-13",
   "schema": "helixos.roadmap-data/1",
-  "sourceFingerprint": "1fd68b7412a3ee8615afb2cd18663a4f2f373fca10d282d741f2136e75961614",
+  "sourceFingerprint": "05c39e36c2d1416dee6921ea26d787827e70d3840489673aa76a2f71bb9a0ad6",
   "sources": [
     {
       "path": "ROADMAP-SPECS.md",
@@ -6895,7 +6792,7 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "specs/006-durable-signed-task-authority/tasks.md",
-      "sha256": "d93ff971e38a20636cefc91b256eca1ea16a0a3071e0b6cee825c70d2e865422"
+      "sha256": "dd6154588e9564e3577ce8e372319bac7dc2ae271115e1c7bec8490cfd8abb84"
     }
   ],
   "strategicStages": [
@@ -6914,7 +6811,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "id": "R1",
       "status": "active",
       "title": "Fondation portable et coordinateur durable",
-      "trackedTaskCompleted": 335,
+      "trackedTaskCompleted": 343,
       "trackedTaskTotal": 429
     },
     {
@@ -6976,12 +6873,12 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "summary": {
     "acceptedClaims": 0,
-    "completedTasks": 335,
+    "completedTasks": 343,
     "focusPlan": "PLAN-006",
-    "remainingTasks": 94,
+    "remainingTasks": 86,
     "strategicStage": "R1",
     "totalClaims": 6,
-    "trackedTaskPercent": 78.1,
+    "trackedTaskPercent": 80.0,
     "trackedTasks": 429
   }
 };
