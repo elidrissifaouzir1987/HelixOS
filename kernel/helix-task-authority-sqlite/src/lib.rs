@@ -6,23 +6,38 @@
 #![forbid(unsafe_code)]
 #![deny(missing_debug_implementations)]
 
-mod config {}
-mod clock {}
-mod connection {}
-mod root_safety {}
-mod schema {}
+mod clock;
+mod config;
+mod connection;
+mod root_safety;
+mod schema;
 mod grant {}
 mod lease {}
 mod delegation {}
 mod decision {}
-mod revocation {}
+mod revocation;
 mod projection {}
 mod guard {}
-mod readback {}
-mod event {}
-mod queue {}
+mod event;
+mod queue;
+mod readback;
 mod maintenance {}
 mod manifest {}
 
 #[cfg(feature = "test-fault-injection")]
-mod test_fault {}
+mod test_fault;
+
+pub use clock::{
+    AuthorityTrustedClockOutcomeV1, AuthorityTrustedClockSampleV1, AuthorityTrustedClockSourceV1,
+    InjectedAuthorityClockProviderV1,
+};
+pub use config::{
+    AuthorityRootIdentityEvidenceV1, AuthorityStoreConfigErrorV1, AuthorityStoreConfigV1,
+};
+pub use connection::AuthorityStoreOpenErrorV1;
+pub use schema::{
+    embedded_task_authority_store_schema_v1_sha256, TASK_AUTHORITY_STORE_APPLICATION_ID_V1,
+    TASK_AUTHORITY_STORE_FORMAT_VERSION_V1, TASK_AUTHORITY_STORE_SCHEMA_V1_SHA256,
+    TASK_AUTHORITY_STORE_SCHEMA_V1_SHA256_HEX, TASK_AUTHORITY_STORE_SCHEMA_V1_SQL,
+    TASK_AUTHORITY_STORE_SCHEMA_VERSION_V1,
+};
