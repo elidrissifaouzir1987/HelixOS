@@ -9,15 +9,15 @@ window.HELIXOS_ROADMAP_DATA = {
     }
   ],
   "currentFocus": {
-    "description": "Define the nine exact idempotency domains, closed stable preimages excluding candidate-generated values, immutable attempt/namespace/input/outcome bindings, closed mutation/readback outcomes and abstract atomic store operations shared by every story in kernel/helix-task-authority/src/outcome.rs and kernel/helix-task-authority/src/store.rs",
+    "description": "Define trusted clock/deadline capture, 1,024 ordinary plus 32 reserved-control capacity, unified non-cloneable authority guard custody and nonconstructible projection-provider traits in kernel/helix-task-authority/src/control.rs, kernel/helix-task-authority/src/guard.rs and kernel/helix-task-authority/src/projection.rs",
     "done": false,
-    "id": "T015",
+    "id": "T016",
     "kind": "implementation",
     "phase": "Foundational Contracts, Store and Control Boundaries",
     "phaseNumber": 2,
     "planId": "PLAN-006",
     "planTitle": "Durable signed task authority",
-    "source": "specs/006-durable-signed-task-authority/tasks.md#L116",
+    "source": "specs/006-durable-signed-task-authority/tasks.md#L117",
     "tags": []
   },
   "definitionOfDone": [
@@ -4136,7 +4136,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "total": 98
     },
     {
-      "completed": 14,
+      "completed": 15,
       "conformance": {
         "ciWorkflow": null,
         "claimStatus": "pending-evidence",
@@ -4159,7 +4159,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 8
         },
         {
-          "done": 6,
+          "done": 7,
           "number": 2,
           "title": "Foundational Contracts, Store and Control Boundaries",
           "total": 16
@@ -4207,8 +4207,8 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 7
         }
       ],
-      "remaining": 96,
-      "taskPercent": 12.7,
+      "remaining": 95,
+      "taskPercent": 13.6,
       "taskSource": "specs/006-durable-signed-task-authority/tasks.md",
       "taskTitle": "Durable Signed Task Authority",
       "tasks": [
@@ -4372,7 +4372,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Define the nine exact idempotency domains, closed stable preimages excluding candidate-generated values, immutable attempt/namespace/input/outcome bindings, closed mutation/readback outcomes and abstract atomic store operations shared by every story in kernel/helix-task-authority/src/outcome.rs and kernel/helix-task-authority/src/store.rs",
-          "done": false,
+          "done": true,
           "id": "T015",
           "kind": "implementation",
           "phase": "Foundational Contracts, Store and Control Boundaries",
@@ -5533,18 +5533,6 @@ window.HELIXOS_ROADMAP_DATA = {
     }
   ],
   "openTasks": [
-    {
-      "description": "Define the nine exact idempotency domains, closed stable preimages excluding candidate-generated values, immutable attempt/namespace/input/outcome bindings, closed mutation/readback outcomes and abstract atomic store operations shared by every story in kernel/helix-task-authority/src/outcome.rs and kernel/helix-task-authority/src/store.rs",
-      "done": false,
-      "id": "T015",
-      "kind": "implementation",
-      "phase": "Foundational Contracts, Store and Control Boundaries",
-      "phaseNumber": 2,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L116",
-      "tags": []
-    },
     {
       "description": "Define trusted clock/deadline capture, 1,024 ordinary plus 32 reserved-control capacity, unified non-cloneable authority guard custody and nonconstructible projection-provider traits in kernel/helix-task-authority/src/control.rs, kernel/helix-task-authority/src/guard.rs and kernel/helix-task-authority/src/projection.rs",
       "done": false,
@@ -6885,7 +6873,7 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "roadmapDate": "2026-07-13",
   "schema": "helixos.roadmap-data/1",
-  "sourceFingerprint": "035a4a90bedc735067a9acb0bca3c9c24ae4376b913f53c24f81144b10d5827e",
+  "sourceFingerprint": "b291a994954bee560a75d3ee007dc23a27ef021ef9d72e40f6860e9eced8afb0",
   "sources": [
     {
       "path": "ROADMAP-SPECS.md",
@@ -6917,7 +6905,7 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "specs/006-durable-signed-task-authority/tasks.md",
-      "sha256": "4df502cb5d5fe72fcc5c1a9d2d1e777d212ef72c78ef442a5f7234c2781411c8"
+      "sha256": "25b71d2322d55753f3a9e3f515c6c21ecd6da2efda6cf29fe045270a05c035db"
     }
   ],
   "strategicStages": [
@@ -6936,7 +6924,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "id": "R1",
       "status": "active",
       "title": "Fondation portable et coordinateur durable",
-      "trackedTaskCompleted": 333,
+      "trackedTaskCompleted": 334,
       "trackedTaskTotal": 429
     },
     {
@@ -6998,12 +6986,12 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "summary": {
     "acceptedClaims": 0,
-    "completedTasks": 333,
+    "completedTasks": 334,
     "focusPlan": "PLAN-006",
-    "remainingTasks": 96,
+    "remainingTasks": 95,
     "strategicStage": "R1",
     "totalClaims": 6,
-    "trackedTaskPercent": 77.6,
+    "trackedTaskPercent": 77.9,
     "trackedTasks": 429
   }
 };
