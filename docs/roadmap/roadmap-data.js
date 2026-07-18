@@ -9,18 +9,18 @@ window.HELIXOS_ROADMAP_DATA = {
     }
   ],
   "currentFocus": {
-    "description": "Write failing HumanRequestGrant canonical/domain/purpose/context/expiry/current-trust contract tests and every protected-leaf mutation case in kernel/helix-task-authority-contracts/tests/human_request_grant_contract.rs",
+    "description": "Extend failing TaskLease contract tests to child shape, depth, resource/catalogue subsets, every budget/counter/trust/time one-unit widening and exact-limit acceptance in kernel/helix-task-authority-contracts/tests/task_lease_contract.rs",
     "done": false,
-    "id": "T025",
+    "id": "T039",
     "kind": "implementation",
-    "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
-    "phaseNumber": 3,
+    "phase": "User Story 2 - Issue and Restrict Task Leases (Priority: P1)",
+    "phaseNumber": 4,
     "planId": "PLAN-006",
     "planTitle": "Durable signed task authority",
-    "source": "specs/006-durable-signed-task-authority/tasks.md#L146",
+    "source": "specs/006-durable-signed-task-authority/tasks.md#L182",
     "tags": [
       "P",
-      "US1"
+      "US2"
     ]
   },
   "definitionOfDone": [
@@ -4139,7 +4139,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "total": 98
     },
     {
-      "completed": 24,
+      "completed": 38,
       "conformance": {
         "ciWorkflow": null,
         "claimStatus": "pending-evidence",
@@ -4168,7 +4168,7 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 16
         },
         {
-          "done": 0,
+          "done": 14,
           "number": 3,
           "title": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
           "total": 14
@@ -4210,8 +4210,8 @@ window.HELIXOS_ROADMAP_DATA = {
           "total": 7
         }
       ],
-      "remaining": 86,
-      "taskPercent": 21.8,
+      "remaining": 72,
+      "taskPercent": 34.5,
       "taskSource": "specs/006-durable-signed-task-authority/tasks.md",
       "taskTitle": "Durable Signed Task Authority",
       "tasks": [
@@ -4483,7 +4483,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Write failing HumanRequestGrant canonical/domain/purpose/context/expiry/current-trust contract tests and every protected-leaf mutation case in kernel/helix-task-authority-contracts/tests/human_request_grant_contract.rs",
-          "done": false,
+          "done": true,
           "id": "T025",
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
@@ -4496,7 +4496,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Write failing root TaskLease shape, source-grant, scope-intersection, exact-digest and exclusive deadline contract tests in kernel/helix-task-authority-contracts/tests/task_lease_contract.rs",
-          "done": false,
+          "done": true,
           "id": "T026",
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
@@ -4509,7 +4509,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Write failing core tests for forged/replayed/wrong-context grants, key rotation/revocation, signing failure before claim, exact retry/conflict outcomes and current-versus-historical authority after source/ancestor/decision revocation in kernel/helix-task-authority/tests/request.rs and kernel/helix-task-authority/tests/revocation.rs",
-          "done": false,
+          "done": true,
           "id": "T027",
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
@@ -4522,7 +4522,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Write failing 10,000 sequential, 100 x 64-thread and 20 x eight-process one-shot root issuance tests with exact retained bytes and invariant reopen in kernel/helix-task-authority-sqlite/tests/contention.rs",
-          "done": false,
+          "done": true,
           "id": "T028",
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
@@ -4535,7 +4535,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Write failing SQLite atomic-graph and readback tests proving grant record, one claim, one root lease, initial usage, generations and event are all visible or all absent in kernel/helix-task-authority-sqlite/tests/contract.rs",
-          "done": false,
+          "done": true,
           "id": "T029",
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
@@ -4548,7 +4548,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Implement the closed HumanRequestGrant protected/envelope/authentic types and fixed verification order for helixos.human-request-grant/1 in kernel/helix-task-authority-contracts/src/human_request_grant.rs from specs/006-durable-signed-task-authority/contracts/human-request-grant-v1.schema.json",
-          "done": false,
+          "done": true,
           "id": "T030",
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
@@ -4560,7 +4560,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Implement the root TaskLease protected/envelope/authentic types, explicit null parent branch, source digest and purpose-separated signing needed by root issuance in kernel/helix-task-authority-contracts/src/task_lease.rs from specs/006-durable-signed-task-authority/contracts/task-lease-v1.schema.json",
-          "done": false,
+          "done": true,
           "id": "T031",
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
@@ -4572,7 +4572,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Implement current grant-context resolution, scope/policy/catalogue intersection, sign-before-writer root candidate construction and closed request outcomes in kernel/helix-task-authority/src/request.rs and kernel/helix-task-authority/src/lease.rs",
-          "done": false,
+          "done": true,
           "id": "T032",
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
@@ -4584,7 +4584,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Implement create-only exact grant retention, issuer-scoped claim uniqueness, current trust/scope/time recheck and conflict tombstones in kernel/helix-task-authority-sqlite/src/grant.rs",
-          "done": false,
+          "done": true,
           "id": "T033",
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
@@ -4596,7 +4596,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Implement the single BEGIN IMMEDIATE root graph that commits grant, claim, signed root lease, initial usage, generations and redacted event atomically in kernel/helix-task-authority-sqlite/src/lease.rs",
-          "done": false,
+          "done": true,
           "id": "T034",
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
@@ -4608,7 +4608,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Implement exact retry retrieval and one-readback handling for lost acknowledgement without re-signing or reissuing in kernel/helix-task-authority-sqlite/src/grant.rs and kernel/helix-task-authority-sqlite/src/readback.rs",
-          "done": false,
+          "done": true,
           "id": "T035",
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
@@ -4620,7 +4620,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Enforce immutable key IDs, new-ID rotation, current-versus-historical trust and signer/grant revocation before consumption in kernel/helix-task-authority/src/revocation.rs and kernel/helix-task-authority-sqlite/src/revocation.rs",
-          "done": false,
+          "done": true,
           "id": "T036",
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
@@ -4632,7 +4632,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Freeze public synthetic grant/root-lease canonical bytes, signatures, context/replay/expiry mutations and exact outcomes in contracts/fixtures/durable-signed-task-authority-v1/golden/human-request-grant.protected.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/human-request-grant.envelope.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/root-task-lease.protected.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/root-task-lease.envelope.jcs, contracts/fixtures/durable-signed-task-authority-v1/cases.json and contracts/fixtures/durable-signed-task-authority-v1/expected-outcomes.json",
-          "done": false,
+          "done": true,
           "id": "T037",
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
@@ -4644,7 +4644,7 @@ window.HELIXOS_ROADMAP_DATA = {
         },
         {
           "description": "Run and record PLAN006-REQUEST, FR-007\u2013FR-011, FR-031\u2013FR-032, FR-035\u2013FR-036, SC-002\u2013SC-003 and SC-007 with exact mutation/generation deltas and zero authority from bare messages or notifications in specs/006-durable-signed-task-authority/evidence/us1-request.md",
-          "done": false,
+          "done": true,
           "id": "T038",
           "kind": "implementation",
           "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
@@ -5536,207 +5536,6 @@ window.HELIXOS_ROADMAP_DATA = {
     }
   ],
   "openTasks": [
-    {
-      "description": "Write failing HumanRequestGrant canonical/domain/purpose/context/expiry/current-trust contract tests and every protected-leaf mutation case in kernel/helix-task-authority-contracts/tests/human_request_grant_contract.rs",
-      "done": false,
-      "id": "T025",
-      "kind": "implementation",
-      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
-      "phaseNumber": 3,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L146",
-      "tags": [
-        "P",
-        "US1"
-      ]
-    },
-    {
-      "description": "Write failing root TaskLease shape, source-grant, scope-intersection, exact-digest and exclusive deadline contract tests in kernel/helix-task-authority-contracts/tests/task_lease_contract.rs",
-      "done": false,
-      "id": "T026",
-      "kind": "implementation",
-      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
-      "phaseNumber": 3,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L147",
-      "tags": [
-        "P",
-        "US1"
-      ]
-    },
-    {
-      "description": "Write failing core tests for forged/replayed/wrong-context grants, key rotation/revocation, signing failure before claim, exact retry/conflict outcomes and current-versus-historical authority after source/ancestor/decision revocation in kernel/helix-task-authority/tests/request.rs and kernel/helix-task-authority/tests/revocation.rs",
-      "done": false,
-      "id": "T027",
-      "kind": "implementation",
-      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
-      "phaseNumber": 3,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L148",
-      "tags": [
-        "P",
-        "US1"
-      ]
-    },
-    {
-      "description": "Write failing 10,000 sequential, 100 x 64-thread and 20 x eight-process one-shot root issuance tests with exact retained bytes and invariant reopen in kernel/helix-task-authority-sqlite/tests/contention.rs",
-      "done": false,
-      "id": "T028",
-      "kind": "implementation",
-      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
-      "phaseNumber": 3,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L149",
-      "tags": [
-        "P",
-        "US1"
-      ]
-    },
-    {
-      "description": "Write failing SQLite atomic-graph and readback tests proving grant record, one claim, one root lease, initial usage, generations and event are all visible or all absent in kernel/helix-task-authority-sqlite/tests/contract.rs",
-      "done": false,
-      "id": "T029",
-      "kind": "implementation",
-      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
-      "phaseNumber": 3,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L150",
-      "tags": [
-        "P",
-        "US1"
-      ]
-    },
-    {
-      "description": "Implement the closed HumanRequestGrant protected/envelope/authentic types and fixed verification order for helixos.human-request-grant/1 in kernel/helix-task-authority-contracts/src/human_request_grant.rs from specs/006-durable-signed-task-authority/contracts/human-request-grant-v1.schema.json",
-      "done": false,
-      "id": "T030",
-      "kind": "implementation",
-      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
-      "phaseNumber": 3,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L154",
-      "tags": [
-        "US1"
-      ]
-    },
-    {
-      "description": "Implement the root TaskLease protected/envelope/authentic types, explicit null parent branch, source digest and purpose-separated signing needed by root issuance in kernel/helix-task-authority-contracts/src/task_lease.rs from specs/006-durable-signed-task-authority/contracts/task-lease-v1.schema.json",
-      "done": false,
-      "id": "T031",
-      "kind": "implementation",
-      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
-      "phaseNumber": 3,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L155",
-      "tags": [
-        "US1"
-      ]
-    },
-    {
-      "description": "Implement current grant-context resolution, scope/policy/catalogue intersection, sign-before-writer root candidate construction and closed request outcomes in kernel/helix-task-authority/src/request.rs and kernel/helix-task-authority/src/lease.rs",
-      "done": false,
-      "id": "T032",
-      "kind": "implementation",
-      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
-      "phaseNumber": 3,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L156",
-      "tags": [
-        "US1"
-      ]
-    },
-    {
-      "description": "Implement create-only exact grant retention, issuer-scoped claim uniqueness, current trust/scope/time recheck and conflict tombstones in kernel/helix-task-authority-sqlite/src/grant.rs",
-      "done": false,
-      "id": "T033",
-      "kind": "implementation",
-      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
-      "phaseNumber": 3,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L157",
-      "tags": [
-        "US1"
-      ]
-    },
-    {
-      "description": "Implement the single BEGIN IMMEDIATE root graph that commits grant, claim, signed root lease, initial usage, generations and redacted event atomically in kernel/helix-task-authority-sqlite/src/lease.rs",
-      "done": false,
-      "id": "T034",
-      "kind": "implementation",
-      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
-      "phaseNumber": 3,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L158",
-      "tags": [
-        "US1"
-      ]
-    },
-    {
-      "description": "Implement exact retry retrieval and one-readback handling for lost acknowledgement without re-signing or reissuing in kernel/helix-task-authority-sqlite/src/grant.rs and kernel/helix-task-authority-sqlite/src/readback.rs",
-      "done": false,
-      "id": "T035",
-      "kind": "implementation",
-      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
-      "phaseNumber": 3,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L159",
-      "tags": [
-        "US1"
-      ]
-    },
-    {
-      "description": "Enforce immutable key IDs, new-ID rotation, current-versus-historical trust and signer/grant revocation before consumption in kernel/helix-task-authority/src/revocation.rs and kernel/helix-task-authority-sqlite/src/revocation.rs",
-      "done": false,
-      "id": "T036",
-      "kind": "implementation",
-      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
-      "phaseNumber": 3,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L160",
-      "tags": [
-        "US1"
-      ]
-    },
-    {
-      "description": "Freeze public synthetic grant/root-lease canonical bytes, signatures, context/replay/expiry mutations and exact outcomes in contracts/fixtures/durable-signed-task-authority-v1/golden/human-request-grant.protected.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/human-request-grant.envelope.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/root-task-lease.protected.jcs, contracts/fixtures/durable-signed-task-authority-v1/golden/root-task-lease.envelope.jcs, contracts/fixtures/durable-signed-task-authority-v1/cases.json and contracts/fixtures/durable-signed-task-authority-v1/expected-outcomes.json",
-      "done": false,
-      "id": "T037",
-      "kind": "implementation",
-      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
-      "phaseNumber": 3,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L161",
-      "tags": [
-        "US1"
-      ]
-    },
-    {
-      "description": "Run and record PLAN006-REQUEST, FR-007\u2013FR-011, FR-031\u2013FR-032, FR-035\u2013FR-036, SC-002\u2013SC-003 and SC-007 with exact mutation/generation deltas and zero authority from bare messages or notifications in specs/006-durable-signed-task-authority/evidence/us1-request.md",
-      "done": false,
-      "id": "T038",
-      "kind": "implementation",
-      "phase": "User Story 1 - Accept an Authentic Human Request Once (Priority: P1) \ud83c\udfaf MVP",
-      "phaseNumber": 3,
-      "planId": "PLAN-006",
-      "planTitle": "Durable signed task authority",
-      "source": "specs/006-durable-signed-task-authority/tasks.md#L162",
-      "tags": [
-        "US1"
-      ]
-    },
     {
       "description": "Extend failing TaskLease contract tests to child shape, depth, resource/catalogue subsets, every budget/counter/trust/time one-unit widening and exact-limit acceptance in kernel/helix-task-authority-contracts/tests/task_lease_contract.rs",
       "done": false,
@@ -6760,7 +6559,7 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "roadmapDate": "2026-07-13",
   "schema": "helixos.roadmap-data/1",
-  "sourceFingerprint": "05c39e36c2d1416dee6921ea26d787827e70d3840489673aa76a2f71bb9a0ad6",
+  "sourceFingerprint": "3fdc36894c179fc16fbe87b14f789d37916961d6f14217bfd76bc16a744bbae1",
   "sources": [
     {
       "path": "ROADMAP-SPECS.md",
@@ -6792,7 +6591,7 @@ window.HELIXOS_ROADMAP_DATA = {
     },
     {
       "path": "specs/006-durable-signed-task-authority/tasks.md",
-      "sha256": "dd6154588e9564e3577ce8e372319bac7dc2ae271115e1c7bec8490cfd8abb84"
+      "sha256": "afad1153902337a44cb75a234d9c44ac344569b56362344a3a9d9af86a0fd886"
     }
   ],
   "strategicStages": [
@@ -6811,7 +6610,7 @@ window.HELIXOS_ROADMAP_DATA = {
       "id": "R1",
       "status": "active",
       "title": "Fondation portable et coordinateur durable",
-      "trackedTaskCompleted": 343,
+      "trackedTaskCompleted": 357,
       "trackedTaskTotal": 429
     },
     {
@@ -6873,12 +6672,12 @@ window.HELIXOS_ROADMAP_DATA = {
   ],
   "summary": {
     "acceptedClaims": 0,
-    "completedTasks": 343,
+    "completedTasks": 357,
     "focusPlan": "PLAN-006",
-    "remainingTasks": 86,
+    "remainingTasks": 72,
     "strategicStage": "R1",
     "totalClaims": 6,
-    "trackedTaskPercent": 80.0,
+    "trackedTaskPercent": 83.2,
     "trackedTasks": 429
   }
 };

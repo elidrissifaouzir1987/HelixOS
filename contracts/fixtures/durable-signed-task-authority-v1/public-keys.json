@@ -1,4 +1,21 @@
 {
   "schema": "helixos.durable-signed-task-authority-public-keys/1",
-  "keys": []
+  "keys": [
+    {
+      "key_purpose": "request-surface-grant-signing",
+      "key_id": "request-key-v1",
+      "algorithm": "ed25519",
+      "public_key_hex": "ea4a6c63e29c520abef5507b132ec5f9954776aebebe7b92421eea691446d22c",
+      "public_key_fingerprint": "fe812c12f3ab4ce6ac5db69ac352f906cb1b11ef43fb33e252ef7ff552263889",
+      "synthetic": true
+    },
+    {
+      "key_purpose": "core-task-lease-signing",
+      "key_id": "lease-key-v1",
+      "algorithm": "ed25519",
+      "public_key_hex": "fd1724385aa0c75b64fb78cd602fa1d991fdebf76b13c58ed702eac835e9f618",
+      "public_key_fingerprint": "dbc298251c51321b7266e78d1c151c2b62aff8cb95b293096d3463018544face",
+      "synthetic": true
+    }
+  ]
 }

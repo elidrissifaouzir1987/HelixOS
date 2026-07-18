@@ -1,4 +1,83 @@
 {
   "schema": "helixos.durable-signed-task-authority-cases/1",
-  "cases": []
+  "cases": [
+    {
+      "case_id": "US1-GRANT-CURRENT",
+      "input": "golden/human-request-grant.envelope.jcs",
+      "operation": "ROOT_LEASE_ISSUE",
+      "observation": { "utc_ms": 1100, "monotonic_ms": 100 },
+      "mutation": null
+    },
+    {
+      "case_id": "US1-GRANT-WRONG-CONTEXT",
+      "input": "golden/human-request-grant.envelope.jcs",
+      "operation": "ROOT_LEASE_ISSUE",
+      "observation": { "utc_ms": 1100, "monotonic_ms": 100 },
+      "mutation": {
+        "target": "authenticated_context.message_digest",
+        "replacement": "2121212121212121212121212121212121212121212121212121212121212121"
+      }
+    },
+    {
+      "case_id": "US1-GRANT-EXPIRED",
+      "input": "golden/human-request-grant.envelope.jcs",
+      "operation": "ROOT_LEASE_ISSUE",
+      "observation": { "utc_ms": 2000, "monotonic_ms": 100 },
+      "mutation": null
+    },
+    {
+      "case_id": "US1-GRANT-HISTORICAL-KEY",
+      "input": "golden/human-request-grant.envelope.jcs",
+      "operation": "ROOT_LEASE_ISSUE",
+      "observation": { "utc_ms": 1100, "monotonic_ms": 100 },
+      "mutation": {
+        "target": "trust.request-key-v1.status",
+        "replacement": "RETIRED"
+      }
+    },
+    {
+      "case_id": "US1-GRANT-REVOKED",
+      "input": "golden/human-request-grant.envelope.jcs",
+      "operation": "ROOT_LEASE_ISSUE",
+      "observation": { "utc_ms": 1100, "monotonic_ms": 100 },
+      "mutation": {
+        "target": "revocation.GRANT.1010101010101010101010101010101010101010101010101010101010101010",
+        "replacement": "SOURCE_REVOKED"
+      }
+    },
+    {
+      "case_id": "US1-ROOT-LEASE-CURRENT",
+      "input": "golden/root-task-lease.envelope.jcs",
+      "operation": "VERIFY_RETAINED_ROOT",
+      "observation": { "utc_ms": 1100, "monotonic_ms": 100 },
+      "mutation": null
+    },
+    {
+      "case_id": "US1-ROOT-LEASE-DEADLINE-EQUALITY",
+      "input": "golden/root-task-lease.envelope.jcs",
+      "operation": "VERIFY_CURRENT_ROOT",
+      "observation": { "utc_ms": 1100, "monotonic_ms": 200 },
+      "mutation": null
+    },
+    {
+      "case_id": "US1-EXACT-RETRY",
+      "input": "golden/human-request-grant.envelope.jcs",
+      "operation": "ROOT_LEASE_ISSUE",
+      "observation": { "utc_ms": 1100, "monotonic_ms": 100 },
+      "mutation": {
+        "target": "attempt_id_and_losing_candidate",
+        "replacement": "NEW_RANDOM_VALUES_SAME_STABLE_INPUT"
+      }
+    },
+    {
+      "case_id": "US1-CONFLICTING-REUSE",
+      "input": "golden/human-request-grant.envelope.jcs",
+      "operation": "ROOT_LEASE_ISSUE",
+      "observation": { "utc_ms": 1100, "monotonic_ms": 100 },
+      "mutation": {
+        "target": "requested_bounds.budget.read_bytes_limit",
+        "replacement": 9999
+      }
+    }
+  ]
 }

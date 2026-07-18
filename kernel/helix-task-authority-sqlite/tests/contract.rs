@@ -1,8 +1,11 @@
 //! PLAN-006 foundation contracts shared by default and non-default builds.
 
+mod support;
+
 use helix_task_authority::{
-    AuthorityAdmissionClassV1, AuthorityCapacityProfileV1, AuthorityClockProviderV1,
-    AUTHORITY_ORDINARY_CAPACITY_V1, AUTHORITY_RESERVED_CONTROL_CAPACITY_V1,
+    issue_root_lease_v1, AuthorityAdmissionClassV1, AuthorityCapacityProfileV1,
+    AuthorityClockProviderV1, RootLeaseRequestOutcomeV1, AUTHORITY_ORDINARY_CAPACITY_V1,
+    AUTHORITY_RESERVED_CONTROL_CAPACITY_V1,
 };
 use helix_task_authority_contracts::{Generation, Identifier, SafeU64};
 use helix_task_authority_sqlite::{
@@ -142,12 +145,19 @@ fn fault_selection_has_no_ambient_environment_or_process_selector() {
     const SQLITE_FAULT: &str = include_str!("../src/test_fault.rs");
     const SQLITE_MANIFEST: &str = include_str!("../Cargo.toml");
 
-    assert!(CORE_LIB.contains("#[cfg(feature = \"test-fault-injection\")]\nmod test_fault;"));
-    assert!(SQLITE_LIB.contains("#[cfg(feature = \"test-fault-injection\")]\nmod test_fault;"));
-    assert!(CORE_MANIFEST.contains("[features]\ndefault = []"));
-    assert!(SQLITE_MANIFEST.contains("[features]\ndefault = []"));
-    assert!(CORE_MANIFEST.contains("test-fault-injection = []"));
-    assert!(SQLITE_MANIFEST
+    // Git may materialize tracked text with CRLF on Windows. Normalize only for
+    // these source-layout assertions so their meaning stays platform-independent.
+    let core_lib = CORE_LIB.replace("\r\n", "\n");
+    let sqlite_lib = SQLITE_LIB.replace("\r\n", "\n");
+    let core_manifest = CORE_MANIFEST.replace("\r\n", "\n");
+    let sqlite_manifest = SQLITE_MANIFEST.replace("\r\n", "\n");
+
+    assert!(core_lib.contains("#[cfg(feature = \"test-fault-injection\")]\nmod test_fault;"));
+    assert!(sqlite_lib.contains("#[cfg(feature = \"test-fault-injection\")]\nmod test_fault;"));
+    assert!(core_manifest.contains("[features]\ndefault = []"));
+    assert!(sqlite_manifest.contains("[features]\ndefault = []"));
+    assert!(core_manifest.contains("test-fault-injection = []"));
+    assert!(sqlite_manifest
         .contains("test-fault-injection = [\"helix-task-authority/test-fault-injection\"]"));
     for source in [CORE_FAULT, SQLITE_FAULT] {
         for forbidden in [
@@ -234,6 +244,133 @@ fn fault_phase_ids_and_applicable_models_match_the_frozen_registry() {
             .collect();
         assert_eq!(models, expected_models);
     }
+}
+
+#[test]
+fn root_issuance_graph_is_all_absent_or_all_visible_with_exact_generations() {
+    let root = support::TestRoot::provision();
+    let store = root.store();
+    let signer = support::LeaseSignerV1::fixed();
+
+    assert!(matches!(
+        issue_root_lease_v1(support::request(50, 99), &signer, &store),
+        RootLeaseRequestOutcomeV1::DeniedDefinite
+    ));
+    {
+        let connection = root.connection();
+        for table in [
+            "human_request_grants",
+            "human_grant_claims",
+            "task_leases",
+            "task_lease_usage",
+        ] {
+            let count: i64 = connection
+                .query_row(&format!("SELECT COUNT(*) FROM {table}"), [], |row| {
+                    row.get(0)
+                })
+                .unwrap();
+            assert_eq!(count, 0, "denied transaction leaked {table}");
+        }
+    }
+
+    let retained = match issue_root_lease_v1(support::request(50, 3), &signer, &store) {
+        RootLeaseRequestOutcomeV1::CommittedRetained(retained) => retained,
+        outcome => panic!("valid root issuance failed: {outcome:?}"),
+    };
+    assert!(!retained.source_grant_wire_v1().is_empty());
+    assert!(!retained.root_lease_wire_v1().is_empty());
+
+    let connection = root.connection();
+    for (table, expected) in [
+        ("human_request_grants", 1_i64),
+        ("human_grant_claims", 1),
+        ("task_leases", 1),
+        ("task_lease_usage", 1),
+        ("authority_attempts", 4),
+        ("authority_events", 4),
+    ] {
+        let count: i64 = connection
+            .query_row(&format!("SELECT COUNT(*) FROM {table}"), [], |row| {
+                row.get(0)
+            })
+            .unwrap();
+        assert_eq!(count, expected, "{table} cardinality");
+    }
+    let metadata: (i64, i64, i64, i64, i64, i64, i64) = connection
+        .query_row(
+            "SELECT store_generation, trust_generation, grant_generation,
+                    lease_generation, allocation_generation, counter_generation,
+                    event_generation FROM authority_store_metadata",
+            [],
+            |row| {
+                Ok((
+                    row.get(0)?,
+                    row.get(1)?,
+                    row.get(2)?,
+                    row.get(3)?,
+                    row.get(4)?,
+                    row.get(5)?,
+                    row.get(6)?,
+                ))
+            },
+        )
+        .unwrap();
+    assert_eq!(metadata, (4, 3, 4, 4, 4, 4, 4));
+}
+
+#[test]
+fn exact_retry_reads_back_identical_root_bytes_without_resigning_persistence() {
+    let root = support::TestRoot::provision();
+    let store = root.store();
+    let signer = support::LeaseSignerV1::fixed();
+    let first = match issue_root_lease_v1(support::request(50, 3), &signer, &store) {
+        RootLeaseRequestOutcomeV1::CommittedRetained(retained) => retained,
+        outcome => panic!("first issuance failed: {outcome:?}"),
+    };
+    let first_wire = first.root_lease_wire_v1().to_vec();
+    for _ in 0..32 {
+        let retry = match issue_root_lease_v1(support::request(50, 3), &signer, &store) {
+            RootLeaseRequestOutcomeV1::CommittedRetained(retained) => retained,
+            outcome => panic!("exact retry failed: {outcome:?}"),
+        };
+        assert_eq!(retry.root_lease_wire_v1(), first_wire);
+    }
+    let connection = root.connection();
+    let cardinality: (i64, i64, i64) = connection
+        .query_row(
+            "SELECT
+                (SELECT COUNT(*) FROM human_grant_claims),
+                (SELECT COUNT(*) FROM task_leases),
+                (SELECT COUNT(*) FROM authority_attempts)",
+            [],
+            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+        )
+        .unwrap();
+    assert_eq!(cardinality, (1, 1, 4));
+}
+
+#[test]
+fn signer_revocation_preserves_historical_key_bytes_but_denies_new_consumption() {
+    let root = support::TestRoot::provision();
+    root.revoke_request_signer();
+    let store = root.store();
+    let signer = support::LeaseSignerV1::fixed();
+    assert!(matches!(
+        issue_root_lease_v1(support::request(50, 4), &signer, &store),
+        RootLeaseRequestOutcomeV1::DeniedDefinite
+    ));
+    let connection = root.connection();
+    let counts: (i64, i64, i64) = connection
+        .query_row(
+            "SELECT
+                (SELECT COUNT(*) FROM authority_verification_keys),
+                (SELECT COUNT(*) FROM human_request_grants),
+                (SELECT COUNT(*) FROM task_leases)",
+            [],
+            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+        )
+        .unwrap();
+    assert_eq!(counts, (2, 0, 0));
 }
 
 #[cfg(feature = "test-fault-injection")]

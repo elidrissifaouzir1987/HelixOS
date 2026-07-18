@@ -10,6 +10,8 @@
 
 use crate::config::AuthorityStoreConfigV1;
 use crate::connection::open_existing_v1;
+use crate::grant::read_root_graph_for_retained_attempt_v1;
+use crate::lease::{qualify_retained_readback_v1, RetainedRootLeaseV1};
 use crate::schema;
 use helix_task_authority::{
     AuthorityAttemptBindingV1, AuthorityAttemptIdV1, AuthorityClockProviderV1,
@@ -22,6 +24,26 @@ use helix_task_authority_contracts::{Generation, SafeU64, Sha256Digest};
 use rusqlite::{params, Connection, TransactionBehavior};
 use std::fmt;
 use std::sync::Arc;
+
+pub(crate) struct RootLeaseReadbackExpectationV1 {
+    grant_issuer_id: Box<str>,
+    grant_id: Sha256Digest,
+}
+
+impl RootLeaseReadbackExpectationV1 {
+    pub(crate) fn new(grant_issuer_id: &str, grant_id: Sha256Digest) -> Self {
+        Self {
+            grant_issuer_id: grant_issuer_id.into(),
+            grant_id,
+        }
+    }
+}
+
+impl fmt::Debug for RootLeaseReadbackExpectationV1 {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("RootLeaseReadbackExpectationV1(..)")
+    }
+}
 
 /// Adapter-private proof that the uncertain writer was abandoned before readback.
 ///
@@ -82,6 +104,171 @@ pub(crate) fn one_fresh_uncertain_readback_v1(
             graph_verifier,
         }),
     )
+}
+
+pub(crate) fn one_fresh_root_uncertain_readback_v1(
+    attempt: AuthorityAttemptBindingV1,
+    capacity: FreshReadbackCapacityV1,
+    fresh_config: AuthorityStoreConfigV1,
+    clock: Arc<dyn AuthorityClockProviderV1>,
+    expected_root_id: Box<str>,
+    expectation: RootLeaseReadbackExpectationV1,
+) -> AuthorityUncertainReadbackV1<RetainedRootLeaseV1> {
+    let absolute_deadline_monotonic_ms = frozen_readback_deadline_v1(&attempt);
+    AuthorityUncertainReadbackV1::from_store_parts_v1(
+        attempt,
+        Box::new(SqliteRootLeaseUncertainReadbackResolverV1 {
+            capacity,
+            fresh_config,
+            clock,
+            absolute_deadline_monotonic_ms,
+            expected_root_id,
+            expectation,
+        }),
+    )
+}
+
+struct SqliteRootLeaseUncertainReadbackResolverV1 {
+    capacity: FreshReadbackCapacityV1,
+    fresh_config: AuthorityStoreConfigV1,
+    clock: Arc<dyn AuthorityClockProviderV1>,
+    absolute_deadline_monotonic_ms: SafeU64,
+    expected_root_id: Box<str>,
+    expectation: RootLeaseReadbackExpectationV1,
+}
+
+impl fmt::Debug for SqliteRootLeaseUncertainReadbackResolverV1 {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("SqliteRootLeaseUncertainReadbackResolverV1(..)")
+    }
+}
+
+impl AuthorityUncertainReadbackResolverV1<RetainedRootLeaseV1>
+    for SqliteRootLeaseUncertainReadbackResolverV1
+{
+    fn readback_exact_once_v1(
+        self: Box<Self>,
+        attempt: &AuthorityAttemptBindingV1,
+    ) -> AuthorityReadbackOutcomeV1<RetainedRootLeaseV1> {
+        let Self {
+            capacity,
+            fresh_config,
+            clock,
+            absolute_deadline_monotonic_ms,
+            expected_root_id,
+            expectation,
+        } = *self;
+        capacity.consume_v1();
+        resolve_root_on_one_fresh_connection_v1(
+            fresh_config,
+            clock,
+            absolute_deadline_monotonic_ms,
+            expected_root_id,
+            expectation,
+            attempt,
+        )
+    }
+}
+
+fn resolve_root_on_one_fresh_connection_v1(
+    fresh_config: AuthorityStoreConfigV1,
+    clock: Arc<dyn AuthorityClockProviderV1>,
+    absolute_deadline_monotonic_ms: SafeU64,
+    expected_root_id: Box<str>,
+    expectation: RootLeaseReadbackExpectationV1,
+    attempt: &AuthorityAttemptBindingV1,
+) -> AuthorityReadbackOutcomeV1<RetainedRootLeaseV1> {
+    let mut opened = match open_existing_v1(
+        fresh_config,
+        clock.as_ref(),
+        absolute_deadline_monotonic_ms,
+        &expected_root_id,
+    ) {
+        Ok(opened) => opened,
+        Err(_) => return AuthorityReadbackOutcomeV1::AmbiguousReconciliationRequired,
+    };
+    if opened
+        .connection()
+        .pragma_update(None, "query_only", true)
+        .is_err()
+    {
+        return AuthorityReadbackOutcomeV1::AmbiguousReconciliationRequired;
+    }
+
+    let outcome = {
+        let transaction = match opened
+            .connection_mut()
+            .transaction_with_behavior(TransactionBehavior::Deferred)
+        {
+            Ok(transaction) => transaction,
+            Err(_) => return AuthorityReadbackOutcomeV1::AmbiguousReconciliationRequired,
+        };
+        if schema::verify_admission_v1(&transaction, &expected_root_id).is_err() {
+            return AuthorityReadbackOutcomeV1::AmbiguousReconciliationRequired;
+        }
+        let classification = match classify_fresh_graph_v1(&transaction, attempt) {
+            FreshGraphClassificationV1::Complete(retained) => {
+                match read_root_graph_for_retained_attempt_v1(&transaction, retained).and_then(
+                    |readback| {
+                        qualify_retained_readback_v1(&transaction, readback)
+                            .map_err(|_| crate::grant::GrantStoreErrorV1::Corrupt)
+                    },
+                ) {
+                    Ok(retained) => AuthorityReadbackOutcomeV1::CommittedRetained(retained),
+                    Err(_) => AuthorityReadbackOutcomeV1::AmbiguousReconciliationRequired,
+                }
+            }
+            FreshGraphClassificationV1::Conflict => AuthorityReadbackOutcomeV1::ConflictRetained,
+            FreshGraphClassificationV1::HealthyAbsence
+                if all_root_candidate_keys_absent_v1(&transaction, attempt, &expectation) =>
+            {
+                AuthorityReadbackOutcomeV1::DeniedDefinite
+            }
+            FreshGraphClassificationV1::HealthyAbsence | FreshGraphClassificationV1::Ambiguous => {
+                AuthorityReadbackOutcomeV1::AmbiguousReconciliationRequired
+            }
+        };
+        if transaction.rollback().is_err() {
+            return AuthorityReadbackOutcomeV1::AmbiguousReconciliationRequired;
+        }
+        classification
+    };
+
+    if opened
+        .config()
+        .existing_root()
+        .is_none_or(|root| root.revalidate().is_err())
+        || !deadline_is_still_live_v1(clock.as_ref(), absolute_deadline_monotonic_ms)
+    {
+        AuthorityReadbackOutcomeV1::AmbiguousReconciliationRequired
+    } else {
+        outcome
+    }
+}
+
+fn all_root_candidate_keys_absent_v1(
+    connection: &Connection,
+    attempt: &AuthorityAttemptBindingV1,
+    expectation: &RootLeaseReadbackExpectationV1,
+) -> bool {
+    connection
+        .query_row(
+            "SELECT
+                 NOT EXISTS(SELECT 1 FROM authority_attempts WHERE attempt_id = ?1) AND
+                 NOT EXISTS(SELECT 1 FROM authority_attempts WHERE namespace_digest = ?2) AND
+                 NOT EXISTS(SELECT 1 FROM human_request_grants
+                            WHERE grant_issuer_id = ?3 AND grant_id = ?4) AND
+                 NOT EXISTS(SELECT 1 FROM human_grant_claims
+                            WHERE grant_issuer_id = ?3 AND grant_id = ?4)",
+            params![
+                attempt.attempt_id_v1().digest_v1().to_hex(),
+                attempt.namespace_digest_v1().digest_v1().to_hex(),
+                expectation.grant_issuer_id.as_ref(),
+                expectation.grant_id.to_hex(),
+            ],
+            |row| row.get::<_, bool>(0),
+        )
+        .unwrap_or(false)
 }
 
 fn frozen_readback_deadline_v1(attempt: &AuthorityAttemptBindingV1) -> SafeU64 {

@@ -111,6 +111,10 @@ impl OpenedAuthorityStoreV1 {
     pub(crate) fn root_id_v1(&self) -> &str {
         &self.root_id
     }
+
+    pub(crate) fn into_connection(self) -> Connection {
+        self.connection
+    }
 }
 
 impl fmt::Debug for OpenedAuthorityStoreV1 {
