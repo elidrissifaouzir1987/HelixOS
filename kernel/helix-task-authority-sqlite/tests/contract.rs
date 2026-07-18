@@ -145,12 +145,19 @@ fn fault_selection_has_no_ambient_environment_or_process_selector() {
     const SQLITE_FAULT: &str = include_str!("../src/test_fault.rs");
     const SQLITE_MANIFEST: &str = include_str!("../Cargo.toml");
 
-    assert!(CORE_LIB.contains("#[cfg(feature = \"test-fault-injection\")]\nmod test_fault;"));
-    assert!(SQLITE_LIB.contains("#[cfg(feature = \"test-fault-injection\")]\nmod test_fault;"));
-    assert!(CORE_MANIFEST.contains("[features]\ndefault = []"));
-    assert!(SQLITE_MANIFEST.contains("[features]\ndefault = []"));
-    assert!(CORE_MANIFEST.contains("test-fault-injection = []"));
-    assert!(SQLITE_MANIFEST
+    // Git may materialize tracked text with CRLF on Windows. Normalize only for
+    // these source-layout assertions so their meaning stays platform-independent.
+    let core_lib = CORE_LIB.replace("\r\n", "\n");
+    let sqlite_lib = SQLITE_LIB.replace("\r\n", "\n");
+    let core_manifest = CORE_MANIFEST.replace("\r\n", "\n");
+    let sqlite_manifest = SQLITE_MANIFEST.replace("\r\n", "\n");
+
+    assert!(core_lib.contains("#[cfg(feature = \"test-fault-injection\")]\nmod test_fault;"));
+    assert!(sqlite_lib.contains("#[cfg(feature = \"test-fault-injection\")]\nmod test_fault;"));
+    assert!(core_manifest.contains("[features]\ndefault = []"));
+    assert!(sqlite_manifest.contains("[features]\ndefault = []"));
+    assert!(core_manifest.contains("test-fault-injection = []"));
+    assert!(sqlite_manifest
         .contains("test-fault-injection = [\"helix-task-authority/test-fault-injection\"]"));
     for source in [CORE_FAULT, SQLITE_FAULT] {
         for forbidden in [
