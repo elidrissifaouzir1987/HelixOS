@@ -232,7 +232,14 @@ fn seeded_redaction_oracle_self_test_detects_every_private_payload_class() {
 
 #[test]
 fn public_debug_errors_and_exports_are_opaque_and_payload_free() {
-    let required = ["crypto.rs", "digest.rs", "error.rs", "validation.rs"];
+    let required = [
+        "crypto.rs",
+        "digest.rs",
+        "error.rs",
+        "human_request_grant.rs",
+        "task_lease.rs",
+        "validation.rs",
+    ];
     let missing = required
         .iter()
         .copied()

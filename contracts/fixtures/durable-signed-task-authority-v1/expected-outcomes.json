@@ -1,4 +1,60 @@
 {
   "schema": "helixos.durable-signed-task-authority-expected-outcomes/1",
-  "outcomes": []
+  "outcomes": [
+    {
+      "case_id": "US1-GRANT-CURRENT",
+      "code": "COMMITTED_RETAINED",
+      "current_authority_marker_returned": false,
+      "durable_delta": { "grant": 1, "claim": 1, "lease": 1, "usage": 1, "attempt": 1, "event": 1, "conflict": 0 }
+    },
+    {
+      "case_id": "US1-GRANT-WRONG-CONTEXT",
+      "code": "ROOT_LEASE_INVALID_GRANT_CONTEXT",
+      "current_authority_marker_returned": false,
+      "durable_delta": { "grant": 0, "claim": 0, "lease": 0, "usage": 0, "attempt": 0, "event": 0, "conflict": 0 }
+    },
+    {
+      "case_id": "US1-GRANT-EXPIRED",
+      "code": "ROOT_LEASE_GRANT_NOT_CURRENT",
+      "current_authority_marker_returned": false,
+      "durable_delta": { "grant": 0, "claim": 0, "lease": 0, "usage": 0, "attempt": 0, "event": 0, "conflict": 0 }
+    },
+    {
+      "case_id": "US1-GRANT-HISTORICAL-KEY",
+      "code": "HISTORICAL_KEY_NOT_AUTHORITY",
+      "current_authority_marker_returned": false,
+      "durable_delta": { "grant": 0, "claim": 0, "lease": 0, "usage": 0, "attempt": 0, "event": 0, "conflict": 0 }
+    },
+    {
+      "case_id": "US1-GRANT-REVOKED",
+      "code": "ROOT_LEASE_GRANT_NOT_CURRENT",
+      "current_authority_marker_returned": false,
+      "durable_delta": { "grant": 0, "claim": 0, "lease": 0, "usage": 0, "attempt": 0, "event": 0, "conflict": 0 }
+    },
+    {
+      "case_id": "US1-ROOT-LEASE-CURRENT",
+      "code": "COMMITTED_RETAINED",
+      "current_authority_marker_returned": false,
+      "durable_delta": { "grant": 0, "claim": 0, "lease": 0, "usage": 0, "attempt": 0, "event": 0, "conflict": 0 }
+    },
+    {
+      "case_id": "US1-ROOT-LEASE-DEADLINE-EQUALITY",
+      "code": "AUTHORITY_DEADLINE_REACHED",
+      "current_authority_marker_returned": false,
+      "durable_delta": { "grant": 0, "claim": 0, "lease": 0, "usage": 0, "attempt": 0, "event": 0, "conflict": 0 }
+    },
+    {
+      "case_id": "US1-EXACT-RETRY",
+      "code": "COMMITTED_RETAINED",
+      "current_authority_marker_returned": false,
+      "returns_exact": "golden/root-task-lease.envelope.jcs",
+      "durable_delta": { "grant": 0, "claim": 0, "lease": 0, "usage": 0, "attempt": 0, "event": 0, "conflict": 0 }
+    },
+    {
+      "case_id": "US1-CONFLICTING-REUSE",
+      "code": "CONFLICT_RETAINED",
+      "current_authority_marker_returned": false,
+      "durable_delta": { "grant": 0, "claim": 0, "lease": 0, "usage": 0, "attempt": 1, "event": 1, "conflict": 1 }
+    }
+  ]
 }

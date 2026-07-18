@@ -1,17 +1,13 @@
 # Durable Signed Task Authority v1 Fixture Corpus
 
-This directory is the versioned, language-neutral PLAN-006 corpus skeleton for
+This directory is the versioned, language-neutral PLAN-006 corpus for
 `HumanRequestGrantV1`, `TaskLeaseV1`, `ApprovalDecisionV1` and their derived current
 projection bindings.
 
-Phase 1 freezes only the inventory and ownership boundary. It deliberately contains no
-plausible signed authority, private key, seed, authentication assertion, bearer value,
-real message, native path or generated acceptance evidence. Reviewed public synthetic
-keys, exact canonical wires, mutations and outcomes are added only after the
-corresponding tests and implementations exist.
-
-The empty arrays in the four JSON files are the intentional T007 setup state. They are
-not a passing contract corpus, coverage claim or conformance result.
+The US1 vectors use reviewed synthetic public keys and exact RFC 8785 bytes. The corpus
+contains no private key, seed, authentication assertion, bearer value, real message or
+native path. It is test evidence only: loading a fixture never creates a current
+authority marker or permits a host effect.
 
 ## Inventory
 
@@ -19,10 +15,7 @@ not a passing contract corpus, coverage claim or conformance result.
 - `chain-cases.json`: cross-contract, ancestry, decision and projection case inventory.
 - `expected-outcomes.json`: exact one-to-one closed outcome projection.
 - `public-keys.json`: reviewed synthetic public verification material only.
-- `golden/README.md`: tracked non-authority placeholder that keeps the golden
-  directory present in a fresh clone.
-- `golden/`: exact canonical bytes and derived digests added by later contract and
-  projection tasks.
+- `golden/`: exact canonical protected and envelope bytes for the US1 grant/root pair.
 
 The normative sources are under
 `specs/006-durable-signed-task-authority/contracts/`. Fixtures are evidence, never

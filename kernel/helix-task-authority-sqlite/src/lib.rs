@@ -9,10 +9,10 @@
 mod clock;
 mod config;
 mod connection;
+mod grant;
+mod lease;
 mod root_safety;
 mod schema;
-mod grant {}
-mod lease {}
 mod delegation {}
 mod decision {}
 mod revocation;
@@ -35,6 +35,7 @@ pub use config::{
     AuthorityRootIdentityEvidenceV1, AuthorityStoreConfigErrorV1, AuthorityStoreConfigV1,
 };
 pub use connection::AuthorityStoreOpenErrorV1;
+pub use lease::{RetainedRootLeaseV1, SqliteRootLeaseStoreV1};
 pub use schema::{
     embedded_task_authority_store_schema_v1_sha256, TASK_AUTHORITY_STORE_APPLICATION_ID_V1,
     TASK_AUTHORITY_STORE_FORMAT_VERSION_V1, TASK_AUTHORITY_STORE_SCHEMA_V1_SHA256,

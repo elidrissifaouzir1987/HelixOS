@@ -6,15 +6,15 @@
 #![forbid(unsafe_code)]
 #![deny(missing_debug_implementations)]
 
-mod request {}
-mod lease {}
+mod lease;
+mod request;
 mod delegation {}
 mod decision {}
-mod revocation {}
 mod control;
 mod guard;
 mod outcome;
 mod projection;
+mod revocation;
 mod store;
 
 #[cfg(feature = "test-fault-injection")]
@@ -42,6 +42,12 @@ pub use projection::{
     AuthorityProjectionRefusalV1, AuthorityProjectionRequestV1, AuthorityProjectionSnapshotV1,
     CurrentAuthorityProjectionV1, CurrentAuthorizationProjectionV1, CurrentLeaseProjectionV1,
 };
+pub use request::{
+    issue_root_lease_v1, prepare_root_lease_candidate_v1, CurrentHumanRequestContextV1,
+    RootIssuanceObservationsV1, RootLeaseCandidateV1, RootLeaseRequestOutcomeV1,
+    RootLeaseRequestRefusalV1, RootLeaseRequestV1,
+};
+pub use revocation::{evaluate_authority_currentness_v1, AuthorityCurrentnessV1};
 pub use store::{
     AuthorityAtomicMutationV1, AuthorityAtomicStoreV1, AuthorityAttemptBindingV1,
     AuthorityAttemptIdV1, AuthorityCounterKindV1, AuthorityIdempotencyPreimageV1,
